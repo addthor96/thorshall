@@ -62,7 +62,7 @@ exports.handler = async function () {
       };
     }
 
-    const totals = data?.rows?.totals?.data?.[0] || [];
+    const totals = data?.totals?.data?.[0] || data?.rows?.totals?.data?.[0] || [];
 
     const get = (name) => {
       const item = totals.find((x) => x.name === name);
