@@ -464,40 +464,36 @@ flex:1;
 .analytics-widget{
 position:relative;
 flex:0 0 auto;
-margin-top:20px;
+align-self:center;
+margin-top:0;
 }
 .analytics-trigger{
-width:48px;
-height:48px;
-border-radius:50%;
-border:1px solid rgba(117,224,162,.55);
-background:linear-gradient(180deg,#75e0a2,#22b66f 52%,#12824f);
-color:#04170d;
-display:grid;
-place-items:center;
-box-shadow:0 10px 24px rgba(0,0,0,.28),0 0 16px rgba(34,182,111,.20),inset 0 1px 0 rgba(255,255,255,.25);
-cursor:pointer;
-transition:transform .18s ease,box-shadow .18s ease;
+width:78px;
+height:78px;
+display:block;
+transition:transform .18s ease,filter .18s ease;
+filter:
+drop-shadow(0 0 14px rgba(255,90,0,.55))
+drop-shadow(0 0 28px rgba(255,120,0,.22));
 }
 .analytics-trigger:hover{
-transform:translateY(-2px);
-box-shadow:0 14px 30px rgba(0,0,0,.36),0 0 22px rgba(117,224,162,.42),inset 0 1px 0 rgba(255,255,255,.25);
+transform:translateY(-2px) scale(1.05);
+filter:
+drop-shadow(0 0 20px rgba(255,90,0,.75))
+drop-shadow(0 0 42px rgba(255,120,0,.32));
 }
-.analytics-trigger svg{
-width:23px;
-height:23px;
-stroke:#04170d;
-stroke-width:2.4;
-fill:none;
-stroke-linecap:round;
-stroke-linejoin:round;
+.analytics-trigger img{
+width:100%;
+height:100%;
+object-fit:contain;
+display:block;
 }
 .analytics-panel{
 position:absolute;
 top:calc(100% + 10px);
-left:calc(100% + 12px);
+left:0;
 right:auto;
-width:335px;
+width:315px;
 padding:18px;
 border-radius:20px;
 border:1px solid rgba(212,167,79,.28);
@@ -505,14 +501,14 @@ background:linear-gradient(180deg,rgba(10,7,4,.98),rgba(20,12,7,.96));
 box-shadow:0 22px 48px rgba(0,0,0,.48);
 opacity:0;
 visibility:hidden;
-transform:translate(-8px,8px);
+transform:translateY(8px);
 transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
 pointer-events:none;
 }
 .analytics-widget:hover .analytics-panel{
 opacity:1;
 visibility:visible;
-transform:translate(0,0);
+transform:translateY(0);
 pointer-events:auto;
 }
 .analytics-title{
@@ -589,12 +585,8 @@ color:#9f927e;
 </header>
 <div class="analytics-widget" aria-label="Recent partner stats">
 <a class="analytics-trigger" href="https://thorshall.gg/partners" aria-label="View partner statistics">
-<svg viewBox="0 0 24 24" aria-hidden="true">
-<path d="M4 19V5"></path>
-<path d="M4 19h16"></path>
-<path d="M7 15l3-4 3 2 5-7"></path>
-<path d="M18 6h2v2"></path>
-</svg>
+
+<img src="img/infernal-diamond.png" alt="">
 </a>
 <div class="analytics-panel">
 <div class="analytics-title"><span class="analytics-dot"></span>Recent partner stats</div>
