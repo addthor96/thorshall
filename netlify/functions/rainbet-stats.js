@@ -4,18 +4,14 @@ exports.handler = async function () {
   if (!token) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Missing token" })
+      body: JSON.stringify({ error: "Missing RAINBET_STATISTIC_TOKEN" })
     };
   }
 
   const now = new Date();
-
-  const from = new Date(
-    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
-  )
+  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
     .toISOString()
     .split("T")[0];
-
   const to = now.toISOString().split("T")[0];
 
   const params = new URLSearchParams({
@@ -28,17 +24,28 @@ exports.handler = async function () {
 
   [
     "wager",
-    "ngr",
     "deposits_sum",
-    "first_deposits_count",
     "visits_count",
-    "registrations_count"
+    "registrations_count",
+    "ngr",
+    "first_deposits_count"
   ].forEach((c) => params.append("columns[]", c));
 
   params.append("group_by[]", "day");
 
-  const url =
-    `https://portal.rainbetpartners.com/api/customer/v1/partner/report?${params.toString()}`;
+  const url = `https://portal.rainbetpartners.com/api/customer/v1/partner/report?${params.toString()}`;
+
+  const readValue = (value) => {
+    if (value && typeof value === "object") {
+      return Number(value.amount || 0);
+    }
+    return Number(value || 0);
+  };
+
+  const getTotal = (totals, name) => {
+    const item = totals.find((x) => x.name === name);
+    return item ? readValue(item.value) : 0;
+  };
 
   try {
     const response = await fetch(url, {
@@ -62,27 +69,21 @@ exports.handler = async function () {
       };
     }
 
-    const totals = data?.totals?.data?.[0] || data?.rows?.totals?.data?.[0] || [];
-
-    const get = (name) => {
-      const item = totals.find((x) => x.name === name);
-
-      if (!item) return 0;
-
-      if (typeof item.value === "object") {
-        return Number(item.value.amount || 0);
-      }
-
-      return Number(item.value || 0);
-    };
+    const totals =
+      data?.totals?.data?.[0] ||
+      data?.rows?.totals?.data?.[0] ||
+      [];
 
     const stats = {
-      visits: get("visits_count"),
-      registrations: get("registrations_count"),
-      wager: get("wager"),
-      ngr: get("ngr"),
-      deposits: get("deposits_sum"),
-      ftd: get("first_deposits_count"),
+      wager: getTotal(totals, "wager"),
+      deposits: getTotal(totals, "deposits_sum"),
+      visits: getTotal(totals, "visits_count"),
+      registrations: getTotal(totals, "registrations_count"),
+
+      // saved for /partners later
+      ngr: getTotal(totals, "ngr"),
+      ftd: getTotal(totals, "first_deposits_count"),
+
       updated: new Date().toISOString()
     };
 
@@ -97,9 +98,7 @@ exports.handler = async function () {
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({
-        error: err.message
-      })
+      body: JSON.stringify({ error: err.message })
     };
   }
 };
