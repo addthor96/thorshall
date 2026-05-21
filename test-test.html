@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Test Test</title>
+
+<style>
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+background:
+linear-gradient(rgba(8,5,3,.84),rgba(8,5,3,.97)),
+url('viking-hall-bg.png') center/cover fixed no-repeat;
+color:white;
+}
+
+.wrap{
+max-width:1180px;
+margin:auto;
+padding:26px 18px;
+}
+
+.site-head{
+display:flex;
+align-items:flex-start;
+gap:12px;
+}
+
+.topbar{
+flex:1;
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:16px 18px;
+border-radius:20px;
+border:1px solid rgba(212,167,79,.22);
+background:rgba(0,0,0,.42);
+backdrop-filter:blur(8px);
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+text-decoration:none;
+color:white;
+font-size:28px;
+font-weight:900;
+}
+
+.brand img{
+width:42px;
+height:42px;
+border-radius:10px;
+object-fit:cover;
+}
+
+.nav{
+display:flex;
+gap:10px;
+align-items:center;
+}
+
+.nav a{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:13px 22px;
+border-radius:14px;
+font-weight:900;
+text-decoration:none;
+border:1px solid rgba(255,230,170,.38);
+background:linear-gradient(180deg,#f0d28b,#d4a74f);
+color:#211407;
+}
+
+.manager-btn{
+background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424)!important;
+color:#fff!important;
+}
+
+.analytics-button{
+width:58px;
+height:58px;
+border-radius:50%;
+overflow:hidden;
+cursor:pointer;
+flex:0 0 auto;
+
+box-shadow:
+0 0 18px rgba(255,90,0,.45),
+0 0 38px rgba(255,120,0,.18);
+
+transition:.2s ease;
+}
+
+.analytics-button:hover{
+transform:translateY(-2px) scale(1.05);
+box-shadow:
+0 0 24px rgba(255,90,0,.65),
+0 0 52px rgba(255,120,0,.28);
+}
+
+.analytics-button img{
+width:100%;
+height:100%;
+display:block;
+object-fit:cover;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+<div class="site-head">
+
+<header class="topbar">
+
+<a class="brand" href="#">
+<img src="img/logo.png" alt="">
+<span>THOR'S HALL</span>
+</a>
+
+<nav class="nav">
+<a href="#">About</a>
+<a href="#">Info</a>
+<a href="#">Guide</a>
+<a href="#">Creators</a>
+<a class="manager-btn" href="#">Managers</a>
+<a href="#">Join Rainbet</a>
+</nav>
+
+</header>
+
+<div class="analytics-button">
+<img src="infernal-diamond.png" alt="">
+</div>
+
+</div>
+
+</div>
+
+</body>
+</html>
