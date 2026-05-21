@@ -1,72 +1,92 @@
-exports.handler = async function() {
+exports.handler = async function () {
   const token = process.env.RAINBET_STATISTIC_TOKEN;
+
   if (!token) {
-    return { statusCode: 500, body: JSON.stringify({ error: 'Missing RAINBET_STATISTIC_TOKEN' }) };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: "Missing RAINBET_STATISTIC_TOKEN"
+      })
+    };
   }
 
   const now = new Date();
-  const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1, 0, 0, 0)).toISOString();
-  const to = now.toISOString();
+
+  const from = new Date(
+    Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1)
+  )
+    .toISOString()
+    .split("T")[0];
+
+  const to = now.toISOString().split("T")[0];
 
   const params = new URLSearchParams();
-  params.set('from', from);
-  params.set('to', to);
-  params.set('conversion_currency', 'USD');
-  ['visits_count','registrations_count','deposits_sum','wager','ngr','first_deposits_count'].forEach(c => {
-    params.append('columns[]', c);
+
+  params.set("async", "false");
+  params.set("from", from);
+  params.set("to", to);
+  params.set("exchange_rates_date", "2019-01-01");
+
+  [
+    "ngr",
+    "deposits_sum",
+    "first_deposits_count",
+    "visits_count",
+    "registrations_count",
+    "clean_net_revenue"
+  ].forEach((c) => {
+    params.append("columns[]", c);
   });
 
-  const url = `https://portal.rainbetpartners.com/api/customer/v1/partner/report?${params.toString()}`;
+  params.append("group_by[]", "day");
+
+  const url =
+    `https://portal.rainbetpartners.com/api/customer/v1/partner/report?${params.toString()}`;
 
   try {
     const response = await fetch(url, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-        'Authorization': token
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: token
       }
     });
 
-    const raw = await response.json();
-    if (!response.ok) {
-      return { statusCode: response.status, body: JSON.stringify({ error: 'Rainbet API error', details: raw }) };
+    const rawText = await response.text();
+
+    let raw;
+
+    try {
+      raw = JSON.parse(rawText);
+    } catch {
+      raw = rawText;
     }
 
-    const rows = Array.isArray(raw) ? raw
-      : Array.isArray(raw.data) ? raw.data
-      : Array.isArray(raw.items) ? raw.items
-      : Array.isArray(raw.rows) ? raw.rows
-      : Array.isArray(raw.report) ? raw.report
-      : [raw];
-
-    const num = v => Number(String(v ?? 0).replace(/[$,]/g, '')) || 0;
-    const sum = keys => rows.reduce((total, row) => {
-      for (const key of keys) {
-        if (row && row[key] !== undefined) return total + num(row[key]);
-      }
-      return total;
-    }, 0);
-
-    const stats = {
-      wager: sum(['wager', 'casino_bets_sum', 'casino_total_bets_sum']),
-      ngr: sum(['ngr', 'casino_ngr']),
-      deposits: sum(['deposits_sum', 'first_deposits_sum']),
-      visits: sum(['visits_count']),
-      registrations: sum(['registrations_count']),
-      ftd: sum(['first_deposits_count']),
-      updated: new Date().toISOString()
-    };
+    if (!response.ok) {
+      return {
+        statusCode: response.status,
+        body: JSON.stringify({
+          error: "Rainbet API error",
+          details: raw
+        })
+      };
+    }
 
     return {
       statusCode: 200,
       headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=3600'
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=300"
       },
-      body: JSON.stringify(stats)
+      body: JSON.stringify(raw)
     };
   } catch (err) {
-    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
+    return {
+      statusCode: 500,
+      body: JSON.stringify({
+        error: err.message
+      })
+    };
   }
 };
