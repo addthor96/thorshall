@@ -759,25 +759,53 @@ Thor's Hall does not operate gambling services. It publishes informational guide
 
 <script>
 (async function(){
-  const money = n => '$' + Number(n || 0).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-  const setText = (id, value) => { const el = document.getElementById(id); if(el) el.textContent = value; };
+  const money = n => '$' + Number(n || 0).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  const setText = (id, value) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = value;
+  };
+
+  const readValue = (value) => {
+    if (value && typeof value === 'object') {
+      if (value.amount !== undefined) return Number(value.amount || 0);
+      if (value.amount_cents !== undefined) return Number(value.amount_cents || 0) / 100;
+    }
+    return Number(value || 0);
+  };
+
+  const fromRawRainbet = (raw, key) => {
+    const totals = raw?.rows?.totals?.data?.[0] || [];
+    const item = totals.find(x => x.name === key);
+    return item ? readValue(item.value) : 0;
+  };
 
   try{
     const res = await fetch('/.netlify/functions/rainbet-stats', { cache: 'no-store' });
     if(!res.ok) throw new Error('Stats request failed');
+
     const data = await res.json();
 
-    setText('stat-wager', money(data.wager));
-    setText('stat-ngr', money(data.ngr));
-    setText('stat-deposits', money(data.deposits));
-    setText('stat-visits', `${data.visits || 0} / ${data.registrations || 0}`);
-    setText('stat-ftd', data.ftd || 0);
+    const wager = data.wager ?? fromRawRainbet(data, 'wager');
+    const ngr = data.ngr ?? fromRawRainbet(data, 'ngr');
+    const deposits = data.deposits ?? fromRawRainbet(data, 'deposits_sum');
+    const visits = data.visits ?? fromRawRainbet(data, 'visits_count');
+    const registrations = data.registrations ?? fromRawRainbet(data, 'registrations_count');
+    const ftd = data.ftd ?? fromRawRainbet(data, 'first_deposits_count');
+
+    setText('stat-wager', money(wager));
+    setText('stat-ngr', money(ngr));
+    setText('stat-deposits', money(deposits));
+    setText('stat-visits', `${visits} / ${registrations}`);
+    setText('stat-ftd', ftd);
     setText('stat-updated', 'Auto-updated from Rainbet API.');
   }catch(e){
     setText('stat-updated', 'Showing latest saved snapshot.');
   }
 })();
 </script>
-
 </body>
 </html>
