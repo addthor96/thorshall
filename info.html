@@ -21,6 +21,7 @@
 *{box-sizing:border-box}
 body{
   margin:0;
+  overflow-x:hidden;
   font-family:Arial,Helvetica,sans-serif;
   color:var(--text);
   line-height:1.55;
@@ -29,12 +30,7 @@ body{
     linear-gradient(rgba(5,5,5,.78),rgba(5,5,5,.96)),
     url('viking-hall-bg.png') center/cover fixed no-repeat;
 }
-.wrap{
-  max-width:1160px;
-  margin:auto;
-  padding:20px 14px 60px;
-  overflow-x:hidden;
-}
+.wrap{max-width:1200px;margin:auto;padding:20px 14px 60px}
 .topbar{
   display:flex;
   justify-content:space-between;
@@ -277,9 +273,9 @@ stroke-linejoin:round;
 .analytics-panel{
 position:absolute;
 top:calc(100% + 10px);
-right:0;
-left:auto;
-width:335px;
+left:calc(100% + 12px);
+right:auto;
+width:315px;
 padding:18px;
 border-radius:20px;
 border:1px solid rgba(212,167,79,.28);
@@ -335,6 +331,12 @@ font-size:12px;
 line-height:1.45;
 color:#9f927e;
 }
+
+@media(max-width:1400px){
+.analytics-panel{left:auto;right:0;transform:translateY(8px);}
+.analytics-widget:hover .analytics-panel{transform:translateY(0);}
+}
+
 @media(max-width:920px){
 .site-head{flex-direction:column;}
 .analytics-widget{margin-top:0;align-self:flex-end;}
