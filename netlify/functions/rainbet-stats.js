@@ -12,6 +12,7 @@ exports.handler = async function () {
   const from = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
     .toISOString()
     .split("T")[0];
+
   const to = now.toISOString().split("T")[0];
 
   const params = new URLSearchParams({
@@ -26,9 +27,7 @@ exports.handler = async function () {
     "wager",
     "deposits_sum",
     "visits_count",
-    "registrations_count",
-    "ngr",
-    "first_deposits_count"
+    "registrations_count"
   ].forEach((c) => params.append("columns[]", c));
 
   params.append("group_by[]", "day");
@@ -79,11 +78,6 @@ exports.handler = async function () {
       deposits: getTotal(totals, "deposits_sum"),
       visits: getTotal(totals, "visits_count"),
       registrations: getTotal(totals, "registrations_count"),
-
-      // saved for /partners later
-      ngr: getTotal(totals, "ngr"),
-      ftd: getTotal(totals, "first_deposits_count"),
-
       updated: new Date().toISOString()
     };
 
