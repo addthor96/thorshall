@@ -29,7 +29,12 @@ body{
     linear-gradient(rgba(5,5,5,.78),rgba(5,5,5,.96)),
     url('viking-hall-bg.png') center/cover fixed no-repeat;
 }
-.wrap{max-width:1240px;margin:auto;padding:20px 14px 60px}
+.wrap{
+  max-width:1160px;
+  margin:auto;
+  padding:20px 14px 60px;
+  overflow-x:hidden;
+}
 .topbar{
   display:flex;
   justify-content:space-between;
@@ -272,9 +277,9 @@ stroke-linejoin:round;
 .analytics-panel{
 position:absolute;
 top:calc(100% + 10px);
-left:calc(100% + 12px);
-right:auto;
-width:335px;
+right:0;
+left:auto;
+width:315px;
 padding:18px;
 border-radius:20px;
 border:1px solid rgba(212,167,79,.28);
