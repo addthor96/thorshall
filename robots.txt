@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://tiny-zabaione-9fd541.netlify.app/sitemap.xml
+

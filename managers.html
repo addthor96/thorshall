@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Manager Program | Thor's Hall Creator Revenue Partnerships</title>
+<meta name="description" content="Thor's Hall Manager Program for creator managers, agencies and connected operators. Introduce creators with audiences, unlock custom pages, tracked links and long-term revenue-share upside."/>
+<meta name="keywords" content="creator manager program, talent manager revenue share, creator agency affiliate program, manager override revenue, streamer manager partnership, creator monetization manager"/>
+<link rel="canonical" href="https://thorshall.gg/managers"/>
+<style>
+:root{
+  --gold:#d4a74f;--gold2:#f0d28b;--gold3:#fff0be;
+  --red:#7f2424;--red2:#a83232;--red3:#d9554b;--red4:#ff8b80;
+  --text:#f3ede2;--muted:#d0c2ab;--line:rgba(212,167,79,.25);
+  --redline:rgba(217,85,75,.34);
+  --panel:#17100b;--panel2:#26180f;--soft:rgba(255,255,255,.04);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);line-height:1.62;
+  background:
+    radial-gradient(circle at 84% 0%,rgba(169,50,50,.19),transparent 32%),
+    radial-gradient(circle at 7% 24%,rgba(212,167,79,.12),transparent 25%),
+    linear-gradient(rgba(10,6,4,.87),rgba(10,6,4,.97)),
+    url('viking-hall-bg.png') center/cover fixed no-repeat;
+}
+.wrap{max-width:1180px;margin:auto;padding:26px 18px 76px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:15px 18px;border-radius:18px;border:1px solid var(--line);background:rgba(0,0,0,.42);backdrop-filter:blur(8px)}
+.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);font-weight:900;letter-spacing:.04em}
+.brand img{width:36px;height:36px;border-radius:9px;object-fit:cover}
+.nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.nav a,.gold-btn,button{
+  text-decoration:none;display:inline-flex;align-items:center;justify-content:center;
+  padding:12px 18px;border-radius:13px;font-weight:900;border:1px solid rgba(255,220,145,.42);
+  background:linear-gradient(180deg,var(--gold3),var(--gold));color:#211407!important;
+  box-shadow:0 10px 22px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.26);
+  cursor:pointer;
+}
+.nav a.manager-btn,.red-btn{
+  color:#fff!important;background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424);
+  border-color:rgba(255,140,130,.52);text-shadow:0 1px 0 rgba(0,0,0,.28)
+}
+.dark-btn{color:var(--gold2)!important;background:linear-gradient(180deg,rgba(32,24,17,.96),rgba(9,7,5,.96));border-color:rgba(255,220,145,.28)}
+.hero{
+  margin-top:24px;padding:64px 38px;border-radius:32px;border:1px solid rgba(169,50,50,.40);
+  background:
+    linear-gradient(135deg,rgba(169,50,50,.14),rgba(255,255,255,.02) 42%,rgba(0,0,0,.58)),
+    linear-gradient(180deg,rgba(0,0,0,.60),rgba(20,12,6,.94));
+  position:relative;overflow:hidden
+}
+.hero:after{content:"MANAGERS";position:absolute;right:16px;top:10px;font-size:104px;font-weight:900;letter-spacing:.07em;color:rgba(240,210,139,.052)}
+.eyebrow{color:var(--red4);font-weight:900;letter-spacing:.08em;text-transform:uppercase;font-size:13px;margin-bottom:12px}
+h1{font-size:clamp(42px,6vw,74px);line-height:1;margin:0 0 16px;max-width:990px;position:relative;z-index:2}
+h2{font-size:clamp(28px,4vw,38px);margin:0 0 12px}
+h3{margin:0 0 9px;font-size:22px}
+p,li{color:var(--muted)}
+.lead{font-size:20px;max-width:920px;position:relative;z-index:2}
+.hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:26px;position:relative;z-index:2}
+.strip,.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:26px}
+.stat,.kpi{padding:18px;border-radius:18px;text-align:center;border:1px solid var(--line);background:var(--soft)}
+.stat strong,.kpi strong{display:block;color:var(--gold2);font-size:26px}
+.kpi{border-color:rgba(169,50,50,.34);background:linear-gradient(180deg,rgba(169,50,50,.12),rgba(212,167,79,.055))}
+.kpi strong{font-size:31px;color:var(--red4)}
+.section{margin-top:24px;padding:30px;border-radius:24px;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--panel2));box-shadow:0 14px 34px rgba(0,0,0,.20)}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
+.card,.panel{padding:22px;border-radius:20px;border:1px solid rgba(255,220,145,.22);background:rgba(255,255,255,.035)}
+.card strong{display:block;color:var(--gold2);font-size:20px;margin-bottom:6px}
+.statement{padding:24px;border-radius:20px;border:1px solid rgba(169,50,50,.36);background:linear-gradient(135deg,rgba(169,50,50,.13),rgba(212,167,79,.06));margin-top:18px}
+.statement strong{color:var(--gold2);font-size:22px}
+.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-top:18px}
+.flow div{padding:20px;border-radius:18px;border:1px solid var(--line);background:rgba(212,167,79,.08)}
+.flow b{color:var(--gold2)}
+.visual{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+.bar{margin:14px 0}
+.bar label{display:flex;justify-content:space-between;color:var(--gold2);font-weight:900;font-size:14px}
+.track{height:12px;border-radius:99px;background:rgba(255,255,255,.08);overflow:hidden;margin-top:7px}
+.fill{height:100%;border-radius:99px;background:linear-gradient(90deg,var(--red3),var(--gold2))}
+.qa{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:18px}
+.qa article{padding:22px;border-radius:20px;border:1px solid rgba(255,220,145,.20);background:rgba(255,255,255,.035)}
+.qa h3{color:var(--gold2)}
+.apply-section{
+  margin-top:24px;
+  padding:30px;
+  border-radius:26px;
+  border:1px solid var(--redline);
+  background:
+    radial-gradient(circle at top right,rgba(217,85,75,.12),transparent 28%),
+    linear-gradient(180deg,rgba(43,18,13,.88),rgba(24,10,8,.94));
+  box-shadow:0 18px 44px rgba(0,0,0,.35);
+}
+.apply-intro{max-width:1030px}
+.apply-grid{
+  display:grid;
+  grid-template-columns:.9fr 1.1fr;
+  gap:18px;
+  margin-top:20px;
+}
+.apply-card{
+  padding:24px;
+  border-radius:22px;
+  border:1px solid rgba(217,85,75,.22);
+  background:rgba(0,0,0,.16);
+}
+.apply-card h3{
+  font-size:30px;
+  color:var(--gold2);
+  margin-bottom:14px;
+}
+.checklist{list-style:none;padding:0;margin:18px 0 0}
+.checklist li{
+  padding:12px 0 12px 36px;
+  position:relative;
+  border-bottom:1px solid rgba(255,255,255,.06);
+  color:var(--text);
+}
+.checklist li:before{
+  content:"✓";
+  position:absolute;
+  left:0;
+  top:12px;
+  width:23px;
+  height:23px;
+  border-radius:50%;
+  display:grid;
+  place-items:center;
+  background:linear-gradient(180deg,var(--red4),var(--red2));
+  color:white;
+  font-size:13px;
+  font-weight:900;
+}
+label{display:block;font-weight:900;color:var(--gold2);margin:0 0 7px}
+input,textarea{
+  width:100%;
+  padding:14px;
+  border-radius:13px;
+  border:1px solid rgba(217,85,75,.30);
+  background:rgba(0,0,0,.42);
+  color:var(--text);
+  margin:0 0 17px;
+  font-size:15px;
+}
+textarea{min-height:118px;resize:vertical}
+input::placeholder,textarea::placeholder{color:#b9aa97}
+.bottom{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:20px}
+.right-cta{margin-left:auto}
+.note{margin-top:22px;padding-top:14px;border-top:1px solid var(--line);font-size:14px;color:#c9b89c;text-align:center}
+.note a{color:var(--gold2);font-weight:800;text-decoration:none}
+@media(max-width:980px){.strip,.flow,.visual,.qa,.kpi-row,.apply-grid{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:700px){.grid,.strip,.flow,.visual,.qa,.kpi-row,.apply-grid{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.hero{padding:42px 22px}.hero:after{font-size:58px}.nav{width:100%}.nav a,.gold-btn,button{width:100%}.right-cta{margin-left:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="topbar">
+<a class="brand" href="index.html"><img src="img/logo.png" alt="Thor's Hall Logo"><span>THOR'S HALL</span></a>
+<nav class="nav">
+<a href="https://thorshall.gg/about">About</a>
+<a href="info.html">Info</a>
+<a href="guide.html">Guide</a>
+<a href="creators.html">Creators</a>
+<a href="managers.html" class="manager-btn">Managers</a>
+<a href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+</nav>
+</header>
+
+<section class="hero">
+<div class="eyebrow">Manager Program</div>
+<h1>Turn Creator Access Into Extra Monthly Revenue.</h1>
+<p class="lead">Thor's Hall is built for managers, agencies, network owners and connected operators who already handle creators, communities or people with real audience attention. Bring qualified creator relationships into a ready-made revenue-share system.</p>
+<div class="hero-cta">
+<a class="gold-btn red-btn" href="#manager-apply">Start Manager Partnership</a>
+<a class="gold-btn dark-btn" href="#manager-fit">See The Fit</a>
+</div>
+<div class="strip">
+<div class="stat"><strong>Audience</strong>You bring access</div>
+<div class="stat"><strong>Pages</strong>We build setup</div>
+<div class="stat"><strong>Tracking</strong>Clear attribution</div>
+<div class="stat"><strong>Upside</strong>Ongoing revenue path</div>
+</div>
+</section>
+
+<section class="section">
+<h2>This Is A Manager Revenue Layer</h2>
+<p>Thor's Hall gives managers a practical way to monetize creator relationships without building an affiliate backend, landing pages, tracking systems or crypto casino funnels from scratch.</p>
+<div class="kpi-row">
+<div class="kpi"><strong>0</strong>Page build cost for approved creators</div>
+<div class="kpi"><strong>1</strong>Simple link per creator</div>
+<div class="kpi"><strong>∞</strong>Long-term referred user upside</div>
+<div class="kpi"><strong>Low</strong>Manager workload</div>
+</div>
+<div class="statement">
+<strong>If you already handle people with clout, this gives that access a second monetization route.</strong>
+<p>Creators get a clean page and link. Managers get a scalable structure. Thor's Hall handles the technical layer.</p>
+</div>
+</section>
+
+<section class="section" id="manager-fit">
+<h2>Built For People Who Already Have Access</h2>
+<div class="grid">
+<article class="card"><strong>Creator Managers</strong><p>For managers representing streamers, YouTubers, TikTok creators, Kick creators, esports creators or online personalities.</p></article>
+<article class="card"><strong>Agencies & Networks</strong><p>For small agencies, talent networks, Discord owners and community operators with multiple audience relationships.</p></article>
+<article class="card"><strong>Connected Operators</strong><p>For people who can reach creators directly and want a performance-based revenue opportunity instead of a one-time intro.</p></article>
+</div>
+</section>
+
+<section class="section">
+<h2>The Business Model Is Simple</h2>
+<div class="flow">
+<div><b>1. Manager Opens Door</b><br/>Qualified creator relationship enters the Thor's Hall pipeline.</div>
+<div><b>2. Thor's Hall Reviews Fit</b><br/>Audience, niche, compliance and creator suitability are checked.</div>
+<div><b>3. Creator Page Goes Live</b><br/>Approved creators receive a custom page and tracked link route.</div>
+<div><b>4. Revenue Can Compound</b><br/>Creator traffic can generate creator revenue and manager override potential.</div>
+</div>
+</section>
+
+<section class="section">
+<h2>Why Managers Take This Seriously</h2>
+<div class="visual">
+<div class="panel">
+<div class="bar"><label><span>Easy to explain</span><span>93%</span></label><div class="track"><div class="fill" style="width:93%"></div></div></div>
+<div class="bar"><label><span>Low operational load</span><span>91%</span></label><div class="track"><div class="fill" style="width:91%"></div></div></div>
+<div class="bar"><label><span>Scales across creators</span><span>88%</span></label><div class="track"><div class="fill" style="width:88%"></div></div></div>
+<div class="bar"><label><span>Long-term upside</span><span>86%</span></label><div class="track"><div class="fill" style="width:86%"></div></div></div>
+</div>
+<div class="panel">
+<h3>Manager Decision</h3>
+<p>This is worth testing when a manager has creators with active audiences and wants another revenue source that does not require producing content, buying ads or building infrastructure.</p>
+<p>The strongest managers bring access. Thor's Hall brings the monetization system.</p>
+</div>
+</div>
+</section>
+
+<section class="section">
+<h2>What Thor's Hall Handles</h2>
+<div class="grid">
+<article class="card"><strong>Custom Creator Pages</strong><p>Approved creators receive pages designed to explain the offer and route traffic cleanly.</p></article>
+<article class="card"><strong>Tracked Link Path</strong><p>Each creator path can be structured for attribution, reporting and payout clarity.</p></article>
+<article class="card"><strong>Affiliate Backend</strong><p>Thor's Hall handles the funnel, partner route and operational setup behind the scenes.</p></article>
+</div>
+</section>
+
+<section class="section">
+<h2>Manager Questions Answered</h2>
+<div class="qa">
+<article><h3>What does the manager do?</h3><p>The manager brings qualified creator relationships into the Thor's Hall partnership pipeline. The core value is access, trust and relationship control.</p></article>
+<article><h3>How can a manager earn?</h3><p>Manager compensation can be structured as an override tied to the creators introduced. Terms depend on creator quality, volume and fit.</p></article>
+<article><h3>Which creators fit best?</h3><p>Gaming, streaming, crypto, betting, esports, poker, slots, crash-game, Discord and online entertainment audiences are the strongest fit.</p></article>
+<article><h3>Why would creators use it?</h3><p>Approved creators get a custom page, tracked link and revenue-share path without paying upfront or building anything themselves.</p></article>
+<article><h3>Does it replace sponsorship deals?</h3><p>No. It works as a separate performance-based monetization layer alongside sponsorships, posts, streams and existing creator income.</p></article>
+<article><h3>Is revenue guaranteed?</h3><p>No. Revenue depends on referred users, activity and audience fit. This is a business opportunity, not a guaranteed income claim.</p></article>
+</div>
+</section>
+
+<section class="apply-section" id="manager-apply">
+<h2>Apply for manager partnership</h2>
+<p class="apply-intro">Send your email, the type of creators or network you manage, and a short message about your creator access. Include the platforms, audience categories and how many creators could be relevant for the program.</p>
+
+<div class="apply-grid">
+<div class="apply-card">
+<h3>Manager-first setup</h3>
+<p>Thor's Hall is built for managers who want a clean revenue-share path for creators without creating the backend themselves.</p>
+<ul class="checklist">
+<li>Manager override potential</li>
+<li>Free creator pages for approved creators</li>
+<li>Tracked creator routes</li>
+<li>Designed for agencies, managers and networks</li>
+<li>Low operational workload</li>
+</ul>
+</div>
+
+<div class="apply-card">
+<form name="manager-partnership" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/thanks.html">
+<input type="hidden" name="form-name" value="manager-partnership">
+<input type="hidden" name="recipient_email" value="arnar@norse.is">
+
+<p style="display:none">
+<label>Don't fill this out:<input name="bot-field"></label>
+</p>
+
+<label for="email">Email</label>
+<input id="email" name="email" type="email" placeholder="your@email.com" required>
+
+<label for="manager-type">Manager / agency type</label>
+<input id="manager-type" name="manager_type" type="text" placeholder="Example: talent manager, agency, streamer network, Discord community owner..." required>
+
+<label for="creator-access">Creator access</label>
+<input id="creator-access" name="creator_access" type="text" placeholder="Example: 5 gaming streamers, 20 TikTok creators, esports team, creator agency..." required>
+
+<label for="platforms">Main platforms</label>
+<input id="platforms" name="platforms" type="text" placeholder="Example: Twitch, Kick, YouTube, TikTok, Discord, Instagram, X..." required>
+
+<label for="message">Message</label>
+<textarea id="message" name="message" placeholder="Tell us about your creator network, audience types, expected fit and how you would introduce creators..." required></textarea>
+
+<button type="submit" class="red-btn">Send Manager Application</button>
+</form>
+</div>
+</div>
+
+<p class="note">18+ Play responsibly • <a href="https://thorshall.gg/affiliate-disclosure" target="_blank" rel="noopener noreferrer">Affiliate Disclosure</a></p>
+</section>
+
+</div>
+</body>
+</html>
