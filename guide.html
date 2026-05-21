@@ -29,10 +29,126 @@
   text-shadow:0 1px 0 rgba(0,0,0,.28);
 }
 
+
+.site-head{
+display:flex;
+align-items:flex-start;
+gap:10px;
+position:relative;
+z-index:20;
+}
+.site-head .topbar{
+flex:1;
+}
+.analytics-widget{
+position:relative;
+flex:0 0 auto;
+margin-top:20px;
+}
+.analytics-trigger{
+width:48px;
+height:48px;
+border-radius:50%;
+border:1px solid rgba(255,230,170,.38);
+background:linear-gradient(180deg,var(--gold2, var(--g2, #f0d28b)),var(--gold, var(--g, #d4a74f)));
+color:#211407;
+display:grid;
+place-items:center;
+box-shadow:0 10px 24px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.25);
+cursor:pointer;
+transition:transform .18s ease,box-shadow .18s ease;
+}
+.analytics-trigger:hover{
+transform:translateY(-2px);
+box-shadow:0 14px 30px rgba(0,0,0,.36),0 0 18px rgba(212,167,79,.25),inset 0 1px 0 rgba(255,255,255,.25);
+}
+.analytics-trigger svg{
+width:23px;
+height:23px;
+stroke:#211407;
+stroke-width:2.4;
+fill:none;
+stroke-linecap:round;
+stroke-linejoin:round;
+}
+.analytics-panel{
+position:absolute;
+top:calc(100% + 10px);
+left:calc(100% + 12px);
+right:auto;
+width:335px;
+padding:18px;
+border-radius:20px;
+border:1px solid rgba(212,167,79,.28);
+background:linear-gradient(180deg,rgba(10,7,4,.98),rgba(20,12,7,.96));
+box-shadow:0 22px 48px rgba(0,0,0,.48);
+opacity:0;
+visibility:hidden;
+transform:translate(-8px,8px);
+transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
+pointer-events:none;
+}
+.analytics-widget:hover .analytics-panel{
+opacity:1;
+visibility:visible;
+transform:translate(0,0);
+pointer-events:auto;
+}
+.analytics-title{
+display:flex;
+align-items:center;
+gap:8px;
+font-size:14px;
+font-weight:900;
+letter-spacing:.05em;
+text-transform:uppercase;
+color:var(--gold2, var(--g2, #f0d28b));
+margin-bottom:13px;
+}
+.analytics-dot{
+width:8px;
+height:8px;
+border-radius:50%;
+background:#75e0a2;
+box-shadow:0 0 12px rgba(117,224,162,.75);
+}
+.analytics-row{
+display:flex;
+justify-content:space-between;
+gap:16px;
+padding:11px 0;
+border-bottom:1px solid rgba(255,255,255,.07);
+font-size:14px;
+color:var(--muted, var(--m, #d0c2ab));
+}
+.analytics-row strong{
+color:var(--text, var(--t, #f4ede2));
+font-size:15px;
+white-space:nowrap;
+}
+.analytics-note{
+margin:13px 0 0;
+font-size:12px;
+line-height:1.45;
+color:#9f927e;
+}
+@media(max-width:920px){
+.site-head{flex-direction:column;}
+.analytics-widget{margin-top:0;align-self:flex-end;}
+.analytics-panel{top:60px;left:auto;right:0;transform:translateY(-6px);}
+.analytics-widget:hover .analytics-panel{transform:translateY(0);}
+}
+@media(max-width:640px){
+.analytics-widget{align-self:stretch;}
+.analytics-trigger{margin-left:auto;}
+.analytics-panel{width:min(315px,calc(100vw - 36px));}
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
+<div class="site-head">
 <header class="topbar">
 <a class="brand" href="index.html"><img src="img/logo.png" alt="Thor's Hall Logo"><span>THOR'S HALL</span></a>
 <nav class="nav">
@@ -44,6 +160,24 @@
 <a class="btn" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
 </nav>
 </header>
+<div class="analytics-widget" aria-label="Recent partner stats">
+<a class="analytics-trigger" href="https://thorshall.gg/partners" aria-label="View partner statistics">
+<svg viewBox="0 0 24 24" aria-hidden="true">
+<path d="M4 19V5"></path>
+<path d="M4 19h16"></path>
+<path d="M7 15l3-4 3 2 5-7"></path>
+<path d="M18 6h2v2"></path>
+</svg>
+</a>
+<div class="analytics-panel">
+<div class="analytics-title"><span class="analytics-dot"></span>Recent partner stats</div>
+<div class="analytics-row"><span>Wagered this month</span><strong data-rainbet-stat="wager">$0.00</strong></div>
+<div class="analytics-row"><span>Deposits tracked</span><strong data-rainbet-stat="deposits">$0.00</strong></div>
+<div class="analytics-row"><span>Visits / registrations</span><strong data-rainbet-stat="visits">0 / 0</strong></div>
+<p class="analytics-note" data-rainbet-stat="updated">Monthly partner snapshot. Updates automatically.</p>
+</div>
+</div>
+</div>
 
 <section class="hero">
 <div class="eyebrow">Creator monetization hub</div>
@@ -321,5 +455,35 @@
 <p class="note">18+ Play responsibly • <a href="https://thorshall.gg/affiliate-disclosure" target="_blank" rel="noopener noreferrer">Affiliate Disclosure</a></p>
 </section>
 </div>
+
+<script>
+(async function(){
+  const money = n => '$' + Number(n || 0).toLocaleString('en-US', {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  });
+
+  const setStat = (key, value) => {
+    document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach(el => {
+      el.textContent = value;
+    });
+  };
+
+  try{
+    const res = await fetch('/.netlify/functions/rainbet-stats', { cache: 'no-store' });
+    if(!res.ok) throw new Error('Stats request failed');
+
+    const data = await res.json();
+
+    setStat('wager', money(data.wager));
+    setStat('deposits', money(data.deposits));
+    setStat('visits', `${data.visits || 0} / ${data.registrations || 0}`);
+    setStat('updated', 'Monthly partner snapshot. Updates automatically.');
+  }catch(e){
+    setStat('updated', 'Showing latest saved monthly snapshot.');
+  }
+})();
+</script>
+
 </body>
 </html>

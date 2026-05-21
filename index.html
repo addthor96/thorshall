@@ -584,12 +584,10 @@ width:min(315px,calc(100vw - 36px));
 </a>
 <div class="analytics-panel">
 <div class="analytics-title"><span class="analytics-dot"></span>Recent partner stats</div>
-<div class="analytics-row"><span>Casino wager</span><strong id="stat-wager">$7,698.12</strong></div>
-<div class="analytics-row"><span>Casino NGR</span><strong id="stat-ngr">$837.58</strong></div>
-<div class="analytics-row"><span>Deposits sum</span><strong id="stat-deposits">$525.16</strong></div>
-<div class="analytics-row"><span>Visits / registrations</span><strong id="stat-visits">173 / 4</strong></div>
-<div class="analytics-row"><span>FTD count</span><strong id="stat-ftd">1</strong></div>
-<p class="analytics-note" id="stat-updated">Auto-updates from Rainbet API.</p>
+<div class="analytics-row"><span>Wagered this month</span><strong data-rainbet-stat="wager">$0.00</strong></div>
+<div class="analytics-row"><span>Deposits tracked</span><strong data-rainbet-stat="deposits">$0.00</strong></div>
+<div class="analytics-row"><span>Visits / registrations</span><strong data-rainbet-stat="visits">0 / 0</strong></div>
+<p class="analytics-note" data-rainbet-stat="updated">Monthly partner snapshot. Updates automatically.</p>
 </div>
 </div>
 </div>
@@ -764,23 +762,10 @@ Thor's Hall does not operate gambling services. It publishes informational guide
     maximumFractionDigits: 2
   });
 
-  const setText = (id, value) => {
-    const el = document.getElementById(id);
-    if (el) el.textContent = value;
-  };
-
-  const readValue = (value) => {
-    if (value && typeof value === 'object') {
-      if (value.amount !== undefined) return Number(value.amount || 0);
-      if (value.amount_cents !== undefined) return Number(value.amount_cents || 0) / 100;
-    }
-    return Number(value || 0);
-  };
-
-  const fromRawRainbet = (raw, key) => {
-    const totals = raw?.rows?.totals?.data?.[0] || [];
-    const item = totals.find(x => x.name === key);
-    return item ? readValue(item.value) : 0;
+  const setStat = (key, value) => {
+    document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach(el => {
+      el.textContent = value;
+    });
   };
 
   try{
@@ -789,21 +774,12 @@ Thor's Hall does not operate gambling services. It publishes informational guide
 
     const data = await res.json();
 
-    const wager = data.wager ?? fromRawRainbet(data, 'wager');
-    const ngr = data.ngr ?? fromRawRainbet(data, 'ngr');
-    const deposits = data.deposits ?? fromRawRainbet(data, 'deposits_sum');
-    const visits = data.visits ?? fromRawRainbet(data, 'visits_count');
-    const registrations = data.registrations ?? fromRawRainbet(data, 'registrations_count');
-    const ftd = data.ftd ?? fromRawRainbet(data, 'first_deposits_count');
-
-    setText('stat-wager', money(wager));
-    setText('stat-ngr', money(ngr));
-    setText('stat-deposits', money(deposits));
-    setText('stat-visits', `${visits} / ${registrations}`);
-    setText('stat-ftd', ftd);
-    setText('stat-updated', 'Auto-updated from Rainbet API.');
+    setStat('wager', money(data.wager));
+    setStat('deposits', money(data.deposits));
+    setStat('visits', `${data.visits || 0} / ${data.registrations || 0}`);
+    setStat('updated', 'Monthly partner snapshot. Updates automatically.');
   }catch(e){
-    setText('stat-updated', 'Showing latest saved snapshot.');
+    setStat('updated', 'Showing latest saved monthly snapshot.');
   }
 })();
 </script>
