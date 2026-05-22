@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
 <title>Partners | Thor's Hall</title>
-<link rel="canonical" href="https://thorshall.gg/partners">
 
 <style>
 :root{
@@ -15,26 +15,22 @@
 --line:rgba(212,167,79,.24);
 }
 
-*{box-sizing:border-box}
+*{
+box-sizing:border-box;
+}
 
 body{
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
+background:#050302;
 color:var(--text);
-min-height:100vh;
-background:
-linear-gradient(rgba(5,3,2,.10),rgba(5,3,2,.28)),
-url('wall.png') center top/contain no-repeat,
-#050302;
 overflow-x:hidden;
 }
 
 .wrap{
 max-width:1180px;
 margin:auto;
-padding:26px 18px 70px;
-position:relative;
-z-index:2;
+padding:26px 18px 80px;
 }
 
 .topbar{
@@ -48,6 +44,7 @@ border:1px solid var(--line);
 background:rgba(0,0,0,.46);
 backdrop-filter:blur(8px);
 box-shadow:0 18px 44px rgba(0,0,0,.34);
+margin-bottom:28px;
 }
 
 .brand{
@@ -55,7 +52,7 @@ display:flex;
 align-items:center;
 gap:12px;
 text-decoration:none;
-color:white;
+color:#fff;
 font-size:28px;
 font-weight:900;
 letter-spacing:.04em;
@@ -72,7 +69,6 @@ object-fit:cover;
 display:flex;
 gap:10px;
 flex-wrap:wrap;
-justify-content:flex-end;
 }
 
 .nav a{
@@ -93,52 +89,52 @@ box-shadow:0 10px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.25);
 color:#fff!important;
 background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424);
 border-color:rgba(255,140,130,.52);
-text-shadow:0 1px 0 rgba(0,0,0,.28);
 }
 
-.partner-wall-space{
-height:calc(100vh - 120px);
-min-height:760px;
+.partner-wall{
 position:relative;
+width:100%;
+min-height:1200px;
+border-radius:30px;
+overflow:hidden;
+border:1px solid rgba(212,167,79,.18);
 }
 
-.partner-layer{
-position:absolute;
-inset:120px 8% 8% 8%;
+.partner-wall img{
+width:100%;
+display:block;
+user-select:none;
 pointer-events:none;
 }
 
-.partner-placeholder{
+.wall-overlay{
 position:absolute;
-top:18%;
-left:50%;
-transform:translateX(-50%);
+inset:0;
+display:flex;
+justify-content:center;
+align-items:flex-start;
+padding-top:220px;
+}
+
+.wall-title{
 text-align:center;
-opacity:.92;
 }
 
-.partner-placeholder h1{
+.wall-title h1{
+font-size:clamp(52px,7vw,92px);
 margin:0;
-font-size:clamp(44px,6vw,76px);
-letter-spacing:.06em;
-text-transform:uppercase;
-text-shadow:0 4px 24px rgba(0,0,0,.85);
+letter-spacing:.08em;
+text-shadow:0 8px 30px rgba(0,0,0,.9);
 }
 
-.partner-placeholder p{
-margin:12px 0 0;
-font-size:18px;
-color:#d8c3a0;
-text-shadow:0 3px 16px rgba(0,0,0,.85);
+.wall-title p{
+margin-top:14px;
+font-size:20px;
+color:#d6c2a0;
+text-shadow:0 4px 20px rgba(0,0,0,.9);
 }
 
 @media(max-width:760px){
-body{
-background:
-linear-gradient(rgba(5,3,2,.16),rgba(5,3,2,.38)),
-url('wall.png') center top/cover no-repeat,
-#050302;
-}
 
 .topbar{
 flex-direction:column;
@@ -153,8 +149,12 @@ width:100%;
 width:100%;
 }
 
-.partner-wall-space{
-min-height:680px;
+.partner-wall{
+min-height:auto;
+}
+
+.wall-overlay{
+padding-top:120px;
 }
 }
 </style>
@@ -165,6 +165,7 @@ min-height:680px;
 <div class="wrap">
 
 <header class="topbar">
+
 <a class="brand" href="https://thorshall.gg">
 <img src="img/logo.png" alt="Thor's Hall Logo">
 <span>THOR'S HALL</span>
@@ -178,15 +179,22 @@ min-height:680px;
 <a class="manager-btn" href="https://thorshall.gg/managers">Managers</a>
 <a href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
 </nav>
+
 </header>
 
-<section class="partner-wall-space">
-<div class="partner-layer">
-<div class="partner-placeholder">
-<h1>Partners</h1>
-<p>The wall is ready for live partner plaques.</p>
+<section class="partner-wall">
+
+<img src="wall.png" alt="Thor's Hall Partner Wall">
+
+<div class="wall-overlay">
+
+<div class="wall-title">
+<h1>PARTNERS</h1>
+<p>The Hall of Partners is being forged.</p>
 </div>
+
 </div>
+
 </section>
 
 </div>
