@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Partners | Thor's Hall</title>
-<meta name="description" content="Thor's Hall partner wall with creator and partnership activity.">
+<meta name="description" content="Thor's Hall partner wall with live creator and partnership activity.">
 <link rel="canonical" href="https://thorshall.gg/partners">
+<link rel="preload" as="image" href="/wall.png">
+<link rel="preload" as="image" href="/wallbackground.png">
 
 <style>
 :root{
@@ -25,8 +27,8 @@ margin:0;
 font-family:Arial,Helvetica,sans-serif;
 color:var(--text);
 background:
-linear-gradient(rgba(5,3,2,.35),rgba(5,3,2,.78)),
-url('wallbackground.png') center top/cover fixed no-repeat,
+linear-gradient(rgba(5,3,2,.28),rgba(5,3,2,.76)),
+url('/wallbackground.png') center top/cover fixed no-repeat,
 #050302;
 overflow-x:hidden;
 }
@@ -102,13 +104,12 @@ position:relative;
 width:100%;
 border-radius:34px;
 overflow:hidden;
-box-shadow:0 28px 80px rgba(0,0,0,.60);
+box-shadow:0 28px 80px rgba(0,0,0,.55);
 background:#050302;
 }
 
-.partner-wall img.wall-image{
+.wall-image{
 width:100%;
-height:auto;
 display:block;
 user-select:none;
 -webkit-user-drag:none;
@@ -124,7 +125,7 @@ pointer-events:none;
 
 .wall-title{
 position:absolute;
-top:10.5%;
+top:12%;
 left:50%;
 transform:translateX(-50%);
 text-align:center;
@@ -134,27 +135,17 @@ padding:0 20px;
 
 .wall-title h1{
 margin:0;
-font-size:clamp(46px,6vw,86px);
+font-size:clamp(54px,7vw,96px);
 line-height:1;
 letter-spacing:.08em;
 text-shadow:0 8px 30px rgba(0,0,0,.95);
 }
 
 .wall-title p{
-margin:14px 0 0;
-font-size:18px;
-color:var(--muted);
+margin:16px 0 0;
+font-size:20px;
+color:#d7c29f;
 text-shadow:0 4px 20px rgba(0,0,0,.95);
-}
-
-/* Future interactive layer: place partner cards/plaques inside this area */
-.partner-plaque-layer{
-position:absolute;
-left:24%;
-right:24%;
-top:24%;
-bottom:18%;
-pointer-events:auto;
 }
 
 @media(max-width:760px){
@@ -162,10 +153,9 @@ body{background-attachment:scroll}
 .topbar{flex-direction:column;align-items:flex-start}
 .nav{width:100%}
 .nav a{width:100%}
-.wall-title{top:9%}
-.wall-title h1{font-size:40px}
-.wall-title p{font-size:14px}
-.partner-plaque-layer{left:12%;right:12%;top:25%;bottom:18%}
+.wall-title{top:10%}
+.wall-title h1{font-size:46px}
+.wall-title p{font-size:15px}
 }
 </style>
 </head>
@@ -175,7 +165,7 @@ body{background-attachment:scroll}
 
 <header class="topbar">
 <a class="brand" href="https://thorshall.gg">
-<img src="img/logo.png" alt="Thor's Hall Logo">
+<img src="/img/logo.png" alt="Thor's Hall Logo">
 <span>THOR'S HALL</span>
 </a>
 
@@ -190,15 +180,13 @@ body{background-attachment:scroll}
 </header>
 
 <section class="partner-wall" aria-label="Thor's Hall Partner Wall">
-<img class="wall-image" src="wall.png" alt="Thor's Hall Partner Wall" loading="eager" decoding="async" fetchpriority="high">
+<img class="wall-image" src="/wall.png" alt="Thor's Hall Partner Wall" loading="eager" decoding="async" fetchpriority="high">
 
 <div class="wall-overlay">
 <div class="wall-title">
 <h1>PARTNERS</h1>
 <p>The Hall of Partners is being forged.</p>
 </div>
-
-<div class="partner-plaque-layer"></div>
 </div>
 </section>
 
