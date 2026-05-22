@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Partners | Thor's Hall</title>
-<meta name="description" content="Thor's Hall partner wall with live creator and partnership activity.">
+<meta name="description" content="Thor's Hall partner wall with creator and partnership activity.">
 <link rel="canonical" href="https://thorshall.gg/partners">
 
 <style>
@@ -13,11 +13,11 @@
 --gold2:#f0d28b;
 --gold3:#fff0be;
 --text:#f4ede2;
+--muted:#d0c2ab;
 --line:rgba(212,167,79,.24);
 }
 
 *{box-sizing:border-box}
-
 html{scroll-behavior:smooth}
 
 body{
@@ -25,8 +25,8 @@ margin:0;
 font-family:Arial,Helvetica,sans-serif;
 color:var(--text);
 background:
-linear-gradient(rgba(5,3,2,.30),rgba(5,3,2,.78)),
-url("wallbackground.png") center top/cover fixed no-repeat,
+linear-gradient(rgba(5,3,2,.35),rgba(5,3,2,.78)),
+url('wallbackground.png') center top/cover fixed no-repeat,
 #050302;
 overflow-x:hidden;
 }
@@ -35,8 +35,6 @@ overflow-x:hidden;
 max-width:1180px;
 margin:auto;
 padding:26px 18px 80px;
-position:relative;
-z-index:2;
 }
 
 .topbar{
@@ -104,11 +102,11 @@ position:relative;
 width:100%;
 border-radius:34px;
 overflow:hidden;
+box-shadow:0 28px 80px rgba(0,0,0,.60);
 background:#050302;
-box-shadow:0 28px 80px rgba(0,0,0,.55);
 }
 
-.wall-image{
+.partner-wall img.wall-image{
 width:100%;
 height:auto;
 display:block;
@@ -126,7 +124,7 @@ pointer-events:none;
 
 .wall-title{
 position:absolute;
-top:12%;
+top:10.5%;
 left:50%;
 transform:translateX(-50%);
 text-align:center;
@@ -136,82 +134,43 @@ padding:0 20px;
 
 .wall-title h1{
 margin:0;
-font-size:clamp(54px,7vw,96px);
+font-size:clamp(46px,6vw,86px);
 line-height:1;
 letter-spacing:.08em;
-text-transform:uppercase;
 text-shadow:0 8px 30px rgba(0,0,0,.95);
 }
 
 .wall-title p{
-margin-top:16px;
-font-size:20px;
-color:#d7c29f;
+margin:14px 0 0;
+font-size:18px;
+color:var(--muted);
 text-shadow:0 4px 20px rgba(0,0,0,.95);
 }
 
-.partner-layer{
+/* Future interactive layer: place partner cards/plaques inside this area */
+.partner-plaque-layer{
 position:absolute;
-inset:0;
-z-index:3;
-pointer-events:none;
+left:24%;
+right:24%;
+top:24%;
+bottom:18%;
+pointer-events:auto;
 }
-
-/* Future clickable plaques go here. Remove pointer-events:none on a plaque when active. */
-.partner-plaque{
-position:absolute;
-width:230px;
-min-height:112px;
-border-radius:18px;
-border:1px solid rgba(255,180,90,.18);
-background:rgba(0,0,0,.24);
-box-shadow:0 12px 28px rgba(0,0,0,.30);
-backdrop-filter:blur(4px);
-opacity:0;
-}
-
-.plaque-left{top:36%;left:18%}
-.plaque-right{top:36%;right:18%}
-.plaque-center{top:58%;left:50%;transform:translateX(-50%)}
 
 @media(max-width:760px){
-body{
-background:
-linear-gradient(rgba(5,3,2,.36),rgba(5,3,2,.82)),
-url("wallbackground.png") center top/cover scroll no-repeat,
-#050302;
-}
-
-.topbar{
-flex-direction:column;
-align-items:flex-start;
-}
-
-.nav{
-width:100%;
-}
-
-.nav a{
-width:100%;
-}
-
-.wall-title{
-top:10%;
-}
-
-.wall-title h1{
-font-size:46px;
-}
-
-.wall-title p{
-font-size:15px;
-}
+body{background-attachment:scroll}
+.topbar{flex-direction:column;align-items:flex-start}
+.nav{width:100%}
+.nav a{width:100%}
+.wall-title{top:9%}
+.wall-title h1{font-size:40px}
+.wall-title p{font-size:14px}
+.partner-plaque-layer{left:12%;right:12%;top:25%;bottom:18%}
 }
 </style>
 </head>
 
 <body>
-
 <div class="wrap">
 
 <header class="topbar">
@@ -230,24 +189,19 @@ font-size:15px;
 </nav>
 </header>
 
-<section class="partner-wall" aria-label="Thor's Hall partner wall">
+<section class="partner-wall" aria-label="Thor's Hall Partner Wall">
 <img class="wall-image" src="wall.png" alt="Thor's Hall Partner Wall" loading="eager" decoding="async" fetchpriority="high">
 
 <div class="wall-overlay">
 <div class="wall-title">
-<h1>Partners</h1>
+<h1>PARTNERS</h1>
 <p>The Hall of Partners is being forged.</p>
 </div>
-</div>
 
-<div class="partner-layer">
-<div class="partner-plaque plaque-left"></div>
-<div class="partner-plaque plaque-right"></div>
-<div class="partner-plaque plaque-center"></div>
+<div class="partner-plaque-layer"></div>
 </div>
 </section>
 
 </div>
-
 </body>
 </html>
