@@ -3,9 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-
 <title>Partners | Thor's Hall</title>
-<meta name="description" content="Thor's Hall partner wall with live partner activity, creator network metrics and tracked partnership stats.">
 <link rel="canonical" href="https://thorshall.gg/partners">
 
 <style>
@@ -14,7 +12,6 @@
 --gold2:#f0d28b;
 --gold3:#fff0be;
 --text:#f4ede2;
---muted:#d0c2ab;
 --line:rgba(212,167,79,.24);
 }
 
@@ -24,10 +21,11 @@ body{
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
 color:var(--text);
-background:
-linear-gradient(rgba(5,3,2,.20),rgba(5,3,2,.58)),
-url('Wall.png') center top/cover no-repeat fixed;
 min-height:100vh;
+background:
+linear-gradient(rgba(5,3,2,.10),rgba(5,3,2,.28)),
+url('Wall.png') center top/contain no-repeat,
+#050302;
 overflow-x:hidden;
 }
 
@@ -35,6 +33,8 @@ overflow-x:hidden;
 max-width:1180px;
 margin:auto;
 padding:26px 18px 70px;
+position:relative;
+z-index:2;
 }
 
 .topbar{
@@ -96,50 +96,50 @@ border-color:rgba(255,140,130,.52);
 text-shadow:0 1px 0 rgba(0,0,0,.28);
 }
 
-.partner-wall{
-margin-top:36px;
-min-height:720px;
-padding:70px 56px;
-border-radius:28px;
-background:rgba(0,0,0,.08);
+.partner-wall-space{
+height:calc(100vh - 120px);
+min-height:760px;
+position:relative;
 }
 
-.wall-inner{
-max-width:920px;
-margin:auto;
+.partner-layer{
+position:absolute;
+inset:120px 8% 8% 8%;
+pointer-events:none;
+}
+
+.partner-placeholder{
+position:absolute;
+top:18%;
+left:50%;
+transform:translateX(-50%);
 text-align:center;
+opacity:.92;
 }
 
-.eyebrow{
-display:inline-block;
-padding:8px 14px;
-border-radius:999px;
-font-size:13px;
-font-weight:900;
-letter-spacing:.1em;
-text-transform:uppercase;
-color:var(--gold2);
-border:1px solid rgba(240,210,139,.24);
-background:rgba(0,0,0,.34);
-}
-
-h1{
+.partner-placeholder h1{
+margin:0;
 font-size:clamp(44px,6vw,76px);
-line-height:1;
-margin:22px 0 14px;
-text-shadow:0 4px 24px rgba(0,0,0,.75);
+letter-spacing:.06em;
+text-transform:uppercase;
+text-shadow:0 4px 24px rgba(0,0,0,.85);
 }
 
-.lead{
-max-width:780px;
-margin:0 auto;
-font-size:20px;
-line-height:1.6;
-color:#e8d8bd;
-text-shadow:0 3px 16px rgba(0,0,0,.75);
+.partner-placeholder p{
+margin:12px 0 0;
+font-size:18px;
+color:#d8c3a0;
+text-shadow:0 3px 16px rgba(0,0,0,.85);
 }
 
 @media(max-width:760px){
+body{
+background:
+linear-gradient(rgba(5,3,2,.16),rgba(5,3,2,.38)),
+url('Wall.png') center top/cover no-repeat,
+#050302;
+}
+
 .topbar{
 flex-direction:column;
 align-items:flex-start;
@@ -153,9 +153,8 @@ width:100%;
 width:100%;
 }
 
-.partner-wall{
-padding:46px 22px;
-min-height:620px;
+.partner-wall-space{
+min-height:680px;
 }
 }
 </style>
@@ -181,15 +180,14 @@ min-height:620px;
 </nav>
 </header>
 
-<main class="partner-wall">
-<div class="wall-inner">
-<div class="eyebrow">Live Partner Wall</div>
-<h1>Hall of Partners</h1>
-<p class="lead">
-A dedicated wall for Thor's Hall partners, creator activity, tracked performance and future payout proof.
-</p>
+<section class="partner-wall-space">
+<div class="partner-layer">
+<div class="partner-placeholder">
+<h1>Partners</h1>
+<p>The wall is ready for live partner plaques.</p>
 </div>
-</main>
+</div>
+</section>
 
 </div>
 
