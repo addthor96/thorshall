@@ -634,7 +634,7 @@ width:min(315px,calc(100vw - 36px));
 <div class="analytics-row"><span>Wagered this month</span><strong data-rainbet-stat="wager">$0.00</strong></div>
 <div class="analytics-row"><span>Deposits tracked</span><strong data-rainbet-stat="deposits">$0.00</strong></div>
 <div class="analytics-row"><span>Visits / registrations</span><strong data-rainbet-stat="visits">0 / 0</strong></div>
-<p class="analytics-note" data-rainbet-stat="updated">Monthly partner snapshot. Updates automatically.</p>
+<p class="analytics-note" data-rainbet-stat="updated">Metrics sourced from live activity.</p>
 </div>
 </div>
 </div>
@@ -861,7 +861,7 @@ Users should only participate where legal, only if they are 18+, and only with m
     setStat('wager', money(data.wager));
     setStat('deposits', money(data.deposits));
     setStat('visits', `${data.visits || 0} / ${data.registrations || 0}`);
-    setStat('updated', 'Monthly partner snapshot. Updates automatically.');
+    setStat('updated', 'Metrics sourced from live activity.');
   }catch(e){
     setStat('updated', 'Showing latest saved monthly snapshot.');
   }
