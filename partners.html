@@ -186,11 +186,11 @@ body{
 }
 
 
-.left-cut{
-  clip-path:polygon(15% 0,100% 0,100% 100%,0 100%,0 28%);
+.cut-top-left{
+  clip-path:polygon(24% 0,100% 0,100% 100%,0 100%,0 32%);
 }
-.right-cut{
-  clip-path:polygon(15% 0,100% 0,100% 100%,0 100%,0 28%);
+.cut-top-right{
+  clip-path:polygon(0 0,76% 0,100% 32%,100% 100%,0 100%);
 }
 
 /* LEDGER - STARTS BELOW FACE */
@@ -342,14 +342,14 @@ body{
         <strong id="stat-wager">$0.00</strong>
       </div>
 
-      <div class="stat-card engraved-box left-cut">
+      <div class="stat-card engraved-box cut-top-right">
         <span>Deposits tracked</span>
         <strong id="stat-deposits">$0.00</strong>
       </div>
 
       <div class="face-gap"></div>
 
-      <div class="stat-card engraved-box left-cut">
+      <div class="stat-card engraved-box cut-top-left">
         <span>Visits</span>
         <strong id="stat-visits">0</strong>
       </div>
