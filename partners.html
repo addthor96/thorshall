@@ -167,6 +167,10 @@ body{
 .stat-card{
   min-height:78px;
   padding:14px 18px;
+  text-align:center;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
 }
 .stat-card span{
   display:block;
@@ -179,6 +183,14 @@ body{
   color:rgba(240,210,139,.96);
   font-size:25px;
   line-height:1;
+}
+
+
+.left-cut{
+  clip-path:polygon(0 0,85% 0,100% 28%,100% 100%,0 100%);
+}
+.right-cut{
+  clip-path:polygon(15% 0,100% 0,100% 100%,0 100%,0 28%);
 }
 
 /* LEDGER - STARTS BELOW FACE */
@@ -325,12 +337,12 @@ body{
   <div class="wall-ui">
 
     <div class="live-summary">
-      <div class="stat-card engraved-box">
+      <div class="stat-card engraved-box right-cut">
         <span>Total wagered</span>
         <strong id="stat-wager">$0.00</strong>
       </div>
 
-      <div class="stat-card engraved-box">
+      <div class="stat-card engraved-box left-cut">
         <span>Deposits tracked</span>
         <strong id="stat-deposits">$0.00</strong>
       </div>
