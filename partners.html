@@ -7,23 +7,32 @@
 
 <style>
 :root{
---gold:#d4a74f;--gold2:#f0d28b;--gold3:#fff0be;
---text:#f4ede2;--muted:#d0c2ab;--line:rgba(212,167,79,.24);
---panel:#14100c;--panel2:#24160f;
+--gold:#d4a74f;
+--gold2:#f0d28b;
+--gold3:#fff0be;
+--text:#f4ede2;
+--muted:#d0c2ab;
+--line:rgba(212,167,79,.24);
+--green:#75e0a2;
 }
 *{box-sizing:border-box}
+
 body{
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
 color:var(--text);
-line-height:1.65;
 background:
-radial-gradient(circle at 80% 0%,rgba(255,90,20,.16),transparent 32%),
-radial-gradient(circle at 12% 30%,rgba(212,167,79,.12),transparent 28%),
-linear-gradient(rgba(8,5,3,.86),rgba(8,5,3,.97)),
-url('img/wallbackground.png') center/cover fixed no-repeat;
+linear-gradient(rgba(5,3,2,.30),rgba(5,3,2,.82)),
+url('img/wallbackground.png') center/cover fixed no-repeat,
+#050302;
+overflow-x:hidden;
 }
-.wrap{max-width:1180px;margin:auto;padding:26px 18px 76px}
+
+.wrap{
+max-width:1180px;
+margin:auto;
+padding:26px 18px 76px;
+}
 
 .topbar{
 display:flex;
@@ -35,93 +44,250 @@ border-radius:20px;
 border:1px solid var(--line);
 background:rgba(0,0,0,.45);
 backdrop-filter:blur(8px);
+margin-bottom:24px;
 }
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:white;font-size:28px;font-weight:900;letter-spacing:.04em}
-.brand img{width:42px;height:42px;border-radius:10px;object-fit:cover}
-.nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+text-decoration:none;
+color:#fff;
+font-size:28px;
+font-weight:900;
+letter-spacing:.04em;
+}
+
+.brand img{
+width:42px;
+height:42px;
+border-radius:10px;
+object-fit:cover;
+}
+
+.nav{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+justify-content:flex-end;
+}
+
 .nav a,.btn{
-display:inline-flex;align-items:center;justify-content:center;
-padding:13px 22px;border-radius:14px;font-weight:900;text-decoration:none;
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:13px 22px;
+border-radius:14px;
+font-weight:900;
+text-decoration:none;
 border:1px solid rgba(255,230,170,.38);
 background:linear-gradient(180deg,var(--gold3),var(--gold));
 color:#211407!important;
 box-shadow:0 10px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.25);
 }
-.nav a.manager-btn{color:#fff!important;background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424);border-color:rgba(255,140,130,.52)}
-.btn.dark{background:linear-gradient(180deg,rgba(240,210,139,.14),rgba(212,167,79,.06));color:var(--text)!important}
 
-.hero{
-margin-top:24px;
-padding:58px 42px;
-border-radius:34px;
-border:1px solid rgba(212,167,79,.30);
-background:
-radial-gradient(circle at top right,rgba(255,90,20,.14),transparent 34%),
-linear-gradient(135deg,rgba(212,167,79,.12),rgba(0,0,0,.60)),
-linear-gradient(180deg,rgba(10,7,4,.82),rgba(18,11,6,.96));
-box-shadow:0 24px 70px rgba(0,0,0,.35);
+.nav a.manager-btn{
+color:#fff!important;
+background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424);
+border-color:rgba(255,140,130,.52);
 }
-.eyebrow{display:inline-block;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--gold2);border:1px solid rgba(240,210,139,.22);background:rgba(240,210,139,.08);margin-bottom:18px}
-h1{font-size:clamp(44px,6vw,74px);line-height:1;margin:0 0 18px;max-width:900px}
-.lead{font-size:20px;max-width:850px;color:var(--muted)}
-.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
 
-.stats{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:14px;
-margin-top:24px;
-}
-.stat{
-padding:22px;
-border-radius:22px;
-border:1px solid rgba(255,220,145,.22);
-background:rgba(0,0,0,.42);
-}
-.stat span{display:block;color:var(--muted);font-size:14px}
-.stat strong{display:block;color:var(--gold2);font-size:30px;line-height:1;margin-top:8px}
-
-.section{
-margin-top:24px;
-padding:30px;
-border-radius:26px;
-border:1px solid var(--line);
-background:linear-gradient(180deg,rgba(20,16,12,.94),rgba(36,22,15,.94));
-}
-.section h2{font-size:clamp(30px,4vw,42px);margin:0 0 12px}
-.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px}
-.card{
-padding:24px;
-border-radius:22px;
-border:1px solid rgba(255,220,145,.20);
-background:rgba(255,255,255,.04);
-}
-.card strong{display:block;color:var(--gold2);font-size:22px;margin-bottom:8px}
-.card p{color:var(--muted);margin:0}
-
-.wall-feature{
-margin-top:24px;
-border-radius:30px;
-overflow:hidden;
-border:1px solid rgba(212,167,79,.22);
-background:#050302;
+.partner-wall{
 position:relative;
-box-shadow:0 24px 70px rgba(0,0,0,.38);
+width:100%;
+min-height:960px;
+border-radius:34px;
+overflow:hidden;
+box-shadow:0 34px 90px rgba(0,0,0,.62);
+background:#050302;
 }
-.wall-feature img{width:100%;display:block;opacity:.72}
-.wall-feature-content{
+
+.wall-image{
 position:absolute;
 inset:0;
-display:flex;
-align-items:center;
-justify-content:center;
-text-align:center;
-padding:30px;
-background:linear-gradient(180deg,rgba(0,0,0,.18),rgba(0,0,0,.54));
+width:100%;
+height:100%;
+object-fit:cover;
+object-position:center top;
+user-select:none;
+pointer-events:none;
 }
-.wall-feature-content div{max-width:720px}
-.wall-feature h2{font-size:clamp(34px,5vw,64px);margin:0 0 12px;text-shadow:0 8px 30px rgba(0,0,0,.85)}
-.wall-feature p{font-size:19px;color:#e2cda8;text-shadow:0 4px 18px rgba(0,0,0,.85)}
+
+.wall-ui{
+position:relative;
+z-index:2;
+min-height:960px;
+padding:115px 90px 90px;
+}
+
+.wall-heading{
+text-align:center;
+margin-bottom:26px;
+}
+
+.wall-heading .eyebrow{
+display:inline-block;
+padding:8px 14px;
+border-radius:999px;
+font-size:13px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:var(--gold2);
+border:1px solid rgba(240,210,139,.22);
+background:rgba(0,0,0,.32);
+}
+
+.wall-heading h1{
+font-size:clamp(42px,5vw,70px);
+line-height:1;
+margin:16px 0 10px;
+text-shadow:0 8px 30px rgba(0,0,0,.95);
+}
+
+.wall-heading p{
+max-width:720px;
+margin:0 auto;
+color:#d7c29f;
+font-size:18px;
+text-shadow:0 4px 20px rgba(0,0,0,.95);
+}
+
+.live-summary{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:12px;
+margin:28px 0 22px;
+}
+
+.summary-card{
+padding:16px;
+border-radius:16px;
+border:1px solid rgba(255,220,145,.24);
+background:rgba(0,0,0,.50);
+box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+.summary-card span{
+display:block;
+font-size:13px;
+color:var(--muted);
+}
+
+.summary-card strong{
+display:block;
+margin-top:6px;
+font-size:24px;
+color:var(--gold2);
+}
+
+.partner-board{
+border-radius:22px;
+border:1px solid rgba(255,220,145,.25);
+background:rgba(0,0,0,.54);
+overflow:hidden;
+box-shadow:
+0 20px 50px rgba(0,0,0,.42),
+inset 0 1px 0 rgba(255,255,255,.05);
+}
+
+.board-title{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+padding:18px 20px;
+border-bottom:1px solid rgba(255,255,255,.08);
+background:linear-gradient(180deg,rgba(240,210,139,.10),rgba(212,167,79,.035));
+}
+
+.board-title strong{
+color:var(--gold2);
+font-size:18px;
+letter-spacing:.04em;
+text-transform:uppercase;
+}
+
+.board-title span{
+font-size:13px;
+color:#9f927e;
+}
+
+.partner-table{
+width:100%;
+border-collapse:collapse;
+}
+
+.partner-table th,
+.partner-table td{
+padding:15px 18px;
+text-align:left;
+border-bottom:1px solid rgba(255,255,255,.075);
+}
+
+.partner-table th{
+font-size:12px;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:var(--gold2);
+background:rgba(255,255,255,.035);
+}
+
+.partner-table td{
+font-size:15px;
+color:var(--text);
+}
+
+.partner-table tr:hover td{
+background:rgba(240,210,139,.055);
+}
+
+.partner-name{
+font-weight:900;
+color:#fff;
+}
+
+.status{
+display:inline-flex;
+align-items:center;
+gap:7px;
+font-size:13px;
+color:var(--green);
+font-weight:900;
+}
+
+.status:before{
+content:"";
+width:8px;
+height:8px;
+border-radius:50%;
+background:var(--green);
+box-shadow:0 0 12px rgba(117,224,162,.75);
+}
+
+.wall-note{
+margin-top:18px;
+padding:16px 18px;
+border-radius:18px;
+border:1px solid rgba(255,220,145,.18);
+background:rgba(0,0,0,.38);
+color:#bfae92;
+font-size:14px;
+text-align:center;
+}
+
+.wall-actions{
+display:flex;
+gap:12px;
+justify-content:center;
+flex-wrap:wrap;
+margin-top:22px;
+}
+
+.btn.dark{
+background:linear-gradient(180deg,rgba(240,210,139,.14),rgba(212,167,79,.06));
+color:var(--text)!important;
+}
 
 .footer{
 margin-top:24px;
@@ -131,22 +297,66 @@ text-align:center;
 font-size:14px;
 color:#c6b08d;
 }
-.footer a{color:var(--gold2);text-decoration:none;font-weight:900}
+
+.footer a{
+color:var(--gold2);
+text-decoration:none;
+font-weight:900;
+}
 
 @media(max-width:920px){
-.topbar{flex-direction:column;align-items:flex-start}
-.stats,.grid{grid-template-columns:1fr 1fr}
+.topbar{
+flex-direction:column;
+align-items:flex-start;
 }
+
+.nav{
+width:100%;
+}
+
+.nav a{
+width:100%;
+}
+
+.wall-ui{
+padding:90px 28px 60px;
+}
+
+.live-summary{
+grid-template-columns:1fr 1fr;
+}
+
+.partner-board{
+overflow-x:auto;
+}
+
+.partner-table{
+min-width:760px;
+}
+}
+
 @media(max-width:640px){
-.nav,.nav a{width:100%}
-.stats,.grid{grid-template-columns:1fr}
-.hero{padding:42px 24px}
-.wall-feature-content{position:relative;background:rgba(0,0,0,.72)}
+.live-summary{
+grid-template-columns:1fr;
+}
+
+.wall-ui{
+padding:70px 18px 50px;
+}
+
+.partner-wall{
+border-radius:22px;
+}
+
+.wall-heading h1{
+font-size:42px;
+}
 }
 </style>
 </head>
 
 <body>
+
 <div class="wrap">
 
 <header class="topbar">
@@ -154,6 +364,7 @@ color:#c6b08d;
 <img src="img/logo.png" alt="Thor's Hall Logo">
 <span>THOR'S HALL</span>
 </a>
+
 <nav class="nav">
 <a href="https://thorshall.gg/about">About</a>
 <a href="https://thorshall.gg/info">Info</a>
@@ -164,51 +375,86 @@ color:#c6b08d;
 </nav>
 </header>
 
-<section class="hero">
-<div class="eyebrow">Thor's Hall Partner Network</div>
-<h1>Live partner activity, creator proof and payout history.</h1>
-<p class="lead">
-A dedicated Thor's Hall partner page for tracked creator performance, active partnerships and future payout proof.
-</p>
-<div class="hero-actions">
+<section class="partner-wall">
+<img class="wall-image" src="img/wall.png" alt="Thor's Hall Partner Wall" loading="eager" decoding="async" fetchpriority="high">
+
+<div class="wall-ui">
+
+<div class="wall-heading">
+<div class="eyebrow">Live Partner Wall</div>
+<h1>Partner Network</h1>
+<p>Tracked creator activity, partner performance and future payout proof displayed directly inside the Hall.</p>
+</div>
+
+<div class="live-summary">
+<div class="summary-card"><span>Total wagered</span><strong id="stat-wager">$0.00</strong></div>
+<div class="summary-card"><span>Deposits tracked</span><strong id="stat-deposits">$0.00</strong></div>
+<div class="summary-card"><span>Visits / registrations</span><strong id="stat-visits">0 / 0</strong></div>
+<div class="summary-card"><span>First deposits</span><strong id="stat-ftd">0</strong></div>
+</div>
+
+<div class="partner-board">
+<div class="board-title">
+<strong>Partner Ledger</strong>
+<span>Metrics sourced from live activity.</span>
+</div>
+
+<table class="partner-table">
+<thead>
+<tr>
+<th>Partner</th>
+<th>Wagered</th>
+<th>Deposits</th>
+<th>Visits</th>
+<th>Registrations</th>
+<th>FTD</th>
+<th>Status</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td class="partner-name">Thor's Hall Network</td>
+<td id="row-wager">$0.00</td>
+<td id="row-deposits">$0.00</td>
+<td id="row-visits">0</td>
+<td id="row-registrations">0</td>
+<td id="row-ftd">0</td>
+<td><span class="status">Live</span></td>
+</tr>
+
+<tr>
+<td class="partner-name">Featured Creator</td>
+<td>Coming soon</td>
+<td>Coming soon</td>
+<td>Coming soon</td>
+<td>Coming soon</td>
+<td>Coming soon</td>
+<td><span class="status">Reserved</span></td>
+</tr>
+
+<tr>
+<td class="partner-name">Manager Network</td>
+<td>Coming soon</td>
+<td>Coming soon</td>
+<td>Coming soon</td>
+<td>Coming soon</td>
+<td>Coming soon</td>
+<td><span class="status">Reserved</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="wall-note">
+Public partner rows can be shown only for creators or managers who agree to be listed.
+</div>
+
+<div class="wall-actions">
 <a class="btn" href="https://thorshall.gg/creators">Apply as Creator</a>
 <a class="btn dark" href="https://thorshall.gg/managers">Manager Program</a>
 </div>
 
-<div class="stats">
-<div class="stat"><span>Wagered this month</span><strong id="stat-wager">$0.00</strong></div>
-<div class="stat"><span>Deposits tracked</span><strong id="stat-deposits">$0.00</strong></div>
-<div class="stat"><span>Visits / registrations</span><strong id="stat-visits">0 / 0</strong></div>
-<div class="stat"><span>First deposits</span><strong id="stat-ftd">0</strong></div>
-</div>
-</section>
-
-<section class="section">
-<h2>Partner proof system</h2>
-<p>The goal is simple: show real activity from tracked creator links without exposing private player data.</p>
-<div class="grid">
-<div class="card"><strong>Creator Cards</strong><p>Public partner profiles with selected live metrics.</p></div>
-<div class="card"><strong>Payout Proof</strong><p>Future payout screenshots and monthly proof updates.</p></div>
-<div class="card"><strong>Live Tracking</strong><p>Stats sourced from active partner reporting.</p></div>
-</div>
-</section>
-
-<section class="wall-feature">
-<img src="img/wall.png" alt="Thor's Hall Partner Wall" loading="lazy">
-<div class="wall-feature-content">
-<div>
-<h2>Hall of Partners</h2>
-<p>This section can later hold featured creators, partner plaques, manager groups and verified performance highlights.</p>
-</div>
-</div>
-</section>
-
-<section class="section">
-<h2>How partners can be shown</h2>
-<div class="grid">
-<div class="card"><strong>Public</strong><p>Name, logo, social link and live stats if the partner agrees.</p></div>
-<div class="card"><strong>Partial</strong><p>Only selected stats shown, such as visits and registrations.</p></div>
-<div class="card"><strong>Private</strong><p>Tracked internally without public listing.</p></div>
 </div>
 </section>
 
@@ -223,14 +469,22 @@ A dedicated Thor's Hall partner page for tracked creator performance, active par
 (async function(){
 const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+
 try{
 const r=await fetch('/.netlify/functions/rainbet-stats',{cache:'no-store'});
 if(!r.ok)throw new Error('Stats failed');
 const d=await r.json();
+
 set('stat-wager',money(d.wager));
 set('stat-deposits',money(d.deposits));
 set('stat-visits',`${d.visits||0} / ${d.registrations||0}`);
 set('stat-ftd',d.ftd||0);
+
+set('row-wager',money(d.wager));
+set('row-deposits',money(d.deposits));
+set('row-visits',d.visits||0);
+set('row-registrations',d.registrations||0);
+set('row-ftd',d.ftd||0);
 }catch(e){}
 })();
 </script>
