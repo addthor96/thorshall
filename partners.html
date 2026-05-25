@@ -7,12 +7,8 @@
 
 <style>
 :root{
---gold:#d4a74f;
---gold2:#f0d28b;
---gold3:#fff0be;
---text:#f4ede2;
---muted:#d0c2ab;
---line:rgba(212,167,79,.24);
+--gold:#d4a74f;--gold2:#f0d28b;--gold3:#fff0be;
+--text:#f4ede2;--muted:#d0c2ab;--line:rgba(212,167,79,.24);
 --green:#75e0a2;
 }
 *{box-sizing:border-box}
@@ -22,19 +18,21 @@ margin:0;
 font-family:Arial,Helvetica,sans-serif;
 color:var(--text);
 background:
-linear-gradient(rgba(5,3,2,.30),rgba(5,3,2,.82)),
+linear-gradient(rgba(5,3,2,.35),rgba(5,3,2,.86)),
 url('img/wallbackground.png') center/cover fixed no-repeat,
 #050302;
 overflow-x:hidden;
 }
 
 .wrap{
-max-width:1180px;
+max-width:1360px;
 margin:auto;
-padding:26px 18px 76px;
+padding:24px 18px 70px;
 }
 
 .topbar{
+max-width:1180px;
+margin:0 auto 22px;
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -42,9 +40,8 @@ gap:14px;
 padding:16px 18px;
 border-radius:20px;
 border:1px solid var(--line);
-background:rgba(0,0,0,.45);
+background:rgba(0,0,0,.48);
 backdrop-filter:blur(8px);
-margin-bottom:24px;
 }
 
 .brand{
@@ -95,7 +92,7 @@ border-color:rgba(255,140,130,.52);
 .partner-wall{
 position:relative;
 width:100%;
-min-height:960px;
+min-height:1120px;
 border-radius:34px;
 overflow:hidden;
 box-shadow:0 34px 90px rgba(0,0,0,.62);
@@ -116,13 +113,13 @@ pointer-events:none;
 .wall-ui{
 position:relative;
 z-index:2;
-min-height:960px;
-padding:115px 90px 90px;
+min-height:1120px;
+padding:120px 110px 90px;
 }
 
 .wall-heading{
 text-align:center;
-margin-bottom:26px;
+margin-bottom:28px;
 }
 
 .wall-heading .eyebrow{
@@ -134,19 +131,19 @@ font-weight:900;
 letter-spacing:.08em;
 text-transform:uppercase;
 color:var(--gold2);
-border:1px solid rgba(240,210,139,.22);
-background:rgba(0,0,0,.32);
+border:1px solid rgba(240,210,139,.20);
+background:rgba(0,0,0,.22);
 }
 
 .wall-heading h1{
-font-size:clamp(42px,5vw,70px);
+font-size:clamp(44px,5vw,76px);
 line-height:1;
 margin:16px 0 10px;
 text-shadow:0 8px 30px rgba(0,0,0,.95);
 }
 
 .wall-heading p{
-max-width:720px;
+max-width:760px;
 margin:0 auto;
 color:#d7c29f;
 font-size:18px;
@@ -156,16 +153,17 @@ text-shadow:0 4px 20px rgba(0,0,0,.95);
 .live-summary{
 display:grid;
 grid-template-columns:repeat(4,1fr);
-gap:12px;
-margin:28px 0 22px;
+gap:14px;
+margin:30px 0 24px;
 }
 
 .summary-card{
-padding:16px;
-border-radius:16px;
-border:1px solid rgba(255,220,145,.24);
-background:rgba(0,0,0,.50);
-box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+padding:18px;
+border-radius:18px;
+border:1px solid rgba(255,220,145,.16);
+background:rgba(0,0,0,.34);
+backdrop-filter:blur(3px);
+box-shadow:inset 0 1px 0 rgba(255,255,255,.04);
 }
 
 .summary-card span{
@@ -176,19 +174,21 @@ color:var(--muted);
 
 .summary-card strong{
 display:block;
-margin-top:6px;
-font-size:24px;
+margin-top:7px;
+font-size:26px;
 color:var(--gold2);
+line-height:1;
 }
 
 .partner-board{
 border-radius:22px;
-border:1px solid rgba(255,220,145,.25);
-background:rgba(0,0,0,.54);
+border:1px solid rgba(255,220,145,.18);
+background:rgba(0,0,0,.34);
+backdrop-filter:blur(3px);
 overflow:hidden;
 box-shadow:
-0 20px 50px rgba(0,0,0,.42),
-inset 0 1px 0 rgba(255,255,255,.05);
+0 20px 50px rgba(0,0,0,.28),
+inset 0 1px 0 rgba(255,255,255,.04);
 }
 
 .board-title{
@@ -196,21 +196,21 @@ display:flex;
 justify-content:space-between;
 align-items:center;
 gap:12px;
-padding:18px 20px;
-border-bottom:1px solid rgba(255,255,255,.08);
-background:linear-gradient(180deg,rgba(240,210,139,.10),rgba(212,167,79,.035));
+padding:20px 22px;
+border-bottom:1px solid rgba(255,255,255,.07);
+background:rgba(240,210,139,.055);
 }
 
 .board-title strong{
 color:var(--gold2);
-font-size:18px;
+font-size:20px;
 letter-spacing:.04em;
 text-transform:uppercase;
 }
 
 .board-title span{
 font-size:13px;
-color:#9f927e;
+color:#b4a68f;
 }
 
 .partner-table{
@@ -220,9 +220,9 @@ border-collapse:collapse;
 
 .partner-table th,
 .partner-table td{
-padding:15px 18px;
+padding:17px 18px;
 text-align:left;
-border-bottom:1px solid rgba(255,255,255,.075);
+border-bottom:1px solid rgba(255,255,255,.06);
 }
 
 .partner-table th{
@@ -230,7 +230,7 @@ font-size:12px;
 letter-spacing:.08em;
 text-transform:uppercase;
 color:var(--gold2);
-background:rgba(255,255,255,.035);
+background:rgba(255,255,255,.025);
 }
 
 .partner-table td{
@@ -239,7 +239,7 @@ color:var(--text);
 }
 
 .partner-table tr:hover td{
-background:rgba(240,210,139,.055);
+background:rgba(240,210,139,.045);
 }
 
 .partner-name{
@@ -267,10 +267,11 @@ box-shadow:0 0 12px rgba(117,224,162,.75);
 
 .wall-note{
 margin-top:18px;
-padding:16px 18px;
+padding:15px 18px;
 border-radius:18px;
-border:1px solid rgba(255,220,145,.18);
-background:rgba(0,0,0,.38);
+border:1px solid rgba(255,220,145,.12);
+background:rgba(0,0,0,.25);
+backdrop-filter:blur(2px);
 color:#bfae92;
 font-size:14px;
 text-align:center;
@@ -285,7 +286,7 @@ margin-top:22px;
 }
 
 .btn.dark{
-background:linear-gradient(180deg,rgba(240,210,139,.14),rgba(212,167,79,.06));
+background:rgba(0,0,0,.28);
 color:var(--text)!important;
 }
 
@@ -310,16 +311,12 @@ flex-direction:column;
 align-items:flex-start;
 }
 
-.nav{
-width:100%;
-}
-
-.nav a{
+.nav,.nav a{
 width:100%;
 }
 
 .wall-ui{
-padding:90px 28px 60px;
+padding:95px 34px 65px;
 }
 
 .live-summary{
@@ -331,7 +328,7 @@ overflow-x:auto;
 }
 
 .partner-table{
-min-width:760px;
+min-width:820px;
 }
 }
 
@@ -341,11 +338,12 @@ grid-template-columns:1fr;
 }
 
 .wall-ui{
-padding:70px 18px 50px;
+padding:72px 18px 50px;
 }
 
 .partner-wall{
 border-radius:22px;
+min-height:980px;
 }
 
 .wall-heading h1{
@@ -390,7 +388,7 @@ font-size:42px;
 <div class="summary-card"><span>Total wagered</span><strong id="stat-wager">$0.00</strong></div>
 <div class="summary-card"><span>Deposits tracked</span><strong id="stat-deposits">$0.00</strong></div>
 <div class="summary-card"><span>Visits / registrations</span><strong id="stat-visits">0 / 0</strong></div>
-<div class="summary-card"><span>First deposits</span><strong id="stat-ftd">0</strong></div>
+<div class="summary-card"><span>Casino NGR</span><strong id="stat-ngr">$0.00</strong></div>
 </div>
 
 <div class="partner-board">
@@ -407,7 +405,7 @@ font-size:42px;
 <th>Deposits</th>
 <th>Visits</th>
 <th>Registrations</th>
-<th>FTD</th>
+<th>NGR</th>
 <th>Status</th>
 </tr>
 </thead>
@@ -419,7 +417,7 @@ font-size:42px;
 <td id="row-deposits">$0.00</td>
 <td id="row-visits">0</td>
 <td id="row-registrations">0</td>
-<td id="row-ftd">0</td>
+<td id="row-ngr">$0.00</td>
 <td><span class="status">Live</span></td>
 </tr>
 
@@ -429,7 +427,7 @@ font-size:42px;
 <td>Coming soon</td>
 <td>Coming soon</td>
 <td>Coming soon</td>
-<td>Coming soon</td>
+<td>Private</td>
 <td><span class="status">Reserved</span></td>
 </tr>
 
@@ -439,7 +437,7 @@ font-size:42px;
 <td>Coming soon</td>
 <td>Coming soon</td>
 <td>Coming soon</td>
-<td>Coming soon</td>
+<td>Private</td>
 <td><span class="status">Reserved</span></td>
 </tr>
 </tbody>
@@ -478,13 +476,13 @@ const d=await r.json();
 set('stat-wager',money(d.wager));
 set('stat-deposits',money(d.deposits));
 set('stat-visits',`${d.visits||0} / ${d.registrations||0}`);
-set('stat-ftd',d.ftd||0);
+set('stat-ngr',money(d.ngr));
 
 set('row-wager',money(d.wager));
 set('row-deposits',money(d.deposits));
 set('row-visits',d.visits||0);
 set('row-registrations',d.registrations||0);
-set('row-ftd',d.ftd||0);
+set('row-ngr',money(d.ngr));
 }catch(e){}
 })();
 </script>
