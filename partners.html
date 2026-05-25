@@ -424,24 +424,28 @@ const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,
 const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
 
 try{
-  const r=await fetch('/.netlify/functions/rainbet-stats-v2',{cache:'no-store'});
-  if(!r.ok)throw new Error('Stats failed');
-  const d=await r.json();
-
-  const overall = d.overall || {};
-  const mithra = d.partners?.mithra || {};
-
   // Top boxes = overall all-time account stats
-  set('stat-wager',money(overall.wager));
-  set('stat-deposits',money(overall.deposits));
-  set('stat-visits',overall.visits || 0);
-  set('stat-registrations',overall.registrations || 0);
+  const overallRes = await fetch('/.netlify/functions/rainbet-stats',{cache:'no-store'});
+  if(overallRes.ok){
+    const overall = await overallRes.json();
 
-  // Mithra row = Mithra campaign only, all-time
-  set('row-wager',money(mithra.wager));
-  set('row-deposits',money(mithra.deposits));
-  set('row-visits',mithra.visits || 0);
-  set('row-registrations',mithra.registrations || 0);
+    set('stat-wager',money(overall.wager));
+    set('stat-deposits',money(overall.deposits));
+    set('stat-visits',overall.visits || 0);
+    set('stat-registrations',overall.registrations || 0);
+  }
+
+  // Creator rows = creator campaign stats only
+  const partnersRes = await fetch('/.netlify/functions/rainbet-stats-partners',{cache:'no-store'});
+  if(partnersRes.ok){
+    const data = await partnersRes.json();
+    const mithra = data.partners?.mithra || {};
+
+    set('row-wager',money(mithra.wager));
+    set('row-deposits',money(mithra.deposits));
+    set('row-visits',mithra.visits || 0);
+    set('row-registrations',mithra.registrations || 0);
+  }
 }catch(e){}
 })();
 </script>

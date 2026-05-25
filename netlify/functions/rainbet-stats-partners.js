@@ -10,7 +10,13 @@ exports.handler = async function () {
 
   const from = "2019-01-01";
   const to = new Date().toISOString().split("T")[0];
-  const MITHRA_CAMPAIGN_ID = "89073";
+
+  const CREATORS = {
+    mithra: {
+      name: "Mithra",
+      campaignId: "89073"
+    }
+  };
 
   const readValue = (value) => {
     if (value && typeof value === "object") return Number(value.amount || 0);
@@ -22,7 +28,7 @@ exports.handler = async function () {
     return item ? readValue(item.value) : 0;
   };
 
-  async function fetchReport(campaignId = null) {
+  async function fetchCreatorStats(campaignId) {
     const params = new URLSearchParams({
       async: "false",
       from,
@@ -34,7 +40,7 @@ exports.handler = async function () {
     ["wager", "deposits_sum", "visits_count", "registrations_count"]
       .forEach((c) => params.append("columns[]", c));
 
-    if (campaignId) params.append("campaign_ids[]", campaignId);
+    params.append("campaign_ids[]", campaignId);
 
     const response = await fetch(
       "https://portal.rainbetpartners.com/api/customer/v1/partner/report?" + params.toString(),
@@ -49,7 +55,6 @@ exports.handler = async function () {
     );
 
     const data = await response.json();
-
     if (!response.ok) throw new Error(JSON.stringify(data));
 
     const totals = data?.totals?.data?.[0] || data?.rows?.totals?.data?.[0] || [];
@@ -63,18 +68,34 @@ exports.handler = async function () {
   }
 
   try {
-    const overall = await fetchReport();
-    const mithra = await fetchReport(MITHRA_CAMPAIGN_ID);
+    const partners = {};
+
+    for (const [key, creator] of Object.entries(CREATORS)) {
+      partners[key] = {
+        name: creator.name,
+        campaignId: creator.campaignId,
+        ...(await fetchCreatorStats(creator.campaignId))
+      };
+    }
 
     return {
       statusCode: 200,
-      headers: { "Content-Type": "application/json", "Cache-Control": "public, max-age=300" },
-      body: JSON.stringify({ overall, partners: { mithra }, updated: new Date().toISOString() })
+      headers: {
+        "Content-Type": "application/json",
+        "Cache-Control": "public, max-age=300"
+      },
+      body: JSON.stringify({
+        partners,
+        updated: new Date().toISOString()
+      })
     };
   } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Rainbet API error", details: err.message })
+      body: JSON.stringify({
+        error: "Rainbet partner stats error",
+        details: err.message
+      })
     };
   }
 };

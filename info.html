@@ -672,9 +672,9 @@ width:min(315px,calc(100vw - 36px));
     setStat('wager', money(data.wager));
     setStat('deposits', money(data.deposits));
     setStat('visits', `${data.visits || 0} / ${data.registrations || 0}`);
-    setStat('updated', 'Metrics sourced from live activity.');
+    setStat('updated', 'Showing all-time Thor\'s Hall partner activity.');
   }catch(e){
-    setStat('updated', 'Showing latest saved monthly snapshot.');
+    setStat('updated', 'Showing latest saved all-time snapshot.');
   }
 })();
 </script>
