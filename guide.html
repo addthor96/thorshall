@@ -241,7 +241,7 @@ width:min(315px,calc(100vw - 36px));
 <div class="analytics-row"><span>WAGERED</span><strong data-rainbet-stat="wager">$0.00</strong></div>
 <div class="analytics-row"><span>DEPOSITS</span><strong data-rainbet-stat="deposits">$0.00</strong></div>
 <div class="analytics-row"><span>VISITS • REGS</span><strong data-rainbet-stat="visits">0 / 0</strong></div>
-<p class="analytics-note" data-rainbet-stat="updated">Thor's Hall activity.</p>
+<p class="analytics-note" data-rainbet-stat="updated">Metrics sourced from live activity.</p>
 </div>
 </div>
 </div>
@@ -545,9 +545,9 @@ width:min(315px,calc(100vw - 36px));
     setStat('wager', money(data.wager));
     setStat('deposits', money(data.deposits));
     setStat('visits', `${data.visits || 0} / ${data.registrations || 0}`);
-    setStat('updated', 'Showing all-time Thor\'s Hall partner activity.');
+    setStat('updated', "Thor's Hall activity.");
   }catch(e){
-    setStat('updated', 'Thor's Hall activity.');
+    setStat('updated', "Thor's Hall activity.");
   }
 })();
 </script>
