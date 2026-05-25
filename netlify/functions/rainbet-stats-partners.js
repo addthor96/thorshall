@@ -4,7 +4,9 @@ exports.handler = async function () {
   if (!token) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: "Missing RAINBET_STATISTIC_TOKEN" })
+      body: JSON.stringify({
+        error: "Missing RAINBET_STATISTIC_TOKEN"
+      })
     };
   }
 
@@ -19,7 +21,10 @@ exports.handler = async function () {
   };
 
   const readValue = (value) => {
-    if (value && typeof value === "object") return Number(value.amount || 0);
+    if (value && typeof value === "object") {
+      return Number(value.amount || 0);
+    }
+
     return Number(value || 0);
   };
 
@@ -42,34 +47,41 @@ exports.handler = async function () {
       "deposits_sum",
       "visits_count",
       "registrations_count",
-      "casino_ngr"
+      "ngr"
     ].forEach((c) => params.append("columns[]", c));
 
     params.append("campaign_ids[]", campaignId);
 
-    const response = await fetch(
-      "https://portal.rainbetpartners.com/api/customer/v1/partner/report?" + params.toString(),
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-          Authorization: token
-        }
+    const url =
+      "https://portal.rainbetpartners.com/api/customer/v1/partner/report?" +
+      params.toString();
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+        Authorization: token
       }
-    );
+    });
 
     const data = await response.json();
-    if (!response.ok) throw new Error(JSON.stringify(data));
 
-    const totals = data?.totals?.data?.[0] || data?.rows?.totals?.data?.[0] || [];
+    if (!response.ok) {
+      throw new Error(JSON.stringify(data));
+    }
+
+    const totals =
+      data?.totals?.data?.[0] ||
+      data?.rows?.totals?.data?.[0] ||
+      [];
 
     return {
       wager: getTotal(totals, "wager"),
       deposits: getTotal(totals, "deposits_sum"),
       visits: getTotal(totals, "visits_count"),
       registrations: getTotal(totals, "registrations_count"),
-      ngr: getTotal(totals, "casino_ngr")
+      ngr: getTotal(totals, "ngr")
     };
   }
 
