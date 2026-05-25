@@ -243,21 +243,30 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 .partner-name{
   color:rgba(255,248,232,.94)!important;
   font-weight:700;
+  position:relative;
+  padding-right:22px!important;
 }
-.status{
-  display:inline-flex;
-  align-items:center;
-  gap:8px;
-  color:var(--green);
-  font-weight:700;
-}
-.status:before{
+
+.partner-name:after{
   content:"";
-  width:8px;
-  height:8px;
+  position:absolute;
+  top:12px;
+  right:10px;
+  width:9px;
+  height:9px;
   border-radius:50%;
+  background:#777;
+  box-shadow:0 0 10px rgba(140,140,140,.35);
+}
+
+.partner-name.active:after{
   background:var(--green);
-  box-shadow:0 0 12px rgba(117,224,162,.85);
+  box-shadow:0 0 13px rgba(117,224,162,.88);
+}
+
+.partner-name.inactive:after{
+  background:#777;
+  box-shadow:0 0 10px rgba(140,140,140,.35);
 }
 
 .wall-note{
@@ -283,6 +292,13 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
   box-shadow:inset 1px 1px 0 rgba(255,230,160,.13),inset -1px -1px 0 rgba(0,0,0,.78);
 }
 
+.btn.manager-red{
+  color:#fff!important;
+  background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424);
+  border-color:rgba(255,140,130,.52);
+  text-shadow:0 1px 0 rgba(0,0,0,.28);
+}
+
 .footer{
   margin-top:24px;
   padding-top:16px;
@@ -305,7 +321,7 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
   .live-summary{grid-template-columns:1fr 1fr}
   .face-gap{display:none}
   .partner-board{overflow-x:auto}
-  .partner-table{min-width:760px}
+  .partner-table{min-width:700px}
 }
 @media(max-width:640px){
   .wall-ui{padding:90px 18px 50px}
@@ -376,24 +392,73 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
             <th>Deposits</th>
             <th>Visits</th>
             <th>Registrations</th>
-            <th>Status</th>
+            <th>NGR</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="partner-name">Mithra</td>
+            <td class="partner-name active">Mithra</td>
             <td id="row-wager">$0.00</td>
             <td id="row-deposits">$0.00</td>
             <td id="row-visits">0</td>
             <td id="row-registrations">0</td>
-            <td><span class="status">Live</span></td>
-          </tr>          <tr>
-            <td class="partner-name">Manager Network</td>
-            <td>Coming soon</td>
-            <td>Coming soon</td>
-            <td>Coming soon</td>
-            <td>Coming soon</td>
-            <td><span class="status">Reserved</span></td>
+            <td id="row-ngr">$0.00</td>
+          </tr>
+          <tr>
+            <td class="partner-name inactive">Manager Network</td>
+            <td>Reserved</td>
+            <td>Reserved</td>
+            <td>Reserved</td>
+            <td>Reserved</td>
+            <td>Private</td>
+          </tr>
+          <tr>
+            <td class="partner-name inactive">Creator Slot I</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <td class="partner-name inactive">Creator Slot II</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <td class="partner-name inactive">Creator Slot III</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <td class="partner-name inactive">Creator Slot IV</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <td class="partner-name inactive">Creator Slot V</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+          </tr>
+          <tr>
+            <td class="partner-name inactive">Creator Slot VI</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
+            <td>Open</td>
           </tr>
         </tbody>
       </table>
@@ -405,7 +470,7 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 
     <div class="wall-actions">
       <a class="btn" href="https://thorshall.gg/creators">Apply as Creator</a>
-      <a class="btn dark" href="https://thorshall.gg/managers">Manager Program</a>
+      <a class="btn manager-red" href="https://thorshall.gg/managers">Manager Program</a>
     </div>
 
   </div>
@@ -445,6 +510,7 @@ try{
     set('row-deposits',money(mithra.deposits));
     set('row-visits',mithra.visits || 0);
     set('row-registrations',mithra.registrations || 0);
+    set('row-ngr',money(mithra.ngr));
   }
 }catch(e){}
 })();

@@ -37,8 +37,13 @@ exports.handler = async function () {
       conversion_currency: "USD"
     });
 
-    ["wager", "deposits_sum", "visits_count", "registrations_count"]
-      .forEach((c) => params.append("columns[]", c));
+    [
+      "wager",
+      "deposits_sum",
+      "visits_count",
+      "registrations_count",
+      "casino_ngr"
+    ].forEach((c) => params.append("columns[]", c));
 
     params.append("campaign_ids[]", campaignId);
 
@@ -63,7 +68,8 @@ exports.handler = async function () {
       wager: getTotal(totals, "wager"),
       deposits: getTotal(totals, "deposits_sum"),
       visits: getTotal(totals, "visits_count"),
-      registrations: getTotal(totals, "registrations_count")
+      registrations: getTotal(totals, "registrations_count"),
+      ngr: getTotal(totals, "casino_ngr")
     };
   }
 
