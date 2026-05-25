@@ -4,404 +4,446 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>Partners | Thor's Hall</title>
+<meta name="description" content="Thor's Hall public partner ledger with transparent tracked activity, visits, registrations, deposits and wagered totals.">
 
 <style>
 :root{
---gold:#d4a74f;--gold2:#f0d28b;--gold3:#fff0be;
---text:#f4ede2;--muted:#d0c2ab;--line:rgba(212,167,79,.24);
---green:#75e0a2;
+  --gold:#d4a74f;
+  --gold2:#f0d28b;
+  --gold3:#fff0be;
+  --text:#f5ead7;
+  --muted:#c9b89a;
+  --green:#75e0a2;
 }
+
 *{box-sizing:border-box}
 
 body{
-margin:0;
-font-family:Arial,Helvetica,sans-serif;
-color:var(--text);
-background:
-linear-gradient(rgba(5,3,2,.35),rgba(5,3,2,.86)),
-url('img/wallbackground.png') center/cover fixed no-repeat,
-#050302;
-overflow-x:hidden;
+  margin:0;
+  font-family:Georgia,"Times New Roman",serif;
+  color:var(--text);
+  background:
+    linear-gradient(rgba(5,3,2,.25),rgba(5,3,2,.88)),
+    url('img/wallbackground.png') center/cover fixed no-repeat,
+    #050302;
+  overflow-x:hidden;
 }
 
 .wrap{
-max-width:1360px;
-margin:auto;
-padding:24px 18px 70px;
+  max-width:1360px;
+  margin:auto;
+  padding:24px 18px 70px;
 }
 
+/* TOP NAV */
 .topbar{
-max-width:1180px;
-margin:0 auto 22px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:14px;
-padding:16px 18px;
-border-radius:20px;
-border:1px solid var(--line);
-background:rgba(0,0,0,.48);
-backdrop-filter:blur(8px);
+  max-width:1180px;
+  margin:0 auto 22px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:14px;
+  padding:14px 18px;
+  border-radius:4px;
+  border:1px solid rgba(240,210,139,.25);
+  background:rgba(0,0,0,.42);
+  box-shadow:
+    inset 0 0 26px rgba(0,0,0,.75),
+    0 18px 45px rgba(0,0,0,.45);
 }
 
 .brand{
-display:flex;
-align-items:center;
-gap:12px;
-text-decoration:none;
-color:#fff;
-font-size:28px;
-font-weight:900;
-letter-spacing:.04em;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  font-size:28px;
+  font-weight:900;
+  letter-spacing:.04em;
 }
 
 .brand img{
-width:42px;
-height:42px;
-border-radius:10px;
-object-fit:cover;
+  width:42px;
+  height:42px;
+  border-radius:8px;
+  object-fit:cover;
 }
 
 .nav{
-display:flex;
-gap:10px;
-flex-wrap:wrap;
-justify-content:flex-end;
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  justify-content:flex-end;
 }
 
 .nav a,.btn{
-display:inline-flex;
-align-items:center;
-justify-content:center;
-padding:13px 22px;
-border-radius:14px;
-font-weight:900;
-text-decoration:none;
-border:1px solid rgba(255,230,170,.38);
-background:linear-gradient(180deg,var(--gold3),var(--gold));
-color:#211407!important;
-box-shadow:0 10px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.25);
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:12px 21px;
+  border-radius:4px;
+  font-family:Arial,Helvetica,sans-serif;
+  font-weight:900;
+  text-decoration:none;
+  border:1px solid rgba(255,230,170,.45);
+  background:
+    linear-gradient(180deg,rgba(255,240,190,.94),rgba(212,167,79,.90));
+  color:#211407!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.28),
+    inset 0 -2px 0 rgba(70,42,8,.55),
+    0 9px 20px rgba(0,0,0,.35);
 }
 
 .nav a.manager-btn{
-color:#fff!important;
-background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424);
-border-color:rgba(255,140,130,.52);
+  color:#fff!important;
+  background:linear-gradient(180deg,#d7655c,#a83232 50%,#762020);
+  border-color:rgba(255,140,130,.55);
 }
 
+/* MAIN WALL */
 .partner-wall{
-position:relative;
-width:100%;
-min-height:1080px;
-border-radius:34px;
-overflow:hidden;
-box-shadow:0 34px 90px rgba(0,0,0,.62);
-background:#050302;
+  position:relative;
+  min-height:1080px;
+  border-radius:6px;
+  overflow:hidden;
+  background:#050302;
+  box-shadow:0 34px 90px rgba(0,0,0,.68);
 }
 
 .wall-image{
-position:absolute;
-inset:0;
-width:100%;
-height:100%;
-object-fit:cover;
-object-position:center top;
-transform:scale(1.08);
-user-select:none;
-pointer-events:none;
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  object-position:center top;
+  transform:scale(1.08);
+  pointer-events:none;
+  user-select:none;
+}
+
+/* darken image slightly so engraved text is readable */
+.partner-wall:after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+    radial-gradient(circle at 50% 15%,rgba(255,95,16,.16),transparent 24%),
+    linear-gradient(rgba(0,0,0,.08),rgba(0,0,0,.18));
+  pointer-events:none;
+  z-index:1;
 }
 
 .wall-ui{
-position:relative;
-z-index:2;
-min-height:1080px;
-padding:190px 145px 95px;
+  position:relative;
+  z-index:2;
+  min-height:1080px;
+  padding:190px 150px 95px;
 }
 
-.live-summary{
-display:grid;
-grid-template-columns:repeat(4,1fr);
-gap:14px;
-margin:0 auto 24px;
-max-width:980px;
+/* ENGRAVED SYSTEM */
+.engraved-box{
+  background:transparent!important;
+  border:1px solid rgba(223,180,91,.22);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,230,160,.13),
+    inset -1px -1px 0 rgba(0,0,0,.78),
+    inset 0 0 18px rgba(0,0,0,.20);
 }
 
-.summary-card,
-.partner-board,
+.engraved-text,
+.summary-card span,
+.summary-card strong,
+.partner-table th,
+.partner-table td,
+.board-title strong,
 .wall-note{
-background:transparent;
-backdrop-filter:none;
-border:1px solid rgba(240,210,139,.16);
-box-shadow:
-inset 0 1px 0 rgba(255,230,160,.12),
-inset 0 -1px 0 rgba(0,0,0,.55),
-inset 0 0 22px rgba(0,0,0,.28),
-0 0 0 1px rgba(0,0,0,.18);
-text-shadow:
-0 1px 0 rgba(0,0,0,.95),
-0 0 8px rgba(212,167,79,.20);
+  text-shadow:
+    0 1px 0 #000,
+    1px 1px 0 #000,
+    0 -1px 0 rgba(255,235,170,.18),
+    0 0 8px rgba(212,167,79,.12);
+}
+
+.chisel-line{
+  height:1px;
+  background:rgba(223,180,91,.22);
+  box-shadow:
+    0 1px 0 rgba(0,0,0,.95),
+    0 -1px 0 rgba(255,230,160,.08);
+}
+
+/* TOP STATS */
+.live-summary{
+  max-width:980px;
+  margin:0 auto 22px;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
 }
 
 .summary-card{
-padding:18px;
-border-radius:16px;
-background:
-linear-gradient(135deg,rgba(255,220,130,.035),rgba(0,0,0,.08));
+  padding:20px 24px;
+  min-height:88px;
+  border-right:1px solid rgba(223,180,91,.18);
 }
 
+.summary-card:first-child{border-left:1px solid rgba(223,180,91,.18)}
+
 .summary-card span{
-display:block;
-font-size:13px;
-color:var(--muted);
+  display:block;
+  color:rgba(230,211,176,.76);
+  font-size:14px;
+  letter-spacing:.02em;
 }
 
 .summary-card strong{
-display:block;
-margin-top:7px;
-font-size:26px;
-color:var(--gold2);
-line-height:1;
+  display:block;
+  margin-top:7px;
+  color:rgba(240,210,139,.96);
+  font-size:30px;
+  font-weight:700;
+  line-height:1;
 }
 
+/* LEDGER */
 .partner-board{
-max-width:980px;
-margin:0 auto;
-border-radius:20px;
-overflow:hidden;
+  max-width:980px;
+  margin:0 auto;
+  background:transparent;
 }
 
 .board-title{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:12px;
-padding:20px 22px;
-background:transparent;
-border-bottom:1px solid rgba(240,210,139,.12);
-box-shadow:inset 0 -1px 0 rgba(0,0,0,.55);
+  padding:18px 22px 13px;
 }
 
 .board-title strong{
-color:var(--gold2);
-font-size:20px;
-letter-spacing:.04em;
-text-transform:uppercase;
+  display:block;
+  color:rgba(240,210,139,.94);
+  font-size:28px;
+  font-weight:700;
+  letter-spacing:.055em;
+  text-transform:uppercase;
 }
 
 .partner-table{
-width:100%;
-border-collapse:collapse;
+  width:100%;
+  border-collapse:collapse;
+  background:transparent!important;
 }
 
 .partner-table th,
 .partner-table td{
-padding:17px 18px;
-text-align:left;
-border-bottom:1px solid rgba(255,255,255,.045);
+  padding:17px 18px;
+  text-align:left;
+  background:transparent!important;
+  border-right:1px solid rgba(223,180,91,.16);
+  border-bottom:1px solid rgba(223,180,91,.16);
+}
+
+.partner-table th:first-child,
+.partner-table td:first-child{
+  border-left:1px solid rgba(223,180,91,.16);
 }
 
 .partner-table th{
-font-size:12px;
-letter-spacing:.08em;
-text-transform:uppercase;
-color:var(--gold2);
-background:transparent;
-text-shadow:0 1px 0 #000,0 0 10px rgba(212,167,79,.28);
+  color:rgba(240,210,139,.90);
+  font-size:14px;
+  letter-spacing:.08em;
+  text-transform:uppercase;
 }
 
 .partner-table td{
-font-size:15px;
-color:var(--text);
-}
-
-.partner-table tr:hover td{
-background:rgba(240,210,139,.035);
-box-shadow:inset 0 0 18px rgba(0,0,0,.20);
+  color:rgba(245,234,215,.87);
+  font-size:18px;
 }
 
 .partner-name{
-font-weight:900;
-color:#fff;
+  color:rgba(255,248,232,.94)!important;
+  font-weight:700;
 }
 
 .status{
-display:inline-flex;
-align-items:center;
-gap:7px;
-font-size:13px;
-color:var(--green);
-font-weight:900;
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  color:var(--green);
+  font-weight:700;
 }
 
 .status:before{
-content:"";
-width:8px;
-height:8px;
-border-radius:50%;
-background:var(--green);
-box-shadow:0 0 12px rgba(117,224,162,.75);
+  content:"";
+  width:8px;
+  height:8px;
+  border-radius:50%;
+  background:var(--green);
+  box-shadow:0 0 12px rgba(117,224,162,.85);
 }
 
+/* NOTE + BUTTONS */
 .wall-note{
-max-width:980px;
-margin:18px auto 0;
-padding:15px 18px;
-border-radius:18px;
-background:transparent;
-color:#bfae92;
-font-size:14px;
-text-align:center;
+  max-width:980px;
+  margin:20px auto 0;
+  padding:15px 18px;
+  text-align:center;
+  color:rgba(219,201,168,.78);
+  font-size:15px;
 }
 
 .wall-actions{
-max-width:980px;
-display:flex;
-gap:12px;
-justify-content:center;
-flex-wrap:wrap;
-margin:22px auto 0;
+  max-width:980px;
+  display:flex;
+  justify-content:center;
+  gap:28px;
+  flex-wrap:wrap;
+  margin:26px auto 0;
 }
 
 .btn.dark{
-background:rgba(0,0,0,.18);
-border-color:rgba(240,210,139,.20);
-color:var(--text)!important;
+  background:transparent;
+  color:rgba(245,234,215,.92)!important;
+  border-color:rgba(240,210,139,.28);
+  box-shadow:
+    inset 1px 1px 0 rgba(255,230,160,.13),
+    inset -1px -1px 0 rgba(0,0,0,.78);
 }
 
+/* FOOTER */
 .footer{
-margin-top:24px;
-padding-top:16px;
-border-top:1px solid var(--line);
-text-align:center;
-font-size:14px;
-color:#c6b08d;
+  margin-top:24px;
+  padding-top:16px;
+  border-top:1px solid rgba(240,210,139,.18);
+  text-align:center;
+  font-size:14px;
+  color:#c6b08d;
+  font-family:Arial,Helvetica,sans-serif;
 }
 
 .footer a{
-color:var(--gold2);
-text-decoration:none;
-font-weight:900;
+  color:var(--gold2);
+  text-decoration:none;
+  font-weight:900;
 }
 
+/* RESPONSIVE */
 @media(max-width:920px){
-.topbar{
-flex-direction:column;
-align-items:flex-start;
-}
-.nav,.nav a{width:100%}
-.wall-ui{padding:120px 34px 65px}
-.live-summary{grid-template-columns:1fr 1fr}
-.partner-board{overflow-x:auto}
-.partner-table{min-width:820px}
+  .topbar{flex-direction:column;align-items:flex-start}
+  .nav,.nav a{width:100%}
+  .wall-ui{padding:120px 34px 65px}
+  .live-summary{grid-template-columns:1fr}
+  .summary-card{border-left:1px solid rgba(223,180,91,.18)}
+  .partner-board{overflow-x:auto}
+  .partner-table{min-width:760px}
 }
 
 @media(max-width:640px){
-.live-summary{grid-template-columns:1fr}
-.wall-ui{padding:90px 18px 50px}
-.partner-wall{border-radius:22px;min-height:980px}
+  .wall-ui{padding:90px 18px 50px}
+  .partner-wall{min-height:980px}
 }
 </style>
 </head>
 
 <body>
-
 <div class="wrap">
 
 <header class="topbar">
-<a class="brand" href="https://thorshall.gg">
-<img src="img/logo.png" alt="Thor's Hall Logo">
-<span>THOR'S HALL</span>
-</a>
+  <a class="brand" href="https://thorshall.gg/">
+    <img src="img/logo.png" alt="Thor's Hall Logo">
+    <span>THOR'S HALL</span>
+  </a>
 
-<nav class="nav">
-<a href="https://thorshall.gg/about">About</a>
-<a href="https://thorshall.gg/info">Info</a>
-<a href="https://thorshall.gg/guide">Guide</a>
-<a href="https://thorshall.gg/creators">Creators</a>
-<a class="manager-btn" href="https://thorshall.gg/managers">Managers</a>
-<a href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
-</nav>
+  <nav class="nav">
+    <a href="https://thorshall.gg/about">About</a>
+    <a href="https://thorshall.gg/info">Info</a>
+    <a href="https://thorshall.gg/guide">Guide</a>
+    <a href="https://thorshall.gg/creators">Creators</a>
+    <a class="manager-btn" href="https://thorshall.gg/managers">Managers</a>
+    <a href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+  </nav>
 </header>
 
 <section class="partner-wall">
-<img class="wall-image" src="img/wall.png" alt="Thor's Hall Partner Wall" loading="eager" decoding="async" fetchpriority="high">
+  <img class="wall-image" src="img/wall.png" alt="Thor's Hall Partner Wall" loading="eager" decoding="async" fetchpriority="high">
 
-<div class="wall-ui">
+  <div class="wall-ui">
 
-<div class="live-summary">
-<div class="summary-card"><span>Total wagered</span><strong id="stat-wager">$0.00</strong></div>
-<div class="summary-card"><span>Deposits tracked</span><strong id="stat-deposits">$0.00</strong></div>
-<div class="summary-card"><span>Visits / registrations</span><strong id="stat-visits">0 / 0</strong></div>
-<div class="summary-card"><span>Casino NGR</span><strong id="stat-ngr">$0.00</strong></div>
-</div>
+    <div class="live-summary engraved-box">
+      <div class="summary-card">
+        <span>Total wagered</span>
+        <strong id="stat-wager">$0.00</strong>
+      </div>
+      <div class="summary-card">
+        <span>Deposits tracked</span>
+        <strong id="stat-deposits">$0.00</strong>
+      </div>
+      <div class="summary-card">
+        <span>Visits / registrations</span>
+        <strong id="stat-visits">0 / 0</strong>
+      </div>
+    </div>
 
-<div class="partner-board">
-<div class="board-title">
-<strong>Partner Ledger</strong>
-</div>
+    <div class="partner-board">
+      <div class="board-title engraved-box">
+        <strong>Partner Ledger</strong>
+      </div>
 
-<table class="partner-table">
-<thead>
-<tr>
-<th>Partner</th>
-<th>Wagered</th>
-<th>Deposits</th>
-<th>Visits</th>
-<th>Registrations</th>
-<th>NGR</th>
-<th>Status</th>
-</tr>
-</thead>
+      <table class="partner-table">
+        <thead>
+          <tr>
+            <th>Partner</th>
+            <th>Wagered</th>
+            <th>Deposits</th>
+            <th>Visits</th>
+            <th>Registrations</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="partner-name">Thor's Hall Network</td>
+            <td id="row-wager">$0.00</td>
+            <td id="row-deposits">$0.00</td>
+            <td id="row-visits">0</td>
+            <td id="row-registrations">0</td>
+            <td><span class="status">Live</span></td>
+          </tr>
+          <tr>
+            <td class="partner-name">Mithra</td>
+            <td>Coming soon</td>
+            <td>Coming soon</td>
+            <td>Coming soon</td>
+            <td>Coming soon</td>
+            <td><span class="status">Reserved</span></td>
+          </tr>
+          <tr>
+            <td class="partner-name">Manager Network</td>
+            <td>Coming soon</td>
+            <td>Coming soon</td>
+            <td>Coming soon</td>
+            <td>Coming soon</td>
+            <td><span class="status">Reserved</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-<tbody>
-<tr>
-<td class="partner-name">Thor's Hall Network</td>
-<td id="row-wager">$0.00</td>
-<td id="row-deposits">$0.00</td>
-<td id="row-visits">0</td>
-<td id="row-registrations">0</td>
-<td id="row-ngr">$0.00</td>
-<td><span class="status">Live</span></td>
-</tr>
+    <div class="wall-note engraved-box">
+      Public partner rows are only shown for creators or managers who agree to be listed.
+    </div>
 
-<tr>
-<td class="partner-name">Featured Creator</td>
-<td>Coming soon</td>
-<td>Coming soon</td>
-<td>Coming soon</td>
-<td>Coming soon</td>
-<td>Private</td>
-<td><span class="status">Reserved</span></td>
-</tr>
+    <div class="wall-actions">
+      <a class="btn" href="https://thorshall.gg/creators">Apply as Creator</a>
+      <a class="btn dark" href="https://thorshall.gg/managers">Manager Program</a>
+    </div>
 
-<tr>
-<td class="partner-name">Manager Network</td>
-<td>Coming soon</td>
-<td>Coming soon</td>
-<td>Coming soon</td>
-<td>Coming soon</td>
-<td>Private</td>
-<td><span class="status">Reserved</span></td>
-</tr>
-</tbody>
-</table>
-</div>
-
-<div class="wall-note">
-Public partner rows can be shown only for creators or managers who agree to be listed.
-</div>
-
-<div class="wall-actions">
-<a class="btn" href="https://thorshall.gg/creators">Apply as Creator</a>
-<a class="btn dark" href="https://thorshall.gg/managers">Manager Program</a>
-</div>
-
-</div>
+  </div>
 </section>
 
 <div class="footer">
-18+ Play responsibly •
-<a href="https://thorshall.gg/affiliate-disclosure">Affiliate Disclosure</a>
+  18+ Play responsibly •
+  <a href="https://thorshall.gg/affiliate-disclosure">Affiliate Disclosure</a>
 </div>
 
 </div>
@@ -412,35 +454,32 @@ const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,
 const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
 
 function pickNumber(obj, keys){
-for(const key of keys){
-if(obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== ''){
-return Number(obj[key]) || 0;
-}
-}
-return 0;
+  for(const key of keys){
+    if(obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== ''){
+      return Number(obj[key]) || 0;
+    }
+  }
+  return 0;
 }
 
 try{
-const r=await fetch('/.netlify/functions/rainbet-stats',{cache:'no-store'});
-if(!r.ok)throw new Error('Stats failed');
-const d=await r.json();
+  const r=await fetch('/.netlify/functions/rainbet-stats',{cache:'no-store'});
+  if(!r.ok)throw new Error('Stats failed');
+  const d=await r.json();
 
-const wager = pickNumber(d,['wager','casino_wager','wagered','total_wager','totalWager']);
-const deposits = pickNumber(d,['deposits','deposits_sum','deposit_sum','total_deposits','totalDeposits']);
-const visits = pickNumber(d,['visits','visits_count','clicks']);
-const registrations = pickNumber(d,['registrations','registrations_count','signups']);
-const ngr = pickNumber(d,['ngr','casino_ngr','net_gaming_revenue','netGamingRevenue','revenue']);
+  const wager = pickNumber(d,['wager','casino_wager','wagered','total_wager','totalWager']);
+  const deposits = pickNumber(d,['deposits','deposits_sum','deposit_sum','total_deposits','totalDeposits']);
+  const visits = pickNumber(d,['visits','visits_count','clicks']);
+  const registrations = pickNumber(d,['registrations','registrations_count','signups']);
 
-set('stat-wager',money(wager));
-set('stat-deposits',money(deposits));
-set('stat-visits',`${visits} / ${registrations}`);
-set('stat-ngr',money(ngr));
+  set('stat-wager',money(wager));
+  set('stat-deposits',money(deposits));
+  set('stat-visits',`${visits} / ${registrations}`);
 
-set('row-wager',money(wager));
-set('row-deposits',money(deposits));
-set('row-visits',visits);
-set('row-registrations',registrations);
-set('row-ngr',money(ngr));
+  set('row-wager',money(wager));
+  set('row-deposits',money(deposits));
+  set('row-visits',visits);
+  set('row-registrations',registrations);
 }catch(e){}
 })();
 </script>
