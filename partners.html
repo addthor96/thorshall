@@ -129,17 +129,24 @@ max-width:980px;
 .summary-card,
 .partner-board,
 .wall-note{
-background:rgba(0,0,0,.14);
-backdrop-filter:blur(1px);
-border:1px solid rgba(240,210,139,.14);
+background:transparent;
+backdrop-filter:none;
+border:1px solid rgba(240,210,139,.16);
 box-shadow:
-inset 0 0 28px rgba(0,0,0,.45),
-0 0 18px rgba(212,167,79,.04);
+inset 0 1px 0 rgba(255,230,160,.12),
+inset 0 -1px 0 rgba(0,0,0,.55),
+inset 0 0 22px rgba(0,0,0,.28),
+0 0 0 1px rgba(0,0,0,.18);
+text-shadow:
+0 1px 0 rgba(0,0,0,.95),
+0 0 8px rgba(212,167,79,.20);
 }
 
 .summary-card{
 padding:18px;
 border-radius:16px;
+background:
+linear-gradient(135deg,rgba(255,220,130,.035),rgba(0,0,0,.08));
 }
 
 .summary-card span{
@@ -169,8 +176,9 @@ justify-content:space-between;
 align-items:center;
 gap:12px;
 padding:20px 22px;
-background:rgba(240,210,139,.03);
-border-bottom:1px solid rgba(255,255,255,.04);
+background:transparent;
+border-bottom:1px solid rgba(240,210,139,.12);
+box-shadow:inset 0 -1px 0 rgba(0,0,0,.55);
 }
 
 .board-title strong{
@@ -197,7 +205,8 @@ font-size:12px;
 letter-spacing:.08em;
 text-transform:uppercase;
 color:var(--gold2);
-background:rgba(255,255,255,.015);
+background:transparent;
+text-shadow:0 1px 0 #000,0 0 10px rgba(212,167,79,.28);
 }
 
 .partner-table td{
@@ -206,7 +215,8 @@ color:var(--text);
 }
 
 .partner-table tr:hover td{
-background:rgba(240,210,139,.03);
+background:rgba(240,210,139,.035);
+box-shadow:inset 0 0 18px rgba(0,0,0,.20);
 }
 
 .partner-name{
@@ -237,7 +247,7 @@ max-width:980px;
 margin:18px auto 0;
 padding:15px 18px;
 border-radius:18px;
-background:rgba(0,0,0,.10);
+background:transparent;
 color:#bfae92;
 font-size:14px;
 text-align:center;
