@@ -423,34 +423,25 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
 
-function pickNumber(obj, keys){
-  for(const key of keys){
-    if(obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== ''){
-      return Number(obj[key]) || 0;
-    }
-  }
-  return 0;
-}
-
 try{
-  const r=await fetch('/.netlify/functions/rainbet-stats',{cache:'no-store'});
+  const r=await fetch('/.netlify/functions/rainbet-stats-v2',{cache:'no-store'});
   if(!r.ok)throw new Error('Stats failed');
   const d=await r.json();
 
-  const wager = pickNumber(d,['wager','casino_wager','wagered','total_wager','totalWager']);
-  const deposits = pickNumber(d,['deposits','deposits_sum','deposit_sum','total_deposits','totalDeposits']);
-  const visits = pickNumber(d,['visits','visits_count','clicks']);
-  const registrations = pickNumber(d,['registrations','registrations_count','signups']);
+  const overall = d.overall || {};
+  const mithra = d.partners?.mithra || {};
 
-  set('stat-wager',money(wager));
-  set('stat-deposits',money(deposits));
-  set('stat-visits',visits);
-  set('stat-registrations',registrations);
+  // Top boxes = overall all-time account stats
+  set('stat-wager',money(overall.wager));
+  set('stat-deposits',money(overall.deposits));
+  set('stat-visits',overall.visits || 0);
+  set('stat-registrations',overall.registrations || 0);
 
-  set('row-wager',money(wager));
-  set('row-deposits',money(deposits));
-  set('row-visits',visits);
-  set('row-registrations',registrations);
+  // Mithra row = Mithra campaign only, all-time
+  set('row-wager',money(mithra.wager));
+  set('row-deposits',money(mithra.deposits));
+  set('row-visits',mithra.visits || 0);
+  set('row-registrations',mithra.registrations || 0);
 }catch(e){}
 })();
 </script>
