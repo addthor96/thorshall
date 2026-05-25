@@ -13,22 +13,19 @@ body{
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
 color:var(--text);
-background:
-linear-gradient(rgba(5,3,2,.28),rgba(5,3,2,.70)),
-url('img/wallbackground.png') center top/cover fixed no-repeat,
-#050302;
+background:#050302;
 overflow-x:hidden;
 }
 
 .wrap{
-max-width:1280px;
+max-width:1400px;
 margin:auto;
-padding:26px 18px 80px;
+padding:26px 18px 60px;
 }
 
 .topbar{
 max-width:1180px;
-margin:0 auto 28px;
+margin:0 auto 24px;
 display:flex;
 justify-content:space-between;
 align-items:center;
@@ -36,8 +33,7 @@ gap:14px;
 padding:16px 18px;
 border-radius:20px;
 border:1px solid var(--line);
-background:rgba(0,0,0,.52);
-backdrop-filter:blur(8px);
+background:rgba(0,0,0,.55);
 box-shadow:0 18px 44px rgba(0,0,0,.34);
 }
 
@@ -87,13 +83,13 @@ border-color:rgba(255,140,130,.52);
 
 .partner-wall{
 position:relative;
-width:min(1220px,100%);
-height:760px;
+width:min(1360px,100%);
+height:820px;
 margin:0 auto;
 border-radius:34px;
 overflow:hidden;
-box-shadow:0 34px 90px rgba(0,0,0,.62);
 background:#050302;
+box-shadow:0 34px 90px rgba(0,0,0,.72);
 }
 
 .wall-image{
@@ -103,7 +99,7 @@ width:100%;
 height:100%;
 object-fit:cover;
 object-position:center center;
-transform:scale(1.22);
+transform:scale(1.38);
 user-select:none;
 -webkit-user-drag:none;
 pointer-events:none;
@@ -117,7 +113,7 @@ z-index:2;
 
 .wall-title{
 position:absolute;
-top:7%;
+top:8%;
 left:50%;
 transform:translateX(-50%);
 text-align:center;
@@ -127,7 +123,7 @@ padding:0 20px;
 
 .wall-title h1{
 margin:0;
-font-size:clamp(58px,7vw,104px);
+font-size:clamp(58px,7vw,110px);
 line-height:1;
 letter-spacing:.08em;
 text-shadow:0 8px 30px rgba(0,0,0,.95);
@@ -144,12 +140,10 @@ text-shadow:0 4px 20px rgba(0,0,0,.95);
 .topbar{flex-direction:column;align-items:flex-start}
 .nav{width:100%}
 .nav a{width:100%}
-.partner-wall{height:620px}
-.wall-image{transform:scale(1.35)}
-.wall-title{top:8%}
+.partner-wall{height:640px}
+.wall-image{transform:scale(1.55)}
 .wall-title h1{font-size:46px}
 .wall-title p{font-size:15px}
-body{background-attachment:scroll}
 }
 </style>
 </head>
