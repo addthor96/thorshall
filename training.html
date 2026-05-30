@@ -3,155 +3,98 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Rune Reels Training Slot</title>
+  <title>Rune Reels 5x5 Training Slot</title>
   <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
       min-height: 100vh;
-      background: radial-gradient(circle at top, #2a160c 0%, #100806 45%, #050303 100%);
-      color: #f4dfb6;
+      background: radial-gradient(circle at top, #2b1609 0%, #0b0503 58%, #020101 100%);
+      color: #f7dfaa;
       font-family: Georgia, 'Times New Roman', serif;
       display: flex;
       justify-content: center;
       align-items: center;
-      padding: 24px;
+      padding: 22px;
     }
 
-    .slot-page {
+    .page {
       width: 100%;
-      max-width: 980px;
-      background: linear-gradient(145deg, rgba(54, 31, 15, 0.98), rgba(18, 9, 6, 0.98));
-      border: 2px solid #b98135;
+      max-width: 1120px;
+      background: linear-gradient(145deg, rgba(54, 30, 13, .98), rgba(13, 7, 5, .98));
+      border: 2px solid #a56f23;
       border-radius: 28px;
       padding: 28px;
-      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.65), inset 0 0 50px rgba(255, 183, 77, 0.06);
-      position: relative;
-      overflow: hidden;
+      box-shadow: 0 35px 90px rgba(0,0,0,.7);
     }
 
-    .slot-page::before {
-      content: "";
-      position: absolute;
-      inset: -100px;
-      background: radial-gradient(circle, rgba(255, 197, 102, 0.12), transparent 45%);
-      pointer-events: none;
-    }
-
-    .header {
-      text-align: center;
-      position: relative;
-      z-index: 1;
-      margin-bottom: 26px;
-    }
-
-    .eyebrow {
-      color: #d69b4a;
-      font-size: 13px;
-      letter-spacing: 4px;
-      text-transform: uppercase;
-      margin-bottom: 10px;
-    }
-
-    h1 {
-      font-size: clamp(36px, 7vw, 72px);
-      letter-spacing: 2px;
-      color: #ffe2a1;
-      text-shadow: 0 0 24px rgba(255, 168, 64, 0.25);
-      margin-bottom: 8px;
-    }
-
-    .subtitle {
-      color: #c6a574;
-      font-size: 16px;
-    }
+    .header { text-align: center; margin-bottom: 22px; }
+    .eyebrow { color: #ce8c34; letter-spacing: 5px; font-size: 13px; text-transform: uppercase; margin-bottom: 10px; }
+    h1 { font-size: clamp(42px, 7vw, 78px); color: #ffe5aa; letter-spacing: 2px; text-shadow: 0 0 20px rgba(255,181,74,.22); }
+    .subtitle { color: #c4a06c; font-size: 15px; margin-top: 8px; }
 
     .stats {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-      position: relative;
-      z-index: 1;
-      margin-bottom: 22px;
+      margin-bottom: 20px;
     }
 
     .stat {
-      border: 1px solid rgba(185, 129, 53, 0.5);
-      background: rgba(12, 6, 4, 0.65);
-      border-radius: 16px;
+      background: rgba(8,4,3,.78);
+      border: 1px solid rgba(185,129,53,.35);
+      border-radius: 15px;
       padding: 14px;
       text-align: center;
     }
 
-    .stat-label {
-      color: #a78b62;
-      font-size: 12px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 6px;
-    }
-
-    .stat-value {
-      font-size: 24px;
-      font-weight: bold;
-      color: #ffd98b;
-    }
+    .stat span { display: block; color: #a98551; font-size: 12px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+    .stat strong { color: #ffdd90; font-size: 25px; }
 
     .machine {
-      position: relative;
-      z-index: 1;
-      background: linear-gradient(180deg, #1c0f09, #080403);
-      border: 2px solid #8d5f25;
+      background: radial-gradient(circle at center, #1f1008, #090403 70%);
+      border: 2px solid #8d6129;
       border-radius: 24px;
-      padding: 22px;
-      box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.65);
-      margin-bottom: 20px;
+      padding: 20px;
+      box-shadow: inset 0 0 45px rgba(0,0,0,.75);
     }
 
     .reels {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 12px;
+      gap: 10px;
       margin-bottom: 18px;
     }
 
     .reel {
       display: grid;
-      grid-template-rows: repeat(3, 100px);
+      grid-template-rows: repeat(5, 78px);
       gap: 10px;
     }
 
-    .symbol {
+    .cell {
       display: flex;
-      justify-content: center;
       align-items: center;
-      font-size: clamp(34px, 6vw, 54px);
-      background: radial-gradient(circle at top, #3a2010, #130907);
-      border: 1px solid rgba(255, 190, 89, 0.35);
-      border-radius: 18px;
-      box-shadow: inset 0 0 24px rgba(255, 180, 70, 0.05), 0 8px 20px rgba(0, 0, 0, 0.35);
-      transition: transform 0.16s ease, filter 0.16s ease, border-color 0.16s ease;
+      justify-content: center;
+      border-radius: 16px;
+      border: 1px solid rgba(255,201,116,.32);
+      background: linear-gradient(180deg, #3a1d0c, #120806);
+      color: #ffe3a8;
+      font-size: 32px;
+      font-weight: 800;
+      box-shadow: inset 0 0 18px rgba(255,190,95,.05), 0 9px 18px rgba(0,0,0,.36);
+      user-select: none;
     }
 
-    .symbol.win {
-      border-color: #ffd166;
-      filter: drop-shadow(0 0 14px rgba(255, 209, 102, 0.75));
+    .cell.custom { font-size: 38px; }
+    .cell.win {
+      border-color: #ffd36b;
+      box-shadow: 0 0 18px rgba(255,211,107,.65), inset 0 0 18px rgba(255,211,107,.15);
       transform: scale(1.04);
     }
 
-    .symbol.spin {
-      animation: flicker 0.45s linear infinite;
-    }
-
-    @keyframes flicker {
-      0% { transform: translateY(-4px); filter: blur(1px); }
-      50% { transform: translateY(4px); filter: blur(2px); }
-      100% { transform: translateY(-4px); filter: blur(1px); }
-    }
+    .cell.spin { animation: blurspin .15s linear infinite; }
+    @keyframes blurspin { 0%{filter:blur(0); transform:translateY(-2px)} 50%{filter:blur(2px); transform:translateY(2px)} 100%{filter:blur(0); transform:translateY(-2px)} }
 
     .controls {
       display: grid;
@@ -160,190 +103,320 @@
       gap: 16px;
     }
 
-    .bet-controls {
-      display: flex;
-      gap: 8px;
-      justify-content: flex-start;
-      flex-wrap: wrap;
-    }
+    .side { display: flex; gap: 10px; flex-wrap: wrap; }
+    .side.right { justify-content: flex-end; }
 
     button {
-      border: none;
-      cursor: pointer;
       font-family: inherit;
+      cursor: pointer;
+      border: 1px solid rgba(255,207,128,.36);
+      background: rgba(255,207,128,.08);
+      color: #ffe09a;
       border-radius: 999px;
-      transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+      padding: 10px 16px;
+      font-weight: 700;
     }
 
-    button:active {
-      transform: scale(0.96);
-    }
+    button:disabled { opacity: .45; cursor: not-allowed; }
+    button:active { transform: scale(.96); }
 
-    button:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
-
-    .small-btn {
-      background: rgba(255, 207, 128, 0.1);
-      color: #ffd98b;
-      border: 1px solid rgba(255, 207, 128, 0.35);
-      padding: 10px 14px;
-      font-size: 14px;
-    }
-
-    .spin-btn {
-      width: 170px;
-      height: 170px;
-      background: radial-gradient(circle at top, #ffd36f, #b86b20 55%, #5d2b0d 100%);
-      color: #160906;
-      font-size: 32px;
-      font-weight: bold;
-      border: 4px solid #ffe7a9;
-      box-shadow: 0 0 32px rgba(255, 166, 55, 0.38), inset 0 -12px 18px rgba(0, 0, 0, 0.22);
+    .spin {
+      width: 142px;
+      height: 142px;
+      border-radius: 50%;
+      border: 4px solid #ffe4a3;
+      background: radial-gradient(circle at top, #ffd77b, #bd7224 58%, #5d2b0d 100%);
+      color: #160805;
+      font-size: 27px;
       text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .right-controls {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
+      box-shadow: 0 0 32px rgba(255,170,60,.38);
     }
 
     .message {
-      position: relative;
-      z-index: 1;
-      min-height: 48px;
       text-align: center;
+      min-height: 42px;
       font-size: 22px;
-      color: #ffe2a1;
-      margin-bottom: 12px;
+      color: #ffe6ab;
+      margin: 18px 0 6px;
     }
 
     .paytable {
-      position: relative;
-      z-index: 1;
       display: grid;
-      grid-template-columns: repeat(6, 1fr);
+      grid-template-columns: repeat(5, 1fr);
       gap: 8px;
-      margin-top: 18px;
+      margin-top: 16px;
     }
 
-    .pay-item {
-      background: rgba(0, 0, 0, 0.26);
-      border: 1px solid rgba(185, 129, 53, 0.28);
-      border-radius: 14px;
+    .pay {
+      background: rgba(0,0,0,.28);
+      border: 1px solid rgba(185,129,53,.25);
+      border-radius: 13px;
       padding: 10px;
       text-align: center;
+      color: #c9a878;
       font-size: 13px;
-      color: #c8aa78;
     }
 
-    .pay-symbol {
-      font-size: 28px;
-      display: block;
-      margin-bottom: 5px;
-    }
+    .pay b { display:block; color:#ffe0a0; font-size:22px; margin-bottom:4px; }
+    .note { text-align:center; color:#8f7652; font-size:13px; margin-top:16px; }
 
-    .footer-note {
-      position: relative;
-      z-index: 1;
-      text-align: center;
-      color: #8f7555;
-      font-size: 13px;
-      margin-top: 18px;
-    }
-
-    @media (max-width: 760px) {
-      .stats {
-        grid-template-columns: repeat(2, 1fr);
-      }
-
-      .reel {
-        grid-template-rows: repeat(3, 70px);
-      }
-
-      .controls {
-        grid-template-columns: 1fr;
-      }
-
-      .bet-controls,
-      .right-controls {
-        justify-content: center;
-      }
-
-      .spin-btn {
-        width: 130px;
-        height: 130px;
-        font-size: 25px;
-        margin: 0 auto;
-      }
-
-      .paytable {
-        grid-template-columns: repeat(3, 1fr);
-      }
+    @media (max-width: 800px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .reel { grid-template-rows: repeat(5, 60px); }
+      .cell { font-size: 24px; }
+      .cell.custom { font-size: 28px; }
+      .controls { grid-template-columns: 1fr; }
+      .side, .side.right { justify-content: center; }
+      .spin { width: 120px; height: 120px; margin: 0 auto; font-size: 22px; }
+      .paytable { grid-template-columns: repeat(2, 1fr); }
     }
   </style>
 </head>
 <body>
-  <main class="slot-page">
+  <main class="page">
     <section class="header">
       <div class="eyebrow">Thor's Hall Training Build</div>
       <h1>Rune Reels</h1>
-      <p class="subtitle">A fake-money Viking slot prototype for testing design, logic, and engagement.</p>
+      <p class="subtitle">5x5 fake-money slot prototype with 10 symbols.</p>
     </section>
 
     <section class="stats">
-      <div class="stat">
-        <div class="stat-label">Balance</div>
-        <div class="stat-value" id="balance">1000</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Bet</div>
-        <div class="stat-value" id="bet">10</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Last Win</div>
-        <div class="stat-value" id="lastWin">0</div>
-      </div>
-      <div class="stat">
-        <div class="stat-label">Spins</div>
-        <div class="stat-value" id="spins">0</div>
-      </div>
+      <div class="stat"><span>Balance</span><strong id="balance">1000</strong></div>
+      <div class="stat"><span>Bet</span><strong id="bet">10</strong></div>
+      <div class="stat"><span>Last Win</span><strong id="lastWin">0</strong></div>
+      <div class="stat"><span>Spins</span><strong id="spins">0</strong></div>
     </section>
 
     <section class="machine">
       <div class="reels" id="reels"></div>
 
       <div class="controls">
-        <div class="bet-controls">
-          <button class="small-btn" id="betDown">- Bet</button>
-          <button class="small-btn" id="betUp">+ Bet</button>
+        <div class="side">
+          <button id="betDown">- Bet</button>
+          <button id="betUp">+ Bet</button>
         </div>
 
-        <button class="spin-btn" id="spinBtn">Spin</button>
+        <button class="spin" id="spinBtn">Spin</button>
 
-        <div class="right-controls">
-          <button class="small-btn" id="autoBtn">Auto 10</button>
-          <button class="small-btn" id="resetBtn">Reset</button>
+        <div class="side right">
+          <button id="autoBtn">Auto 10</button>
+          <button id="resetBtn">Reset</button>
         </div>
       </div>
     </section>
 
     <div class="message" id="message">Press spin to enter the hall.</div>
-
     <section class="paytable" id="paytable"></section>
-
-    <p class="footer-note">Prototype only. Fake balance. No real money, no prizes, no external links.</p>
+    <p class="note">Prototype only. Fake balance. No real money, no prizes, no external links.</p>
   </main>
 
   <script>
+    const rows = 5;
+    const cols = 5;
+    const bets = [10, 20, 50, 100];
+
     const symbols = [
-      { icon: '⚡', name: 'Lightning', weight: 6, pay: 20 },
-      { icon: '🔨', name: 'Hammer', weight: 8, pay: 15 },
-      { icon: '🛡️', name: 'Shield', weight: 10, pay: 10 },
-      { icon: '🐺', name: 'Wolf', weight: 12, pay: 8 },
-      { icon: '🐦‍⬛', name: 'Raven', weight: 14, pay: 6 },
-      { icon: 'ᚱ', name: 'Rune', weight: 18, pay: 4 },
+      { text: '10', name: 'Ten', weight: 20, pay: 2 },
+      { text: 'J', name: 'Jack', weight: 18, pay: 3 },
+      { text: 'Q', name: 'Queen', weight: 16, pay: 4 },
+      { text: 'K', name: 'King', weight: 14, pay: 5 },
+      { text: 'A', name: 'Ace', weight: 12, pay: 6 },
+      { text: '🐦‍⬛', name: 'Raven', weight: 10, pay: 8, custom: true },
+      { text: '🚢', name: 'Longship', weight: 9, pay: 10, custom: true },
+      { text: '🔨', name: 'Hammer', weight: 7, pay: 14, custom: true },
+      { text: 'ᛟ', name: 'Valknut', weight: 6, pay: 18, custom: true },
+      { text: '⚡', name: 'Thor', weight: 4, pay: 25, custom: true }
+    ];
+
+    let balance = 1000;
+    let betIndex = 0;
+    let lastWin = 0;
+    let spins = 0;
+    let spinning = false;
+    let autoLeft = 0;
+
+    const reelsEl = document.getElementById('reels');
+    const balanceEl = document.getElementById('balance');
+    const betEl = document.getElementById('bet');
+    const lastWinEl = document.getElementById('lastWin');
+    const spinsEl = document.getElementById('spins');
+    const messageEl = document.getElementById('message');
+    const paytableEl = document.getElementById('paytable');
+    const spinBtn = document.getElementById('spinBtn');
+    const betUp = document.getElementById('betUp');
+    const betDown = document.getElementById('betDown');
+    const resetBtn = document.getElementById('resetBtn');
+    const autoBtn = document.getElementById('autoBtn');
+
+    function weightedSymbol() {
+      const total = symbols.reduce((sum, s) => sum + s.weight, 0);
+      let roll = Math.random() * total;
+      for (const s of symbols) {
+        roll -= s.weight;
+        if (roll <= 0) return s;
+      }
+      return symbols[0];
+    }
+
+    function randomSymbol() {
+      return symbols[Math.floor(Math.random() * symbols.length)];
+    }
+
+    function initGrid() {
+      reelsEl.innerHTML = '';
+      for (let c = 0; c < cols; c++) {
+        const reel = document.createElement('div');
+        reel.className = 'reel';
+        for (let r = 0; r < rows; r++) {
+          const cell = document.createElement('div');
+          const s = randomSymbol();
+          cell.className = 'cell' + (s.custom ? ' custom' : '');
+          cell.dataset.row = r;
+          cell.dataset.col = c;
+          cell.textContent = s.text;
+          reel.appendChild(cell);
+        }
+        reelsEl.appendChild(reel);
+      }
+    }
+
+    function cells() { return [...document.querySelectorAll('.cell')]; }
+
+    function updateStats() {
+      balanceEl.textContent = balance;
+      betEl.textContent = bets[betIndex];
+      lastWinEl.textContent = lastWin;
+      spinsEl.textContent = spins;
+      spinBtn.disabled = spinning || balance < bets[betIndex];
+      autoBtn.disabled = spinning || balance < bets[betIndex];
+      betUp.disabled = spinning || betIndex >= bets.length - 1;
+      betDown.disabled = spinning || betIndex <= 0;
+    }
+
+    function makeGrid() {
+      const grid = [];
+      for (let r = 0; r < rows; r++) {
+        grid[r] = [];
+        for (let c = 0; c < cols; c++) grid[r][c] = weightedSymbol();
+      }
+      return grid;
+    }
+
+    function calculate(grid) {
+      let totalWin = 0;
+      const winCells = [];
+      const bet = bets[betIndex];
+
+      // Beginner logic: 5 horizontal paylines only, left-to-right.
+      for (let r = 0; r < rows; r++) {
+        const first = grid[r][0].text;
+        let count = 1;
+        for (let c = 1; c < cols; c++) {
+          if (grid[r][c].text === first) count++;
+          else break;
+        }
+
+        if (count >= 3) {
+          const symbol = grid[r][0];
+          const multiplier = count === 3 ? 0.4 : count === 4 ? 0.7 : 1;
+          const rowWin = Math.floor(bet * symbol.pay * multiplier);
+          totalWin += rowWin;
+          for (let c = 0; c < count; c++) winCells.push(`${r}-${c}`);
+        }
+      }
+
+      return { totalWin, winCells };
+    }
+
+    function showGrid(grid, winCells) {
+      cells().forEach(cell => {
+        const r = Number(cell.dataset.row);
+        const c = Number(cell.dataset.col);
+        const s = grid[r][c];
+        cell.textContent = s.text;
+        cell.className = 'cell' + (s.custom ? ' custom' : '');
+        if (winCells.includes(`${r}-${c}`)) cell.classList.add('win');
+      });
+    }
+
+    function setSpinVisual(on) {
+      spinning = on;
+      cells().forEach(cell => {
+        cell.classList.toggle('spin', on);
+        cell.classList.remove('win');
+      });
+      updateStats();
+    }
+
+    function spin() {
+      const bet = bets[betIndex];
+      if (spinning || balance < bet) return;
+
+      balance -= bet;
+      lastWin = 0;
+      spins++;
+      messageEl.textContent = 'Reels are spinning...';
+      setSpinVisual(true);
+      updateStats();
+
+      const flicker = setInterval(() => {
+        cells().forEach(cell => {
+          const s = randomSymbol();
+          cell.textContent = s.text;
+          cell.className = 'cell spin' + (s.custom ? ' custom' : '');
+        });
+      }, 70);
+
+      setTimeout(() => {
+        clearInterval(flicker);
+        const grid = makeGrid();
+        const result = calculate(grid);
+        lastWin = result.totalWin;
+        balance += lastWin;
+        showGrid(grid, result.winCells);
+        setSpinVisual(false);
+
+        if (lastWin > 0) messageEl.textContent = `Win: ${lastWin} fake coins.`;
+        else if (balance < bets[betIndex]) messageEl.textContent = 'Out of fake coins. Reset to continue.';
+        else messageEl.textContent = 'No win. Spin again.';
+
+        updateStats();
+
+        if (autoLeft > 0 && balance >= bets[betIndex]) {
+          autoLeft--;
+          autoBtn.textContent = `Auto ${autoLeft}`;
+          setTimeout(spin, 500);
+        } else {
+          autoLeft = 0;
+          autoBtn.textContent = 'Auto 10';
+        }
+      }, 850);
+    }
+
+    function renderPaytable() {
+      paytableEl.innerHTML = symbols.map(s => `
+        <div class="pay"><b>${s.text}</b>5x pays ${s.pay}x bet</div>
+      `).join('');
+    }
+
+    spinBtn.addEventListener('click', spin);
+    betUp.addEventListener('click', () => { if (betIndex < bets.length - 1) betIndex++; updateStats(); });
+    betDown.addEventListener('click', () => { if (betIndex > 0) betIndex--; updateStats(); });
+    resetBtn.addEventListener('click', () => {
+      balance = 1000;
+      betIndex = 0;
+      lastWin = 0;
+      spins = 0;
+      autoLeft = 0;
+      messageEl.textContent = 'Reset complete. Press spin to enter the hall.';
+      initGrid();
+      updateStats();
+    });
+    autoBtn.addEventListener('click', () => { if (!spinning) { autoLeft = 10; autoBtn.textContent = 'Auto 10'; spin(); } });
+
+    initGrid();
+    renderPaytable();
+    updateStats();
+  </script>
+</body>
+</html>
