@@ -53,11 +53,11 @@
 <body>
 <div class="wrap">
   <main class="stage" id="stage" aria-label="Miðgarður slot prototype">
-    <img class="bg" src="assets/bg.webp" alt="Miðgarður Norse slot background">
+    <img class="bg" src="/img/midgardur.webp" alt="Miðgarður Norse slot background">
     <div class="vignette"></div><div class="storm"></div>
     <section class="reels" id="reels"></section><div class="winlines" id="winlines"></div>
 
-    <div class="mascot"><img src="assets/raven.webp" alt="Animated raven mascot"></div>
+    <div class="mascot"><img src="/img/raven.webp" alt="Animated raven mascot"></div>
     <div class="bubble" id="bubble">Two FS runes... the hall is watching.</div>
 
     <button class="soundBtn" id="soundBtn">Sound: On</button>
@@ -84,7 +84,7 @@
         <li><b>Included:</b> 5x5 board, 11 symbols, weighted RNG, ways-pays logic, FS scatter bonus, tease slowdown, free spins, raven mascot animation, lightning flashes, win highlights, auto spin, fake balance.</li>
         <li><b>Win model:</b> matching symbols pay left-to-right by ways. FS is scatter only. 3+ FS triggers free spins.</li>
         <li><b>Tease:</b> when 2 FS symbols have landed before all reels stop, remaining reels slow down and blue effects activate.</li>
-        <li><b>Sound:</b> temporary browser-generated SFX are included. Real music is not included yet. Add files later like <code>assets/audio/bg-loop.mp3</code>, <code>spin.mp3</code>, <code>reel-stop.mp3</code>, <code>bonus.mp3</code>.</li>
+        <li><b>Sound:</b> temporary browser-generated SFX are included. Real music is not included yet. Add files later like <code>/audio/bg-loop.mp3</code>, <code>/audio/spin.mp3</code>, <code>/audio/reel-stop.mp3</code>, <code>/audio/bonus.mp3</code>.</li>
         <li><b>Not final:</b> RTP is not certified. This is a training/demo slot only. For a real gambling game you would need a proper PAR sheet, simulation, RNG review, legal/compliance, and lab certification.</li>
       </ul>
     </aside>
@@ -93,8 +93,17 @@
 <script>
 (() => {
   const ASSETS = {
-    TEN:'assets/ten.webp', J:'assets/jack.webp', Q:'assets/queen.webp', K:'assets/king.webp', A:'assets/ace.webp',
-    RAVEN:'assets/raven.webp', SHIP:'assets/ship.webp', AXE:'assets/axe.webp', RUNE:'assets/rune.webp', MJOLNIR:'assets/mjolnir.webp', FS:'assets/fs.webp'
+    TEN:'/img/ten.webp',
+    J:'/img/jack.webp',
+    Q:'/img/queen.webp',
+    K:'/img/king.webp',
+    A:'/img/ace.webp',
+    RAVEN:'/img/raven.webp',
+    SHIP:'/img/ship.webp',
+    AXE:'/img/axe.webp',
+    RUNE:'/img/rune.webp',
+    MJOLNIR:'/img/mjolnir.webp',
+    FS:'/img/fs.webp'
   };
   const symbols = [
     {id:'TEN', name:'10', weight:24, tier:'low', pay:{3:.25,4:.75,5:1.8}},
