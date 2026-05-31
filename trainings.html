@@ -1,18 +1,11 @@
-<!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Miðgarður — Hacksaw-Inspired Training Build</title>
-<style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Miðgarður — Thor's Hall Final Training Slot</title><meta name="description" content="Miðgarður is a fake-money Norse slot training prototype on Thor's Hall. No deposits, no real-money gambling."><meta name="robots" content="index,follow"><meta property="og:title" content="Miðgarður — Thor's Hall Training Slot"><meta property="og:description" content="Fake-money Norse slot training prototype. No deposits, no real-money gambling."><meta property="og:type" content="website"><style>
 :root{
   --gold:#f2c36b;
   --blue:#47d7ff;
   --panel:rgba(5,8,12,.94);
+  --soft-border:rgba(242,195,107,.22);
 }
-
 *{box-sizing:border-box}
-
 html,body{
   margin:0;
   width:100%;
@@ -22,7 +15,6 @@ html,body{
   color:#f8e7b8;
   font-family:Georgia,"Times New Roman",serif;
 }
-
 .stage{
   position:relative;
   width:min(100vw,177.777vh);
@@ -31,7 +23,6 @@ html,body{
   overflow:hidden;
   background:#020406;
 }
-
 .bg{
   position:absolute;
   inset:0;
@@ -42,7 +33,6 @@ html,body{
   user-select:none;
   pointer-events:none;
 }
-
 .vignette{
   position:absolute;
   inset:0;
@@ -50,14 +40,15 @@ html,body{
   pointer-events:none;
   background:radial-gradient(circle at 49% 43%, transparent 52%, rgba(0,0,0,.16) 80%, rgba(0,0,0,.58) 100%);
 }
-
+/* =========================================================
+   REEL AREA
+   ========================================================= */
 .reels{
   position:absolute;
   z-index:5;
   inset:0;
   overflow:visible;
 }
-
 .tile{
   position:absolute;
   display:flex;
@@ -66,16 +57,14 @@ html,body{
   overflow:hidden;
   padding:.45%;
 }
-
 .tile::before{
   content:"";
   position:absolute;
   inset:12%;
   border-radius:.4vw;
-  background:radial-gradient(circle at 50% 45%, rgba(0,0,0,.12), rgba(0,0,0,0));
+  background:radial-gradient(circle at 50% 45%, rgba(0,0,0,.13), rgba(0,0,0,0));
   pointer-events:none;
 }
-
 .symbol{
   position:relative;
   z-index:3;
@@ -87,7 +76,6 @@ html,body{
   transform-origin:center center;
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
-
 .tile[data-id="TEN"] .symbol,
 .tile[data-id="J"] .symbol,
 .tile[data-id="Q"] .symbol,
@@ -96,7 +84,6 @@ html,body{
   width:65%;
   height:65%;
 }
-
 .tile[data-id="RAVEN"] .symbol,
 .tile[data-id="SHIP"] .symbol,
 .tile[data-id="AXE"] .symbol,
@@ -106,10 +93,8 @@ html,body{
   width:69%;
   height:69%;
 }
-
-.tile.hidden-for-reel .symbol{opacity:0}
-
-/* Reel overlays */
+.tile.hidden-static .symbol{opacity:0}
+/* One overlay strip per reel column */
 .column-reel{
   position:absolute;
   z-index:8;
@@ -118,10 +103,8 @@ html,body{
   opacity:0;
   transition:opacity .10s linear;
 }
-
 .column-reel.active{opacity:1}
 .column-reel.fade-out{opacity:0}
-
 .column-reel::after{
   content:"";
   position:absolute;
@@ -130,17 +113,12 @@ html,body{
   opacity:0;
   background:linear-gradient(90deg,transparent,rgba(71,215,255,.10),transparent);
 }
-
-.column-reel.stop-accent::after{
-  animation:stopAccent .20s ease-out;
-}
-
+.column-reel.stop-accent::after{animation:stopAccent .20s ease-out}
 @keyframes stopAccent{
   0%{opacity:0;transform:scaleY(.985)}
   45%{opacity:.45;transform:scaleY(1)}
   100%{opacity:0;transform:scaleY(1)}
 }
-
 .reel-track{
   position:absolute;
   left:0;
@@ -149,49 +127,524 @@ html,body{
   will-change:transform;
   transform:translate3d(0,0,0);
 }
-
 .reel-item{
   display:flex;
   align-items:center;
   justify-content:center;
 }
-
 .reel-item img{
   display:block;
   object-fit:contain;
   object-position:center center;
-  filter:blur(.75px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  filter:blur(.78px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
   opacity:.94;
   width:69%;
   height:69%;
 }
-
 .reel-item.low img{width:65%;height:65%}
 .reel-item.final img{
-  filter:blur(.12px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  filter:blur(.10px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
   opacity:1;
 }
-
-/* Post-spin effects */
+/* Post-spin effects only */
 .tile.win .symbol{
   animation:winPulse .75s ease-in-out infinite alternate;
   filter:
     drop-shadow(0 0 .55vw rgba(255,230,155,.95))
     drop-shadow(0 0 1.25vw rgba(71,215,255,.58));
 }
-
 @keyframes winPulse{to{transform:scale(1.08)}}
-
 .tile.tease .symbol{
   animation:teasePulse .38s ease-in-out infinite alternate;
   filter:
     drop-shadow(0 0 .70vw rgba(71,215,255,.95))
     drop-shadow(0 0 1.55vw rgba(71,215,255,.62));
 }
-
 @keyframes teasePulse{to{transform:scale(1.10)}}
-
-/* HUD */
+.session-stats{
+  position:absolute;
+  z-index:22;
+  left:1%;
+  top:1%;
+  min-width:12vw;
+  padding:.6vw .75vw;
+  border-radius:.8vw;
+  background:rgba(0,0,0,.44);
+  border:1px solid rgba(242,195,107,.16);
+  font-size:.72vw;
+  line-height:1.35;
+  color:#d9c692;
+  pointer-events:none;
+}
+.session-stats b{
+  color:#fff0bf;
+}
+.turbo{
+  min-width:4.2vw;
+  padding:0 .65vw;
+  font-size:.66vw;
+}
+.turbo.on{
+  color:#b9f5ff;
+  border-color:rgba(71,215,255,.42);
+  box-shadow:0 0 .9vw rgba(71,215,255,.17);
+}
+.rules-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.55vw;
+  margin-top:.75vw;
+}
+.rules-box{
+  padding:.55vw;
+  border-radius:.65vw;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(242,195,107,.12);
+}
+.rules-box b{
+  color:#fff0bf;
+}
+.paytable-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:.5vw;
+  padding:.22vw 0;
+  border-bottom:1px solid rgba(255,255,255,.055);
+}
+.paytable-row:last-child{
+  border-bottom:0;
+}
+.keyboard-hint{
+  position:absolute;
+  z-index:21;
+  right:1.2%;
+  bottom:1.2%;
+  font-size:.62vw;
+  color:rgba(255,238,183,.52);
+  pointer-events:none;
+}
+.stage.turbo-mode .column-reel.stop-accent::after{
+  animation-duration:.12s;
+}
+#resetBtn{top:10.5%}
+#fullBtn{top:15.2%}
+.start-screen{
+  position:absolute;
+  inset:0;
+  z-index:100;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:radial-gradient(circle at 50% 45%,rgba(21,35,46,.82),rgba(0,0,0,.92));
+}
+.start-screen.hide{
+  display:none;
+}
+.start-card{
+  width:min(38vw,88%);
+  padding:1.25vw;
+  border-radius:1.15vw;
+  text-align:center;
+  background:linear-gradient(180deg,rgba(8,12,18,.96),rgba(5,8,12,.94));
+  border:1px solid rgba(242,195,107,.30);
+  box-shadow:0 1vw 2vw rgba(0,0,0,.55),0 0 2vw rgba(71,215,255,.12);
+}
+.start-card h1{
+  margin:.1vw 0 .45vw;
+  font-size:2vw;
+  color:#fff0bf;
+  text-shadow:0 0 1vw rgba(255,190,80,.28);
+}
+.start-card p{
+  margin:.25vw 0 .9vw;
+  font-size:.9vw;
+  color:#d9c692;
+  line-height:1.35;
+}
+.start-card button{
+  min-width:9vw;
+  padding:.65vw 1vw;
+  border-radius:999px;
+  background:radial-gradient(circle at 35% 24%,#ffeaa2,#d8902c 48%,#5d2209 92%);
+  border:.14vw solid rgba(255,238,183,.92);
+  color:#2b0d00;
+  font-weight:900;
+  text-transform:uppercase;
+}
+.asset-warning{
+  position:absolute;
+  z-index:90;
+  left:50%;
+  top:2%;
+  transform:translateX(-50%);
+  display:none;
+  max-width:46vw;
+  padding:.6vw .8vw;
+  border-radius:.8vw;
+  background:rgba(40,8,8,.86);
+  border:1px solid rgba(255,125,125,.34);
+  color:#ffd0d0;
+  font-size:.72vw;
+  text-align:center;
+}
+.asset-warning.show{
+  display:block;
+}
+@media (max-width:900px){
+  .hud{
+    width:72%;
+    height:8.8%;
+    gap:.4%;
+  }
+  .pill{
+    min-width:11%;
+  }
+  .pill span{
+    font-size:1vw;
+  }
+  .pill b{
+    font-size:1.45vw;
+  }
+  .small{
+    font-size:1vw;
+  }
+  .buy{
+    min-width:11vw;
+    font-size:.95vw;
+  }
+  .spin{
+    width:7vw;
+    height:7vw;
+    font-size:1.25vw;
+  }
+  .auto-mini{
+    width:3.6vw;
+    min-width:3.6vw;
+    height:3.6vw;
+    font-size:1.35vw;
+  }
+  .menu-panel{
+    min-width:18vw;
+  }
+  .menu-opt{
+    font-size:1vw;
+  }
+  .msg{
+    font-size:1.55vw;
+  }
+  .notes{
+    width:44%;
+    font-size:1vw;
+  }
+  .session-stats{
+    font-size:1vw;
+  }
+  .start-card{
+    width:60vw;
+  }
+  .start-card h1{
+    font-size:3vw;
+  }
+  .start-card p{
+    font-size:1.35vw;
+  }
+}
+.version-tag{
+  position:absolute;
+  z-index:21;
+  left:1%;
+  bottom:10.4%;
+  padding:.35vw .55vw;
+  border-radius:999px;
+  background:rgba(0,0,0,.38);
+  border:1px solid rgba(242,195,107,.12);
+  color:rgba(255,238,183,.55);
+  font-size:.58vw;
+  pointer-events:none;
+}
+.qa-panel{
+  display:none;
+  margin-top:.75vw;
+  padding:.65vw;
+  border-radius:.75vw;
+  background:rgba(71,215,255,.04);
+  border:1px solid rgba(71,215,255,.18);
+}
+.qa-panel.show{
+  display:block;
+}
+.qa-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:.35vw;
+  margin-top:.45vw;
+}
+.qa-actions button{
+  padding:.45vw .5vw;
+  border-radius:.55vw;
+  background:linear-gradient(180deg,rgba(39,45,50,.94),rgba(10,12,14,.92));
+  border:1px solid rgba(71,215,255,.18);
+  color:#d7f6ff;
+  font-size:.68vw;
+  text-align:center;
+}
+.history-panel{
+  position:absolute;
+  z-index:22;
+  left:1%;
+  top:16.4%;
+  width:14vw;
+  max-height:20vw;
+  overflow:hidden;
+  padding:.6vw .65vw;
+  border-radius:.8vw;
+  background:rgba(0,0,0,.36);
+  border:1px solid rgba(242,195,107,.13);
+  font-size:.62vw;
+  color:rgba(255,238,183,.72);
+  pointer-events:none;
+}
+.history-panel b{
+  color:#fff0bf;
+}
+.history-line{
+  display:flex;
+  justify-content:space-between;
+  gap:.4vw;
+  padding:.16vw 0;
+  border-bottom:1px solid rgba(255,255,255,.045);
+}
+.history-line:last-child{
+  border-bottom:0;
+}
+.qa-note{
+  margin-top:.5vw;
+  color:#a9f2ff;
+  font-size:.68vw;
+}
+.release-badge{
+  position:absolute;
+  z-index:21;
+  left:50%;
+  top:1.1%;
+  transform:translateX(-50%);
+  padding:.38vw .72vw;
+  border-radius:999px;
+  background:rgba(0,0,0,.42);
+  border:1px solid rgba(242,195,107,.14);
+  color:rgba(255,238,183,.62);
+  font-size:.62vw;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  pointer-events:none;
+}
+.qa-only{
+  display:none !important;
+}
+.stage.qa-mode .qa-only{
+  display:block !important;
+}
+button.qa-only{
+  display:none !important;
+}
+.stage.qa-mode button.qa-only{
+  display:block !important;
+}
+.preload-bar{
+  width:100%;
+  height:.42vw;
+  margin:.75vw 0 .5vw;
+  overflow:hidden;
+  border-radius:999px;
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(242,195,107,.12);
+}
+.preload-fill{
+  width:0%;
+  height:100%;
+  border-radius:999px;
+  background:linear-gradient(90deg,rgba(71,215,255,.45),rgba(242,195,107,.85));
+  transition:width .22s ease;
+}
+.preload-text{
+  font-size:.75vw;
+  color:#b8d9df;
+  min-height:1em;
+}
+.start-card button:disabled{
+  opacity:.45;
+  cursor:wait;
+}
+.session-stats .rtp-line{
+  color:#a9f2ff;
+}
+.release-note{
+  position:absolute;
+  z-index:21;
+  left:50%;
+  bottom:10.15%;
+  transform:translateX(-50%);
+  color:rgba(255,238,183,.48);
+  font-size:.62vw;
+  pointer-events:none;
+}
+@media (prefers-reduced-motion: reduce){
+  .tile.win .symbol,
+  .tile.tease .symbol,
+  .mascot{
+    animation:none !important;
+  }
+  .column-reel::after{
+    display:none;
+  }
+  .stage.lightning .flash,
+  .stage.shake{
+    animation:none !important;
+  }
+}
+.production-disclaimer{
+  position:absolute;
+  z-index:21;
+  left:50%;
+  bottom:10.15%;
+  transform:translateX(-50%);
+  color:rgba(255,238,183,.60);
+  font-size:.62vw;
+  pointer-events:none;
+  text-align:center;
+}
+.history-panel,
+.version-tag,
+.release-badge{
+  display:none;
+}
+.stage.qa-mode .history-panel,
+.stage.qa-mode .version-tag,
+.stage.qa-mode .release-badge{
+  display:block;
+}
+.portrait-warning{
+  display:none;
+  position:absolute;
+  z-index:120;
+  inset:0;
+  align-items:center;
+  justify-content:center;
+  padding:6vw;
+  background:#020406;
+  color:#fff0bf;
+  text-align:center;
+}
+.portrait-warning-card{
+  max-width:34rem;
+  padding:1.2rem;
+  border-radius:1rem;
+  background:rgba(8,12,18,.96);
+  border:1px solid rgba(242,195,107,.30);
+}
+@media (orientation:portrait) and (max-width:800px){
+  .portrait-warning{
+    display:flex;
+  }
+}
+.build-info{
+  position:absolute;
+  z-index:21;
+  right:1.2%;
+  top:20%;
+  display:none;
+  max-width:16vw;
+  padding:.55vw .65vw;
+  border-radius:.75vw;
+  background:rgba(0,0,0,.42);
+  border:1px solid rgba(71,215,255,.15);
+  color:rgba(216,247,255,.72);
+  font-size:.58vw;
+  line-height:1.35;
+  pointer-events:none;
+}
+.stage.qa-mode .build-info{
+  display:block;
+}
+.compliance-strip{
+  position:absolute;
+  z-index:21;
+  left:50%;
+  top:5.1%;
+  transform:translateX(-50%);
+  display:flex;
+  align-items:center;
+  gap:.5vw;
+  padding:.35vw .7vw;
+  border-radius:999px;
+  background:rgba(0,0,0,.42);
+  border:1px solid rgba(242,195,107,.16);
+  color:rgba(255,238,183,.72);
+  font-size:.58vw;
+  pointer-events:none;
+}
+.compliance-strip b{
+  color:#fff0bf;
+}
+.age-check{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.45vw;
+  margin:.6vw 0 .2vw;
+  font-size:.78vw;
+  color:#d9c692;
+}
+.age-check input{
+  width:.85vw;
+  height:.85vw;
+  accent-color:#d8902c;
+}
+.responsible-note{
+  margin-top:.45vw;
+  font-size:.7vw;
+  color:rgba(255,238,183,.62);
+}
+.changelog{
+  margin-top:.75vw;
+  padding:.65vw;
+  border-radius:.75vw;
+  background:rgba(255,255,255,.035);
+  border:1px solid rgba(242,195,107,.12);
+}
+.changelog ul{
+  margin:.35vw 0 0 1.05vw;
+  padding:0;
+}
+.changelog li{
+  margin:.18vw 0;
+}
+.smoke-list{
+  margin-top:.55vw;
+  padding:.55vw;
+  border-radius:.65vw;
+  background:rgba(71,215,255,.04);
+  border:1px solid rgba(71,215,255,.14);
+}
+.smoke-list code{
+  color:#a9f2ff;
+}
+/* Debug cells: add ?debug=1 */
+.stage.debug .tile{outline:1px solid rgba(255,0,0,.95)}
+.stage.debug .tile::after{
+  content:"";
+  position:absolute;
+  left:50%;top:50%;
+  width:.45vw;height:.45vw;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:#00ff38;
+  z-index:50;
+}
+/* =========================================================
+   UI / HUD
+   ========================================================= */
 .hud{
   position:absolute;
   z-index:20;
@@ -210,7 +663,6 @@ html,body{
   border:1px solid rgba(242,195,107,.20);
   box-shadow:0 0 2vw rgba(0,0,0,.75);
 }
-
 .pill{
   min-width:12%;
   padding:.35% .75%;
@@ -219,7 +671,6 @@ html,body{
   background:rgba(0,0,0,.48);
   border:1px solid rgba(255,220,130,.12);
 }
-
 .pill span{
   display:block;
   font-size:.58vw;
@@ -227,40 +678,33 @@ html,body{
   text-transform:uppercase;
   color:#c99d5c;
 }
-
 .pill b{
   display:block;
   font-size:.95vw;
   color:#fff2c8;
 }
-
 button{
   font:inherit;
   border:none;
   cursor:pointer;
   color:#ffe8ad;
 }
-
 button:disabled{opacity:.45;cursor:not-allowed}
-
 .small{
   min-width:5.8%;
   height:70%;
   border-radius:999px;
   background:linear-gradient(180deg,rgba(52,41,24,.94),rgba(9,8,8,.88));
-  border:1px solid rgba(242,195,107,.22);
+  border:1px solid var(--soft-border);
   font-size:.68vw;
 }
-
 .betbtn{
   min-width:3.4%;
   width:3.4%;
   font-size:1.05vw;
   font-weight:900;
 }
-
 .betpill{min-width:8%}
-
 .spin{
   width:5.25vw;
   height:5.25vw;
@@ -273,7 +717,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
   font-size:1vw;
   box-shadow:0 0 1.5vw rgba(255,179,63,.68);
 }
-
 .buy{
   min-width:8.4vw;
   padding:0 .8vw;
@@ -281,20 +724,17 @@ button:disabled{opacity:.45;cursor:not-allowed}
   box-shadow:0 0 .9vw rgba(71,215,255,.12);
   font-size:.73vw;
 }
-
 .hud-anchor{
   position:relative;
   display:flex;
   align-items:center;
   justify-content:center;
 }
-
 .spin-group{
   display:flex;
   align-items:center;
   gap:.35vw;
 }
-
 .auto-mini{
   min-width:2.7vw;
   width:2.7vw;
@@ -303,9 +743,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
   font-size:1.1vw;
   font-weight:900;
   background:linear-gradient(180deg,rgba(52,41,24,.94),rgba(9,8,8,.88));
-  border:1px solid rgba(242,195,107,.22);
+  border:1px solid var(--soft-border);
 }
-
 .menu-panel{
   position:absolute;
   left:50%;
@@ -315,19 +754,17 @@ button:disabled{opacity:.45;cursor:not-allowed}
   padding:.55vw;
   border-radius:.9vw;
   background:rgba(6,10,14,.95);
-  border:1px solid rgba(242,195,107,.22);
+  border:1px solid var(--soft-border);
   box-shadow:0 .6vw 1.4vw rgba(0,0,0,.45);
   opacity:0;
   pointer-events:none;
   transition:opacity .18s ease, transform .18s ease;
 }
-
 .menu-panel.show{
   opacity:1;
   pointer-events:auto;
   transform:translateX(-50%) translateY(0);
 }
-
 .menu-title{
   font-size:.7vw;
   letter-spacing:.12em;
@@ -336,7 +773,6 @@ button:disabled{opacity:.45;cursor:not-allowed}
   margin-bottom:.35vw;
   text-align:center;
 }
-
 .menu-opt{
   width:100%;
   margin:.2vw 0;
@@ -349,9 +785,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   line-height:1.18;
   text-align:left;
 }
-
 .menu-opt b{color:#fff2c8}
-
 .msg{
   position:absolute;
   z-index:21;
@@ -365,12 +799,10 @@ button:disabled{opacity:.45;cursor:not-allowed}
   color:#ffe8b0;
   text-shadow:0 .15vw .45vw #000,0 0 1vw rgba(255,190,80,.45);
 }
-
 .msg.tease{
   color:#a9f2ff;
   text-shadow:0 0 1.2vw rgba(71,215,255,.8),0 .15vw .45vw #000;
 }
-
 .topbtn{
   position:absolute;
   z-index:35;
@@ -381,10 +813,8 @@ button:disabled{opacity:.45;cursor:not-allowed}
   border:1px solid rgba(255,255,255,.15);
   font-size:.76vw;
 }
-
 #soundBtn{top:1.1%}
 #notesBtn{top:5.8%}
-
 .notes{
   display:none;
   position:absolute;
@@ -401,9 +831,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   font-size:.78vw;
   line-height:1.35;
 }
-
 .notes.show{display:block}
-
 .bubble{
   position:absolute;
   z-index:22;
@@ -421,9 +849,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   transform:translateY(.55vw);
   transition:.25s;
 }
-
 .bubble.show{opacity:1;transform:translateY(0)}
-
 .bonus{
   display:none;
   position:absolute;
@@ -436,9 +862,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   border:1px solid rgba(71,215,255,.32);
   font-size:.82vw;
 }
-
 .bonus.show{display:block}
-
 .overlay{
   display:none;
   position:absolute;
@@ -447,9 +871,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   place-items:center;
   background:radial-gradient(circle,rgba(30,160,220,.18),rgba(0,0,0,.72));
 }
-
 .overlay.show{display:grid}
-
 .big{
   text-align:center;
   font-size:5.8vw;
@@ -457,13 +879,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
   color:#ffdf76;
   text-shadow:0 0 1vw #ffbb35,0 0 3vw rgba(71,215,255,.62),0 .3vw 0 #5b2208;
 }
-
 .big small{
   display:block;
   font-size:1.95vw;
   color:#fff3c9;
 }
-
 .flash{
   position:absolute;
   inset:0;
@@ -472,9 +892,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   background:rgba(90,195,255,.18);
   opacity:0;
 }
-
 .stage.lightning .flash{animation:flash .66s ease}
-
 @keyframes flash{
   0%,100%{opacity:0}
   12%{opacity:.62}
@@ -482,7 +900,52 @@ button:disabled{opacity:.45;cursor:not-allowed}
   36%{opacity:.28}
   48%{opacity:0}
 }
-
+.stage.shake{
+  animation:softShake .42s ease;
+}
+@keyframes softShake{
+  0%,100%{transform:translateX(0)}
+  18%{transform:translateX(-.12vw)}
+  36%{transform:translateX(.10vw)}
+  54%{transform:translateX(-.07vw)}
+  72%{transform:translateX(.05vw)}
+}
+.win-float{
+  position:absolute;
+  z-index:30;
+  left:50%;
+  top:15.5%;
+  transform:translateX(-50%) translateY(.4vw);
+  min-width:18vw;
+  padding:.75vw 1.1vw;
+  border-radius:999px;
+  text-align:center;
+  opacity:0;
+  pointer-events:none;
+  background:linear-gradient(180deg,rgba(12,15,19,.92),rgba(5,8,12,.88));
+  border:1px solid rgba(242,195,107,.26);
+  box-shadow:0 .7vw 1.4vw rgba(0,0,0,.42),0 0 1.6vw rgba(71,215,255,.12);
+  transition:opacity .24s ease, transform .24s ease;
+}
+.win-float.show{
+  opacity:1;
+  transform:translateX(-50%) translateY(0);
+}
+.win-float .label{
+  display:block;
+  font-size:.72vw;
+  letter-spacing:.18em;
+  color:#c99d5c;
+  text-transform:uppercase;
+}
+.win-float .amount{
+  display:block;
+  margin-top:.1vw;
+  font-size:1.7vw;
+  font-weight:900;
+  color:#fff0bf;
+  text-shadow:0 0 .8vw rgba(255,190,80,.35);
+}
 /* Bonus start notice */
 .bonus-notice{
   position:absolute;
@@ -493,9 +956,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
   justify-content:center;
   pointer-events:none;
 }
-
 .bonus-notice.show{display:flex}
-
 .bonus-notice-card{
   width:min(38vw,88%);
   padding:1.15vw 1.25vw;
@@ -509,24 +970,20 @@ button:disabled{opacity:.45;cursor:not-allowed}
   transform:translateY(.55vw) scale(.985);
   transition:opacity .28s ease, transform .28s ease;
 }
-
 .bonus-notice.show .bonus-notice-card{
   opacity:1;
   transform:translateY(0) scale(1);
 }
-
 .bonus-notice-card h3{
   margin:0 0 .45vw;
   font-size:1.6vw;
   color:#fff2c8;
 }
-
 .bonus-notice-card p{
   margin:.25vw 0;
   font-size:.92vw;
   color:#d7e9f4;
 }
-
 .bonus-notice-card .cta{
   margin-top:.8vw;
   display:inline-flex;
@@ -535,103 +992,64 @@ button:disabled{opacity:.45;cursor:not-allowed}
   padding:.55vw .9vw;
   border-radius:999px;
   background:linear-gradient(180deg,rgba(46,35,21,.96),rgba(10,9,9,.92));
-  border:1px solid rgba(242,195,107,.22);
+  border:1px solid var(--soft-border);
   color:#ffe8ad;
   font-size:.78vw;
 }
-
 .bonus-notice-card.hidden-bonus{
   border-color:rgba(71,215,255,.42);
   box-shadow:0 1vw 2vw rgba(0,0,0,.45), 0 0 2vw rgba(71,215,255,.24);
 }
-
 .bonus-notice-card.super-bonus{border-color:rgba(255,190,80,.36)}
 .bonus-notice-card.normal-bonus{border-color:rgba(242,195,107,.30)}
-
-/* Debug */
-.stage.debug .tile{outline:1px solid rgba(255,0,0,.95)}
-.stage.debug .tile::after{
-  content:"";
-  position:absolute;
-  left:50%;top:50%;
-  width:.45vw;height:.45vw;
-  transform:translate(-50%,-50%);
-  border-radius:50%;
-  background:#00ff38;
-  z-index:50;
+</style><script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoGame",
+  "name": "Mi\u00f0gar\u00f0ur Training Slot",
+  "description": "A fake-money Norse slot training prototype on Thor's Hall. No deposits and no real-money gambling.",
+  "applicationCategory": "Game",
+  "operatingSystem": "Web Browser",
+  "isAccessibleForFree": true,
+  "genre": "Slot training prototype"
 }
-</style>
-</head>
-
-<body>
-<main class="stage" id="stage">
-  <img class="bg" src="/img/slots/midgardur.png" alt="">
-  <div class="vignette"></div>
-
-  <section class="reels" id="reels"></section>
-
-  <div class="bubble" id="bubble">Two FS runes... the hall is watching.</div>
-
-  <button class="topbtn" id="soundBtn">Sound: On</button>
-  <button class="topbtn" id="notesBtn">Notes</button>
-
-  <div class="msg" id="msg">Spin to enter Miðgarður.</div>
-  <div class="bonus" id="bonusPanel">FREE SPINS: <b id="fsLeft">0</b> | BONUS WIN: <b id="bonusWin">0</b></div>
-
-  <div class="hud">
-    <div class="hud-anchor">
-      <button class="small buy" id="buyBtn">Bonus Buy</button>
-      <div class="menu-panel" id="buyMenu">
-        <div class="menu-title">Bonus Buy</div>
-        <button class="menu-opt" id="buyFeatureOpt">Feature Spin<br><b>3x bet</b> • 5x higher FS chance</button>
-        <button class="menu-opt" id="buy3fsOpt">Buy 3 FS Bonus<br><b>100x bet</b> • 10 free spins</button>
-        <button class="menu-opt" id="buy4fsOpt">Buy 4 FS Bonus<br><b>250x bet</b> • 12 super free spins</button>
-      </div>
-    </div>
-
-    <div class="pill"><span>Balance</span><b id="balance">5000</b></div>
-
-    <button class="small betbtn" id="betDown">−</button>
-    <div class="pill betpill"><span>Bet</span><b id="bet">20</b></div>
-    <button class="small betbtn" id="betUp">+</button>
-
-    <div class="hud-anchor spin-group">
-      <button class="spin" id="spinBtn">Spin</button>
-      <button class="auto-mini" id="autoBtn">A</button>
-      <div class="menu-panel" id="autoMenu">
-        <div class="menu-title">Auto Spins</div>
-        <button class="menu-opt auto-opt" data-auto="10">10 auto spins</button>
-        <button class="menu-opt auto-opt" data-auto="25">25 auto spins</button>
-        <button class="menu-opt auto-opt" data-auto="50">50 auto spins</button>
-        <button class="menu-opt auto-opt" data-auto="75">75 auto spins</button>
-        <button class="menu-opt auto-opt" data-auto="100">100 auto spins</button>
-      </div>
-    </div>
-
-    <div class="pill"><span>Last Win</span><b id="lastWin">0</b></div>
-  </div>
-
-  <div class="overlay" id="overlay">
-    <div class="big">BIG WIN<small id="bigAmount">0</small></div>
-  </div>
-
-  <div class="flash"></div>
-
-  <div class="bonus-notice" id="bonusNotice">
-    <div class="bonus-notice-card" id="bonusNoticeCard">
-      <h3 id="bonusNoticeTitle">Bonus Won</h3>
-      <p id="bonusNoticeBody">You won free spins.</p>
-      <div class="cta">Click to start now</div>
-    </div>
-  </div>
-
-  <aside class="notes" id="notes">
-    <b>Miðgarður rebuild</b><br><br>
-    Original Hacksaw-inspired structure: loop engine, feature spin, bonus buy menu, auto menu, pending bonus popup, and Midgardur-only mechanics.
-  </aside>
-</main>
-
-<script>
+</script></head><body><main class="stage" id="stage"><img class="bg" src="/img/slots/midgardur.png" alt=""><div class="vignette"></div><section class="reels" id="reels"></section><div class="session-stats" id="sessionStats">
+    Spins: <b id="statSpins">0</b><br>
+    Wagered: <b id="statWagered">0</b><br>
+    Returned: <b id="statReturned">0</b><br><span class="rtp-line">Session RTP: <b id="statRtp">0%</b></span></div><div class="history-panel" id="historyPanel"><b>Recent Spins</b><div id="historyList"></div></div><div class="version-tag">STEP 12 FINAL</div><div class="release-badge">Training Prototype</div><div class="build-info" id="buildInfo">
+    Build: Step 10<br>
+    Mode: Production integration<br>
+    QA: add <code>?qa=1</code></div><div class="compliance-strip"><b>18+</b><span>Fake-money training only</span><span>•</span><span>No deposits</span><span>•</span><span>No real gambling</span></div><div class="production-disclaimer">Fake-money training prototype • no deposits • no real gambling</div><div class="bubble" id="bubble">Two FS runes... the hall is watching.</div><button class="topbtn" id="soundBtn" aria-label="Toggle sound">Sound: On</button><button class="topbtn" id="notesBtn" aria-label="Open rules and paytable">Rules</button><button class="topbtn" id="resetBtn" aria-label="Reset fake balance and session stats">Reset</button><button class="topbtn" id="fullBtn" aria-label="Toggle fullscreen">Full</button><div class="win-float" id="winFloat"><span class="label" id="winFloatLabel">Win</span><span class="amount" id="winFloatAmount">0</span></div><div class="msg" id="msg">Spin to enter Miðgarður.</div><div class="bonus" id="bonusPanel">FREE SPINS: <b id="fsLeft">0</b> | BONUS WIN: <b id="bonusWin">0</b></div><div class="hud"><div class="hud-anchor"><button class="small buy" id="buyBtn" aria-label="Open bonus buy menu">Bonus Buy</button><div class="menu-panel" id="buyMenu"><div class="menu-title">Bonus Buy</div><button class="menu-opt" id="buyFeatureOpt">Feature Spin<br><b>3x bet</b> • 5x FS chance</button><button class="menu-opt" id="buy3fsOpt">Buy 3 FS Bonus<br><b>100x bet</b> • 10 free spins</button><button class="menu-opt" id="buy4fsOpt">Buy 4 FS Bonus<br><b>250x bet</b> • 12 super spins</button></div></div><div class="pill"><span>Balance</span><b id="balance">5000</b></div><button class="small betbtn" id="betDown">−</button><div class="pill betpill"><span>Bet</span><b id="bet">20</b></div><button class="small betbtn" id="betUp">+</button><div class="hud-anchor spin-group"><button class="spin" id="spinBtn" aria-label="Spin reels">Spin</button><button class="auto-mini" id="autoBtn" aria-label="Open auto spin menu">A</button><div class="menu-panel" id="autoMenu"><div class="menu-title">Auto Spins</div><button class="menu-opt auto-opt" data-auto="10">10 auto spins</button><button class="menu-opt auto-opt" data-auto="25">25 auto spins</button><button class="menu-opt auto-opt" data-auto="50">50 auto spins</button><button class="menu-opt auto-opt" data-auto="75">75 auto spins</button><button class="menu-opt auto-opt" data-auto="100">100 auto spins</button></div></div><button class="small turbo" id="turboBtn">Turbo</button><div class="pill"><span>Last Win</span><b id="lastWin">0</b></div></div><div class="overlay" id="overlay"><div class="big">BIG WIN<small id="bigAmount">0</small></div></div><div class="flash"></div><div class="keyboard-hint">Space = spin • B = buy menu • A = auto menu</div><div class="bonus-notice" id="bonusNotice"><div class="bonus-notice-card" id="bonusNoticeCard"><h3 id="bonusNoticeTitle">Bonus Won</h3><p id="bonusNoticeBody">You won free spins.</p><div class="cta">Click to start now</div></div></div><div class="asset-warning" id="assetWarning"></div><div class="start-screen" id="startScreen"><div class="start-card"><h1>Miðgarður</h1><p>Fake-money training prototype. No deposits, no real-money gambling. Assets preload before entry, then browser audio unlocks on click.</p><label class="age-check"><input type="checkbox" id="ageCheck"> I understand this is 18+ fake-money training only.</label><div class="preload-bar"><div class="preload-fill" id="preloadFill"></div></div><div class="preload-text" id="preloadText">Preparing assets...</div><button id="startBtn" disabled>Enter</button><div class="responsible-note">Play responsibly. This demo has no cash value and cannot be withdrawn.</div></div></div><div class="portrait-warning"><div class="portrait-warning-card"><h2>Rotate your device</h2><p>Miðgarður is built for landscape play. Turn your phone sideways for the full slot layout.</p></div></div><aside class="notes" id="notes" aria-label="Rules and paytable"><b>Miðgarður Rules / Paytable</b><br><span style="color:#a9f2ff">18+ fake-money training prototype. No deposits, no withdrawals, no real-money gambling. QA tools only show with <code>?qa=1</code>.</span><br><br>
+    Fake-money prototype. 5 reels, 4 rows, left-to-right ways. FS symbols trigger bonus rounds. Maximum 1 FS can land per reel.
+    <div class="rules-grid"><div class="rules-box"><b>Bonuses</b><br>
+        3 FS = 10 Free Spins<br>
+        4 FS = 12 Super Spins, 2x wins<br>
+        5 FS = 15 Hidden Spins, 3x wins, minimum 500x bet
+      </div><div class="rules-box"><b>Buy Menu</b><br>
+        Feature Spin = 3x bet, 5x FS chance<br>
+        3 FS Bonus = 100x bet<br>
+        4 FS Bonus = 250x bet
+      </div><div class="rules-box"><b>Low Symbols</b><div class="paytable-row"><span>10 / J / Q / K / A</span><span>3–5 of a kind</span></div>
+        Lower pays, higher hit frequency.
+      </div><div class="rules-box"><b>Premium Symbols</b><div class="paytable-row"><span>Raven / Ship / Axe / Rune / Mjolnir</span><span>Higher pays</span></div>
+        Premium wins are rarer and more volatile.
+      </div></div><br>
+    Dev tools: <code>midgardurSim(100000)</code>, <code>midgardurSim(100000, true)</code>, <code>midgardurReleaseCheck()</code>, <code>midgardurComplianceCheck()</code>, <code>midgardurDiagnostics()</code>, <code>midgardurState</code>, <code>midgardurMath</code>.<br><br><button class="menu-opt qa-only" id="qaToggleBtn" type="button">Show QA Tester Tools</button><div class="qa-panel qa-only" id="qaPanel"><b>QA Tester Tools</b><br>
+      Use these to test rare states without waiting for random results.
+      <div class="qa-actions"><button id="force3Btn" type="button">Next Spin: 3 FS</button><button id="force4Btn" type="button">Next Spin: 4 FS</button><button id="force5Btn" type="button">Next Spin: 5 FS</button><button id="forceBigBtn" type="button">Next Spin: Big Win</button></div><div class="qa-note" id="qaNote">No forced result queued.</div></div><br><div class="changelog"><b>Step 12 Final Handover</b><ul><li>Single-file deploy target: <code>training.html</code></li><li>QA tools remain hidden unless <code>?qa=1</code></li><li>Compliance copy and age acknowledgment included</li><li>Analytics hooks are passive only; no external tracker loaded</li><li>Console helpers included for testing and diagnostics</li></ul></div><div class="smoke-list"><b>Quick smoke test</b><br>
+      1. Open <code>/training</code> and enter after preload.<br>
+      2. Spin once and confirm balance changes.<br>
+      3. Open <code>/training?qa=1</code>, force 3 FS, 4 FS, and 5 FS.<br>
+      4. Run <code>midgardurComplianceCheck()</code> in console.<br>
+      5. Run <code>midgardurFinalAudit()</code> in console.
+    </div><br><b>Deploy checklist</b><br>
+    1. Upload all symbol PNGs to <code>/img/slots/</code>.<br>
+    2. Optional real sounds go in <code>/sounds/</code>.<br>
+    3. Use browser console simulator before changing math.<br>
+    4. Test desktop and mobile landscape after every deploy.<br>
+    5. Use final file as <code>training.html</code> on Netlify.<br>
+    6. Optional: listen for <code>midgardur:event</code> or <code>dataLayer</code> pushes for analytics.
+  </aside></main><script>
 (() => {
 const ASSETS = {
   TEN: "/img/slots/ten.png",
@@ -646,7 +1064,14 @@ const ASSETS = {
   MJOLNIR: "/img/slots/mjolnir.png",
   FS: "/img/slots/fs.png"
 };
-
+const SOUND_FILES = {
+  stop: "/sounds/reel-stop.ogg",
+  fs: "/sounds/fs-hit.ogg",
+  bonus: "/sounds/bonus-popup.ogg",
+  hidden: "/sounds/hidden-bonus.ogg",
+  thunder: "/sounds/thunder.ogg",
+  big: "/sounds/big-win.ogg"
+};
 const SYMBOLS = [
   {id:"TEN", tier:"low", w:25, p:{3:.25,4:.75,5:1.8}},
   {id:"J", tier:"low", w:22, p:{3:.35,4:1,5:2.4}},
@@ -660,62 +1085,310 @@ const SYMBOLS = [
   {id:"MJOLNIR", tier:"premium", w:5, p:{3:4,4:14,5:55}},
   {id:"FS", tier:"fs", w:3, scatter:true}
 ];
-
 const C = 5;
 const R = 4;
 const byId = Object.fromEntries(SYMBOLS.map(s => [s.id, s]));
-
-const reels = document.getElementById("reels");
-const stage = document.getElementById("stage");
-const msg = document.getElementById("msg");
-const bubble = document.getElementById("bubble");
-const balanceEl = document.getElementById("balance");
-const betEl = document.getElementById("bet");
-const lastWinEl = document.getElementById("lastWin");
-const spinBtn = document.getElementById("spinBtn");
-const betUp = document.getElementById("betUp");
-const betDown = document.getElementById("betDown");
-const autoBtn = document.getElementById("autoBtn");
-const buyBtn = document.getElementById("buyBtn");
-const buyMenu = document.getElementById("buyMenu");
-const autoMenu = document.getElementById("autoMenu");
-const buyFeatureOpt = document.getElementById("buyFeatureOpt");
-const buy3fsOpt = document.getElementById("buy3fsOpt");
-const buy4fsOpt = document.getElementById("buy4fsOpt");
-const soundBtn = document.getElementById("soundBtn");
-const notesBtn = document.getElementById("notesBtn");
-const notes = document.getElementById("notes");
-const bonusPanel = document.getElementById("bonusPanel");
-const fsLeft = document.getElementById("fsLeft");
-const bonusWinEl = document.getElementById("bonusWin");
-const overlay = document.getElementById("overlay");
-const bigAmount = document.getElementById("bigAmount");
-const bonusNotice = document.getElementById("bonusNotice");
-const bonusNoticeCard = document.getElementById("bonusNoticeCard");
-const bonusNoticeTitle = document.getElementById("bonusNoticeTitle");
-const bonusNoticeBody = document.getElementById("bonusNoticeBody");
-
-let board = [];
-let balance = 5000;
-let betValues = [10,20,50,100,200];
-let betIndex = 1;
-let lastWin = 0;
-let spinning = false;
-let auto = 0;
-let muted = false;
+const MATH = {
+  baseFsChance: 0.085,
+  featureFsMultiplier: 5,
+  featureFsCap: 0.42,
+  featureSpinCostX: 3,
+  buy3FsCostX: 100,
+  buy4FsCostX: 250,
+  normalBonusSpins: 10,
+  superBonusSpins: 12,
+  hiddenBonusSpins: 15,
+  normalBonusMultiplier: 1,
+  superBonusMultiplier: 2,
+  hiddenBonusMultiplier: 3,
+  hiddenMinWinX: 500,
+  maxWinX: 10000
+};
+const dom = {
+  reels: document.getElementById("reels"),
+  stage: document.getElementById("stage"),
+  msg: document.getElementById("msg"),
+  bubble: document.getElementById("bubble"),
+  balance: document.getElementById("balance"),
+  bet: document.getElementById("bet"),
+  lastWin: document.getElementById("lastWin"),
+  spinBtn: document.getElementById("spinBtn"),
+  betUp: document.getElementById("betUp"),
+  betDown: document.getElementById("betDown"),
+  autoBtn: document.getElementById("autoBtn"),
+  buyBtn: document.getElementById("buyBtn"),
+  buyMenu: document.getElementById("buyMenu"),
+  autoMenu: document.getElementById("autoMenu"),
+  buyFeatureOpt: document.getElementById("buyFeatureOpt"),
+  buy3fsOpt: document.getElementById("buy3fsOpt"),
+  buy4fsOpt: document.getElementById("buy4fsOpt"),
+  soundBtn: document.getElementById("soundBtn"),
+  notesBtn: document.getElementById("notesBtn"),
+  resetBtn: document.getElementById("resetBtn"),
+  fullBtn: document.getElementById("fullBtn"),
+  startBtn: document.getElementById("startBtn"),
+  ageCheck: document.getElementById("ageCheck"),
+  startScreen: document.getElementById("startScreen"),
+  preloadFill: document.getElementById("preloadFill"),
+  preloadText: document.getElementById("preloadText"),
+  assetWarning: document.getElementById("assetWarning"),
+  notes: document.getElementById("notes"),
+  qaToggleBtn: document.getElementById("qaToggleBtn"),
+  qaPanel: document.getElementById("qaPanel"),
+  qaNote: document.getElementById("qaNote"),
+  force3Btn: document.getElementById("force3Btn"),
+  force4Btn: document.getElementById("force4Btn"),
+  force5Btn: document.getElementById("force5Btn"),
+  forceBigBtn: document.getElementById("forceBigBtn"),
+  historyList: document.getElementById("historyList"),
+  turboBtn: document.getElementById("turboBtn"),
+  sessionStats: document.getElementById("sessionStats"),
+  statSpins: document.getElementById("statSpins"),
+  statWagered: document.getElementById("statWagered"),
+  statReturned: document.getElementById("statReturned"),
+  statRtp: document.getElementById("statRtp"),
+  bonusPanel: document.getElementById("bonusPanel"),
+  fsLeft: document.getElementById("fsLeft"),
+  bonusWin: document.getElementById("bonusWin"),
+  overlay: document.getElementById("overlay"),
+  bigAmount: document.getElementById("bigAmount"),
+  bonusNotice: document.getElementById("bonusNotice"),
+  bonusNoticeCard: document.getElementById("bonusNoticeCard"),
+  bonusNoticeTitle: document.getElementById("bonusNoticeTitle"),
+  bonusNoticeBody: document.getElementById("bonusNoticeBody"),
+  winFloat: document.getElementById("winFloat"),
+  winFloatLabel: document.getElementById("winFloatLabel"),
+  winFloatAmount: document.getElementById("winFloatAmount")
+};
+const state = {
+  phase: "IDLE",
+  balance: 5000,
+  betIndex: 1,
+  betValues: [10,20,50,100,200],
+  lastWin: 0,
+  autoLeft: 0,
+  muted: false,
+  board: [],
+  columnReels: [],
+  loops: [],
+  inBonus: false,
+  bonusMode: null,
+  freeSpins: 0,
+  bonusWin: 0,
+  bonusMultiplier: 1,
+  hiddenMinWin: 0,
+  bonusBet: 0,
+  pendingBonus: null,
+  pendingBonusTimer: null,
+  displayBalance: 5000,
+  displayLastWin: 0,
+  turbo: false,
+  sessionSpins: 0,
+  sessionWagered: 0,
+  sessionReturned: 0,
+  started: false,
+  saveVersion: "midgardur-step12-v1",
+  assetsReady: false,
+  ageAccepted: false,
+  forceNext: null,
+  history: [],
+  saveQueued: false
+};
 let audioCtx = null;
-let freeSpins = 0;
-let inBonus = false;
-let bonusWin = 0;
-let columnReels = [];
-let loops = [];
-let bonusMode = "";
-let bonusMultiplier = 1;
-let hiddenMinWin = 0;
-let bonusBet = 0;
-let pendingBonus = null;
-let pendingBonusTimer = null;
-
+const audioCache = new Map();
+function preloadAssets(){
+  const imgSources = Object.values(ASSETS);
+  const soundSources = Object.values(SOUND_FILES);
+  const total = imgSources.length + soundSources.length;
+  let done = 0;
+  const settled = new Set();
+  function progress(key){
+    if(settled.has(key)) return;
+    settled.add(key);
+    done++;
+    const pct = Math.min(100, Math.round(done / total * 100));
+    if(dom.preloadFill) dom.preloadFill.style.width = `${pct}%`;
+    if(dom.preloadText) dom.preloadText.textContent = pct >= 100 ? "Ready." : `Loading assets... ${pct}%`;
+    if(done >= total){
+      state.assetsReady = true;
+      dom.startBtn.disabled = !(state.ageAccepted || (dom.ageCheck && dom.ageCheck.checked));
+      if(dom.preloadFill) dom.preloadFill.style.width = "100%";
+      if(dom.preloadText) dom.preloadText.textContent = "Ready.";
+    }
+  }
+  imgSources.forEach((src, index) => {
+    const key = `img-${index}-${src}`;
+    const img = new Image();
+    img.onload = () => progress(key);
+    img.onerror = () => progress(key);
+    img.src = src;
+  });
+  soundSources.forEach((src, index) => {
+    const key = `sound-${index}-${src}`;
+    try{
+      const a = new Audio(src);
+      a.preload = "auto";
+      a.volume = src.includes("thunder") ? .62 : .46;
+      audioCache.set(src, a);
+      const timeout = setTimeout(() => progress(key), 550);
+      a.oncanplaythrough = () => {
+        clearTimeout(timeout);
+        progress(key);
+      };
+      a.onerror = () => {
+        clearTimeout(timeout);
+        progress(key);
+      };
+      a.load();
+    }catch(e){
+      progress(key);
+    }
+  });
+  setTimeout(() => {
+    if(!state.assetsReady){
+      state.assetsReady = true;
+      dom.startBtn.disabled = !(state.ageAccepted || (dom.ageCheck && dom.ageCheck.checked));
+      if(dom.preloadFill) dom.preloadFill.style.width = "100%";
+      if(dom.preloadText) dom.preloadText.textContent = "Ready. Optional sound files can be added later.";
+      dom.startBtn.disabled = false;
+    }
+  }, 2200);
+}
+const BUILD = {
+  name: "midgardur-training-slot",
+  version: "step12-final-handover",
+  buildHash: "4dcfe6c41fd3",
+  fakeMoneyOnly: true,
+  deployFile: "training.html"
+};
+function trackEvent(name, data={}){
+  const payload = {
+    event: `midgardur_${name}`,
+    build: BUILD.version,
+    phase: state.phase,
+    bet: getBet ? getBet() : undefined,
+    balance: Math.floor(state.balance || 0),
+    ...data
+  };
+  try{
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(payload);
+  }catch(e){}
+  try{
+    window.dispatchEvent(new CustomEvent("midgardur:event", {detail: payload}));
+  }catch(e){}
+  if(new URLSearchParams(location.search).has("qa")){
+    console.debug("[Midgardur]", payload);
+  }
+}
+function safeStorageGet(key){
+  try{return localStorage.getItem(key)}catch(e){return null}
+}
+function safeStorageSet(key, value){
+  try{localStorage.setItem(key, value)}catch(e){}
+}
+function saveGame(){
+  if(state.saveQueued) return;
+  state.saveQueued = true;
+  setTimeout(() => {
+    state.saveQueued = false;
+    const data = {
+      version: state.saveVersion,
+      balance: state.balance,
+      betIndex: state.betIndex,
+      muted: state.muted,
+      turbo: state.turbo,
+      sessionSpins: state.sessionSpins,
+      sessionWagered: state.sessionWagered,
+      sessionReturned: state.sessionReturned,
+      ageAccepted: state.ageAccepted,
+      history: state.history.slice(0,8)
+    };
+    safeStorageSet(state.saveVersion, JSON.stringify(data));
+  }, 250);
+}
+function loadGame(){
+  const raw = safeStorageGet(state.saveVersion);
+  if(!raw) return;
+  try{
+    const data = JSON.parse(raw);
+    if(!data || data.version !== state.saveVersion) return;
+    state.balance = Number.isFinite(data.balance) ? data.balance : state.balance;
+    state.displayBalance = state.balance;
+    state.betIndex = Number.isFinite(data.betIndex) ? data.betIndex : state.betIndex;
+    state.muted = !!data.muted;
+    state.turbo = !!data.turbo;
+    state.sessionSpins = Number.isFinite(data.sessionSpins) ? data.sessionSpins : 0;
+    state.sessionWagered = Number.isFinite(data.sessionWagered) ? data.sessionWagered : 0;
+    state.sessionReturned = Number.isFinite(data.sessionReturned) ? data.sessionReturned : 0;
+    state.history = Array.isArray(data.history) ? data.history.slice(0,8) : [];
+    state.ageAccepted = !!data.ageAccepted;
+  }catch(e){}
+}
+function applyAgeState(){
+  if(dom.ageCheck) dom.ageCheck.checked = !!state.ageAccepted;
+  if(dom.startBtn) dom.startBtn.disabled = !(state.assetsReady && state.ageAccepted);
+}
+function resetGame(){
+  state.phase = "IDLE";
+  state.balance = 5000;
+  state.displayBalance = 5000;
+  state.betIndex = 1;
+  state.lastWin = 0;
+  state.displayLastWin = 0;
+  state.autoLeft = 0;
+  state.inBonus = false;
+  state.bonusMode = null;
+  state.freeSpins = 0;
+  state.bonusWin = 0;
+  state.bonusMultiplier = 1;
+  state.hiddenMinWin = 0;
+  state.bonusBet = 0;
+  state.pendingBonus = null;
+  state.sessionSpins = 0;
+  state.sessionWagered = 0;
+  state.sessionReturned = 0;
+  state.history = [];
+  state.forceNext = null;
+  clearTimeout(state.pendingBonusTimer);
+  dom.bonusNotice.classList.remove("show");
+  hideMenus();
+  clearFX();
+  setMsg("Balance reset. Spin to enter Miðgarður.");
+  saveGame();
+  updateUI();
+}
+function showAssetWarning(text){
+  dom.assetWarning.textContent = text;
+  dom.assetWarning.classList.add("show");
+  setTimeout(() => dom.assetWarning.classList.remove("show"), 5000);
+}
+function installImageFallbacks(){
+  const missing = new Set();
+  document.addEventListener("error", (e) => {
+    const target = e.target;
+    if(!target || target.tagName !== "IMG") return;
+    const src = target.getAttribute("src") || "";
+    if(src && !missing.has(src)){
+      missing.add(src);
+      showAssetWarning(`Missing asset: ${src}`);
+    }
+    target.style.opacity = ".18";
+  }, true);
+}
+function unlockAudio(){
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+  }catch(e){}
+}
+function getBet(){
+  return state.betValues[state.betIndex];
+}
+function setPhase(phase){
+  state.phase = phase;
+  updateUI();
+}
 function makeImg(id, cls=""){
   const i = document.createElement("img");
   i.src = ASSETS[id];
@@ -724,68 +1397,55 @@ function makeImg(id, cls=""){
   i.className = cls;
   return i;
 }
-
 function cell(c,r){
-  return reels.querySelector(`.tile[data-c="${c}"][data-r="${r}"]`);
+  return dom.reels.querySelector(`.tile[data-c="${c}"][data-r="${r}"]`);
 }
-
 function createBoard(){
-  reels.innerHTML = "";
-  columnReels = [];
-
+  dom.reels.innerHTML = "";
+  state.columnReels = [];
   const colLines = [445, 594, 748, 902, 1058, 1212];
   const rowLines = [184, 343, 477, 614, 751];
   const baseW = 1672;
   const baseH = 941;
-
   const pctX = (px) => (px / baseW * 100).toFixed(4) + "%";
   const pctY = (px) => (px / baseH * 100).toFixed(4) + "%";
-
   for(let r=0;r<R;r++){
     for(let c=0;c<C;c++){
       const t = document.createElement("div");
       t.className = "tile";
       t.dataset.c = c;
       t.dataset.r = r;
-
       const x1 = colLines[c];
       const x2 = colLines[c + 1];
       const y1 = rowLines[r];
       const y2 = rowLines[r + 1];
-
       t.style.left = pctX(x1);
       t.style.top = pctY(y1);
       t.style.width = pctX(x2 - x1);
       t.style.height = pctY(y2 - y1);
-
       t.appendChild(makeImg("TEN","symbol"));
-      reels.appendChild(t);
+      dom.reels.appendChild(t);
     }
   }
-
   for(let c=0;c<C;c++){
     const reel = document.createElement("div");
     reel.className = "column-reel";
     reel.dataset.c = c;
-
     const x1 = colLines[c];
     const x2 = colLines[c + 1];
     const y1 = rowLines[0];
     const y2 = rowLines[R];
-
     reel.style.left = pctX(x1);
     reel.style.top = pctY(y1);
     reel.style.width = pctX(x2 - x1);
     reel.style.height = pctY(y2 - y1);
-
     const track = document.createElement("div");
     track.className = "reel-track";
     reel.appendChild(track);
-    reels.appendChild(reel);
-    columnReels[c] = reel;
+    dom.reels.appendChild(reel);
+    state.columnReels[c] = reel;
   }
 }
-
 function weightedRandom(includeScatter=true){
   const pool = includeScatter ? SYMBOLS : SYMBOLS.filter(s => !s.scatter);
   const total = pool.reduce((a,s)=>a+s.w,0);
@@ -796,19 +1456,52 @@ function weightedRandom(includeScatter=true){
   }
   return "TEN";
 }
-
 function randomAny(){
   return SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)].id;
 }
-
 function randomNonScatter(){
   return weightedRandom(false);
 }
-
-function randomBoard(fsBoost=1){
-  const fsChance = Math.min(.62, .13 * fsBoost);
+function forceFsBoard(count){
   const b = [];
-
+  for(let c=0;c<C;c++){
+    b.push(Array.from({length:R}, randomNonScatter));
+  }
+  for(let c=0;c<count;c++){
+    const row = Math.floor(Math.random() * R);
+    b[c][row] = "FS";
+  }
+  return b;
+}
+function forceBigWinBoard(){
+  const b = [];
+  for(let c=0;c<C;c++){
+    b.push(Array.from({length:R}, () => c < 5 ? "MJOLNIR" : randomNonScatter()));
+  }
+  return b;
+}
+function makeOutcome(fsBoost=1){
+  if(state.forceNext === "3fs"){
+    state.forceNext = null;
+    return forceFsBoard(3);
+  }
+  if(state.forceNext === "4fs"){
+    state.forceNext = null;
+    return forceFsBoard(4);
+  }
+  if(state.forceNext === "5fs"){
+    state.forceNext = null;
+    return forceFsBoard(5);
+  }
+  if(state.forceNext === "big"){
+    state.forceNext = null;
+    return forceBigWinBoard();
+  }
+  return randomBoard(fsBoost);
+}
+function randomBoard(fsBoost=1){
+  const fsChance = Math.min(MATH.featureFsCap, MATH.baseFsChance * fsBoost);
+  const b = [];
   for(let c=0;c<C;c++){
     const col = Array.from({length:R}, randomNonScatter);
     if(Math.random() < fsChance){
@@ -819,24 +1512,22 @@ function randomBoard(fsBoost=1){
   }
   return b;
 }
-
 function setTile(c,r,id){
   const t = cell(c,r);
   const s = byId[id];
   const main = t.querySelector(".symbol");
-
   main.src = ASSETS[id];
   main.alt = id;
   t.dataset.id = id;
   t.className = `tile ${s.tier}`;
 }
-
-function render(b=board){
+function render(b=state.board){
   for(let c=0;c<C;c++){
-    for(let r=0;r<R;r++) setTile(c,r,b[c][r]);
+    for(let r=0;r<R;r++){
+      setTile(c,r,b[c][r]);
+    }
   }
 }
-
 function addReelItem(track, id, itemH, final=false){
   const item = document.createElement("div");
   item.className = `reel-item ${byId[id].tier}${final ? " final" : ""}`;
@@ -844,40 +1535,35 @@ function addReelItem(track, id, itemH, final=false){
   item.appendChild(makeImg(id));
   track.appendChild(item);
 }
-
 function fillLoopReel(c){
-  const reel = columnReels[c];
+  const reel = state.columnReels[c];
   const track = reel.querySelector(".reel-track");
   track.innerHTML = "";
-
-  const reelH = reel.getBoundingClientRect().height;
-  const itemH = reelH / R;
-
-  for(let i=0;i<24;i++) addReelItem(track, randomAny(), itemH);
-
-  loops[c] = {
-    reel, track, itemH,
+  const itemH = reel.getBoundingClientRect().height / R;
+  for(let i=0;i<24;i++){
+    addReelItem(track, randomAny(), itemH);
+  }
+  state.loops[c] = {
+    reel,
+    track,
+    itemH,
     y:-itemH * 12,
     speed:itemH * 0.028,
     running:true,
     last:performance.now()
   };
-
   track.style.transition = "none";
-  track.style.transform = `translate3d(0,${loops[c].y}px,0)`;
+  track.style.transform = `translate3d(0,${state.loops[c].y}px,0)`;
   reel.classList.remove("fade-out","stop-accent");
   reel.classList.add("active");
 }
-
 function runLoop(c){
-  const loop = loops[c];
+  const loop = state.loops[c];
   if(!loop || !loop.running) return;
-
   const now = performance.now();
   const dt = Math.min(now - loop.last, 32);
   loop.last = now;
   loop.y += loop.speed * dt;
-
   if(loop.y > -loop.itemH * 6){
     loop.y -= loop.itemH;
     const first = loop.track.firstElementChild;
@@ -886,57 +1572,44 @@ function runLoop(c){
       addReelItem(loop.track, randomAny(), loop.itemH);
     }
   }
-
   loop.track.style.transform = `translate3d(0,${loop.y}px,0)`;
   requestAnimationFrame(() => runLoop(c));
 }
-
 function startLoopingReels(){
   for(let c=0;c<C;c++){
     fillLoopReel(c);
     requestAnimationFrame(() => runLoop(c));
   }
 }
-
 function easeOutQuint(t){
   return 1 - Math.pow(1 - t, 5);
 }
-
 function stopReelIntoResult(c, finalColumn){
   return new Promise(resolve => {
-    const loop = loops[c];
+    const loop = state.loops[c];
     if(loop) loop.running = false;
-
-    const reel = columnReels[c];
+    const reel = state.columnReels[c];
     const track = reel.querySelector(".reel-track");
-    const reelH = reel.getBoundingClientRect().height;
-    const itemH = reelH / R;
-
+    const itemH = reel.getBoundingClientRect().height / R;
     track.innerHTML = "";
-
     const before = 30;
     const after = 8;
-
     for(let i=0;i<before;i++) addReelItem(track, randomAny(), itemH);
     for(let r=0;r<R;r++) addReelItem(track, finalColumn[r], itemH, true);
     for(let i=0;i<after;i++) addReelItem(track, randomAny(), itemH);
-
     const finalY = -before * itemH;
     const startY = finalY - 13.5 * itemH;
-    const duration = 1080;
+    const duration = state.turbo ? 620 : 1080;
     const startTime = performance.now();
-
     track.style.transition = "none";
     track.style.transform = `translate3d(0,${startY}px,0)`;
     reel.classList.remove("fade-out","stop-accent");
     reel.classList.add("active");
-
     function frame(now){
       const t = Math.min((now - startTime) / duration, 1);
       const eased = easeOutQuint(t);
       const y = startY + (finalY - startY) * eased;
       track.style.transform = `translate3d(0,${y}px,0)`;
-
       if(t < 1){
         requestAnimationFrame(frame);
       }else{
@@ -945,16 +1618,13 @@ function stopReelIntoResult(c, finalColumn){
         setTimeout(resolve, 90);
       }
     }
-
     requestAnimationFrame(frame);
   });
 }
-
 function hideReel(c){
-  const reel = columnReels[c];
+  const reel = state.columnReels[c];
   const track = reel.querySelector(".reel-track");
   reel.classList.add("fade-out");
-
   setTimeout(() => {
     reel.classList.remove("active","fade-out","stop-accent");
     track.style.transition = "none";
@@ -962,160 +1632,219 @@ function hideReel(c){
     track.innerHTML = "";
   }, 145);
 }
-
+function getAudioFile(type){
+  const path = SOUND_FILES[type];
+  if(!path) return null;
+  if(!audioCache.has(path)){
+    const a = new Audio(path);
+    a.preload = "auto";
+    a.volume = type === "thunder" ? .62 : .46;
+    audioCache.set(path, a);
+  }
+  return audioCache.get(path);
+}
+function tryFileSound(type){
+  const base = getAudioFile(type);
+  if(!base) return false;
+  try{
+    const a = base.cloneNode(true);
+    a.volume = base.volume;
+    a.play().catch(() => {});
+    return true;
+  }catch(e){
+    return false;
+  }
+}
 function sfx(type){
-  if(muted) return;
-
+  if(state.muted) return;
+  if(tryFileSound(type)) return;
   try{
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     const now = audioCtx.currentTime;
-
     function tone(freq, dur, gain, wave="sine", endFreq=null, delay=0){
       const t = now + delay;
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
-
       o.type = wave;
       o.frequency.setValueAtTime(freq, t);
       if(endFreq) o.frequency.exponentialRampToValueAtTime(endFreq, t + dur);
-
       g.gain.setValueAtTime(0.0001, t);
       g.gain.exponentialRampToValueAtTime(gain, t + 0.012);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
       o.connect(g);
       g.connect(audioCtx.destination);
       o.start(t);
       o.stop(t + dur + .03);
     }
-
     function noiseBurst(duration=1.2, peak=.09, lowpass=380, delay=0){
       const t = now + delay;
       const sr = audioCtx.sampleRate;
       const len = Math.floor(sr * duration);
       const buffer = audioCtx.createBuffer(1, len, sr);
       const data = buffer.getChannelData(0);
-
       for(let i=0;i<len;i++){
         const white = Math.random() * 2 - 1;
         const fall = 1 - i / len;
-        data[i] = white * (0.6 + Math.random() * 0.4) * fall;
+        data[i] = white * (0.55 + Math.random() * 0.45) * Math.pow(fall, 1.25);
       }
-
       const src = audioCtx.createBufferSource();
       const filter = audioCtx.createBiquadFilter();
       const gain = audioCtx.createGain();
-
       src.buffer = buffer;
       filter.type = "lowpass";
       filter.frequency.setValueAtTime(lowpass, t);
-      filter.Q.value = .9;
-
+      filter.Q.value = .85;
       gain.gain.setValueAtTime(0.0001, t);
       gain.gain.exponentialRampToValueAtTime(peak, t + 0.05);
-      gain.gain.exponentialRampToValueAtTime(peak * .55, t + duration * 0.35);
+      gain.gain.exponentialRampToValueAtTime(peak * .55, t + duration * .35);
       gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-
       src.connect(filter);
       filter.connect(gain);
       gain.connect(audioCtx.destination);
       src.start(t);
       src.stop(t + duration + .03);
     }
-
     if(type === "stop"){
-      tone(68,.15,.105,"sine",36);
-      tone(38,.10,.055,"triangle",30,.018);
+      tone(70,.13,.09,"sine",40);
+      tone(42,.09,.045,"triangle",31,.012);
       return;
     }
-
     if(type === "fs"){
-      tone(260,.16,.075,"triangle",520);
-      tone(92,.22,.055,"sine",55,.035);
+      tone(250,.13,.06,"triangle",510);
+      tone(98,.20,.04,"sine",58,.035);
       return;
     }
-
+    if(type === "bonus"){
+      tone(130,.18,.08,"triangle",390);
+      tone(520,.20,.055,"triangle",820,.045);
+      return;
+    }
     if(type === "hidden"){
-      tone(82,.48,.13,"sine",38);
-      tone(520,.38,.07,"triangle",980,.06);
+      tone(76,.52,.11,"sine",35);
+      tone(520,.38,.07,"triangle",980,.08);
+      tone(1040,.32,.04,"triangle",680,.16);
       return;
     }
-
     if(type === "thunder"){
-      noiseBurst(1.45,.085,280,0);
-      noiseBurst(1.05,.05,180,0.11);
-      tone(44,1.2,.05,"sine",26,.04);
-      tone(28,1.45,.04,"triangle",22,.12);
+      noiseBurst(1.55,.085,260,0);
+      noiseBurst(1.18,.052,160,0.10);
+      tone(42,1.25,.052,"sine",25,.04);
+      tone(27,1.55,.038,"triangle",21,.12);
       return;
     }
-
-    if(type === "click"){tone(240,.045,.035,"triangle",190);return;}
-    if(type === "win"){tone(520,.13,.07,"triangle",1200);return;}
-    if(type === "tease"){tone(320,.24,.075,"sawtooth",430);return;}
-    if(type === "bonus"){tone(120,.42,.12,"triangle",460);tone(70,.30,.09,"sine",38,.06);return;}
-    if(type === "big"){tone(180,.35,.11,"triangle",65);return;}
-
-    tone(220,.05,.04,"triangle");
+    if(type === "click"){tone(230,.045,.028,"triangle",190);return;}
+    if(type === "win"){tone(520,.12,.055,"triangle",980);return;}
+    if(type === "tease"){tone(320,.22,.068,"sawtooth",430);return;}
+    if(type === "big"){tone(180,.35,.09,"triangle",65); tone(480,.28,.05,"triangle",900,.05); return;}
+    tone(220,.05,.035,"triangle");
   }catch(e){}
 }
-
+function approachNumber(current, target, step=.18){
+  const diff = target - current;
+  if(Math.abs(diff) < 1) return target;
+  return current + diff * step;
+}
+function animateHudNumbers(){
+  const nextBalance = approachNumber(state.displayBalance, state.balance);
+  const nextLastWin = approachNumber(state.displayLastWin, state.lastWin);
+  state.displayBalance = nextBalance;
+  state.displayLastWin = nextLastWin;
+  dom.balance.textContent = Math.floor(nextBalance);
+  dom.lastWin.textContent = Math.floor(nextLastWin);
+  if(Math.abs(nextBalance - state.balance) >= 1 || Math.abs(nextLastWin - state.lastWin) >= 1){
+    requestAnimationFrame(animateHudNumbers);
+  }else{
+    dom.balance.textContent = Math.floor(state.balance);
+    dom.lastWin.textContent = Math.floor(state.lastWin);
+  }
+}
+function addHistory(entry){
+  state.history.unshift(entry);
+  state.history = state.history.slice(0,8);
+  renderHistory();
+}
+function renderHistory(){
+  if(!dom.historyList) return;
+  dom.historyList.innerHTML = "";
+  state.history.forEach(h => {
+    const row = document.createElement("div");
+    row.className = "history-line";
+    row.innerHTML = `<span>${h.label}</span><span>${h.value}</span>`;
+    dom.historyList.appendChild(row);
+  });
+}
+function updateQaNote(){
+  if(!dom.qaNote) return;
+  const map = {
+    "3fs":"Next spin forced: 3 FS",
+    "4fs":"Next spin forced: 4 FS",
+    "5fs":"Next spin forced: 5 FS",
+    "big":"Next spin forced: Big Win"
+  };
+  dom.qaNote.textContent = state.forceNext ? map[state.forceNext] : "No forced result queued.";
+}
 function updateUI(){
-  const bet = betValues[betIndex];
-
-  balanceEl.textContent = Math.floor(balance);
-  betEl.textContent = bet;
-  lastWinEl.textContent = Math.floor(lastWin);
-
-  spinBtn.disabled = spinning || !!pendingBonus || (!inBonus && balance < bet);
-  betUp.disabled = spinning || inBonus || !!pendingBonus || betIndex >= betValues.length-1;
-  betDown.disabled = spinning || inBonus || !!pendingBonus || betIndex <= 0;
-
-  buyBtn.disabled = spinning || inBonus || !!pendingBonus;
-  autoBtn.disabled = spinning && !inBonus;
-
-  buyFeatureOpt.disabled = spinning || inBonus || !!pendingBonus || balance < bet * 3;
-  buy3fsOpt.disabled = spinning || inBonus || !!pendingBonus || balance < bet * 100;
-  buy4fsOpt.disabled = spinning || inBonus || !!pendingBonus || balance < bet * 250;
-
-  buyFeatureOpt.innerHTML = `Feature Spin<br><b>${bet * 3} coins</b> • 5x higher FS chance`;
-  buy3fsOpt.innerHTML = `Buy 3 FS Bonus<br><b>${bet * 100} coins</b> • 10 free spins`;
-  buy4fsOpt.innerHTML = `Buy 4 FS Bonus<br><b>${bet * 250} coins</b> • 12 super free spins`;
-
-  autoBtn.textContent = auto > 0 ? `${auto}` : "A";
-  fsLeft.textContent = freeSpins;
-  bonusWinEl.textContent = Math.floor(bonusWin);
-  bonusPanel.classList.toggle("show", inBonus);
+  const bet = getBet();
+  const locked = state.phase === "SPINNING" || state.phase === "REEL_STOPPING" || state.phase === "EVALUATING";
+  const pending = !!state.pendingBonus;
+  dom.bet.textContent = bet;
+  requestAnimationFrame(animateHudNumbers);
+  dom.spinBtn.disabled = locked || pending || (!state.inBonus && state.balance < bet);
+  dom.betUp.disabled = locked || state.inBonus || pending || state.betIndex >= state.betValues.length-1;
+  dom.betDown.disabled = locked || state.inBonus || pending || state.betIndex <= 0;
+  dom.buyBtn.disabled = locked || state.inBonus || pending;
+  dom.autoBtn.disabled = locked && !state.inBonus;
+  dom.buyFeatureOpt.disabled = locked || state.inBonus || pending || state.balance < bet * MATH.featureSpinCostX;
+  dom.buy3fsOpt.disabled = locked || state.inBonus || pending || state.balance < bet * MATH.buy3FsCostX;
+  dom.buy4fsOpt.disabled = locked || state.inBonus || pending || state.balance < bet * MATH.buy4FsCostX;
+  dom.buyFeatureOpt.innerHTML = `Feature Spin<br><b>${bet * MATH.featureSpinCostX} coins</b> • 5x FS chance`;
+  dom.buy3fsOpt.innerHTML = `Buy 3 FS Bonus<br><b>${bet * MATH.buy3FsCostX} coins</b> • ${MATH.normalBonusSpins} free spins`;
+  dom.buy4fsOpt.innerHTML = `Buy 4 FS Bonus<br><b>${bet * MATH.buy4FsCostX} coins</b> • ${MATH.superBonusSpins} super spins`;
+  dom.autoBtn.textContent = state.autoLeft > 0 ? `${state.autoLeft}` : "A";
+  dom.fsLeft.textContent = state.freeSpins;
+  dom.bonusWin.textContent = Math.floor(state.bonusWin);
+  dom.bonusPanel.classList.toggle("show", state.inBonus);
+  dom.statSpins.textContent = state.sessionSpins;
+  dom.statWagered.textContent = Math.floor(state.sessionWagered);
+  dom.statReturned.textContent = Math.floor(state.sessionReturned);
+  dom.statRtp.textContent = state.sessionWagered ? `${(state.sessionReturned / state.sessionWagered * 100).toFixed(1)}%` : "0%";
+  dom.turboBtn.classList.toggle("on", state.turbo);
+  dom.stage.classList.toggle("turbo-mode", state.turbo);
+  dom.soundBtn.textContent = `Sound: ${state.muted ? "Off" : "On"}`;
+  renderHistory();
+  updateQaNote();
+  saveGame();
 }
-
 function clearFX(){
-  [...reels.querySelectorAll(".tile")].forEach(t => t.classList.remove("win","tease","hidden-for-reel"));
-  msg.classList.remove("tease");
-  bubble.classList.remove("show");
-  stage.classList.remove("lightning");
+  [...dom.reels.querySelectorAll(".tile")].forEach(t => t.classList.remove("win","tease","hidden-static"));
+  dom.msg.classList.remove("tease");
+  dom.bubble.classList.remove("show");
+  dom.stage.classList.remove("lightning","shake");
+  dom.winFloat.classList.remove("show");
 }
-
 function setMsg(text, tease=false){
-  msg.textContent = text;
-  msg.classList.toggle("tease", tease);
+  dom.msg.textContent = text;
+  dom.msg.classList.toggle("tease", tease);
 }
-
 function showBubble(text){
-  bubble.textContent = text;
-  bubble.classList.add("show");
-  setTimeout(()=>bubble.classList.remove("show"),2400);
+  dom.bubble.textContent = text;
+  dom.bubble.classList.add("show");
+  setTimeout(()=>dom.bubble.classList.remove("show"),2400);
 }
-
 function flash(){
-  stage.classList.remove("lightning");
-  void stage.offsetWidth;
-  stage.classList.add("lightning");
+  dom.stage.classList.remove("lightning");
+  void dom.stage.offsetWidth;
+  dom.stage.classList.add("lightning");
 }
-
 function thunderThenFlash(){
   sfx("thunder");
-  setTimeout(flash, 760);
+  setTimeout(() => {
+    flash();
+    dom.stage.classList.remove("shake");
+    void dom.stage.offsetWidth;
+    dom.stage.classList.add("shake");
+  }, 760);
 }
-
 function countFS(cols, b){
   let n = 0;
   for(let c=0;c<cols;c++){
@@ -1125,15 +1854,12 @@ function countFS(cols, b){
   }
   return n;
 }
-
 function calculate(b){
   let total = 0;
   let wins = [];
-  const bet = betValues[betIndex];
-
+  const bet = getBet();
   for(const s of SYMBOLS){
     if(s.scatter) continue;
-
     const counts = [];
     for(let c=0;c<C;c++){
       let n = 0;
@@ -1143,12 +1869,10 @@ function calculate(b){
       if(!n) break;
       counts.push(n);
     }
-
     if(counts.length >= 3){
       const ways = counts.reduce((a,n)=>a*n,1);
       const pay = s.p[counts.length] || s.p[5];
       total += Math.floor(bet * pay * ways);
-
       for(let c=0;c<counts.length;c++){
         for(let r=0;r<R;r++){
           if(b[c][r] === s.id) wins.push(`${c}-${r}`);
@@ -1156,212 +1880,223 @@ function calculate(b){
       }
     }
   }
-
   return {total, wins:[...new Set(wins)], fs:countFS(C,b)};
 }
-
+function countUp(el, from, to, duration=650){
+  const start = performance.now();
+  const diff = to - from;
+  function frame(now){
+    const t = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 3);
+    el.textContent = Math.floor(from + diff * eased);
+    if(t < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function winLabelFor(win){
+  const x = win / getBet();
+  if(x >= 100) return "EPIC WIN";
+  if(x >= 50) return "MEGA WIN";
+  if(x >= 15) return "BIG WIN";
+  if(x >= 5) return "NICE WIN";
+  return "WIN";
+}
+function showWinFloat(win){
+  if(win <= 0){
+    dom.winFloat.classList.remove("show");
+    return;
+  }
+  dom.winFloatLabel.textContent = winLabelFor(win);
+  dom.winFloatAmount.textContent = "0";
+  dom.winFloat.classList.add("show");
+  countUp(dom.winFloatAmount, 0, win, Math.min(1200, 450 + win / Math.max(1,getBet()) * 25));
+  setTimeout(() => {
+    dom.winFloat.classList.remove("show");
+  }, Math.max(1200, Math.min(2800, 900 + win / Math.max(1,getBet()) * 45)));
+}
 function showWins(keys){
   keys.forEach(k => {
     const [c,r] = k.split("-");
     cell(c,r).classList.add("win");
   });
 }
-
 function showBig(win){
-  if(win / betValues[betIndex] < 15) return;
-
-  bigAmount.textContent = win;
-  overlay.classList.add("show");
+  if(win / getBet() < 15) return;
+  const title = dom.overlay.querySelector(".big");
+  const label = winLabelFor(win);
+  title.childNodes[0].nodeValue = label;
+  dom.bigAmount.textContent = win;
+  dom.overlay.classList.add("show");
   sfx("big");
   flash();
-  setTimeout(()=>overlay.classList.remove("show"),1850);
+  dom.stage.classList.remove("shake");
+  void dom.stage.offsetWidth;
+  dom.stage.classList.add("shake");
+  setTimeout(()=>dom.overlay.classList.remove("show"),2050);
 }
-
 function hideMenus(){
-  buyMenu.classList.remove("show");
-  autoMenu.classList.remove("show");
+  dom.buyMenu.classList.remove("show");
+  dom.autoMenu.classList.remove("show");
 }
-
 function showPendingBonus(config){
-  clearTimeout(pendingBonusTimer);
-  pendingBonus = {...config};
-
-  bonusNoticeTitle.textContent = config.title;
-  bonusNoticeBody.textContent = config.body;
-  bonusNoticeCard.className = `bonus-notice-card ${config.css || ""}`;
-  bonusNotice.classList.add("show");
-
-  updateUI();
-
-  pendingBonusTimer = setTimeout(() => {
+  clearTimeout(state.pendingBonusTimer);
+  state.pendingBonus = {...config};
+  setPhase("BONUS_PENDING");
+  dom.bonusNoticeTitle.textContent = config.title;
+  dom.bonusNoticeBody.textContent = config.body;
+  dom.bonusNoticeCard.className = `bonus-notice-card ${config.css || ""}`;
+  dom.bonusNotice.classList.add("show");
+  state.pendingBonusTimer = setTimeout(() => {
     startPendingBonus();
   }, 25000);
-}
-
-function startPendingBonus(){
-  if(!pendingBonus) return;
-
-  clearTimeout(pendingBonusTimer);
-  pendingBonusTimer = null;
-  bonusNotice.classList.remove("show");
-
-  bonusMode = pendingBonus.mode;
-  bonusMultiplier = pendingBonus.multiplier;
-  freeSpins += pendingBonus.spins;
-  hiddenMinWin = pendingBonus.hiddenMinWin || 0;
-  bonusBet = betValues[betIndex];
-  inBonus = true;
-
-  setMsg(pendingBonus.startMessage);
-  showBubble(pendingBonus.bubble);
-  sfx(pendingBonus.sound || "bonus");
-  flash();
-
-  pendingBonus = null;
   updateUI();
-
+}
+function startPendingBonus(){
+  if(!state.pendingBonus) return;
+  clearTimeout(state.pendingBonusTimer);
+  state.pendingBonusTimer = null;
+  dom.bonusNotice.classList.remove("show");
+  const p = state.pendingBonus;
+  state.pendingBonus = null;
+  state.bonusMode = p.mode;
+  state.bonusMultiplier = p.multiplier;
+  state.freeSpins += p.spins;
+  state.hiddenMinWin = p.hiddenMinWin || 0;
+  state.bonusBet = getBet();
+  state.inBonus = true;
+  setMsg(p.startMessage);
+  showBubble(p.bubble);
+  sfx(p.sound || "bonus");
+  flash();
+  setPhase("BONUS_PLAYING");
   setTimeout(() => {
-    if(!spinning) spin();
+    if(state.phase === "BONUS_PLAYING") spin();
   }, 700);
 }
-
 function startBonusByScatters(fsCount, paidBuy=false){
-  bonusBet = betValues[betIndex];
-
+  trackEvent("bonus_trigger", {fsCount, paidBuy});
+  state.bonusBet = getBet();
   if(fsCount >= 5){
     showPendingBonus({
       mode:"hidden",
-      multiplier:3,
-      spins:15,
-      hiddenMinWin:bonusBet * 500,
+      multiplier:MATH.hiddenBonusMultiplier,
+      spins:MATH.hiddenBonusSpins,
+      hiddenMinWin:state.bonusBet * MATH.hiddenMinWinX,
       title:"Hidden Bonus Activated",
-      body:`You won 15 free spins. Hidden bonus activated. Minimum win ${bonusBet * 500} fake coins.`,
-      startMessage:`HIDDEN BONUS! Minimum win ${bonusBet * 500} fake coins.`,
+      body:`You won ${MATH.hiddenBonusSpins} free spins. Hidden bonus activated. Minimum win ${state.bonusBet * MATH.hiddenMinWinX} fake coins.`,
+      startMessage:`HIDDEN BONUS! Minimum win ${state.bonusBet * MATH.hiddenMinWinX} fake coins.`,
       bubble:"The hidden gate opens. Minimum 500x.",
       sound:"hidden",
       css:"hidden-bonus"
     });
     return;
   }
-
   if(fsCount === 4){
     showPendingBonus({
       mode:"super",
-      multiplier:2,
-      spins:12,
+      multiplier:MATH.superBonusMultiplier,
+      spins:MATH.superBonusSpins,
       title:"Super Bonus Won",
-      body:"You won 12 free spins. Super bonus activated.",
-      startMessage:"SUPER FREE SPINS! 12 spins with 2x wins.",
+      body:`You won ${MATH.superBonusSpins} free spins. Super bonus activated.`,
+      startMessage:`SUPER FREE SPINS! ${MATH.superBonusSpins} spins with ${MATH.superBonusMultiplier}x wins.`,
       bubble:"Super game unlocked. Wins are doubled.",
       sound:"bonus",
       css:"super-bonus"
     });
     return;
   }
-
   showPendingBonus({
     mode:"normal",
-    multiplier:1,
-    spins:10,
+    multiplier:MATH.normalBonusMultiplier,
+    spins:MATH.normalBonusSpins,
     hiddenMinWin:0,
     title:"Free Spins Won",
     body: paidBuy ? "You bought 10 free spins." : "You won 10 free spins.",
-    startMessage:"10 FREE SPINS!",
+    startMessage:`${MATH.normalBonusSpins} FREE SPINS!`,
     bubble: paidBuy ? "Bonus bought. The gates open." : "The gates of Miðgarður open!",
     sound:"bonus",
     css:"normal-bonus"
   });
 }
-
 function finishBonusIfNeeded(){
-  if(!inBonus || freeSpins > 0) return false;
-
-  if(bonusMode === "hidden" && bonusWin < hiddenMinWin){
-    const topUp = hiddenMinWin - bonusWin;
-    bonusWin += topUp;
-    balance += topUp;
-    lastWin += topUp;
-    setMsg(`Hidden bonus guarantee paid. Bonus win: ${Math.floor(bonusWin)}.`);
+  if(!state.inBonus || state.freeSpins > 0) return false;
+  if(state.bonusMode === "hidden" && state.bonusWin < state.hiddenMinWin){
+    const topUp = state.hiddenMinWin - state.bonusWin;
+    state.bonusWin += topUp;
+    state.balance += topUp;
+    state.lastWin += topUp;
+    setMsg(`Hidden bonus guarantee paid. Bonus win: ${Math.floor(state.bonusWin)}.`);
     sfx("hidden");
   }else{
-    setMsg(`Bonus complete. Bonus win: ${Math.floor(bonusWin)}.`);
+    setMsg(`Bonus complete. Bonus win: ${Math.floor(state.bonusWin)}.`);
   }
-
-  inBonus = false;
-  bonusMode = "";
-  bonusMultiplier = 1;
-  hiddenMinWin = 0;
-  bonusBet = 0;
-  bonusWin = 0;
+  state.inBonus = false;
+  state.bonusMode = null;
+  state.bonusMultiplier = 1;
+  state.hiddenMinWin = 0;
+  state.bonusBet = 0;
+  state.bonusWin = 0;
+  setPhase("IDLE");
   return true;
 }
-
 async function spin(options={}){
-  if(spinning || pendingBonus) return;
-
-  const bet = betValues[betIndex];
+  if(state.phase !== "IDLE" && state.phase !== "BONUS_PLAYING") return;
+  if(state.pendingBonus) return;
+  const bet = getBet();
   const feature = !!options.feature;
-  const cost = feature && !inBonus ? bet * 3 : bet;
-
-  if(!inBonus && balance < cost){
+  const cost = feature && !state.inBonus ? bet * MATH.featureSpinCostX : bet;
+  if(!state.inBonus && state.balance < cost){
     setMsg("Not enough fake coins.");
     return;
   }
-
-  spinning = true;
+  state.sessionSpins++;
+  state.sessionWagered += state.inBonus ? 0 : cost;
+  trackEvent("spin_start", {feature, cost, inBonus: state.inBonus, bonusMode: state.bonusMode});
+  setPhase("SPINNING");
   clearFX();
   hideMenus();
-
-  if(inBonus){
-    freeSpins--;
-    setMsg(`${bonusMode === "super" ? "Super" : bonusMode === "hidden" ? "Hidden" : "Free"} spin... ${freeSpins + 1}`);
+  if(state.inBonus){
+    state.freeSpins--;
+    setMsg(`${state.bonusMode === "super" ? "Super" : state.bonusMode === "hidden" ? "Hidden" : "Free"} spin... ${state.freeSpins + 1}`);
   }else{
-    balance -= cost;
+    state.balance -= cost;
     setMsg(feature ? "Feature spin: FS chance boosted 5x..." : "The reels are spinning...");
   }
-
-  lastWin = 0;
+  state.lastWin = 0;
   updateUI();
-
-  const outcome = randomBoard(feature ? 5 : 1);
-
+  const outcome = makeOutcome(feature ? MATH.featureFsMultiplier : 1);
   for(let c=0;c<C;c++){
     for(let r=0;r<R;r++){
-      cell(c,r).classList.add("hidden-for-reel");
+      cell(c,r).classList.add("hidden-static");
     }
   }
-
   startLoopingReels();
-  await new Promise(res => setTimeout(res, 620));
-
+  await new Promise(res => setTimeout(res, state.turbo ? 280 : 620));
+  setPhase("REEL_STOPPING");
   let teased = false;
-
   for(let c=0;c<C;c++){
     const finalColumn = [];
     for(let r=0;r<R;r++) finalColumn.push(outcome[c][r]);
-
+    if(teased && c === C - 1 && !state.turbo){
+      setMsg("Final reel... hold...");
+      await new Promise(res => setTimeout(res, 520));
+    }
     await stopReelIntoResult(c, finalColumn);
-
     for(let r=0;r<R;r++){
       setTile(c,r,outcome[c][r]);
-      cell(c,r).classList.remove("hidden-for-reel");
+      cell(c,r).classList.remove("hidden-static");
     }
-
     hideReel(c);
     sfx("stop");
-
     const reelHasFS = finalColumn.includes("FS");
     const fs = countFS(c+1,outcome);
-
     if(reelHasFS && (c < C - 1 || fs >= 3)) sfx("fs");
-
     if(fs === 2 && c < C-1 && !teased){
       teased = true;
       setMsg("Two FS runes... one more opens the bonus!", true);
       showBubble("Hold... the gate may open.");
       sfx("tease");
       flash();
-
       for(let cc=0;cc<=c;cc++){
         for(let r=0;r<R;r++){
           if(outcome[cc][r] === "FS") cell(cc,r).classList.add("tease");
@@ -1369,167 +2104,435 @@ async function spin(options={}){
       }
     }
   }
-
-  board = outcome;
-
-  const result = calculate(board);
+  setPhase("EVALUATING");
+  state.board = outcome;
+  const result = calculate(state.board);
   let win = result.total;
-
-  if(inBonus) win = Math.floor(win * bonusMultiplier);
-
-  lastWin = win;
-  balance += win;
-  if(inBonus) bonusWin += win;
-
+  if(state.inBonus) win = Math.floor(win * state.bonusMultiplier);
+  const maxWin = getBet() * MATH.maxWinX;
+  if(win > maxWin){
+    win = maxWin;
+    setMsg(`MAX WIN ${MATH.maxWinX}x!`);
+    sfx("big");
+  }
+  state.lastWin = win;
+  state.balance += win;
+  state.sessionReturned += win;
+  if(state.inBonus) state.bonusWin += win;
   showWins(result.wins);
-
-  if(result.fs >= 3 && !inBonus){
+  if(result.fs >= 3 && !state.inBonus){
     startBonusByScatters(result.fs);
   }else if(finishBonusIfNeeded()){
     // message already set
   }else if(win > 0){
     setMsg(`Win: ${Math.floor(win)} fake coins.`);
     sfx("win");
+    setPhase(state.inBonus ? "BONUS_PLAYING" : "IDLE");
   }else{
-    setMsg(inBonus ? `Free spins left: ${freeSpins}` : "No win. Spin again.");
+    setMsg(state.inBonus ? `Free spins left: ${state.freeSpins}` : "No win. Spin again.");
+    setPhase(state.inBonus ? "BONUS_PLAYING" : "IDLE");
   }
-
+  trackEvent("spin_end", {win, winX:+(win / getBet()).toFixed(2), fs:result.fs, inBonus:state.inBonus, bonusMode:state.bonusMode});
+  const spinLabel = result.fs >= 3 ? `${result.fs} FS` : (win > 0 ? "WIN" : "MISS");
+  addHistory({
+    label: spinLabel,
+    value: win > 0 ? `${Math.floor(win)} (${(win / getBet()).toFixed(1)}x)` : "0"
+  });
+  showWinFloat(win);
   showBig(win);
-
-  spinning = false;
   updateUI();
-
-  if(!pendingBonus && (auto > 0 || inBonus) && (inBonus || balance >= betValues[betIndex])){
-    if(auto > 0) auto--;
+  if(!state.pendingBonus && (state.autoLeft > 0 || state.inBonus) && (state.inBonus || state.balance >= getBet())){
+    if(state.autoLeft > 0) state.autoLeft--;
     updateUI();
-    setTimeout(spin, inBonus ? 820 : 520);
+    setTimeout(spin, state.inBonus ? 820 : 520);
   }
 }
-
-spinBtn.onclick = () => {
+/* UI handlers */
+dom.spinBtn.onclick = () => {
   hideMenus();
-  if(pendingBonus){
+  if(state.pendingBonus){
     startPendingBonus();
     return;
   }
   spin();
 };
-
-buyBtn.onclick = (e) => {
+dom.buyBtn.onclick = (e) => {
+  trackEvent("bonus_buy_menu_open");
   e.stopPropagation();
-  autoMenu.classList.remove("show");
-  buyMenu.classList.toggle("show");
+  dom.autoMenu.classList.remove("show");
+  dom.buyMenu.classList.toggle("show");
 };
-
-buyFeatureOpt.onclick = () => {
+dom.buyFeatureOpt.onclick = () => {
+  trackEvent("feature_spin_click", {price:getBet() * MATH.featureSpinCostX});
   hideMenus();
   spin({feature:true});
 };
-
-buy3fsOpt.onclick = () => {
+dom.buy3fsOpt.onclick = () => {
   hideMenus();
-  const bet = betValues[betIndex];
-  const price = bet * 100;
-
-  if(spinning || inBonus || pendingBonus) return;
-  if(balance < price){
+  const bet = getBet();
+  const price = bet * MATH.buy3FsCostX;
+  if(state.phase !== "IDLE" || state.inBonus || state.pendingBonus) return;
+  if(state.balance < price){
     setMsg("Not enough fake coins for 3 FS Bonus Buy.");
     return;
   }
-
-  balance -= price;
-  lastWin = 0;
-  bonusWin = 0;
+  state.balance -= price;
+  state.sessionWagered += price;
+  state.lastWin = 0;
+  state.bonusWin = 0;
+  trackEvent("bonus_buy_3fs", {price});
   setMsg(`3 FS Bonus bought for ${price}.`);
   updateUI();
   startBonusByScatters(3, true);
 };
-
-buy4fsOpt.onclick = () => {
+dom.buy4fsOpt.onclick = () => {
   hideMenus();
-  const bet = betValues[betIndex];
-  const price = bet * 250;
-
-  if(spinning || inBonus || pendingBonus) return;
-  if(balance < price){
+  const bet = getBet();
+  const price = bet * MATH.buy4FsCostX;
+  if(state.phase !== "IDLE" || state.inBonus || state.pendingBonus) return;
+  if(state.balance < price){
     setMsg("Not enough fake coins for 4 FS Bonus Buy.");
     return;
   }
-
-  balance -= price;
-  lastWin = 0;
-  bonusWin = 0;
+  state.balance -= price;
+  state.sessionWagered += price;
+  state.lastWin = 0;
+  state.bonusWin = 0;
+  trackEvent("bonus_buy_4fs", {price});
   setMsg(`4 FS Super Bonus bought for ${price}.`);
   updateUI();
   startBonusByScatters(4, true);
 };
-
-betUp.onclick = () => {
-  betIndex = Math.min(betValues.length-1, betIndex+1);
+dom.betUp.onclick = () => {
+  state.betIndex = Math.min(state.betValues.length-1, state.betIndex+1);
   sfx("click");
   updateUI();
 };
-
-betDown.onclick = () => {
-  betIndex = Math.max(0, betIndex-1);
+dom.betDown.onclick = () => {
+  state.betIndex = Math.max(0, state.betIndex-1);
   sfx("click");
   updateUI();
 };
-
-autoBtn.onclick = (e) => {
+dom.autoBtn.onclick = (e) => {
   e.stopPropagation();
-
-  if(auto > 0 && !spinning){
-    auto = 0;
+  if(state.autoLeft > 0 && state.phase === "IDLE"){
+    state.autoLeft = 0;
     updateUI();
     return;
   }
-
-  buyMenu.classList.remove("show");
-  autoMenu.classList.toggle("show");
+  dom.buyMenu.classList.remove("show");
+  dom.autoMenu.classList.toggle("show");
 };
-
 document.querySelectorAll(".auto-opt").forEach(btn => {
   btn.onclick = () => {
-    auto = Number(btn.dataset.auto || "25");
+    state.autoLeft = Number(btn.dataset.auto || "25");
+    trackEvent("auto_start", {autoLeft:state.autoLeft});
     hideMenus();
     updateUI();
-    if(!spinning && !pendingBonus) spin();
+    if(state.phase === "IDLE" && !state.pendingBonus) spin();
   };
 });
-
-soundBtn.onclick = () => {
-  muted = !muted;
-  soundBtn.textContent = `Sound: ${muted ? "Off" : "On"}`;
+dom.soundBtn.onclick = () => {
+  state.muted = !state.muted;
+  unlockAudio();
+  sfx("click");
+  updateUI();
 };
-
-notesBtn.onclick = () => {
-  notes.classList.toggle("show");
+dom.notesBtn.onclick = () => {
+  trackEvent("rules_toggle", {showing:!dom.notes.classList.contains("show")});
+  dom.notes.classList.toggle("show");
 };
-
-bonusNotice.onclick = () => {
+dom.turboBtn.onclick = () => {
+  state.turbo = !state.turbo;
+  sfx("click");
+  updateUI();
+};
+dom.qaToggleBtn.onclick = () => {
+  dom.qaPanel.classList.toggle("show");
+};
+function setForcedResult(type){
+  if(state.phase !== "IDLE") return;
+  state.forceNext = type;
+  sfx("click");
+  updateUI();
+}
+dom.force3Btn.onclick = () => setForcedResult("3fs");
+dom.force4Btn.onclick = () => setForcedResult("4fs");
+dom.force5Btn.onclick = () => setForcedResult("5fs");
+dom.forceBigBtn.onclick = () => setForcedResult("big");
+dom.resetBtn.onclick = () => {
+  trackEvent("reset_click");
+  if(state.phase !== "IDLE" && state.phase !== "BONUS_PLAYING") return;
+  if(!dom.stage.classList.contains("qa-mode")){
+    const ok = confirm("Reset fake balance and session stats?");
+    if(!ok) return;
+  }
+  resetGame();
+};
+dom.fullBtn.onclick = async () => {
+  trackEvent("fullscreen_toggle");
+  try{
+    if(!document.fullscreenElement){
+      await dom.stage.requestFullscreen();
+    }else{
+      await document.exitFullscreen();
+    }
+  }catch(e){}
+};
+dom.startBtn.onclick = () => {
+  if(!state.assetsReady) return;
+  if(!state.ageAccepted && !(dom.ageCheck && dom.ageCheck.checked)) return;
+  state.ageAccepted = true;
+  saveGame();
+  trackEvent("start");
+  state.started = true;
+  unlockAudio();
+  dom.startScreen.classList.add("hide");
+  sfx("click");
+};
+dom.ageCheck.onchange = () => {
+  state.ageAccepted = !!dom.ageCheck.checked;
+  dom.startBtn.disabled = !(state.assetsReady && state.ageAccepted);
+  saveGame();
+};
+dom.bonusNotice.onclick = () => {
   startPendingBonus();
 };
-
 document.addEventListener("click", (e) => {
   if(!e.target.closest(".hud-anchor")){
     hideMenus();
   }
 });
-
-if(new URLSearchParams(location.search).has("debug")){
-  stage.classList.add("debug");
+document.addEventListener("keydown", (e) => {
+  const tag = (document.activeElement && document.activeElement.tagName || "").toLowerCase();
+  if(tag === "input" || tag === "textarea") return;
+  if(!state.started && e.code !== "Space" && e.key !== "Enter") return;
+  if(!state.started && (e.code === "Space" || e.key === "Enter")){
+    e.preventDefault();
+    dom.startBtn.click();
+    return;
+  }
+  if(e.code === "Space"){
+    e.preventDefault();
+    dom.spinBtn.click();
+  }
+  if(e.key.toLowerCase() === "b"){
+    e.preventDefault();
+    dom.buyBtn.click();
+  }
+  if(e.key.toLowerCase() === "a"){
+    e.preventDefault();
+    dom.autoBtn.click();
+  }
+  if(e.key.toLowerCase() === "t"){
+    e.preventDefault();
+    dom.turboBtn.click();
+  }
+  if(dom.stage.classList.contains("qa-mode")){
+    if(e.key.toLowerCase() === "q"){
+      e.preventDefault();
+      dom.qaToggleBtn.click();
+    }
+    if(dom.qaPanel.classList.contains("show")){
+      if(e.key === "3") setForcedResult("3fs");
+      if(e.key === "4") setForcedResult("4fs");
+      if(e.key === "5") setForcedResult("5fs");
+    }
+  }
+});
+const urlParams = new URLSearchParams(location.search);
+if(urlParams.has("qa")){
+  dom.stage.classList.add("qa-mode");
 }
-
+if(urlParams.has("debug")){
+  dom.stage.classList.add("debug");
+}
+function calculateWithBet(b, forcedBet){
+  let total = 0;
+  for(const s of SYMBOLS){
+    if(s.scatter) continue;
+    const counts = [];
+    for(let c=0;c<C;c++){
+      let n = 0;
+      for(let r=0;r<R;r++){
+        if(b[c][r] === s.id) n++;
+      }
+      if(!n) break;
+      counts.push(n);
+    }
+    if(counts.length >= 3){
+      const ways = counts.reduce((a,n)=>a*n,1);
+      const pay = s.p[counts.length] || s.p[5];
+      total += Math.floor(forcedBet * pay * ways);
+    }
+  }
+  return {total, fs:countFS(C,b)};
+}
+function simulateBonusMath(mode, bet){
+  let spins = MATH.normalBonusSpins;
+  let multiplier = MATH.normalBonusMultiplier;
+  let minWin = 0;
+  if(mode === "super"){
+    spins = MATH.superBonusSpins;
+    multiplier = MATH.superBonusMultiplier;
+  }
+  if(mode === "hidden"){
+    spins = MATH.hiddenBonusSpins;
+    multiplier = MATH.hiddenBonusMultiplier;
+    minWin = bet * MATH.hiddenMinWinX;
+  }
+  let total = 0;
+  for(let i=0;i<spins;i++){
+    const b = randomBoard(0);
+    total += calculateWithBet(b, bet).total * multiplier;
+  }
+  if(minWin && total < minWin) total = minWin;
+  return total;
+}
+function simulateOneSpinForMath(bet=20, feature=false){
+  const cost = feature ? bet * MATH.featureSpinCostX : bet;
+  const b = randomBoard(feature ? MATH.featureFsMultiplier : 1);
+  const result = calculateWithBet(b, bet);
+  let total = result.total;
+  let bonusType = null;
+  if(result.fs >= 5){
+    bonusType = "hidden";
+    total += simulateBonusMath("hidden", bet);
+  }else if(result.fs === 4){
+    bonusType = "super";
+    total += simulateBonusMath("super", bet);
+  }else if(result.fs === 3){
+    bonusType = "normal";
+    total += simulateBonusMath("normal", bet);
+  }
+  const maxWin = bet * MATH.maxWinX;
+  if(total > maxWin) total = maxWin;
+  return {cost, win:total, fs:result.fs, bonusType};
+}
+window.midgardurState = state;
+window.midgardurMath = MATH;
+window.midgardurFinalCheck = function(){
+  return {
+    release: window.midgardurReleaseCheck(),
+    compliance: window.midgardurComplianceCheck(),
+    audit: window.midgardurFinalAudit()
+  };
+};
+window.midgardurFinalAudit = function(){
+  const requiredImages = Object.values(ASSETS);
+  const optionalSounds = Object.values(SOUND_FILES);
+  const audit = {
+    build: BUILD.version,
+    buildHash: BUILD.buildHash,
+    fakeMoneyOnly: BUILD.fakeMoneyOnly,
+    ageGatePresent: !!document.getElementById("ageCheck"),
+    complianceStripPresent: !!document.querySelector(".compliance-strip"),
+    qaMode: dom.stage.classList.contains("qa-mode"),
+    debugMode: dom.stage.classList.contains("debug"),
+    requiredImageCount: requiredImages.length,
+    optionalSoundCount: optionalSounds.length,
+    dataLayerAvailable: !!window.dataLayer,
+    currentPhase: state.phase,
+    balance: state.balance,
+    bet: getBet(),
+    localSaveKey: state.saveVersion
+  };
+  console.table(audit);
+  return audit;
+};
+window.midgardurComplianceCheck = function(){
+  const checks = {
+    fakeMoneyDisclaimerVisible: !!document.querySelector(".compliance-strip"),
+    ageGatePresent: !!document.getElementById("ageCheck"),
+    noDepositCopy: document.body.innerText.toLowerCase().includes("no deposits"),
+    noRealGamblingCopy: document.body.innerText.toLowerCase().includes("no real"),
+    qaHiddenByDefault: !document.getElementById("stage").classList.contains("qa-mode"),
+    structuredDataPresent: !!document.querySelector('script[type="application/ld+json"]')
+  };
+  console.table(checks);
+  return checks;
+};
+window.midgardurReleaseCheck = function(){
+  const checks = {
+    build: BUILD.version,
+    fakeMoneyOnly: BUILD.fakeMoneyOnly,
+    assetsReady: state.assetsReady,
+    phase: state.phase,
+    qaMode: dom.stage.classList.contains("qa-mode"),
+    debugMode: dom.stage.classList.contains("debug"),
+    balance: state.balance,
+    bet: getBet(),
+    sessionSpins: state.sessionSpins,
+    sessionRTP: state.sessionWagered ? (state.sessionReturned / state.sessionWagered * 100).toFixed(2) + "%" : "n/a"
+  };
+  console.table(checks);
+  return checks;
+};
+window.midgardurDiagnostics = function(){
+  const info = {
+    phase: state.phase,
+    balance: state.balance,
+    bet: getBet(),
+    autoLeft: state.autoLeft,
+    inBonus: state.inBonus,
+    bonusMode: state.bonusMode,
+    freeSpins: state.freeSpins,
+    pendingBonus: !!state.pendingBonus,
+    forceNext: state.forceNext,
+    sessionRTP: state.sessionWagered ? (state.sessionReturned / state.sessionWagered * 100).toFixed(2) + "%" : "n/a"
+  };
+  console.table(info);
+  return info;
+};
+window.midgardurSim = function(spins=100000, feature=false){
+  const bet = 20;
+  let wagered = 0;
+  let paid = 0;
+  let bonuses = 0;
+  let normal = 0;
+  let superB = 0;
+  let hidden = 0;
+  let maxWin = 0;
+  let hits = 0;
+  for(let i=0;i<spins;i++){
+    const r = simulateOneSpinForMath(bet, feature);
+    wagered += r.cost;
+    paid += r.win;
+    if(r.win > 0) hits++;
+    if(r.bonusType){
+      bonuses++;
+      if(r.bonusType === "normal") normal++;
+      if(r.bonusType === "super") superB++;
+      if(r.bonusType === "hidden") hidden++;
+    }
+    if(r.win > maxWin) maxWin = r.win;
+  }
+  const summary = {
+    spins,
+    mode: feature ? "Feature Spin" : "Base Spin",
+    rtp: +(paid / wagered * 100).toFixed(2) + "%",
+    hitRate: +(hits / spins * 100).toFixed(2) + "%",
+    bonusEvery: bonuses ? Math.round(spins / bonuses) : "never",
+    normalEvery: normal ? Math.round(spins / normal) : "never",
+    superEvery: superB ? Math.round(spins / superB) : "never",
+    hiddenEvery: hidden ? Math.round(spins / hidden) : "never",
+    maxWinX: +(maxWin / bet).toFixed(2)
+  };
+  console.table(summary);
+  return summary;
+};
+/* Init */
+installImageFallbacks();
+loadGame();
+applyAgeState();
+preloadAssets();
 createBoard();
-board = randomBoard();
+state.board = randomBoard();
 render();
+renderHistory();
 updateUI();
-
 setInterval(() => {
-  if(!spinning && Math.random() < .45) thunderThenFlash();
+  if(state.phase === "IDLE" && Math.random() < .45) thunderThenFlash();
 }, 20000);
 })();
-</script>
-</body>
-</html>
+</script></body></html>
