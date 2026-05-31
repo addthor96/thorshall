@@ -99,14 +99,14 @@ html,body{
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Symbol size control — final and spinning symbols use matching size so there is no grow/shrink pop */
+/* Symbol size control — fixed with normalized 512x512 symbol canvases */
 .tile[data-id="TEN"] .symbol,
 .tile[data-id="J"] .symbol,
 .tile[data-id="Q"] .symbol,
 .tile[data-id="K"] .symbol,
 .tile[data-id="A"] .symbol{
-  width:66%;
-  height:66%;
+  width:68%;
+  height:68%;
 }
 
 .tile[data-id="RAVEN"] .symbol,
@@ -115,8 +115,8 @@ html,body{
 .tile[data-id="RUNE"] .symbol,
 .tile[data-id="MJOLNIR"] .symbol,
 .tile[data-id="FS"] .symbol{
-  width:69%;
-  height:69%;
+  width:72%;
+  height:72%;
 }
 
 /* Smooth spinning strip */
@@ -124,8 +124,8 @@ html,body{
   position:absolute;
   left:0;
   right:0;
-  top:-375%;
-  height:1000%;
+  top:-420%;
+  height:1100%;
   z-index:4;
   opacity:0;
   display:flex;
@@ -133,18 +133,18 @@ html,body{
   align-items:center;
   justify-content:flex-start;
   pointer-events:none;
-  will-change:transform;
-  transform:translateY(-30%);
+  will-change:transform,opacity;
+  transform:translate3d(0,-33%,0);
 }
 
 .strip img{
   display:block;
   width:69%;
-  height:10%;
-  min-height:10%;
+  height:9.0909%;
+  min-height:9.0909%;
   object-fit:contain;
   object-position:center center;
-  filter:blur(.85px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  filter:blur(.8px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
   opacity:.92;
 }
 
@@ -152,22 +152,36 @@ html,body{
 
 .tile.spinning .strip{
   opacity:1;
-  animation:reelRoll .48s linear infinite;
+  animation:reelRoll .42s linear infinite;
+}
+
+/* When a reel is about to stop, let the strip decelerate/fade instead of hard-cutting */
+.tile.settling .symbol{opacity:0}
+
+.tile.settling .strip{
+  opacity:1;
+  animation:reelSettle .28s cubic-bezier(.12,.78,.18,1) forwards;
 }
 
 @keyframes reelRoll{
-  from{transform:translateY(-35%)}
-  to{transform:translateY(0%)}
+  from{transform:translate3d(0,-36%,0)}
+  to{transform:translate3d(0,-9%,0)}
 }
-  to{transform:translateY(20%)}
+  to{transform:translate3d(0,-9%,0)}
+}
+
+@keyframes reelSettle{
+  0%{transform:translate3d(0,-28%,0);opacity:1;filter:blur(.85px)}
+  68%{transform:translate3d(0,-16%,0);opacity:.98;filter:blur(.45px)}
+  100%{transform:translate3d(0,-13%,0);opacity:0;filter:blur(.15px)}
 }
 
 .tile.stopping .symbol{
-  animation:stopSnap .16s ease-out;
+  animation:stopSnap .18s ease-out both;
 }
 
 @keyframes stopSnap{
-  0%{opacity:.75;filter:blur(.35px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
+  0%{opacity:0;filter:blur(.6px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
   100%{opacity:1;filter:blur(0) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
 }
   65%{transform:translateY(4%) scale(1.05);opacity:1}
@@ -479,7 +493,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.<br>Spin animation: fixed no grow/shrink pop; reel strip uses same size symbols and stops with blur fade only.
+    This is a fake-money training/prototype page only.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.<br>Smoother spin stop: reel decelerates/fades before final symbols reveal, no hard pop.
   </aside>
 </main>
 
@@ -601,7 +615,7 @@ function createBoard(){
 
       const strip = document.createElement("div");
       strip.className = "strip";
-      for(let i=0;i<10;i++){
+      for(let i=0;i<11;i++){
         strip.appendChild(makeImg(randomAny()));
       }
 
@@ -690,8 +704,9 @@ function sfx(type){
     }
 
     if(type === "stop"){
-      tone(76, .16, .15, "sine", 38);
-      tone(42, .10, .08, "triangle", 32, .018);
+      /* darker reel-stop thump */
+      tone(72, .18, .14, "sine", 36);
+      tone(40, .12, .075, "triangle", 30, .018);
       return;
     }
 
@@ -875,13 +890,19 @@ async function spin(){
 
     for(let r=0;r<R;r++){
       const t = cell(c,r);
-      t.classList.remove("spinning");
-      setTile(c,r,outcome[c][r]);
-      t.classList.add("stopping");
-      setTimeout(()=>t.classList.remove("stopping"),270);
+      t.classList.add("settling");
     }
 
     sfx("stop");
+    await new Promise(res => setTimeout(res, 280));
+
+    for(let r=0;r<R;r++){
+      const t = cell(c,r);
+      t.classList.remove("spinning","settling");
+      setTile(c,r,outcome[c][r]);
+      t.classList.add("stopping");
+      setTimeout(()=>t.classList.remove("stopping"),190);
+    }
 
     const fs = countFS(c+1,outcome);
 
