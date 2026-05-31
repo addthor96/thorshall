@@ -119,111 +119,71 @@ html,body{
   height:72%;
 }
 
-/* Smooth spinning strip */
+/* Smooth column reel animation — one real strip per reel, no per-cell flashing */
 .strip{
+  display:none;
+}
+
+.tile.reel-hidden .symbol{
+  opacity:0;
+}
+
+.column-reel{
+  position:absolute;
+  z-index:8;
+  overflow:hidden;
+  pointer-events:none;
+  opacity:0;
+}
+
+.column-reel.active{
+  opacity:1;
+}
+
+.reel-track{
   position:absolute;
   left:0;
-  right:0;
-  top:-420%;
-  height:1100%;
-  z-index:4;
-  opacity:0;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:flex-start;
-  pointer-events:none;
-  will-change:transform,opacity;
-  transform:translate3d(0,-33%,0);
+  top:0;
+  width:100%;
+  height:100%;
+  will-change:top;
 }
 
-.strip img{
+.reel-item{
+  height:25%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.reel-item img{
   display:block;
-  width:69%;
-  height:9.0909%;
-  min-height:9.0909%;
+  width:68%;
+  height:68%;
   object-fit:contain;
   object-position:center center;
-  filter:blur(.8px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
-  opacity:.92;
+  filter:blur(.65px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  opacity:.94;
 }
 
-.tile.spinning .symbol{opacity:0}
+.reel-item.low img{
+  width:66%;
+  height:66%;
+}
 
-.tile.spinning .strip{
+.reel-item.premium img,
+.reel-item.fs img{
+  width:69%;
+  height:69%;
+}
+
+.column-reel.settled .reel-item img{
+  filter:blur(0) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
   opacity:1;
-  animation:reelRoll .42s linear infinite;
-}
-
-/* When a reel is about to stop, let the strip decelerate/fade instead of hard-cutting */
-.tile.settling .symbol{opacity:0}
-
-.tile.settling .strip{
-  opacity:1;
-  animation:reelSettle .28s cubic-bezier(.12,.78,.18,1) forwards;
-}
-
-@keyframes reelRoll{
-  from{transform:translate3d(0,-36%,0)}
-  to{transform:translate3d(0,-9%,0)}
-}
-  to{transform:translate3d(0,-9%,0)}
-}
-
-@keyframes reelSettle{
-  0%{transform:translate3d(0,-28%,0);opacity:1;filter:blur(.85px)}
-  68%{transform:translate3d(0,-16%,0);opacity:.98;filter:blur(.45px)}
-  100%{transform:translate3d(0,-13%,0);opacity:0;filter:blur(.15px)}
-}
-
-.tile.stopping .symbol{
-  animation:stopSnap .18s ease-out both;
-}
-
-@keyframes stopSnap{
-  0%{opacity:0;filter:blur(.6px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
-  100%{opacity:1;filter:blur(0) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
-}
-  65%{transform:translateY(4%) scale(1.05);opacity:1}
-  100%{transform:translateY(0) scale(1)}
-}
-
-.tile.win .symbol{
-  animation:winPulse .75s ease-in-out infinite alternate;
-  filter:
-    drop-shadow(0 0 .55vw rgba(255,230,155,.95))
-    drop-shadow(0 0 1.25vw rgba(71,215,255,.58));
-}
-
-@keyframes winPulse{
-  to{transform:scale(1.10)}
-}
-
-.tile.tease .symbol{
-  animation:teasePulse .38s ease-in-out infinite alternate;
-  filter:
-    drop-shadow(0 0 .70vw rgba(71,215,255,.95))
-    drop-shadow(0 0 1.55vw rgba(71,215,255,.62));
-}
-
-@keyframes teasePulse{
-  to{transform:scale(1.13)}
-}
-
-/* Optional alignment debug: add ?debug=1 to the URL */
-.stage.debug .tile{outline:1px solid rgba(255,0,0,.95)}
-.stage.debug .tile::after{
-  content:"";
-  position:absolute;
-  left:50%;top:50%;
-  width:.45vw;height:.45vw;
-  transform:translate(-50%,-50%);
-  border-radius:50%;
-  background:#00ff38;
-  z-index:50;
 }
 
 /* HUD */
+
 .hud{
   position:absolute;
   z-index:20;
@@ -493,8 +453,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.<br>Smoother spin stop: reel decelerates/fades before final symbols reveal, no hard pop.
-  </aside>
+    This is a fake-money training/prototype page only.<br>Animation rebuilt from scratch: one smooth strip per reel column, no per-cell flash on stopping.</aside>
 </main>
 
 <script>
@@ -563,6 +522,7 @@ let audioCtx = null;
 let freeSpins = 0;
 let inBonus = false;
 let bonusWin = 0;
+let columnReels = [];
 
 function makeImg(id, cls=""){
   const i = document.createElement("img");
@@ -579,13 +539,8 @@ function cell(c,r){
 
 function createBoard(){
   reels.innerHTML = "";
+  columnReels = [];
 
-  /*
-    Inspected from the corrected 1672 x 941 PNG.
-    These are cell boundary lines in original image pixels:
-    5 columns = 6 x-boundaries
-    4 rows    = 5 y-boundaries
-  */
   const colLines = [445, 594, 748, 902, 1058, 1212];
   const rowLines = [184, 343, 477, 614, 751];
   const baseW = 1672;
@@ -612,17 +567,35 @@ function createBoard(){
       t.style.height = pctY(y2 - y1);
 
       const main = makeImg("TEN","symbol");
-
       const strip = document.createElement("div");
       strip.className = "strip";
-      for(let i=0;i<11;i++){
-        strip.appendChild(makeImg(randomAny()));
-      }
 
       t.appendChild(main);
       t.appendChild(strip);
       reels.appendChild(t);
     }
+  }
+
+  for(let c=0;c<C;c++){
+    const reel = document.createElement("div");
+    reel.className = "column-reel";
+    reel.dataset.c = c;
+
+    const x1 = colLines[c];
+    const x2 = colLines[c + 1];
+    const y1 = rowLines[0];
+    const y2 = rowLines[R];
+
+    reel.style.left = pctX(x1);
+    reel.style.top = pctY(y1);
+    reel.style.width = pctX(x2 - x1);
+    reel.style.height = pctY(y2 - y1);
+
+    const track = document.createElement("div");
+    track.className = "reel-track";
+    reel.appendChild(track);
+    reels.appendChild(reel);
+    columnReels[c] = reel;
   }
 }
 
@@ -667,12 +640,64 @@ function render(b=board){
 }
 
 function refreshStrip(t){
-  const imgs = t.querySelectorAll(".strip img");
-  imgs.forEach(i => {
-    const id = randomAny();
-    i.src = ASSETS[id];
-    i.alt = id;
+  /* disabled; spinning is handled by column reel overlays */
+}
+
+function buildColumnReel(c, finalColumn){
+  const reel = columnReels[c];
+  const track = reel.querySelector(".reel-track");
+  track.innerHTML = "";
+
+  const fillerCount = 34;
+  const ids = [];
+
+  for(let i=0;i<fillerCount;i++){
+    ids.push(randomAny());
+  }
+
+  for(let r=0;r<R;r++){
+    ids.push(finalColumn[r]);
+  }
+
+  ids.forEach(id => {
+    const item = document.createElement("div");
+    item.className = `reel-item ${byId[id].tier}`;
+    const img = makeImg(id);
+    item.appendChild(img);
+    track.appendChild(item);
   });
+
+  return ids.length;
+}
+
+function startColumnReel(c, itemCount, duration){
+  const reel = columnReels[c];
+  const track = reel.querySelector(".reel-track");
+
+  const finalTop = -((itemCount - R) * (100 / R));
+  const startTop = finalTop + 520;
+
+  reel.classList.remove("settled");
+  reel.classList.add("active");
+
+  track.style.transition = "none";
+  track.style.top = `${startTop}%`;
+  void track.offsetHeight;
+
+  track.style.transition = `top ${duration}ms cubic-bezier(.08,.72,.12,1)`;
+  track.style.top = `${finalTop}%`;
+}
+
+function stopColumnReel(c){
+  const reel = columnReels[c];
+  reel.classList.add("settled");
+
+  setTimeout(() => {
+    reel.classList.remove("active","settled");
+    const track = reel.querySelector(".reel-track");
+    track.style.transition = "none";
+    track.style.top = "0";
+  }, 80);
 }
 
 function sfx(type){
@@ -704,7 +729,6 @@ function sfx(type){
     }
 
     if(type === "stop"){
-      /* darker reel-stop thump */
       tone(72, .18, .14, "sine", 36);
       tone(40, .12, .075, "triangle", 30, .018);
       return;
@@ -860,7 +884,6 @@ async function spin(){
 
   spinning = true;
   clearFX();
-  sfx("spin");
 
   if(inBonus){
     freeSpins--;
@@ -874,35 +897,36 @@ async function spin(){
   updateUI();
 
   const outcome = randomBoard();
+
+  for(let c=0;c<C;c++){
+    for(let r=0;r<R;r++){
+      cell(c,r).classList.add("reel-hidden");
+    }
+
+    const finalColumn = [];
+    for(let r=0;r<R;r++){
+      finalColumn.push(outcome[c][r]);
+    }
+
+    const itemCount = buildColumnReel(c, finalColumn);
+    const duration = 900 + c * 260;
+    startColumnReel(c, itemCount, duration);
+  }
+
   let teased = false;
 
   for(let c=0;c<C;c++){
-    for(let r=0;r<R;r++){
-      const t = cell(c,r);
-      refreshStrip(t);
-      t.classList.add("spinning");
-    }
-  }
-
-  for(let c=0;c<C;c++){
-    const delay = 360 + c * 150 + (teased ? c * 120 : 0);
-    await new Promise(res => setTimeout(res, delay));
+    const wait = c === 0 ? 900 : 260;
+    await new Promise(res => setTimeout(res, wait));
 
     for(let r=0;r<R;r++){
       const t = cell(c,r);
-      t.classList.add("settling");
-    }
-
-    sfx("stop");
-    await new Promise(res => setTimeout(res, 280));
-
-    for(let r=0;r<R;r++){
-      const t = cell(c,r);
-      t.classList.remove("spinning","settling");
       setTile(c,r,outcome[c][r]);
-      t.classList.add("stopping");
-      setTimeout(()=>t.classList.remove("stopping"),190);
+      t.classList.remove("reel-hidden");
     }
+
+    stopColumnReel(c);
+    sfx("stop");
 
     const fs = countFS(c+1,outcome);
 
@@ -920,8 +944,6 @@ async function spin(){
           }
         }
       }
-
-      await new Promise(res => setTimeout(res, 430));
     }
   }
 
@@ -950,7 +972,7 @@ async function spin(){
     flash();
 
     [...reels.children].forEach(t => {
-      if(t.dataset.id === "FS") t.classList.add("tease");
+      if(t.dataset && t.dataset.id === "FS") t.classList.add("tease");
     });
   }else if(inBonus && freeSpins <= 0){
     inBonus = false;
