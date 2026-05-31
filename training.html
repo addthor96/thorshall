@@ -114,6 +114,11 @@ html,body{
 .tile[data-id="MJOLNIR"] .symbol{max-width:68%;max-height:68%;margin-top:1.0%}
 .tile[data-id="FS"] .symbol{max-width:70%;max-height:70%;margin-top:0.8%}
 
+/* Top row only: nudge symbols down so they sit in the visual center of the first row */
+.tile[data-r="0"] .symbol{
+  margin-top:4.1% !important;
+}
+
 /* Smooth spinning strip */
 .strip{
   position:absolute;
