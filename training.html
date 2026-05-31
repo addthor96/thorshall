@@ -100,19 +100,19 @@ html,body{
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Symbol size control — similar visual size, fitted inside each 4x5 cell */
-.tile[data-id="TEN"] .symbol{max-width:71%;max-height:71%}
-.tile[data-id="J"] .symbol{max-width:76%;max-height:76%}
-.tile[data-id="Q"] .symbol{max-width:71%;max-height:71%}
-.tile[data-id="K"] .symbol{max-width:74%;max-height:74%}
-.tile[data-id="A"] .symbol{max-width:71%;max-height:71%}
+/* Symbol size control — tuned to make 10/A/J/Q/K slightly smaller and visually center all symbols better */
+.tile[data-id="TEN"] .symbol{max-width:62%;max-height:62%;margin-top:1.1%}
+.tile[data-id="J"] .symbol{max-width:66%;max-height:66%;margin-top:1.2%}
+.tile[data-id="Q"] .symbol{max-width:61%;max-height:61%;margin-top:1.0%}
+.tile[data-id="K"] .symbol{max-width:63%;max-height:63%;margin-top:1.0%}
+.tile[data-id="A"] .symbol{max-width:61%;max-height:61%;margin-top:1.0%}
 
-.tile[data-id="RAVEN"] .symbol{max-width:73%;max-height:73%}
-.tile[data-id="SHIP"] .symbol{max-width:71%;max-height:71%}
-.tile[data-id="AXE"] .symbol{max-width:72%;max-height:72%}
-.tile[data-id="RUNE"] .symbol{max-width:74%;max-height:74%}
-.tile[data-id="MJOLNIR"] .symbol{max-width:72%;max-height:72%}
-.tile[data-id="FS"] .symbol{max-width:74%;max-height:74%}
+.tile[data-id="RAVEN"] .symbol{max-width:70%;max-height:70%;margin-top:0.8%}
+.tile[data-id="SHIP"] .symbol{max-width:68%;max-height:68%;margin-top:1.0%}
+.tile[data-id="AXE"] .symbol{max-width:68%;max-height:68%;margin-top:0.9%}
+.tile[data-id="RUNE"] .symbol{max-width:70%;max-height:70%;margin-top:0.8%}
+.tile[data-id="MJOLNIR"] .symbol{max-width:68%;max-height:68%;margin-top:1.0%}
+.tile[data-id="FS"] .symbol{max-width:70%;max-height:70%;margin-top:0.8%}
 
 /* Smooth spinning strip */
 .strip{
