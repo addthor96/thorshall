@@ -13,13 +13,10 @@
     This is the actual 5x5 board area only.
     Do not use the outer frame as the grid.
   */
-  --grid-left: 29.42%;
-  --grid-top: 18.86%;
-  --grid-width: 42.36%;
-  --grid-height: 58.08%;
-
-  --cell-pad-x: 7%;
-  --cell-pad-y: 7%;
+  --grid-left: 29.46%;
+  --grid-top: 18.78%;
+  --grid-width: 42.34%;
+  --grid-height: 58.24%;
 
   --gold:#f2c36b;
   --blue:#47d7ff;
@@ -73,21 +70,19 @@ html,body{
   top:var(--grid-top);
   width:var(--grid-width);
   height:var(--grid-height);
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  grid-template-rows:repeat(5,1fr);
-  padding:0;
-  gap:0;
   overflow:hidden;
 }
 
+
 .tile{
-  position:relative;
+  position:absolute;
+  width:18.2%;
+  height:18.2%;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
-  padding:var(--cell-pad-y) var(--cell-pad-x);
+  transform:translate(-50%,-50%);
 }
 
 /* small dark behind transparent symbols */
@@ -116,18 +111,18 @@ html,body{
 }
 
 /* Symbol size control */
-.tile[data-id="TEN"] .symbol{width:70%;height:70%}
-.tile[data-id="J"] .symbol{width:62%;height:62%}
-.tile[data-id="Q"] .symbol{width:64%;height:64%}
-.tile[data-id="K"] .symbol{width:64%;height:64%}
-.tile[data-id="A"] .symbol{width:66%;height:66%}
+.tile[data-id="TEN"] .symbol{width:68%;height:68%}
+.tile[data-id="J"] .symbol{width:57%;height:57%}
+.tile[data-id="Q"] .symbol{width:60%;height:60%}
+.tile[data-id="K"] .symbol{width:60%;height:60%}
+.tile[data-id="A"] .symbol{width:62%;height:62%}
 
-.tile[data-id="RAVEN"] .symbol{width:68%;height:68%}
-.tile[data-id="SHIP"] .symbol{width:70%;height:70%}
-.tile[data-id="AXE"] .symbol{width:69%;height:69%}
-.tile[data-id="RUNE"] .symbol{width:64%;height:64%}
-.tile[data-id="MJOLNIR"] .symbol{width:66%;height:66%}
-.tile[data-id="FS"] .symbol{width:64%;height:64%}
+.tile[data-id="RAVEN"] .symbol{width:62%;height:62%}
+.tile[data-id="SHIP"] .symbol{width:66%;height:66%}
+.tile[data-id="AXE"] .symbol{width:61%;height:61%}
+.tile[data-id="RUNE"] .symbol{width:58%;height:58%}
+.tile[data-id="MJOLNIR"] .symbol{width:60%;height:60%}
+.tile[data-id="FS"] .symbol{width:58%;height:58%}
 
 /* Smooth spinning strip */
 .strip{
@@ -468,7 +463,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.<br>Grid rebuilt with equal 5x5 spacing and tuned symbol sizing.
+    This is a fake-money training/prototype page only.<br>Manual row/column centers are used so symbols sit in the middle of each square.
   </aside>
 </main>
 
@@ -555,12 +550,22 @@ function cell(c,r){
 function createBoard(){
   reels.innerHTML = "";
 
+  const colStart = 10.2;
+  const colEnd = 89.8;
+  const rowStart = 10.0;
+  const rowEnd = 89.6;
+
+  const xAt = (c) => colStart + ((colEnd - colStart) * (c / (C - 1)));
+  const yAt = (r) => rowStart + ((rowEnd - rowStart) * (r / (R - 1)));
+
   for(let r=0;r<R;r++){
     for(let c=0;c<C;c++){
       const t = document.createElement("div");
       t.className = "tile";
       t.dataset.c = c;
       t.dataset.r = r;
+      t.style.left = `${xAt(c)}%`;
+      t.style.top = `${yAt(r)}%`;
 
       const main = makeImg("TEN","symbol");
 
