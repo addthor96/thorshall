@@ -119,11 +119,12 @@ html,body{
   height:72%;
 }
 
-/* Smooth column reel animation — one real strip per reel, no per-cell flashing */
+/* Smooth column reel animation — one full strip per reel column */
 .strip{
   display:none;
 }
 
+/* Final static cells hide only while the column overlay is spinning */
 .tile.reel-hidden .symbol{
   opacity:0;
 }
@@ -134,10 +135,16 @@ html,body{
   overflow:hidden;
   pointer-events:none;
   opacity:0;
+  transition:opacity .16s linear;
+  background:transparent;
 }
 
 .column-reel.active{
   opacity:1;
+}
+
+.column-reel.fading{
+  opacity:0;
 }
 
 .reel-track{
@@ -162,8 +169,8 @@ html,body{
   height:68%;
   object-fit:contain;
   object-position:center center;
-  filter:blur(.65px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
-  opacity:.94;
+  filter:blur(.72px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  opacity:.93;
 }
 
 .reel-item.low img{
@@ -177,9 +184,9 @@ html,body{
   height:69%;
 }
 
-.column-reel.settled .reel-item img{
-  filter:blur(0) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
-  opacity:1;
+.column-reel.clean .reel-item img{
+  filter:blur(.18px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  opacity:.98;
 }
 
 /* HUD */
@@ -453,7 +460,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.<br>Animation rebuilt from scratch: one smooth strip per reel column, no per-cell flash on stopping.</aside>
+    This is a fake-money training/prototype page only.<br>Animation rebuilt: smoother downwards reels, softer stops, no punch-down hit, plus reel-spin sound while spinning.</aside>
 </main>
 
 <script>
@@ -523,6 +530,7 @@ let freeSpins = 0;
 let inBonus = false;
 let bonusWin = 0;
 let columnReels = [];
+let spinHum = null;
 
 function makeImg(id, cls=""){
   const i = document.createElement("img");
@@ -640,7 +648,7 @@ function render(b=board){
 }
 
 function refreshStrip(t){
-  /* disabled; spinning is handled by column reel overlays */
+  /* disabled; column reels handle the spin animation */
 }
 
 function buildColumnReel(c, finalColumn){
@@ -648,7 +656,7 @@ function buildColumnReel(c, finalColumn){
   const track = reel.querySelector(".reel-track");
   track.innerHTML = "";
 
-  const fillerCount = 34;
+  const fillerCount = 38;
   const ids = [];
 
   for(let i=0;i<fillerCount;i++){
@@ -675,29 +683,73 @@ function startColumnReel(c, itemCount, duration){
   const track = reel.querySelector(".reel-track");
 
   const finalTop = -((itemCount - R) * (100 / R));
-  const startTop = finalTop + 520;
 
-  reel.classList.remove("settled");
+  /*
+    IMPORTANT:
+    top increases from a more negative value to finalTop.
+    That makes the symbols visually travel DOWN the screen.
+  */
+  const startTop = finalTop - 620;
+
+  reel.classList.remove("fading","clean");
   reel.classList.add("active");
 
   track.style.transition = "none";
   track.style.top = `${startTop}%`;
   void track.offsetHeight;
 
-  track.style.transition = `top ${duration}ms cubic-bezier(.08,.72,.12,1)`;
+  track.style.transition = `top ${duration}ms cubic-bezier(.10,.72,.12,1)`;
   track.style.top = `${finalTop}%`;
 }
 
-function stopColumnReel(c){
+function finishColumnReel(c){
   const reel = columnReels[c];
-  reel.classList.add("settled");
+  reel.classList.add("clean","fading");
 
   setTimeout(() => {
-    reel.classList.remove("active","settled");
+    reel.classList.remove("active","fading","clean");
     const track = reel.querySelector(".reel-track");
     track.style.transition = "none";
     track.style.top = "0";
-  }, 80);
+  }, 170);
+}
+
+function startSpinSound(){
+  if(muted || spinHum) return;
+
+  try{
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const now = audioCtx.currentTime;
+
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+
+    osc.type = "sawtooth";
+    osc.frequency.setValueAtTime(58, now);
+
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.035, now + 0.08);
+
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+
+    spinHum = {osc, gain};
+  }catch(e){}
+}
+
+function stopSpinSound(){
+  if(!spinHum || !audioCtx) return;
+
+  try{
+    const now = audioCtx.currentTime;
+    spinHum.gain.gain.cancelScheduledValues(now);
+    spinHum.gain.gain.setValueAtTime(spinHum.gain.gain.value || 0.03, now);
+    spinHum.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.18);
+    spinHum.osc.stop(now + 0.22);
+  }catch(e){}
+
+  spinHum = null;
 }
 
 function sfx(type){
@@ -719,7 +771,7 @@ function sfx(type){
       }
 
       g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(gain, t + 0.012);
       g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
 
       o.connect(g);
@@ -729,13 +781,8 @@ function sfx(type){
     }
 
     if(type === "stop"){
-      tone(72, .18, .14, "sine", 36);
-      tone(40, .12, .075, "triangle", 30, .018);
-      return;
-    }
-
-    if(type === "spin"){
-      tone(92, .08, .045, "triangle", 70);
+      tone(68, .16, .12, "sine", 36);
+      tone(38, .11, .065, "triangle", 30, .018);
       return;
     }
 
@@ -884,6 +931,7 @@ async function spin(){
 
   spinning = true;
   clearFX();
+  startSpinSound();
 
   if(inBonus){
     freeSpins--;
@@ -909,14 +957,14 @@ async function spin(){
     }
 
     const itemCount = buildColumnReel(c, finalColumn);
-    const duration = 900 + c * 260;
+    const duration = 1350 + c * 330;
     startColumnReel(c, itemCount, duration);
   }
 
   let teased = false;
 
   for(let c=0;c<C;c++){
-    const wait = c === 0 ? 900 : 260;
+    const wait = c === 0 ? 1350 : 330;
     await new Promise(res => setTimeout(res, wait));
 
     for(let r=0;r<R;r++){
@@ -925,7 +973,7 @@ async function spin(){
       t.classList.remove("reel-hidden");
     }
 
-    stopColumnReel(c);
+    finishColumnReel(c);
     sfx("stop");
 
     const fs = countFS(c+1,outcome);
@@ -946,6 +994,8 @@ async function spin(){
       }
     }
   }
+
+  stopSpinSound();
 
   board = outcome;
 
@@ -1022,6 +1072,7 @@ autoBtn.onclick = () => {
 
 soundBtn.onclick = () => {
   muted = !muted;
+  if(muted) stopSpinSound();
   soundBtn.textContent = `Sound: ${muted ? "Off" : "On"}`;
 };
 
