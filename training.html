@@ -133,6 +133,26 @@ html,body{
   opacity:0;
 }
 
+/* Very small stop accent so the landing feels intentional, not punched */
+.column-reel::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  opacity:0;
+  background:linear-gradient(90deg, transparent, rgba(71,215,255,.11), transparent);
+}
+
+.column-reel.stop-accent::after{
+  animation:reelStopAccent .18s ease-out;
+}
+
+@keyframes reelStopAccent{
+  0%{opacity:0;transform:scaleY(.96)}
+  45%{opacity:.55;transform:scaleY(1)}
+  100%{opacity:0;transform:scaleY(1)}
+}
+
 .reel-track{
   position:absolute;
   left:0;
@@ -472,7 +492,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
-    Real loop engine: reels loop fast first, then decelerate into the final result. No generated spin hum.
+    Real loop engine: reels loop fast first, then decelerate into the final result. Stop updated with heavy ease-out, soft crossfade, and subtle blue stop accent.
   </aside>
 </main>
 
@@ -724,6 +744,10 @@ function startLoopingReels(){
   }
 }
 
+function easeOutQuint(t){
+  return 1 - Math.pow(1 - t, 5);
+}
+
 function stopReelIntoResult(c, finalColumn){
   return new Promise(resolve => {
     const loop = loops[c];
@@ -736,7 +760,7 @@ function stopReelIntoResult(c, finalColumn){
 
     track.innerHTML = "";
 
-    const before = 24;
+    const before = 30;
     const after = 8;
 
     for(let i=0;i<before;i++) addReelItem(track, randomAny(), itemH);
@@ -744,27 +768,42 @@ function stopReelIntoResult(c, finalColumn){
     for(let i=0;i<after;i++) addReelItem(track, randomAny(), itemH);
 
     const finalY = -before * itemH;
-    const startY = finalY - 9 * itemH;
+
+    /*
+      Longer distance + manual ease-out.
+      This removes the "drop and hit" feeling because the final 20% slows down heavily.
+    */
+    const startY = finalY - 13.5 * itemH;
+    const duration = 1080;
+    const startTime = performance.now();
 
     track.style.transition = "none";
     track.style.transform = `translate3d(0,${startY}px,0)`;
-    void track.offsetHeight;
+    reel.classList.remove("fade-out","stop-accent");
+    reel.classList.add("active");
 
-    let done = false;
-    const finish = () => {
-      if(done) return;
-      done = true;
-      track.removeEventListener("transitionend", finish);
-      resolve();
-    };
+    function frame(now){
+      const t = Math.min((now - startTime) / duration, 1);
+      const eased = easeOutQuint(t);
+      const y = startY + (finalY - startY) * eased;
 
-    track.addEventListener("transitionend", finish);
-    requestAnimationFrame(() => {
-      track.style.transition = `transform 760ms cubic-bezier(.08,.72,.10,1)`;
-      track.style.transform = `translate3d(0,${finalY}px,0)`;
-    });
+      track.style.transform = `translate3d(0,${y}px,0)`;
 
-    setTimeout(finish, 840);
+      if(t < 1){
+        requestAnimationFrame(frame);
+      }else{
+        track.style.transform = `translate3d(0,${finalY}px,0)`;
+        reel.classList.add("stop-accent");
+
+        /*
+          Tiny hold before revealing static symbols behind it.
+          The reel is already stopped, so no visual drop happens on reveal.
+        */
+        setTimeout(resolve, 90);
+      }
+    }
+
+    requestAnimationFrame(frame);
   });
 }
 
@@ -772,13 +811,18 @@ function hideReel(c){
   const reel = columnReels[c];
   const track = reel.querySelector(".reel-track");
 
+  /*
+    Soft crossfade from stopped reel overlay to static final symbols.
+    This is the part that removes the "symbols drop into the cell" feeling.
+  */
   reel.classList.add("fade-out");
+
   setTimeout(() => {
-    reel.classList.remove("active","fade-out");
+    reel.classList.remove("active","fade-out","stop-accent");
     track.style.transition = "none";
     track.style.transform = "translate3d(0,0,0)";
     track.innerHTML = "";
-  }, 100);
+  }, 145);
 }
 
 function sfx(type){
