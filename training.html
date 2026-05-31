@@ -224,27 +224,7 @@ html,body{
 }
 
 
-/* Background ravens */
-.flying-raven{
-  position:absolute;
-  z-index:2;
-  width:3.2%;
-  opacity:.34;
-  pointer-events:none;
-  filter:brightness(.28) drop-shadow(0 .18vw .22vw rgba(0,0,0,.7));
-  animation:flyRavenAcross 11s linear forwards;
-}
-
-.flying-raven.r2{
-  width:2.3%;
-  opacity:.24;
-  animation-duration:12.5s;
-  animation-delay:.55s;
-}
-
-@keyframes flyRavenAcross{
-  from{transform:translate3d(-8vw,0,0) scaleX(1)}
-  to{transform:translate3d(112vw,-4.5vw,0) scaleX(1)}
+to{transform:translate3d(112vw,-4.5vw,0) scaleX(1)}
 }
 
 /* HUD */
@@ -336,6 +316,157 @@ button:disabled{opacity:.5;cursor:not-allowed}
   border-color:rgba(71,215,255,.32);
   box-shadow:0 0 .9vw rgba(71,215,255,.12);
 }
+
+.hud-anchor{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.spin-group{
+  display:flex;
+  align-items:center;
+  gap:.35vw;
+}
+
+.auto-mini{
+  min-width:2.7vw;
+  width:2.7vw;
+  height:2.7vw;
+  border-radius:999px;
+  font-size:1.1vw;
+  font-weight:900;
+  background:linear-gradient(180deg,rgba(52,41,24,.94),rgba(9,8,8,.88));
+  border:1px solid rgba(242,195,107,.22);
+}
+
+.menu-panel{
+  position:absolute;
+  left:50%;
+  bottom:120%;
+  transform:translateX(-50%) translateY(.4vw);
+  min-width:13vw;
+  padding:.55vw;
+  border-radius:.9vw;
+  background:rgba(6,10,14,.95);
+  border:1px solid rgba(242,195,107,.22);
+  box-shadow:0 .6vw 1.4vw rgba(0,0,0,.45);
+  opacity:0;
+  pointer-events:none;
+  transition:opacity .18s ease, transform .18s ease;
+}
+
+.menu-panel.show{
+  opacity:1;
+  pointer-events:auto;
+  transform:translateX(-50%) translateY(0);
+}
+
+.menu-title{
+  font-size:.7vw;
+  letter-spacing:.12em;
+  color:#c99d5c;
+  text-transform:uppercase;
+  margin-bottom:.35vw;
+  text-align:center;
+}
+
+.menu-opt{
+  width:100%;
+  margin:.2vw 0;
+  padding:.48vw .56vw;
+  border-radius:.6vw;
+  background:linear-gradient(180deg,rgba(48,38,23,.94),rgba(12,10,10,.92));
+  border:1px solid rgba(255,220,130,.12);
+  color:#ffe8ad;
+  font-size:.72vw;
+  line-height:1.18;
+  text-align:left;
+}
+
+.menu-opt b{
+  color:#fff2c8;
+}
+
+.buy{
+  min-width:8.8vw;
+  padding:0 .8vw;
+  line-height:1;
+  font-size:.76vw;
+}
+
+.bonus-notice{
+  position:absolute;
+  inset:0;
+  z-index:60;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
+.bonus-notice.show{
+  display:flex;
+}
+
+.bonus-notice-card{
+  width:min(38vw,88%);
+  padding:1.15vw 1.25vw;
+  border-radius:1vw;
+  background:linear-gradient(180deg,rgba(8,12,18,.96),rgba(5,8,12,.94));
+  border:1px solid rgba(242,195,107,.30);
+  box-shadow:0 1vw 2vw rgba(0,0,0,.45), 0 0 1.8vw rgba(71,215,255,.14);
+  text-align:center;
+  pointer-events:auto;
+  opacity:0;
+  transform:translateY(.55vw) scale(.985);
+  transition:opacity .28s ease, transform .28s ease;
+}
+
+.bonus-notice.show .bonus-notice-card{
+  opacity:1;
+  transform:translateY(0) scale(1);
+}
+
+.bonus-notice-card h3{
+  margin:0 0 .45vw;
+  font-size:1.6vw;
+  color:#fff2c8;
+}
+
+.bonus-notice-card p{
+  margin:.25vw 0;
+  font-size:.92vw;
+  color:#d7e9f4;
+}
+
+.bonus-notice-card .cta{
+  margin-top:.8vw;
+  display:inline-flex;
+  align-items:center;
+  gap:.45vw;
+  padding:.55vw .9vw;
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(46,35,21,.96),rgba(10,9,9,.92));
+  border:1px solid rgba(242,195,107,.22);
+  color:#ffe8ad;
+  font-size:.78vw;
+}
+
+.bonus-notice-card.hidden-bonus{
+  border-color:rgba(71,215,255,.42);
+  box-shadow:0 1vw 2vw rgba(0,0,0,.45), 0 0 2vw rgba(71,215,255,.24);
+}
+
+.bonus-notice-card.super-bonus{
+  border-color:rgba(255,190,80,.36);
+}
+
+.bonus-notice-card.normal-bonus{
+  border-color:rgba(242,195,107,.30);
+}
+
 
 .spin{
   width:5.25vw;
@@ -520,32 +651,57 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <div class="msg" id="msg">Spin to enter Miðgarður.</div>
   <div class="bonus" id="bonusPanel">FREE SPINS: <b id="fsLeft">0</b> | BONUS WIN: <b id="bonusWin">0</b></div>
 
-  <div class="hud">
+  
+<div class="hud">
+    <div class="hud-anchor">
+      <button class="small buy" id="buyBtn">Bonus Buy</button>
+      <div class="menu-panel" id="buyMenu">
+        <div class="menu-title">Bonus Buy</div>
+        <button class="menu-opt" id="buyFeatureOpt">Feature Spin<br><b>3x bet</b> • 5x higher FS chance</button>
+        <button class="menu-opt" id="buy3fsOpt">Buy 3 FS Bonus<br><b>100x bet</b> • 10 free spins</button>
+        <button class="menu-opt" id="buy4fsOpt">Buy 4 FS Bonus<br><b>250x bet</b> • 12 super free spins</button>
+      </div>
+    </div>
+
     <div class="pill"><span>Balance</span><b id="balance">5000</b></div>
 
     <button class="small betbtn" id="betDown">−</button>
     <div class="pill betpill"><span>Bet</span><b id="bet">20</b></div>
     <button class="small betbtn" id="betUp">+</button>
 
-    <button class="spin" id="spinBtn">Spin</button>
+    <div class="hud-anchor spin-group">
+      <button class="spin" id="spinBtn">Spin</button>
+      <button class="auto-mini" id="autoBtn">A</button>
+      <div class="menu-panel" id="autoMenu">
+        <div class="menu-title">Auto Spins</div>
+        <button class="menu-opt auto-opt" data-auto="10">10 auto spins</button>
+        <button class="menu-opt auto-opt" data-auto="25">25 auto spins</button>
+        <button class="menu-opt auto-opt" data-auto="50">50 auto spins</button>
+        <button class="menu-opt auto-opt" data-auto="75">75 auto spins</button>
+        <button class="menu-opt auto-opt" data-auto="100">100 auto spins</button>
+      </div>
+    </div>
 
-    <button class="small feature" id="featureBtn">Feature<br><b>3x</b></button>
-    <button class="small buy" id="buyBtn">Bonus Buy<br><b>250x</b></button>
-
-    <button class="small" id="autoBtn">Auto 25</button>
     <div class="pill"><span>Last Win</span><b id="lastWin">0</b></div>
   </div>
 
-  <div class="overlay"<div class="overlay" id="overlay">
+  <div class="overlay" id="overlay">
     <div class="big">BIG WIN<small id="bigAmount">0</small></div>
   </div>
 
   <div class="flash"></div>
 
+  <div class="bonus-notice" id="bonusNotice">
+    <div class="bonus-notice-card" id="bonusNoticeCard">
+      <h3 id="bonusNoticeTitle">Bonus Won</h3>
+      <p id="bonusNoticeBody">You won free spins.</p>
+      <div class="cta">Click to start now</div>
+    </div>
+  </div>
+
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
-    Updated systems: max 1 FS per reel, FS-hit sound only when bonus is still possible, 3FS normal bonus, 4FS super bonus, 5FS hidden 500x-min bonus, Feature Spin, Bonus Buy, new bottom bar, background ravens, thunder before lightning.
-  </aside>
+    Updated systems: smoother bonus flow, popup-start bonus notices, dropdown Bonus Buy, dropdown Auto Spins, improved thunder, no flying ravens.</aside>
 </main>
 
 <script>
@@ -593,8 +749,12 @@ const spinBtn = document.getElementById("spinBtn");
 const betUp = document.getElementById("betUp");
 const betDown = document.getElementById("betDown");
 const autoBtn = document.getElementById("autoBtn");
-const featureBtn = document.getElementById("featureBtn");
 const buyBtn = document.getElementById("buyBtn");
+const buyMenu = document.getElementById("buyMenu");
+const autoMenu = document.getElementById("autoMenu");
+const buyFeatureOpt = document.getElementById("buyFeatureOpt");
+const buy3fsOpt = document.getElementById("buy3fsOpt");
+const buy4fsOpt = document.getElementById("buy4fsOpt");
 const soundBtn = document.getElementById("soundBtn");
 const notesBtn = document.getElementById("notesBtn");
 const notes = document.getElementById("notes");
@@ -603,6 +763,10 @@ const fsLeft = document.getElementById("fsLeft");
 const bonusWinEl = document.getElementById("bonusWin");
 const overlay = document.getElementById("overlay");
 const bigAmount = document.getElementById("bigAmount");
+const bonusNotice = document.getElementById("bonusNotice");
+const bonusNoticeCard = document.getElementById("bonusNoticeCard");
+const bonusNoticeTitle = document.getElementById("bonusNoticeTitle");
+const bonusNoticeBody = document.getElementById("bonusNoticeBody");
 
 let board = [];
 let balance = 5000;
@@ -622,6 +786,8 @@ let bonusMode = "";
 let bonusMultiplier = 1;
 let hiddenMinWin = 0;
 let bonusBet = 0;
+let pendingBonus = null;
+let pendingBonusTimer = null;
 
 function makeImg(id, cls=""){
   const i = document.createElement("img");
@@ -932,6 +1098,41 @@ function sfx(type){
       o.stop(t + dur + .03);
     }
 
+    function noiseBurst(duration=1.2, peak=.09, lowpass=380, delay=0){
+      const t = now + delay;
+      const sr = audioCtx.sampleRate;
+      const len = Math.floor(sr * duration);
+      const buffer = audioCtx.createBuffer(1, len, sr);
+      const data = buffer.getChannelData(0);
+
+      for(let i=0;i<len;i++){
+        const white = Math.random() * 2 - 1;
+        const fall = 1 - i / len;
+        data[i] = white * (0.6 + Math.random() * 0.4) * fall;
+      }
+
+      const src = audioCtx.createBufferSource();
+      const filter = audioCtx.createBiquadFilter();
+      const gain = audioCtx.createGain();
+
+      src.buffer = buffer;
+      filter.type = "lowpass";
+      filter.frequency.setValueAtTime(lowpass, t);
+      filter.Q.value = .9;
+
+      gain.gain.setValueAtTime(0.0001, t);
+      gain.gain.exponentialRampToValueAtTime(peak, t + 0.05);
+      gain.gain.exponentialRampToValueAtTime(peak * .55, t + duration * 0.35);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+
+      src.connect(filter);
+      filter.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      src.start(t);
+      src.stop(t + duration + .03);
+    }
+
     if(type === "stop"){
       tone(68,.15,.105,"sine",36);
       tone(38,.10,.055,"triangle",30,.018);
@@ -951,8 +1152,10 @@ function sfx(type){
     }
 
     if(type === "thunder"){
-      tone(46,.85,.11,"sine",28);
-      tone(31,.95,.08,"triangle",24,.06);
+      noiseBurst(1.45,.085,280,0);
+      noiseBurst(1.05,.05,180,0.11);
+      tone(44,1.2,.05,"sine",26,.04);
+      tone(28,1.45,.04,"triangle",22,.12);
       return;
     }
 
@@ -967,16 +1170,28 @@ function sfx(type){
 }
 
 function updateUI(){
+  const bet = betValues[betIndex];
+
   balanceEl.textContent = Math.floor(balance);
-  betEl.textContent = betValues[betIndex];
+  betEl.textContent = bet;
   lastWinEl.textContent = Math.floor(lastWin);
 
-  spinBtn.disabled = spinning || (!inBonus && balance < betValues[betIndex]);
-  betUp.disabled = spinning || inBonus || betIndex >= betValues.length-1;
-  betDown.disabled = spinning || inBonus || betIndex <= 0;
-  featureBtn.disabled = spinning || inBonus || balance < betValues[betIndex] * 3;
-  buyBtn.disabled = spinning || inBonus || balance < betValues[betIndex] * 250;
+  spinBtn.disabled = spinning || pendingBonus || (!inBonus && balance < bet);
+  betUp.disabled = spinning || inBonus || !!pendingBonus || betIndex >= betValues.length-1;
+  betDown.disabled = spinning || inBonus || !!pendingBonus || betIndex <= 0;
 
+  buyBtn.disabled = spinning || inBonus || !!pendingBonus;
+  autoBtn.disabled = spinning && !inBonus;
+
+  buyFeatureOpt.disabled = spinning || inBonus || !!pendingBonus || balance < bet * 3;
+  buy3fsOpt.disabled = spinning || inBonus || !!pendingBonus || balance < bet * 100;
+  buy4fsOpt.disabled = spinning || inBonus || !!pendingBonus || balance < bet * 250;
+
+  buyFeatureOpt.innerHTML = `Feature Spin<br><b>${bet * 3} coins</b> • 5x higher FS chance`;
+  buy3fsOpt.innerHTML = `Buy 3 FS Bonus<br><b>${bet * 100} coins</b> • 10 free spins`;
+  buy4fsOpt.innerHTML = `Buy 4 FS Bonus<br><b>${bet * 250} coins</b> • 12 super free spins`;
+
+  autoBtn.textContent = auto > 0 ? `${auto}` : "A";
   fsLeft.textContent = freeSpins;
   bonusWinEl.textContent = Math.floor(bonusWin);
   bonusPanel.classList.toggle("show", inBonus);
@@ -1070,7 +1285,111 @@ function showBig(win){
 }
 
 
+
+function hideMenus(){
+  buyMenu.classList.remove("show");
+  autoMenu.classList.remove("show");
+}
+
+function showPendingBonus(config){
+  clearTimeout(pendingBonusTimer);
+  pendingBonus = {...config};
+
+  bonusNoticeTitle.textContent = config.title;
+  bonusNoticeBody.textContent = config.body;
+  bonusNoticeCard.className = `bonus-notice-card ${config.css || ""}`;
+
+  bonusNotice.classList.add("show");
+  updateUI();
+
+  pendingBonusTimer = setTimeout(() => {
+    startPendingBonus();
+  }, 25000);
+}
+
+function startPendingBonus(){
+  if(!pendingBonus) return;
+
+  clearTimeout(pendingBonusTimer);
+  pendingBonusTimer = null;
+
+  bonusNotice.classList.remove("show");
+
+  bonusMode = pendingBonus.mode;
+  bonusMultiplier = pendingBonus.multiplier;
+  freeSpins += pendingBonus.spins;
+  hiddenMinWin = pendingBonus.hiddenMinWin || 0;
+  bonusBet = betValues[betIndex];
+  inBonus = true;
+
+  setMsg(pendingBonus.startMessage);
+  showBubble(pendingBonus.bubble);
+  sfx(pendingBonus.sound || "bonus");
+  flash();
+
+  pendingBonus = null;
+  updateUI();
+
+  setTimeout(() => {
+    if(!spinning) spin();
+  }, 700);
+}
+
+function queueBonusFromScatters(fsCount, paidBuy=false){
+  bonusBet = betValues[betIndex];
+  hiddenMinWin = 0;
+
+  if(fsCount >= 5){
+    showPendingBonus({
+      mode:"hidden",
+      multiplier:3,
+      spins:15,
+      hiddenMinWin:bonusBet * 500,
+      title:"Hidden Bonus Activated",
+      body:`You won 15 free spins. Hidden bonus activated. Minimum win ${bonusBet * 500} fake coins.`,
+      startMessage:`HIDDEN BONUS! Minimum win ${bonusBet * 500} fake coins.`,
+      bubble:"The hidden gate opens. Minimum 500x.",
+      sound:"hidden",
+      css:"hidden-bonus"
+    });
+    return;
+  }
+
+  if(fsCount === 4){
+    showPendingBonus({
+      mode:"super",
+      multiplier:2,
+      spins:12,
+      title:"Super Bonus Won",
+      body:"You won 12 free spins. Super bonus activated.",
+      startMessage:"SUPER FREE SPINS! 12 spins with 2x wins.",
+      bubble:"Super game unlocked. Wins are doubled.",
+      sound:"bonus",
+      css:"super-bonus"
+    });
+    return;
+  }
+
+  showPendingBonus({
+    mode:"normal",
+    multiplier:1,
+    spins:10,
+    hiddenMinWin:0,
+    title:"Free Spins Won",
+    body: paidBuy ? "You bought 10 free spins." : "You won 10 free spins.",
+    startMessage:"10 FREE SPINS!",
+    bubble: paidBuy ? "Bonus bought. The gates open." : "The gates of Miðgarður open!",
+    sound:"bonus",
+    css:"normal-bonus"
+  });
+}
+
 function startBonusByScatters(fsCount, paidBuy=false){
+  queueBonusFromScatters(fsCount, paidBuy);
+  return;
+}
+
+function legacyStartBonusByScattersUnused(fsCount, paidBuy=false){
   bonusBet = betValues[betIndex];
   hiddenMinWin = 0;
 
@@ -1237,44 +1556,69 @@ async function spin(options={}){
   spinning = false;
   updateUI();
 
-  if((auto > 0 || inBonus) && (inBonus || balance >= betValues[betIndex])){
+  if(!pendingBonus && (auto > 0 || inBonus) && (inBonus || balance >= betValues[betIndex])){
     if(auto > 0) auto--;
-    autoBtn.textContent = auto ? `Auto ${auto}` : "Auto 25";
+    updateUI();
     setTimeout(spin, inBonus ? 820 : 520);
   }
 }
 
-spinBtn.onclick = () => spin();
+spinBtn.onclick = () => {
+  hideMenus();
+  if(pendingBonus){
+    startPendingBonus();
+    return;
+  }
+  spin();
+};
 
-featureBtn.onclick = () => {
+buyBtn.onclick = (e) => {
+  e.stopPropagation();
+  autoMenu.classList.remove("show");
+  buyMenu.classList.toggle("show");
+};
+
+buyFeatureOpt.onclick = () => {
+  hideMenus();
   spin({feature:true});
 };
 
-buyBtn.onclick = () => {
-  if(spinning || inBonus) return;
-
+buy3fsOpt.onclick = () => {
+  hideMenus();
   const bet = betValues[betIndex];
-  const price = bet * 250;
+  const price = bet * 100;
 
+  if(spinning || inBonus || pendingBonus) return;
   if(balance < price){
-    setMsg("Not enough fake coins for Bonus Buy.");
+    setMsg("Not enough fake coins for 3 FS Bonus Buy.");
     return;
   }
 
   balance -= price;
   lastWin = 0;
   bonusWin = 0;
-
-  const roll = Math.random();
-  const fsCount = roll < .02 ? 5 : roll < .16 ? 4 : 3;
-
-  setMsg(`Bonus Buy purchased for ${price}.`);
+  setMsg(`3 FS Bonus bought for ${price}.`);
   updateUI();
-  startBonusByScatters(fsCount, true);
+  startBonusByScatters(3, true);
+};
 
-  setTimeout(() => {
-    if(!spinning) spin();
-  }, 700);
+buy4fsOpt.onclick = () => {
+  hideMenus();
+  const bet = betValues[betIndex];
+  const price = bet * 250;
+
+  if(spinning || inBonus || pendingBonus) return;
+  if(balance < price){
+    setMsg("Not enough fake coins for 4 FS Bonus Buy.");
+    return;
+  }
+
+  balance -= price;
+  lastWin = 0;
+  bonusWin = 0;
+  setMsg(`4 FS Super Bonus bought for ${price}.`);
+  updateUI();
+  startBonusByScatters(4, true);
 };
 
 betUp.onclick = () => {
@@ -1289,11 +1633,25 @@ betDown.onclick = () => {
   updateUI();
 };
 
-autoBtn.onclick = () => {
-  auto = auto ? 0 : 25;
-  autoBtn.textContent = auto ? `Auto ${auto}` : "Auto 25";
-  if(auto && !spinning) spin();
+autoBtn.onclick = (e) => {
+  e.stopPropagation();
+  if(auto > 0 && !spinning){
+    auto = 0;
+    updateUI();
+    return;
+  }
+  buyMenu.classList.remove("show");
+  autoMenu.classList.toggle("show");
 };
+
+document.querySelectorAll(".auto-opt").forEach(btn => {
+  btn.onclick = () => {
+    auto = Number(btn.dataset.auto || "25");
+    hideMenus();
+    updateUI();
+    if(!spinning && !pendingBonus) spin();
+  };
+});
 
 soundBtn.onclick = () => {
   muted = !muted;
@@ -1304,29 +1662,22 @@ notesBtn.onclick = () => {
   notes.classList.toggle("show");
 };
 
+bonusNotice.onclick = () => {
+  startPendingBonus();
+};
+
+document.addEventListener("click", (e) => {
+  if(!e.target.closest(".hud-anchor")){
+    hideMenus();
+  }
+});
+
 if(new URLSearchParams(location.search).has("debug")){
   stage.classList.add("debug");
 }
-
-
-function spawnRavens(){
-  const y = 12 + Math.random() * 20;
-
-  for(let i=0;i<2;i++){
-    const img = document.createElement("img");
-    img.className = `flying-raven ${i ? "r2" : ""}`;
-    img.src = ASSETS.RAVEN;
-    img.alt = "";
-    img.style.left = "-8%";
-    img.style.top = `${y + i * 4}%`;
-    stage.appendChild(img);
-    setTimeout(() => img.remove(), 13000);
-  }
-}
-
 function thunderThenFlash(){
   sfx("thunder");
-  setTimeout(flash, 520);
+  setTimeout(flash, 760);
 }
 
 createBoard();
@@ -1337,12 +1688,6 @@ updateUI();
 setInterval(() => {
   if(!spinning && Math.random() < .55) thunderThenFlash();
 }, 18000);
-
-setInterval(() => {
-  spawnRavens();
-}, 45000);
-
-setTimeout(spawnRavens, 6000);
 })();
 </script>
 </body>
