@@ -68,11 +68,7 @@ html,body{
 
 .tile{
   position:absolute;
-  display:flex;
-  align-items:center;
-  justify-content:center;
   overflow:hidden;
-  padding:.55%;
 }
 
 /* small dark behind transparent symbols */
@@ -86,38 +82,34 @@ html,body{
 }
 
 .symbol{
-  position:relative;
+  position:absolute;
+  left:50%;
+  top:50%;
   z-index:3;
   display:block;
-  width:auto;
-  height:auto;
-  max-width:72%;
-  max-height:72%;
+  width:64%;
+  height:64%;
   object-fit:contain;
+  object-position:center center;
   user-select:none;
   pointer-events:none;
-  transform-origin:center center;
+  transform:translate(-50%,-50%);
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Symbol size control — tuned to make 10/A/J/Q/K slightly smaller and visually center all symbols better */
-.tile[data-id="TEN"] .symbol{max-width:62%;max-height:62%;margin-top:1.1%}
-.tile[data-id="J"] .symbol{max-width:66%;max-height:66%;margin-top:1.2%}
-.tile[data-id="Q"] .symbol{max-width:61%;max-height:61%;margin-top:1.0%}
-.tile[data-id="K"] .symbol{max-width:63%;max-height:63%;margin-top:1.0%}
-.tile[data-id="A"] .symbol{max-width:61%;max-height:61%;margin-top:1.0%}
+/* Symbol size control — center each symbol on the exact middle point of the cell and fit it neatly inside a square area */
+.tile[data-id="TEN"] .symbol{width:58%;height:58%}
+.tile[data-id="J"] .symbol{width:60%;height:60%}
+.tile[data-id="Q"] .symbol{width:58%;height:58%}
+.tile[data-id="K"] .symbol{width:60%;height:60%}
+.tile[data-id="A"] .symbol{width:58%;height:58%}
 
-.tile[data-id="RAVEN"] .symbol{max-width:70%;max-height:70%;margin-top:0.8%}
-.tile[data-id="SHIP"] .symbol{max-width:68%;max-height:68%;margin-top:1.0%}
-.tile[data-id="AXE"] .symbol{max-width:68%;max-height:68%;margin-top:0.9%}
-.tile[data-id="RUNE"] .symbol{max-width:70%;max-height:70%;margin-top:0.8%}
-.tile[data-id="MJOLNIR"] .symbol{max-width:68%;max-height:68%;margin-top:1.0%}
-.tile[data-id="FS"] .symbol{max-width:70%;max-height:70%;margin-top:0.8%}
-
-/* Top row only: nudge symbols down so they sit in the visual center of the first row */
-.tile[data-r="0"] .symbol{
-  margin-top:4.1% !important;
-}
+.tile[data-id="RAVEN"] .symbol{width:64%;height:64%}
+.tile[data-id="SHIP"] .symbol{width:63%;height:63%}
+.tile[data-id="AXE"] .symbol{width:64%;height:64%}
+.tile[data-id="RUNE"] .symbol{width:64%;height:64%}
+.tile[data-id="MJOLNIR"] .symbol{width:63%;height:63%}
+.tile[data-id="FS"] .symbol{width:64%;height:64%}
 
 /* Smooth spinning strip */
 .strip{
