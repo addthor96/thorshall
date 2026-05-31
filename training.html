@@ -223,6 +223,30 @@ html,body{
   z-index:50;
 }
 
+
+/* Background ravens */
+.flying-raven{
+  position:absolute;
+  z-index:2;
+  width:3.2%;
+  opacity:.34;
+  pointer-events:none;
+  filter:brightness(.28) drop-shadow(0 .18vw .22vw rgba(0,0,0,.7));
+  animation:flyRavenAcross 11s linear forwards;
+}
+
+.flying-raven.r2{
+  width:2.3%;
+  opacity:.24;
+  animation-duration:12.5s;
+  animation-delay:.55s;
+}
+
+@keyframes flyRavenAcross{
+  from{transform:translate3d(-8vw,0,0) scaleX(1)}
+  to{transform:translate3d(112vw,-4.5vw,0) scaleX(1)}
+}
+
 /* HUD */
 .hud{
   position:absolute;
@@ -282,6 +306,35 @@ button:disabled{opacity:.5;cursor:not-allowed}
   background:linear-gradient(180deg,rgba(52,41,24,.94),rgba(9,8,8,.88));
   border:1px solid rgba(242,195,107,.22);
   font-size:.72vw;
+}
+
+.betbtn{
+  min-width:3.8%;
+  width:3.8%;
+  font-size:1.05vw;
+  font-weight:900;
+}
+
+.betpill{
+  min-width:8.5%;
+}
+
+.feature,
+.buy{
+  min-width:8.4%;
+  line-height:1.05;
+  font-size:.62vw;
+}
+
+.feature b,
+.buy b{
+  font-size:.78vw;
+  color:#fff2c8;
+}
+
+.buy{
+  border-color:rgba(71,215,255,.32);
+  box-shadow:0 0 .9vw rgba(71,215,255,.12);
 }
 
 .spin{
@@ -350,14 +403,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .notes.show{display:block}
 
 .mascot{
-  position:absolute;
-  z-index:6;
-  right:2.7%;
-  bottom:8.2%;
-  width:14%;
-  aspect-ratio:1/1;
-  filter:drop-shadow(0 .8vw 1vw rgba(0,0,0,.88));
-  animation:mascotBob 3.3s ease-in-out infinite;
+  display:none;
 }
 
 .mascot img{
@@ -476,15 +522,21 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   <div class="hud">
     <div class="pill"><span>Balance</span><b id="balance">5000</b></div>
-    <button class="small" id="betDown">− Bet</button>
-    <div class="pill"><span>Bet</span><b id="bet">20</b></div>
+
+    <button class="small betbtn" id="betDown">−</button>
+    <div class="pill betpill"><span>Bet</span><b id="bet">20</b></div>
+    <button class="small betbtn" id="betUp">+</button>
+
     <button class="spin" id="spinBtn">Spin</button>
-    <button class="small" id="betUp">+ Bet</button>
+
+    <button class="small feature" id="featureBtn">Feature<br><b>3x</b></button>
+    <button class="small buy" id="buyBtn">Bonus Buy<br><b>250x</b></button>
+
     <button class="small" id="autoBtn">Auto 25</button>
     <div class="pill"><span>Last Win</span><b id="lastWin">0</b></div>
   </div>
 
-  <div class="overlay" id="overlay">
+  <div class="overlay"<div class="overlay" id="overlay">
     <div class="big">BIG WIN<small id="bigAmount">0</small></div>
   </div>
 
@@ -492,7 +544,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
-    Real loop engine: reels loop fast first, then decelerate into the final result. Stop updated with heavy ease-out, soft crossfade, and subtle blue stop accent.
+    Updated systems: max 1 FS per reel, FS-hit sound only when bonus is still possible, 3FS normal bonus, 4FS super bonus, 5FS hidden 500x-min bonus, Feature Spin, Bonus Buy, new bottom bar, background ravens, thunder before lightning.
   </aside>
 </main>
 
@@ -541,6 +593,8 @@ const spinBtn = document.getElementById("spinBtn");
 const betUp = document.getElementById("betUp");
 const betDown = document.getElementById("betDown");
 const autoBtn = document.getElementById("autoBtn");
+const featureBtn = document.getElementById("featureBtn");
+const buyBtn = document.getElementById("buyBtn");
 const soundBtn = document.getElementById("soundBtn");
 const notesBtn = document.getElementById("notesBtn");
 const notes = document.getElementById("notes");
@@ -564,6 +618,10 @@ let inBonus = false;
 let bonusWin = 0;
 let columnReels = [];
 let loops = [];
+let bonusMode = "";
+let bonusMultiplier = 1;
+let hiddenMinWin = 0;
+let bonusBet = 0;
 
 function makeImg(id, cls=""){
   const i = document.createElement("img");
@@ -635,10 +693,11 @@ function createBoard(){
   }
 }
 
-function weightedRandom(){
-  const total = SYMBOLS.reduce((a,s)=>a+s.w,0);
+function weightedRandom(includeScatter=true){
+  const pool = includeScatter ? SYMBOLS : SYMBOLS.filter(s => !s.scatter);
+  const total = pool.reduce((a,s)=>a+s.w,0);
   let r = Math.random() * total;
-  for(const s of SYMBOLS){
+  for(const s of pool){
     r -= s.w;
     if(r <= 0) return s.id;
   }
@@ -649,8 +708,30 @@ function randomAny(){
   return SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)].id;
 }
 
-function randomBoard(){
-  return Array.from({length:C},()=>Array.from({length:R},weightedRandom));
+function randomNonScatter(){
+  return weightedRandom(false);
+}
+
+function randomBoard(fsBoost=1){
+  /*
+    Max 1 FS per reel.
+    Normal chance is modest; Feature Spin uses 5x chance.
+  */
+  const fsChance = Math.min(.62, .13 * fsBoost);
+  const b = [];
+
+  for(let c=0;c<C;c++){
+    const col = Array.from({length:R}, randomNonScatter);
+
+    if(Math.random() < fsChance){
+      const row = Math.floor(Math.random() * R);
+      col[row] = "FS";
+    }
+
+    b.push(col);
+  }
+
+  return b;
 }
 
 function setTile(c,r,id){
@@ -857,6 +938,24 @@ function sfx(type){
       return;
     }
 
+    if(type === "fs"){
+      tone(260,.16,.075,"triangle",520);
+      tone(92,.22,.055,"sine",55,.035);
+      return;
+    }
+
+    if(type === "hidden"){
+      tone(82,.48,.13,"sine",38);
+      tone(520,.38,.07,"triangle",980,.06);
+      return;
+    }
+
+    if(type === "thunder"){
+      tone(46,.85,.11,"sine",28);
+      tone(31,.95,.08,"triangle",24,.06);
+      return;
+    }
+
     if(type === "click"){ tone(240,.045,.035,"triangle",190); return; }
     if(type === "win"){ tone(520,.13,.07,"triangle",1200); return; }
     if(type === "tease"){ tone(320,.24,.075,"sawtooth",430); return; }
@@ -875,6 +974,8 @@ function updateUI(){
   spinBtn.disabled = spinning || (!inBonus && balance < betValues[betIndex]);
   betUp.disabled = spinning || inBonus || betIndex >= betValues.length-1;
   betDown.disabled = spinning || inBonus || betIndex <= 0;
+  featureBtn.disabled = spinning || inBonus || balance < betValues[betIndex] * 3;
+  buyBtn.disabled = spinning || inBonus || balance < betValues[betIndex] * 250;
 
   fsLeft.textContent = freeSpins;
   bonusWinEl.textContent = Math.floor(bonusWin);
@@ -968,10 +1069,77 @@ function showBig(win){
   setTimeout(()=>overlay.classList.remove("show"),1850);
 }
 
-async function spin(){
+
+function startBonusByScatters(fsCount, paidBuy=false){
+  bonusBet = betValues[betIndex];
+  hiddenMinWin = 0;
+
+  if(fsCount >= 5){
+    bonusMode = "hidden";
+    bonusMultiplier = 3;
+    freeSpins += 15;
+    hiddenMinWin = bonusBet * 500;
+    inBonus = true;
+    setMsg(`HIDDEN BONUS! Minimum win ${hiddenMinWin} fake coins.`);
+    showBubble("The hidden gate opens. Minimum 500x.");
+    sfx("hidden");
+    flash();
+    return;
+  }
+
+  if(fsCount === 4){
+    bonusMode = "super";
+    bonusMultiplier = 2;
+    freeSpins += 12;
+    inBonus = true;
+    setMsg("SUPER FREE SPINS! 12 spins with 2x wins.");
+    showBubble("Super game unlocked. Wins are doubled.");
+    sfx("bonus");
+    flash();
+    return;
+  }
+
+  bonusMode = "normal";
+  bonusMultiplier = 1;
+  freeSpins += 10;
+  inBonus = true;
+  setMsg("10 FREE SPINS!");
+  showBubble(paidBuy ? "Bonus bought. The gates open." : "The gates of Miðgarður open!");
+  sfx("bonus");
+  flash();
+}
+
+function finishBonusIfNeeded(){
+  if(!inBonus || freeSpins > 0) return false;
+
+  if(bonusMode === "hidden" && bonusWin < hiddenMinWin){
+    const topUp = hiddenMinWin - bonusWin;
+    bonusWin += topUp;
+    balance += topUp;
+    lastWin += topUp;
+    setMsg(`Hidden bonus guarantee paid. Bonus win: ${Math.floor(bonusWin)}.`);
+    sfx("hidden");
+  }else{
+    setMsg(`Bonus complete. Bonus win: ${Math.floor(bonusWin)}.`);
+  }
+
+  inBonus = false;
+  bonusMode = "";
+  bonusMultiplier = 1;
+  hiddenMinWin = 0;
+  bonusBet = 0;
+  bonusWin = 0;
+  return true;
+}
+
+async function spin(options={}){
   if(spinning) return;
 
-  if(!inBonus && balance < betValues[betIndex]){
+  const bet = betValues[betIndex];
+  const feature = !!options.feature;
+  const cost = feature && !inBonus ? bet * 3 : bet;
+
+  if(!inBonus && balance < cost){
     setMsg("Not enough fake coins.");
     return;
   }
@@ -981,16 +1149,16 @@ async function spin(){
 
   if(inBonus){
     freeSpins--;
-    setMsg(`Free spin... ${freeSpins + 1}`);
+    setMsg(`${bonusMode === "super" ? "Super" : bonusMode === "hidden" ? "Hidden" : "Free"} spin... ${freeSpins + 1}`);
   }else{
-    balance -= betValues[betIndex];
-    setMsg("The reels are spinning...");
+    balance -= cost;
+    setMsg(feature ? "Feature spin: FS chance boosted 5x..." : "The reels are spinning...");
   }
 
   lastWin = 0;
   updateUI();
 
-  const outcome = randomBoard();
+  const outcome = randomBoard(feature ? 5 : 1);
 
   for(let c=0;c<C;c++){
     for(let r=0;r<R;r++){
@@ -1018,7 +1186,11 @@ async function spin(){
     hideReel(c);
     sfx("stop");
 
+    const reelHasFS = finalColumn.includes("FS");
     const fs = countFS(c+1,outcome);
+    if(reelHasFS && (c < C - 1 || fs >= 3)){
+      sfx("fs");
+    }
 
     if(fs === 2 && c < C-1 && !teased){
       teased = true;
@@ -1040,7 +1212,7 @@ async function spin(){
   const result = calculate(board);
   let win = result.total;
 
-  if(inBonus) win = Math.floor(win * 1.5);
+  if(inBonus) win = Math.floor(win * bonusMultiplier);
 
   lastWin = win;
   balance += win;
@@ -1049,23 +1221,10 @@ async function spin(){
 
   showWins(result.wins);
 
-  if(result.fs >= 3){
-    const award = result.fs === 3 ? 8 : result.fs === 4 ? 12 : 20;
-    freeSpins += award;
-    inBonus = true;
-
-    setMsg(`${result.fs} FS symbols! ${award} free spins!`);
-    showBubble("The gates of Miðgarður open!");
-    sfx("bonus");
-    flash();
-
-    [...reels.querySelectorAll(".tile")].forEach(t => {
-      if(t.dataset.id === "FS") t.classList.add("tease");
-    });
-  }else if(inBonus && freeSpins <= 0){
-    inBonus = false;
-    setMsg(`Bonus complete. Bonus win: ${Math.floor(bonusWin)}.`);
-    bonusWin = 0;
+  if(result.fs >= 3 && !inBonus){
+    startBonusByScatters(result.fs);
+  }else if(finishBonusIfNeeded()){
+    // bonus finished and message already set
   }else if(win > 0){
     setMsg(`Win: ${Math.floor(win)} fake coins.`);
     sfx("win");
@@ -1085,7 +1244,38 @@ async function spin(){
   }
 }
 
-spinBtn.onclick = spin;
+spinBtn.onclick = () => spin();
+
+featureBtn.onclick = () => {
+  spin({feature:true});
+};
+
+buyBtn.onclick = () => {
+  if(spinning || inBonus) return;
+
+  const bet = betValues[betIndex];
+  const price = bet * 250;
+
+  if(balance < price){
+    setMsg("Not enough fake coins for Bonus Buy.");
+    return;
+  }
+
+  balance -= price;
+  lastWin = 0;
+  bonusWin = 0;
+
+  const roll = Math.random();
+  const fsCount = roll < .02 ? 5 : roll < .16 ? 4 : 3;
+
+  setMsg(`Bonus Buy purchased for ${price}.`);
+  updateUI();
+  startBonusByScatters(fsCount, true);
+
+  setTimeout(() => {
+    if(!spinning) spin();
+  }, 700);
+};
 
 betUp.onclick = () => {
   betIndex = Math.min(betValues.length-1, betIndex+1);
@@ -1118,14 +1308,41 @@ if(new URLSearchParams(location.search).has("debug")){
   stage.classList.add("debug");
 }
 
+
+function spawnRavens(){
+  const y = 12 + Math.random() * 20;
+
+  for(let i=0;i<2;i++){
+    const img = document.createElement("img");
+    img.className = `flying-raven ${i ? "r2" : ""}`;
+    img.src = ASSETS.RAVEN;
+    img.alt = "";
+    img.style.left = "-8%";
+    img.style.top = `${y + i * 4}%`;
+    stage.appendChild(img);
+    setTimeout(() => img.remove(), 13000);
+  }
+}
+
+function thunderThenFlash(){
+  sfx("thunder");
+  setTimeout(flash, 520);
+}
+
 createBoard();
 board = randomBoard();
 render();
 updateUI();
 
 setInterval(() => {
-  if(!spinning && Math.random() < .22) flash();
-}, 3800);
+  if(!spinning && Math.random() < .55) thunderThenFlash();
+}, 18000);
+
+setInterval(() => {
+  spawnRavens();
+}, 45000);
+
+setTimeout(spawnRavens, 6000);
 })();
 </script>
 </body>
