@@ -7,17 +7,9 @@
 <style>
 :root{
   /*
-    Calibrated to the uploaded background:
-    /img/slots/midgardur.webp  = 1672 x 941
-
-    This is the actual 5x5 board area only.
-    Do not use the outer frame as the grid.
+    Symbols are positioned by real center points on the 1672 x 941 background.
+    This avoids CSS-grid guessing and places each symbol in the visual middle of each stone square.
   */
-  --grid-left: 29.46%;
-  --grid-top: 18.78%;
-  --grid-width: 42.34%;
-  --grid-height: 58.24%;
-
   --gold:#f2c36b;
   --blue:#47d7ff;
 }
@@ -62,26 +54,22 @@ html,body{
   background:radial-gradient(circle at 49% 43%, transparent 52%, rgba(0,0,0,.16) 80%, rgba(0,0,0,.58) 100%);
 }
 
-/* 5x5 REEL GRID */
+/* 5x5 REEL GRID - manual center-point placement */
 .reels{
   position:absolute;
   z-index:5;
-  left:var(--grid-left);
-  top:var(--grid-top);
-  width:var(--grid-width);
-  height:var(--grid-height);
+  inset:0;
   overflow:hidden;
 }
 
-
 .tile{
   position:absolute;
-  width:18.2%;
-  height:18.2%;
+  width:8.15%;
+  height:10.6%;
   display:flex;
   align-items:center;
   justify-content:center;
-  overflow:hidden;
+  overflow:visible;
   transform:translate(-50%,-50%);
 }
 
@@ -89,9 +77,9 @@ html,body{
 .tile::before{
   content:"";
   position:absolute;
-  inset:16%;
+  inset:18%;
   border-radius:.4vw;
-  background:radial-gradient(circle at 50% 45%, rgba(0,0,0,.14), rgba(0,0,0,0));
+  background:radial-gradient(circle at 50% 45%, rgba(0,0,0,.12), rgba(0,0,0,0));
   pointer-events:none;
 }
 
@@ -104,25 +92,41 @@ html,body{
   max-width:100%;
   max-height:100%;
   object-fit:contain;
+  object-position:center center;
   user-select:none;
   pointer-events:none;
   transform-origin:center center;
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Symbol size control */
-.tile[data-id="TEN"] .symbol{width:68%;height:68%}
-.tile[data-id="J"] .symbol{width:57%;height:57%}
-.tile[data-id="Q"] .symbol{width:60%;height:60%}
-.tile[data-id="K"] .symbol{width:60%;height:60%}
-.tile[data-id="A"] .symbol{width:62%;height:62%}
+/* Symbol size control - tuned inside the detected square centers */
+.tile[data-id="TEN"] .symbol{width:72%;height:72%}
+.tile[data-id="J"] .symbol{width:58%;height:58%}
+.tile[data-id="Q"] .symbol{width:62%;height:62%}
+.tile[data-id="K"] .symbol{width:62%;height:62%}
+.tile[data-id="A"] .symbol{width:64%;height:64%}
 
-.tile[data-id="RAVEN"] .symbol{width:62%;height:62%}
-.tile[data-id="SHIP"] .symbol{width:66%;height:66%}
-.tile[data-id="AXE"] .symbol{width:61%;height:61%}
-.tile[data-id="RUNE"] .symbol{width:58%;height:58%}
-.tile[data-id="MJOLNIR"] .symbol{width:60%;height:60%}
-.tile[data-id="FS"] .symbol{width:58%;height:58%}
+.tile[data-id="RAVEN"] .symbol{width:64%;height:64%}
+.tile[data-id="SHIP"] .symbol{width:68%;height:68%}
+.tile[data-id="AXE"] .symbol{width:62%;height:62%}
+.tile[data-id="RUNE"] .symbol{width:60%;height:60%}
+.tile[data-id="MJOLNIR"] .symbol{width:62%;height:62%}
+.tile[data-id="FS"] .symbol{width:60%;height:60%}
+
+/* Optional debug center dots. Add ?debug=1 to the URL to show exact symbol centers. */
+.stage.debug .tile::after{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:50%;
+  width:.42vw;
+  height:.42vw;
+  border-radius:50%;
+  background:#47d7ff;
+  transform:translate(-50%,-50%);
+  z-index:20;
+  box-shadow:0 0 .5vw #47d7ff;
+}
 
 /* Smooth spinning strip */
 .strip{
@@ -463,7 +467,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.<br>Manual row/column centers are used so symbols sit in the middle of each square.
+    This is a fake-money training/prototype page only.<br>Symbols are placed using inspected square center points, not automatic CSS grid guessing.
   </aside>
 </main>
 
@@ -503,6 +507,7 @@ const byId = Object.fromEntries(SYMBOLS.map(s => [s.id, s]));
 
 const reels = document.getElementById("reels");
 const stage = document.getElementById("stage");
+if(new URLSearchParams(location.search).get("debug") === "1") stage.classList.add("debug");
 const msg = document.getElementById("msg");
 const bubble = document.getElementById("bubble");
 const balanceEl = document.getElementById("balance");
@@ -550,13 +555,16 @@ function cell(c,r){
 function createBoard(){
   reels.innerHTML = "";
 
-  const colStart = 10.2;
-  const colEnd = 89.8;
-  const rowStart = 10.0;
-  const rowEnd = 89.6;
+  /*
+    Exact visual centers for the 5 columns and 5 rows on the uploaded 1672x941 background.
+    These are full-stage percentages, not grid percentages.
 
-  const xAt = (c) => colStart + ((colEnd - colStart) * (c / (C - 1)));
-  const yAt = (r) => rowStart + ((rowEnd - rowStart) * (r / (R - 1)));
+    Pixel centers used:
+    X = 558, 696, 842, 988, 1128
+    Y = 220, 329, 438, 547, 656
+  */
+  const colCenters = [33.37, 41.63, 50.36, 59.09, 67.46];
+  const rowCenters = [23.38, 34.96, 46.55, 58.13, 69.71];
 
   for(let r=0;r<R;r++){
     for(let c=0;c<C;c++){
@@ -564,8 +572,8 @@ function createBoard(){
       t.className = "tile";
       t.dataset.c = c;
       t.dataset.r = r;
-      t.style.left = `${xAt(c)}%`;
-      t.style.top = `${yAt(r)}%`;
+      t.style.left = `${colCenters[c]}%`;
+      t.style.top = `${rowCenters[r]}%`;
 
       const main = makeImg("TEN","symbol");
 
