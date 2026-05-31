@@ -50,13 +50,11 @@ html,body{
   background:radial-gradient(circle at 49% 43%, transparent 52%, rgba(0,0,0,.16) 80%, rgba(0,0,0,.58) 100%);
 }
 
-/* Board overlay. The cells use inspected pixel boundaries from the 1672x941 background. */
+/* Static 4x5 board cells. Positioned from inspected 1672x941 background pixels. */
 .reels{
   position:absolute;
   z-index:5;
   inset:0;
-  width:100%;
-  height:100%;
   overflow:visible;
 }
 
@@ -90,7 +88,6 @@ html,body{
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Static final symbols */
 .tile[data-id="TEN"] .symbol,
 .tile[data-id="J"] .symbol,
 .tile[data-id="Q"] .symbol,
@@ -114,37 +111,36 @@ html,body{
   opacity:0;
 }
 
-/*
-  Hacksaw-like front-end feel:
-  - one full strip per reel/column
-  - strip moves DOWN
-  - no per-cell random flashing
-  - no punch/bounce on landing
-*/
+/* Clean reel animation:
+   One overlay strip per column.
+   The strip moves DOWN by increasing top from negative to less negative.
+   No per-cell randomizing, no flash, no scale hit. */
 .column-reel{
   position:absolute;
   z-index:8;
   overflow:hidden;
   pointer-events:none;
   opacity:0;
-  background:transparent;
-  transition:opacity 90ms linear;
+  transition:opacity .08s linear;
 }
 
-.column-reel.active{opacity:1}
-.column-reel.fade-out{opacity:0}
+.column-reel.active{
+  opacity:1;
+}
+
+.column-reel.fading{
+  opacity:0;
+}
 
 .reel-track{
   position:absolute;
   left:0;
   top:0;
   width:100%;
-  will-change:transform;
-  transform:translate3d(0,0,0);
+  will-change:top;
 }
 
 .reel-item{
-  height:25%;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -170,7 +166,7 @@ html,body{
   opacity:1;
 }
 
-/* Win / tease effects only after the spin has fully stopped */
+/* Only post-spin effects. */
 .tile.win .symbol{
   animation:winPulse .75s ease-in-out infinite alternate;
   filter:
@@ -193,7 +189,7 @@ html,body{
   to{transform:scale(1.10)}
 }
 
-/* Optional alignment debug: add ?debug=1 to URL */
+/* Optional alignment debug: add ?debug=1 */
 .stage.debug .tile{outline:1px solid rgba(255,0,0,.95)}
 .stage.debug .tile::after{
   content:"";
@@ -476,7 +472,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    Rebuilt animation model: one downward reel strip per column, smooth easing, no per-cell random flashing, no landing punch.
+    Clean restart: final static symbols hide, one reel strip per column scrolls downward, transition ends, strip fades, final symbols show. No fake spin hum.
   </aside>
 </main>
 
@@ -547,7 +543,6 @@ let freeSpins = 0;
 let inBonus = false;
 let bonusWin = 0;
 let columnReels = [];
-let spinHum = null;
 
 function makeImg(id, cls=""){
   const i = document.createElement("img");
@@ -566,7 +561,6 @@ function createBoard(){
   reels.innerHTML = "";
   columnReels = [];
 
-  /* Inspected from the corrected 1672 x 941 PNG */
   const colLines = [445, 594, 748, 902, 1058, 1212];
   const rowLines = [184, 343, 477, 614, 751];
   const baseW = 1672;
@@ -616,6 +610,7 @@ function createBoard(){
     track.className = "reel-track";
     reel.appendChild(track);
     reels.appendChild(reel);
+
     columnReels[c] = reel;
   }
 }
@@ -623,12 +618,10 @@ function createBoard(){
 function weightedRandom(){
   const total = SYMBOLS.reduce((a,s)=>a+s.w,0);
   let r = Math.random() * total;
-
   for(const s of SYMBOLS){
     r -= s.w;
     if(r <= 0) return s.id;
   }
-
   return "TEN";
 }
 
@@ -665,89 +658,69 @@ function buildColumnReel(c, finalColumn){
   const track = reel.querySelector(".reel-track");
   track.innerHTML = "";
 
-  const fillerCount = 42;
-  const ids = [];
+  const reelHeight = reel.getBoundingClientRect().height;
+  const itemH = reelHeight / R;
 
-  for(let i=0;i<fillerCount;i++) ids.push(randomAny());
+  const ids = [];
+  for(let i=0;i<34;i++) ids.push(randomAny());
   for(let r=0;r<R;r++) ids.push(finalColumn[r]);
 
   ids.forEach((id, index) => {
     const item = document.createElement("div");
     const isFinal = index >= ids.length - R;
     item.className = `reel-item ${byId[id].tier}${isFinal ? " final" : ""}`;
+    item.style.height = `${itemH}px`;
     item.appendChild(makeImg(id));
     track.appendChild(item);
   });
 
-  return ids.length;
+  return {count:ids.length, itemH};
 }
 
-function animateColumn(c, itemCount, duration){
-  const reel = columnReels[c];
-  const track = reel.querySelector(".reel-track");
+function spinColumn(c, finalColumn, duration){
+  return new Promise(resolve => {
+    const reel = columnReels[c];
+    const track = reel.querySelector(".reel-track");
+    const {count,itemH} = buildColumnReel(c, finalColumn);
 
-  const finalY = -((itemCount - R) * 25); // each item is 25% of reel height
-  const startY = finalY - 650;            // more negative -> moves DOWN toward finalY
+    const finalTop = -((count - R) * itemH);
+    const startTop = finalTop - (14 * itemH); // more negative -> visual movement down into final position
 
-  reel.classList.remove("fade-out");
-  reel.classList.add("active");
+    reel.classList.remove("fading");
+    reel.classList.add("active");
 
-  track.style.transition = "none";
-  track.style.transform = `translate3d(0,${startY}%,0)`;
-  void track.offsetHeight;
+    track.style.transition = "none";
+    track.style.top = `${startTop}px`;
+    void track.offsetHeight;
 
-  track.style.transition = `transform ${duration}ms cubic-bezier(.08,.78,.10,1)`;
-  track.style.transform = `translate3d(0,${finalY}%,0)`;
+    let done = false;
+    const finish = () => {
+      if(done) return;
+      done = true;
+      track.removeEventListener("transitionend", finish);
+      resolve();
+    };
+
+    track.addEventListener("transitionend", finish);
+    requestAnimationFrame(() => {
+      track.style.transition = `top ${duration}ms cubic-bezier(.08,.76,.10,1)`;
+      track.style.top = `${finalTop}px`;
+    });
+
+    setTimeout(finish, duration + 80);
+  });
 }
 
-function finishColumn(c){
+function fadeColumn(c){
   const reel = columnReels[c];
-  reel.classList.add("fade-out");
+  reel.classList.add("fading");
 
   setTimeout(() => {
-    reel.classList.remove("active","fade-out");
+    reel.classList.remove("active","fading");
     const track = reel.querySelector(".reel-track");
     track.style.transition = "none";
-    track.style.transform = "translate3d(0,0,0)";
-  }, 95);
-}
-
-function startSpinSound(){
-  if(muted || spinHum) return;
-
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const now = audioCtx.currentTime;
-
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-
-    osc.type = "sawtooth";
-    osc.frequency.setValueAtTime(54, now);
-
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.032, now + 0.08);
-
-    osc.connect(gain);
-    gain.connect(audioCtx.destination);
-    osc.start(now);
-
-    spinHum = {osc,gain};
-  }catch(e){}
-}
-
-function stopSpinSound(){
-  if(!spinHum || !audioCtx) return;
-
-  try{
-    const now = audioCtx.currentTime;
-    spinHum.gain.gain.cancelScheduledValues(now);
-    spinHum.gain.gain.setValueAtTime(Math.max(spinHum.gain.gain.value, 0.0001), now);
-    spinHum.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.20);
-    spinHum.osc.stop(now + 0.24);
-  }catch(e){}
-
-  spinHum = null;
+    track.style.top = "0px";
+  }, 90);
 }
 
 function sfx(type){
@@ -849,14 +822,11 @@ function calculate(b){
     if(s.scatter) continue;
 
     const counts = [];
-
     for(let c=0;c<C;c++){
       let n = 0;
-
       for(let r=0;r<R;r++){
         if(b[c][r] === s.id) n++;
       }
-
       if(!n) break;
       counts.push(n);
     }
@@ -905,7 +875,6 @@ async function spin(){
 
   spinning = true;
   clearFX();
-  startSpinSound();
 
   if(inBonus){
     freeSpins--;
@@ -924,28 +893,22 @@ async function spin(){
     for(let r=0;r<R;r++){
       cell(c,r).classList.add("reel-hidden");
     }
-
-    const finalColumn = [];
-    for(let r=0;r<R;r++) finalColumn.push(outcome[c][r]);
-
-    const itemCount = buildColumnReel(c, finalColumn);
-    const duration = 1450 + c * 340;
-    animateColumn(c, itemCount, duration);
   }
 
   let teased = false;
 
   for(let c=0;c<C;c++){
-    const wait = c === 0 ? 1450 : 340;
-    await new Promise(res => setTimeout(res, wait));
+    const finalColumn = [];
+    for(let r=0;r<R;r++) finalColumn.push(outcome[c][r]);
+
+    await spinColumn(c, finalColumn, 900 + c * 90);
 
     for(let r=0;r<R;r++){
-      const t = cell(c,r);
       setTile(c,r,outcome[c][r]);
-      t.classList.remove("reel-hidden");
+      cell(c,r).classList.remove("reel-hidden");
     }
 
-    finishColumn(c);
+    fadeColumn(c);
     sfx("stop");
 
     const fs = countFS(c+1,outcome);
@@ -964,8 +927,6 @@ async function spin(){
       }
     }
   }
-
-  stopSpinSound();
 
   board = outcome;
 
@@ -1034,13 +995,11 @@ betDown.onclick = () => {
 autoBtn.onclick = () => {
   auto = auto ? 0 : 25;
   autoBtn.textContent = auto ? `Auto ${auto}` : "Auto 25";
-
   if(auto && !spinning) spin();
 };
 
 soundBtn.onclick = () => {
   muted = !muted;
-  if(muted) stopSpinSound();
   soundBtn.textContent = `Sound: ${muted ? "Off" : "On"}`;
 };
 
