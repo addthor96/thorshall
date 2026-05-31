@@ -7,17 +7,11 @@
 <style>
 :root{
   /*
-    Calibrated to the uploaded background:
-    /img/slots/midgardur.webp  = 1672 x 941
-
-    This is the actual 5x5 board area only.
-    Do not use the outer frame as the grid.
+    Calibrated to the corrected 1672 x 941 PNG background.
+    The board is 5 columns x 4 rows.
+    Tiles are positioned from inspected cell boundary lines,
+    not guessed with a CSS grid.
   */
-  --grid-left: 29.45%;
-  --grid-top: 20.25%;
-  --grid-width: 42.45%;
-  --grid-height: 47.65%;
-
   --gold:#f2c36b;
   --blue:#47d7ff;
 }
@@ -62,28 +56,23 @@ html,body{
   background:radial-gradient(circle at 49% 43%, transparent 52%, rgba(0,0,0,.16) 80%, rgba(0,0,0,.58) 100%);
 }
 
-/* 5x5 REEL GRID */
+/* EXACT 5x4 REEL GRID OVERLAY */
 .reels{
   position:absolute;
   z-index:5;
-  left:var(--grid-left);
-  top:var(--grid-top);
-  width:var(--grid-width);
-  height:var(--grid-height);
-  display:grid;
-  grid-template-columns:repeat(5,1fr);
-  grid-template-rows:repeat(4,1fr);
-  padding:0.15% 0.25%;
-  gap:0;
-  overflow:hidden;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:visible;
 }
 
 .tile{
-  position:relative;
+  position:absolute;
   display:flex;
   align-items:center;
   justify-content:center;
   overflow:hidden;
+  padding:.55%;
 }
 
 /* small dark behind transparent symbols */
@@ -102,8 +91,8 @@ html,body{
   display:block;
   width:auto;
   height:auto;
-  max-width:100%;
-  max-height:100%;
+  max-width:72%;
+  max-height:72%;
   object-fit:contain;
   user-select:none;
   pointer-events:none;
@@ -111,19 +100,19 @@ html,body{
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Symbol size control — 4x5 board, similar visual sizing */
-.tile[data-id="TEN"] .symbol{width:64%;height:64%}
-.tile[data-id="J"] .symbol{width:58%;height:58%}
-.tile[data-id="Q"] .symbol{width:60%;height:60%}
-.tile[data-id="K"] .symbol{width:60%;height:60%}
-.tile[data-id="A"] .symbol{width:61%;height:61%}
+/* Symbol size control — similar visual size, fitted inside each 4x5 cell */
+.tile[data-id="TEN"] .symbol{max-width:71%;max-height:71%}
+.tile[data-id="J"] .symbol{max-width:76%;max-height:76%}
+.tile[data-id="Q"] .symbol{max-width:71%;max-height:71%}
+.tile[data-id="K"] .symbol{max-width:74%;max-height:74%}
+.tile[data-id="A"] .symbol{max-width:71%;max-height:71%}
 
-.tile[data-id="RAVEN"] .symbol{width:62%;height:62%}
-.tile[data-id="SHIP"] .symbol{width:64%;height:64%}
-.tile[data-id="AXE"] .symbol{width:62%;height:62%}
-.tile[data-id="RUNE"] .symbol{width:59%;height:59%}
-.tile[data-id="MJOLNIR"] .symbol{width:61%;height:61%}
-.tile[data-id="FS"] .symbol{width:59%;height:59%}
+.tile[data-id="RAVEN"] .symbol{max-width:73%;max-height:73%}
+.tile[data-id="SHIP"] .symbol{max-width:71%;max-height:71%}
+.tile[data-id="AXE"] .symbol{max-width:72%;max-height:72%}
+.tile[data-id="RUNE"] .symbol{max-width:74%;max-height:74%}
+.tile[data-id="MJOLNIR"] .symbol{max-width:72%;max-height:72%}
+.tile[data-id="FS"] .symbol{max-width:74%;max-height:74%}
 
 /* Smooth spinning strip */
 .strip{
@@ -142,9 +131,9 @@ html,body{
 
 .strip img{
   display:block;
-  width:62%;
+  width:72%;
   height:25%;
-  min-height:20%;
+  min-height:25%;
   object-fit:contain;
   filter:blur(.35px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
   opacity:.94;
@@ -192,6 +181,19 @@ html,body{
 
 @keyframes teasePulse{
   to{transform:scale(1.13)}
+}
+
+/* Optional alignment debug: add ?debug=1 to the URL */
+.stage.debug .tile{outline:1px solid rgba(255,0,0,.95)}
+.stage.debug .tile::after{
+  content:"";
+  position:absolute;
+  left:50%;top:50%;
+  width:.45vw;height:.45vw;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:#00ff38;
+  z-index:50;
 }
 
 /* HUD */
@@ -428,7 +430,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
 <body>
 <main class="stage" id="stage">
-  <img class="bg" src="/img/slots/midgardur.webp" alt="">
+  <img class="bg" src="/img/slots/midgardur.png" alt="">
   <div class="vignette"></div>
 
   <section class="reels" id="reels"></section>
@@ -464,7 +466,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.<br>Board corrected to 5 columns x 4 rows.
+    This is a fake-money training/prototype page only.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.
   </aside>
 </main>
 
@@ -551,6 +553,20 @@ function cell(c,r){
 function createBoard(){
   reels.innerHTML = "";
 
+  /*
+    Inspected from the corrected 1672 x 941 PNG.
+    These are cell boundary lines in original image pixels:
+    5 columns = 6 x-boundaries
+    4 rows    = 5 y-boundaries
+  */
+  const colLines = [445, 594, 748, 902, 1058, 1212];
+  const rowLines = [184, 343, 477, 614, 751];
+  const baseW = 1672;
+  const baseH = 941;
+
+  const pctX = (px) => (px / baseW * 100).toFixed(4) + "%";
+  const pctY = (px) => (px / baseH * 100).toFixed(4) + "%";
+
   for(let r=0;r<R;r++){
     for(let c=0;c<C;c++){
       const t = document.createElement("div");
@@ -558,11 +574,21 @@ function createBoard(){
       t.dataset.c = c;
       t.dataset.r = r;
 
+      const x1 = colLines[c];
+      const x2 = colLines[c + 1];
+      const y1 = rowLines[r];
+      const y2 = rowLines[r + 1];
+
+      t.style.left = pctX(x1);
+      t.style.top = pctY(y1);
+      t.style.width = pctX(x2 - x1);
+      t.style.height = pctY(y2 - y1);
+
       const main = makeImg("TEN","symbol");
 
       const strip = document.createElement("div");
       strip.className = "strip";
-      for(let i=0;i<5;i++){
+      for(let i=0;i<4;i++){
         strip.appendChild(makeImg(randomAny()));
       }
 
@@ -921,6 +947,10 @@ soundBtn.onclick = () => {
 notesBtn.onclick = () => {
   notes.classList.toggle("show");
 };
+
+if(new URLSearchParams(location.search).has("debug")){
+  stage.classList.add("debug");
+}
 
 createBoard();
 board = randomBoard();
