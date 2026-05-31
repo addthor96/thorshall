@@ -13,11 +13,13 @@
     This is the actual 5x5 board area only.
     Do not use the outer frame as the grid.
   */
-  /* Corrected to the visible stone cell area, not the outside frame */
-  --grid-left: 30.32%;
-  --grid-top: 19.55%;
-  --grid-width: 40.43%;
-  --grid-height: 53.56%;
+  --grid-left: 29.42%;
+  --grid-top: 18.86%;
+  --grid-width: 42.36%;
+  --grid-height: 58.08%;
+
+  --cell-pad-x: 7%;
+  --cell-pad-y: 7%;
 
   --gold:#f2c36b;
   --blue:#47d7ff;
@@ -85,15 +87,16 @@ html,body{
   align-items:center;
   justify-content:center;
   overflow:hidden;
+  padding:var(--cell-pad-y) var(--cell-pad-x);
 }
 
 /* small dark behind transparent symbols */
 .tile::before{
   content:"";
   position:absolute;
-  inset:12%;
+  inset:16%;
   border-radius:.4vw;
-  background:radial-gradient(circle at 50% 45%, rgba(0,0,0,.16), rgba(0,0,0,0));
+  background:radial-gradient(circle at 50% 45%, rgba(0,0,0,.14), rgba(0,0,0,0));
   pointer-events:none;
 }
 
@@ -101,6 +104,8 @@ html,body{
   position:relative;
   z-index:3;
   display:block;
+  width:auto;
+  height:auto;
   max-width:100%;
   max-height:100%;
   object-fit:contain;
@@ -110,26 +115,19 @@ html,body{
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Symbol size control
-   Each PNG has a different transparent canvas, so each symbol needs its own size.
-   These values keep the symbols inside the stone boxes without touching borders. */
-.symbol{
-  width:68%;
-  height:68%;
-}
-
-.tile[data-id="TEN"] .symbol{width:74%;height:74%}
+/* Symbol size control */
+.tile[data-id="TEN"] .symbol{width:70%;height:70%}
 .tile[data-id="J"] .symbol{width:62%;height:62%}
-.tile[data-id="Q"] .symbol{width:66%;height:66%}
-.tile[data-id="K"] .symbol{width:66%;height:66%}
+.tile[data-id="Q"] .symbol{width:64%;height:64%}
+.tile[data-id="K"] .symbol{width:64%;height:64%}
 .tile[data-id="A"] .symbol{width:66%;height:66%}
 
-.tile[data-id="RAVEN"] .symbol{width:66%;height:66%}
-.tile[data-id="SHIP"] .symbol{width:72%;height:72%}
-.tile[data-id="AXE"] .symbol{width:70%;height:70%}
-.tile[data-id="RUNE"] .symbol{width:66%;height:66%}
-.tile[data-id="MJOLNIR"] .symbol{width:70%;height:70%}
-.tile[data-id="FS"] .symbol{width:66%;height:66%}
+.tile[data-id="RAVEN"] .symbol{width:68%;height:68%}
+.tile[data-id="SHIP"] .symbol{width:70%;height:70%}
+.tile[data-id="AXE"] .symbol{width:69%;height:69%}
+.tile[data-id="RUNE"] .symbol{width:64%;height:64%}
+.tile[data-id="MJOLNIR"] .symbol{width:66%;height:66%}
+.tile[data-id="FS"] .symbol{width:64%;height:64%}
 
 /* Smooth spinning strip */
 .strip{
@@ -148,7 +146,7 @@ html,body{
 
 .strip img{
   display:block;
-  width:92%;
+  width:64%;
   height:20%;
   min-height:20%;
   object-fit:contain;
@@ -470,7 +468,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.
+    This is a fake-money training/prototype page only.<br>Grid rebuilt with equal 5x5 spacing and tuned symbol sizing.
   </aside>
 </main>
 
