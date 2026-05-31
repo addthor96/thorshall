@@ -122,7 +122,10 @@ html,body{
 /* Smooth spinning strip */
 .strip{
   position:absolute;
-  inset:-150% 0;
+  left:0;
+  right:0;
+  top:-350%;
+  height:900%;
   z-index:4;
   opacity:0;
   display:flex;
@@ -131,38 +134,40 @@ html,body{
   justify-content:flex-start;
   pointer-events:none;
   will-change:transform;
-  transform:translateY(-20%);
+  transform:translateY(-28%);
 }
 
 .strip img{
   display:block;
   width:70%;
-  height:25%;
-  min-height:25%;
+  height:11.111%;
+  min-height:11.111%;
   object-fit:contain;
-  filter:blur(.35px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
-  opacity:.94;
+  filter:blur(.7px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  opacity:.96;
 }
 
 .tile.spinning .symbol{opacity:0}
 
 .tile.spinning .strip{
   opacity:1;
-  animation:reelRoll .34s linear infinite;
+  animation:reelRoll .52s linear infinite;
 }
 
 @keyframes reelRoll{
-  from{transform:translateY(-20%)}
+  from{transform:translateY(-36%)}
+  to{transform:translateY(0%)}
+}
   to{transform:translateY(20%)}
 }
 
 .tile.stopping .symbol{
-  animation:stopSnap .24s cubic-bezier(.2,.9,.25,1.15);
+  animation:stopSnap .20s cubic-bezier(.2,.9,.25,1.15);
 }
 
 @keyframes stopSnap{
-  0%{transform:scale(.92);opacity:.35}
-  65%{transform:scale(1.045);opacity:1}
+  0%{transform:scale(.94);opacity:.55}
+  70%{transform:scale(1.035);opacity:1}
   100%{transform:scale(1);opacity:1}
 }
   65%{transform:translateY(4%) scale(1.05);opacity:1}
@@ -474,7 +479,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.
+    This is a fake-money training/prototype page only.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.<br>Spin animation fixed: reel strips now scroll smoothly instead of randomizing every frame. Stop sound changed to a darker thump.
   </aside>
 </main>
 
@@ -596,7 +601,7 @@ function createBoard(){
 
       const strip = document.createElement("div");
       strip.className = "strip";
-      for(let i=0;i<4;i++){
+      for(let i=0;i<9;i++){
         strip.appendChild(makeImg(randomAny()));
       }
 
@@ -649,7 +654,7 @@ function render(b=board){
 
 function refreshStrip(t){
   const imgs = t.querySelectorAll(".strip img");
-  imgs.forEach(i => {
+  imgs.forEach((i, n) => {
     const id = randomAny();
     i.src = ASSETS[id];
     i.alt = id;
@@ -661,35 +666,67 @@ function sfx(type){
 
   try{
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const o = audioCtx.createOscillator();
-    const g = audioCtx.createGain();
     const now = audioCtx.currentTime;
 
-    const m = {
-      click:[260,.04,.04],
-      spin:[95,.08,.06],
-      stop:[155,.05,.045],
-      win:[650,.12,.07],
-      tease:[440,.22,.085],
-      bonus:[160,.52,.13],
-      big:[220,.35,.11]
-    }[type] || [220,.04,.04];
+    function tone(freq, dur, gain, wave="sine", endFreq=null){
+      const o = audioCtx.createOscillator();
+      const g = audioCtx.createGain();
 
-    o.type = type === "tease" ? "sawtooth" : "triangle";
-    o.frequency.setValueAtTime(m[0],now);
+      o.type = wave;
+      o.frequency.setValueAtTime(freq, now);
+      if(endFreq){
+        o.frequency.exponentialRampToValueAtTime(endFreq, now + dur);
+      }
 
-    if(type === "win" || type === "bonus"){
-      o.frequency.exponentialRampToValueAtTime(m[0]*3,now+m[1]);
+      g.gain.setValueAtTime(0.0001, now);
+      g.gain.exponentialRampToValueAtTime(gain, now + 0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      o.connect(g);
+      g.connect(audioCtx.destination);
+      o.start(now);
+      o.stop(now + dur + .03);
     }
 
-    g.gain.setValueAtTime(0,now);
-    g.gain.linearRampToValueAtTime(m[2],now+.01);
-    g.gain.exponentialRampToValueAtTime(.0001,now+m[1]);
+    if(type === "stop"){
+      /* dark wooden/stone thump when a reel stops */
+      tone(82, .18, .16, "sine", 42);
+      setTimeout(() => tone(48, .11, .10, "triangle", 35), 18);
+      return;
+    }
 
-    o.connect(g);
-    g.connect(audioCtx.destination);
-    o.start(now);
-    o.stop(now+m[1]+.02);
+    if(type === "spin"){
+      tone(92, .09, .045, "triangle", 70);
+      return;
+    }
+
+    if(type === "click"){
+      tone(240, .045, .035, "triangle", 190);
+      return;
+    }
+
+    if(type === "win"){
+      tone(520, .13, .07, "triangle", 1200);
+      return;
+    }
+
+    if(type === "tease"){
+      tone(320, .24, .075, "sawtooth", 430);
+      return;
+    }
+
+    if(type === "bonus"){
+      tone(120, .42, .12, "triangle", 460);
+      setTimeout(() => tone(70, .30, .09, "sine", 38), 60);
+      return;
+    }
+
+    if(type === "big"){
+      tone(180, .35, .11, "triangle", 65);
+      return;
+    }
+
+    tone(220, .05, .04, "triangle");
   }catch(e){}
 }
 
@@ -822,7 +859,6 @@ async function spin(){
   updateUI();
 
   const outcome = randomBoard();
-  const timers = [];
   let teased = false;
 
   for(let c=0;c<C;c++){
@@ -831,17 +867,11 @@ async function spin(){
       refreshStrip(t);
       t.classList.add("spinning");
     }
-
-    timers[c] = setInterval(() => {
-      for(let r=0;r<R;r++) refreshStrip(cell(c,r));
-    }, 95);
   }
 
   for(let c=0;c<C;c++){
     const delay = 360 + c * 150 + (teased ? c * 120 : 0);
     await new Promise(res => setTimeout(res, delay));
-
-    clearInterval(timers[c]);
 
     for(let r=0;r<R;r++){
       const t = cell(c,r);
