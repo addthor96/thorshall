@@ -9,10 +9,10 @@
   --stage-ratio: 16 / 9;
 
   /* These place the 5x5 symbol grid over the visible board. */
-  --grid-left: 13.55%;
-  --grid-top: 17.25%;
-  --grid-width: 59.75%;
-  --grid-height: 61.10%;
+  --grid-left: 23.45%;
+  --grid-top: 16.85%;
+  --grid-width: 58.65%;
+  --grid-height: 62.20%;
 
   --gold:#f2c36b;
   --blue:#47d7ff;
@@ -69,7 +69,7 @@ html,body{
   grid-template-columns:repeat(5,1fr);
   grid-template-rows:repeat(5,1fr);
   gap:.45%;
-  padding:.45% .55% .70%;
+  padding:.70% .75% .95%;
   overflow:hidden;
 }
 
@@ -107,11 +107,11 @@ html,body{
 }
 
 /* Per-symbol fitting. Change ONLY these if a symbol is too big/small. */
-.tile[data-id="TEN"] .symbol{width:58%;height:58%}
-.tile[data-id="J"] .symbol{width:43%;height:43%}
-.tile[data-id="Q"] .symbol{width:47%;height:47%}
-.tile[data-id="K"] .symbol{width:49%;height:49%}
-.tile[data-id="A"] .symbol{width:45%;height:45%}
+.tile[data-id="TEN"] .symbol{width:54%;height:54%}
+.tile[data-id="J"] .symbol{width:39%;height:39%}
+.tile[data-id="Q"] .symbol{width:43%;height:43%}
+.tile[data-id="K"] .symbol{width:45%;height:45%}
+.tile[data-id="A"] .symbol{width:41%;height:41%}
 
 .tile[data-id="RAVEN"] .symbol{width:63%;height:63%}
 .tile[data-id="SHIP"] .symbol{width:66%;height:66%}
@@ -136,7 +136,7 @@ html,body{
 }
 
 .strip img{
-  width:58%;
+  width:52%;
   height:20%;
   min-height:20%;
   object-fit:contain;
