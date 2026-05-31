@@ -111,25 +111,25 @@ html,body{
 }
 
 /* Symbol size control
-   The symbols were too small because width/height were 38–62% of each cell.
-   These values make them sit centered inside the actual stone boxes. */
+   Each PNG has a different transparent canvas, so each symbol needs its own size.
+   These values keep the symbols inside the stone boxes without touching borders. */
 .symbol{
-  width:92%;
-  height:92%;
+  width:68%;
+  height:68%;
 }
 
-.tile[data-id="TEN"] .symbol{width:94%;height:94%}
-.tile[data-id="J"] .symbol{width:94%;height:96%}
-.tile[data-id="Q"] .symbol{width:94%;height:96%}
-.tile[data-id="K"] .symbol{width:94%;height:94%}
-.tile[data-id="A"] .symbol{width:94%;height:96%}
+.tile[data-id="TEN"] .symbol{width:74%;height:74%}
+.tile[data-id="J"] .symbol{width:62%;height:62%}
+.tile[data-id="Q"] .symbol{width:66%;height:66%}
+.tile[data-id="K"] .symbol{width:66%;height:66%}
+.tile[data-id="A"] .symbol{width:66%;height:66%}
 
-.tile[data-id="RAVEN"] .symbol{width:92%;height:92%}
-.tile[data-id="SHIP"] .symbol{width:94%;height:94%}
-.tile[data-id="AXE"] .symbol{width:94%;height:94%}
-.tile[data-id="RUNE"] .symbol{width:92%;height:92%}
-.tile[data-id="MJOLNIR"] .symbol{width:94%;height:94%}
-.tile[data-id="FS"] .symbol{width:92%;height:92%}
+.tile[data-id="RAVEN"] .symbol{width:66%;height:66%}
+.tile[data-id="SHIP"] .symbol{width:72%;height:72%}
+.tile[data-id="AXE"] .symbol{width:70%;height:70%}
+.tile[data-id="RUNE"] .symbol{width:66%;height:66%}
+.tile[data-id="MJOLNIR"] .symbol{width:70%;height:70%}
+.tile[data-id="FS"] .symbol{width:66%;height:66%}
 
 /* Smooth spinning strip */
 .strip{
