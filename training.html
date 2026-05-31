@@ -99,14 +99,14 @@ html,body{
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Symbol size control — fixed with normalized 512x512 symbol canvases */
+/* Symbol size control — final and spinning symbols use matching size so there is no grow/shrink pop */
 .tile[data-id="TEN"] .symbol,
 .tile[data-id="J"] .symbol,
 .tile[data-id="Q"] .symbol,
 .tile[data-id="K"] .symbol,
 .tile[data-id="A"] .symbol{
-  width:68%;
-  height:68%;
+  width:66%;
+  height:66%;
 }
 
 .tile[data-id="RAVEN"] .symbol,
@@ -115,8 +115,8 @@ html,body{
 .tile[data-id="RUNE"] .symbol,
 .tile[data-id="MJOLNIR"] .symbol,
 .tile[data-id="FS"] .symbol{
-  width:72%;
-  height:72%;
+  width:69%;
+  height:69%;
 }
 
 /* Smooth spinning strip */
@@ -124,8 +124,8 @@ html,body{
   position:absolute;
   left:0;
   right:0;
-  top:-350%;
-  height:900%;
+  top:-375%;
+  height:1000%;
   z-index:4;
   opacity:0;
   display:flex;
@@ -134,41 +134,41 @@ html,body{
   justify-content:flex-start;
   pointer-events:none;
   will-change:transform;
-  transform:translateY(-28%);
+  transform:translateY(-30%);
 }
 
 .strip img{
   display:block;
-  width:70%;
-  height:11.111%;
-  min-height:11.111%;
+  width:69%;
+  height:10%;
+  min-height:10%;
   object-fit:contain;
-  filter:blur(.7px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
-  opacity:.96;
+  object-position:center center;
+  filter:blur(.85px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  opacity:.92;
 }
 
 .tile.spinning .symbol{opacity:0}
 
 .tile.spinning .strip{
   opacity:1;
-  animation:reelRoll .52s linear infinite;
+  animation:reelRoll .48s linear infinite;
 }
 
 @keyframes reelRoll{
-  from{transform:translateY(-36%)}
+  from{transform:translateY(-35%)}
   to{transform:translateY(0%)}
 }
   to{transform:translateY(20%)}
 }
 
 .tile.stopping .symbol{
-  animation:stopSnap .20s cubic-bezier(.2,.9,.25,1.15);
+  animation:stopSnap .16s ease-out;
 }
 
 @keyframes stopSnap{
-  0%{transform:scale(.94);opacity:.55}
-  70%{transform:scale(1.035);opacity:1}
-  100%{transform:scale(1);opacity:1}
+  0%{opacity:.75;filter:blur(.35px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
+  100%{opacity:1;filter:blur(0) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
 }
   65%{transform:translateY(4%) scale(1.05);opacity:1}
   100%{transform:translateY(0) scale(1)}
@@ -479,7 +479,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
     Assets are loaded from <code>/img/slots/</code>.<br><br>
-    This is a fake-money training/prototype page only.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.<br>Spin animation fixed: reel strips now scroll smoothly instead of randomizing every frame. Stop sound changed to a darker thump.
+    This is a fake-money training/prototype page only.<br>Matched to the corrected PNG: exact 5 columns x 4 rows using inspected cell boundaries.<br>Spin animation: fixed no grow/shrink pop; reel strip uses same size symbols and stops with blur fade only.
   </aside>
 </main>
 
@@ -601,7 +601,7 @@ function createBoard(){
 
       const strip = document.createElement("div");
       strip.className = "strip";
-      for(let i=0;i<9;i++){
+      for(let i=0;i<10;i++){
         strip.appendChild(makeImg(randomAny()));
       }
 
@@ -654,7 +654,7 @@ function render(b=board){
 
 function refreshStrip(t){
   const imgs = t.querySelectorAll(".strip img");
-  imgs.forEach((i, n) => {
+  imgs.forEach(i => {
     const id = randomAny();
     i.src = ASSETS[id];
     i.alt = id;
@@ -668,35 +668,35 @@ function sfx(type){
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     const now = audioCtx.currentTime;
 
-    function tone(freq, dur, gain, wave="sine", endFreq=null){
+    function tone(freq, dur, gain, wave="sine", endFreq=null, delay=0){
+      const t = now + delay;
       const o = audioCtx.createOscillator();
       const g = audioCtx.createGain();
 
       o.type = wave;
-      o.frequency.setValueAtTime(freq, now);
+      o.frequency.setValueAtTime(freq, t);
       if(endFreq){
-        o.frequency.exponentialRampToValueAtTime(endFreq, now + dur);
+        o.frequency.exponentialRampToValueAtTime(endFreq, t + dur);
       }
 
-      g.gain.setValueAtTime(0.0001, now);
-      g.gain.exponentialRampToValueAtTime(gain, now + 0.012);
-      g.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(gain, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
 
       o.connect(g);
       g.connect(audioCtx.destination);
-      o.start(now);
-      o.stop(now + dur + .03);
+      o.start(t);
+      o.stop(t + dur + .03);
     }
 
     if(type === "stop"){
-      /* dark wooden/stone thump when a reel stops */
-      tone(82, .18, .16, "sine", 42);
-      setTimeout(() => tone(48, .11, .10, "triangle", 35), 18);
+      tone(76, .16, .15, "sine", 38);
+      tone(42, .10, .08, "triangle", 32, .018);
       return;
     }
 
     if(type === "spin"){
-      tone(92, .09, .045, "triangle", 70);
+      tone(92, .08, .045, "triangle", 70);
       return;
     }
 
@@ -717,7 +717,7 @@ function sfx(type){
 
     if(type === "bonus"){
       tone(120, .42, .12, "triangle", 460);
-      setTimeout(() => tone(70, .30, .09, "sine", 38), 60);
+      tone(70, .30, .09, "sine", 38, .06);
       return;
     }
 
