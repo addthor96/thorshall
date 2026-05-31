@@ -68,7 +68,11 @@ html,body{
 
 .tile{
   position:absolute;
+  display:flex;
+  align-items:center;
+  justify-content:center;
   overflow:hidden;
+  padding:.45%;
 }
 
 /* small dark behind transparent symbols */
@@ -82,34 +86,38 @@ html,body{
 }
 
 .symbol{
-  position:absolute;
-  left:50%;
-  top:50%;
+  position:relative;
   z-index:3;
   display:block;
-  width:64%;
-  height:64%;
+  width:66%;
+  height:66%;
   object-fit:contain;
   object-position:center center;
   user-select:none;
   pointer-events:none;
-  transform:translate(-50%,-50%);
+  transform-origin:center center;
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Symbol size control — center each symbol on the exact middle point of the cell and fit it neatly inside a square area */
-.tile[data-id="TEN"] .symbol{width:58%;height:58%}
-.tile[data-id="J"] .symbol{width:60%;height:60%}
-.tile[data-id="Q"] .symbol{width:58%;height:58%}
-.tile[data-id="K"] .symbol{width:60%;height:60%}
-.tile[data-id="A"] .symbol{width:58%;height:58%}
+/* Symbol size control — fixed with normalized 512x512 symbol canvases */
+.tile[data-id="TEN"] .symbol,
+.tile[data-id="J"] .symbol,
+.tile[data-id="Q"] .symbol,
+.tile[data-id="K"] .symbol,
+.tile[data-id="A"] .symbol{
+  width:68%;
+  height:68%;
+}
 
-.tile[data-id="RAVEN"] .symbol{width:64%;height:64%}
-.tile[data-id="SHIP"] .symbol{width:63%;height:63%}
-.tile[data-id="AXE"] .symbol{width:64%;height:64%}
-.tile[data-id="RUNE"] .symbol{width:64%;height:64%}
-.tile[data-id="MJOLNIR"] .symbol{width:63%;height:63%}
-.tile[data-id="FS"] .symbol{width:64%;height:64%}
+.tile[data-id="RAVEN"] .symbol,
+.tile[data-id="SHIP"] .symbol,
+.tile[data-id="AXE"] .symbol,
+.tile[data-id="RUNE"] .symbol,
+.tile[data-id="MJOLNIR"] .symbol,
+.tile[data-id="FS"] .symbol{
+  width:72%;
+  height:72%;
+}
 
 /* Smooth spinning strip */
 .strip{
@@ -128,7 +136,7 @@ html,body{
 
 .strip img{
   display:block;
-  width:72%;
+  width:70%;
   height:25%;
   min-height:25%;
   object-fit:contain;
@@ -153,7 +161,10 @@ html,body{
 }
 
 @keyframes stopSnap{
-  0%{transform:translateY(-18%) scale(.92);opacity:.25}
+  0%{transform:scale(.92);opacity:.35}
+  65%{transform:scale(1.045);opacity:1}
+  100%{transform:scale(1);opacity:1}
+}
   65%{transform:translateY(4%) scale(1.05);opacity:1}
   100%{transform:translateY(0) scale(1)}
 }
