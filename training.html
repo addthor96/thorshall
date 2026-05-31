@@ -6,13 +6,17 @@
 <title>Miðgarður — Slot Training Build</title>
 <style>
 :root{
-  --stage-ratio: 16 / 9;
+  /*
+    Calibrated to the uploaded background:
+    /img/slots/midgardur.webp  = 1672 x 941
 
-  /* These place the 5x5 symbol grid over the visible board. */
-  --grid-left: 23.45%;
-  --grid-top: 16.85%;
-  --grid-width: 58.65%;
-  --grid-height: 62.20%;
+    This is the actual 5x5 board area only.
+    Do not use the outer frame as the grid.
+  */
+  --grid-left: 29.49%;
+  --grid-top: 18.70%;
+  --grid-width: 42.46%;
+  --grid-height: 58.45%;
 
   --gold:#f2c36b;
   --blue:#47d7ff;
@@ -33,7 +37,7 @@ html,body{
 .stage{
   position:relative;
   width:min(100vw,177.777vh);
-  aspect-ratio:var(--stage-ratio);
+  aspect-ratio:1672/941;
   margin:0 auto;
   overflow:hidden;
   background:#020406;
@@ -46,6 +50,8 @@ html,body{
   height:100%;
   object-fit:cover;
   z-index:0;
+  user-select:none;
+  pointer-events:none;
 }
 
 .vignette{
@@ -53,11 +59,10 @@ html,body{
   inset:0;
   z-index:1;
   pointer-events:none;
-  background:
-    radial-gradient(circle at 48% 42%, transparent 47%, rgba(0,0,0,.18) 78%, rgba(0,0,0,.58) 100%);
+  background:radial-gradient(circle at 49% 43%, transparent 52%, rgba(0,0,0,.16) 80%, rgba(0,0,0,.58) 100%);
 }
 
-/* MAIN REEL GRID */
+/* 5x5 REEL GRID */
 .reels{
   position:absolute;
   z-index:5;
@@ -68,8 +73,8 @@ html,body{
   display:grid;
   grid-template-columns:repeat(5,1fr);
   grid-template-rows:repeat(5,1fr);
-  gap:.45%;
-  padding:.70% .75% .95%;
+  padding:0;
+  gap:0;
   overflow:hidden;
 }
 
@@ -79,20 +84,18 @@ html,body{
   align-items:center;
   justify-content:center;
   overflow:hidden;
-  border-radius:.35vw;
 }
 
-/* Slight darkening behind symbols so transparent holes never look white */
+/* small dark behind transparent symbols */
 .tile::before{
   content:"";
   position:absolute;
-  inset:8%;
-  border-radius:.35vw;
-  background:radial-gradient(circle at 50% 45%, rgba(0,0,0,.12), rgba(0,0,0,.02));
+  inset:12%;
+  border-radius:.4vw;
+  background:radial-gradient(circle at 50% 45%, rgba(0,0,0,.16), rgba(0,0,0,0));
   pointer-events:none;
 }
 
-/* Final stopped symbol */
 .symbol{
   position:relative;
   z-index:3;
@@ -102,40 +105,41 @@ html,body{
   object-fit:contain;
   user-select:none;
   pointer-events:none;
-  transform-origin:center;
+  transform-origin:center center;
   filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
 }
 
-/* Per-symbol fitting. Change ONLY these if a symbol is too big/small. */
-.tile[data-id="TEN"] .symbol{width:54%;height:54%}
-.tile[data-id="J"] .symbol{width:39%;height:39%}
+/* Symbol size control */
+.tile[data-id="TEN"] .symbol{width:52%;height:52%}
+.tile[data-id="J"] .symbol{width:38%;height:38%}
 .tile[data-id="Q"] .symbol{width:43%;height:43%}
-.tile[data-id="K"] .symbol{width:45%;height:45%}
+.tile[data-id="K"] .symbol{width:43%;height:43%}
 .tile[data-id="A"] .symbol{width:41%;height:41%}
 
-.tile[data-id="RAVEN"] .symbol{width:63%;height:63%}
-.tile[data-id="SHIP"] .symbol{width:66%;height:66%}
-.tile[data-id="AXE"] .symbol{width:64%;height:64%}
-.tile[data-id="RUNE"] .symbol{width:58%;height:58%}
-.tile[data-id="MJOLNIR"] .symbol{width:60%;height:60%}
-.tile[data-id="FS"] .symbol{width:66%;height:66%}
+.tile[data-id="RAVEN"] .symbol{width:58%;height:58%}
+.tile[data-id="SHIP"] .symbol{width:62%;height:62%}
+.tile[data-id="AXE"] .symbol{width:60%;height:60%}
+.tile[data-id="RUNE"] .symbol{width:55%;height:55%}
+.tile[data-id="MJOLNIR"] .symbol{width:58%;height:58%}
+.tile[data-id="FS"] .symbol{width:62%;height:62%}
 
-/* Smooth reel strip */
+/* Smooth spinning strip */
 .strip{
   position:absolute;
-  inset:-120% 0;
+  inset:-150% 0;
   z-index:4;
+  opacity:0;
   display:flex;
   flex-direction:column;
   align-items:center;
   justify-content:flex-start;
-  opacity:0;
   pointer-events:none;
-  transform:translateY(-20%);
   will-change:transform;
+  transform:translateY(-20%);
 }
 
 .strip img{
+  display:block;
   width:52%;
   height:20%;
   min-height:20%;
@@ -145,9 +149,10 @@ html,body{
 }
 
 .tile.spinning .symbol{opacity:0}
+
 .tile.spinning .strip{
   opacity:1;
-  animation:reelRoll .36s linear infinite;
+  animation:reelRoll .34s linear infinite;
 }
 
 @keyframes reelRoll{
@@ -156,7 +161,7 @@ html,body{
 }
 
 .tile.stopping .symbol{
-  animation:stopSnap .26s cubic-bezier(.2,.9,.25,1.2);
+  animation:stopSnap .24s cubic-bezier(.2,.9,.25,1.15);
 }
 
 @keyframes stopSnap{
@@ -290,6 +295,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   border:1px solid rgba(255,255,255,.15);
   font-size:.76vw;
 }
+
 #soundBtn{top:1.1%}
 #notesBtn{top:5.8%}
 
@@ -309,6 +315,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   font-size:.78vw;
   line-height:1.35;
 }
+
 .notes.show{display:block}
 
 .mascot{
@@ -321,7 +328,13 @@ button:disabled{opacity:.5;cursor:not-allowed}
   filter:drop-shadow(0 .8vw 1vw rgba(0,0,0,.88));
   animation:mascotBob 3.3s ease-in-out infinite;
 }
-.mascot img{width:100%;height:100%;object-fit:contain}
+
+.mascot img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+}
+
 @keyframes mascotBob{
   0%,100%{transform:translateY(0) rotate(-1deg)}
   50%{transform:translateY(-2.2%) rotate(1.2deg)}
@@ -344,7 +357,11 @@ button:disabled{opacity:.5;cursor:not-allowed}
   transform:translateY(.55vw);
   transition:.25s;
 }
-.bubble.show{opacity:1;transform:translateY(0)}
+
+.bubble.show{
+  opacity:1;
+  transform:translateY(0);
+}
 
 .bonus{
   display:none;
@@ -358,6 +375,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
   border:1px solid rgba(71,215,255,.32);
   font-size:.82vw;
 }
+
 .bonus.show{display:block}
 
 .overlay{
@@ -368,7 +386,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
   place-items:center;
   background:radial-gradient(circle,rgba(30,160,220,.18),rgba(0,0,0,.72));
 }
+
 .overlay.show{display:grid}
+
 .big{
   text-align:center;
   font-size:5.8vw;
@@ -376,7 +396,12 @@ button:disabled{opacity:.5;cursor:not-allowed}
   color:#ffdf76;
   text-shadow:0 0 1vw #ffbb35,0 0 3vw rgba(71,215,255,.62),0 .3vw 0 #5b2208;
 }
-.big small{display:block;font-size:1.95vw;color:#fff3c9}
+
+.big small{
+  display:block;
+  font-size:1.95vw;
+  color:#fff3c9;
+}
 
 .flash{
   position:absolute;
@@ -386,7 +411,9 @@ button:disabled{opacity:.5;cursor:not-allowed}
   background:rgba(90,195,255,.18);
   opacity:0;
 }
+
 .stage.lightning .flash{animation:flash .66s ease}
+
 @keyframes flash{
   0%,100%{opacity:0}
   12%{opacity:.62}
@@ -396,6 +423,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 }
 </style>
 </head>
+
 <body>
 <main class="stage" id="stage">
   <img class="bg" src="/img/slots/midgardur.webp" alt="">
@@ -403,7 +431,10 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
   <section class="reels" id="reels"></section>
 
-  <div class="mascot"><img src="/img/slots/raven.png" alt=""></div>
+  <div class="mascot">
+    <img src="/img/slots/raven.png" alt="">
+  </div>
+
   <div class="bubble" id="bubble">Two FS runes... the hall is watching.</div>
 
   <button class="topbtn" id="soundBtn">Sound: On</button>
@@ -422,15 +453,16 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <div class="pill"><span>Last Win</span><b id="lastWin">0</b></div>
   </div>
 
-  <div class="overlay" id="overlay"><div class="big">BIG WIN<small id="bigAmount">0</small></div></div>
+  <div class="overlay" id="overlay">
+    <div class="big">BIG WIN<small id="bigAmount">0</small></div>
+  </div>
+
   <div class="flash"></div>
 
   <aside class="notes" id="notes">
     <b>Miðgarður training build</b><br><br>
-    Uses assets from <code>/img/slots/</code> only.<br><br>
-    Current symbols expected:<br>
-    <code>ten.png, jack.png, queen.png, king.png, ace.png, raven.png, ship.png, axe.png, rune.png, mjolnir.png, fs.png</code><br><br>
-    This is fake-money training/prototype only.
+    Assets are loaded from <code>/img/slots/</code>.<br><br>
+    This is a fake-money training/prototype page only.
   </aside>
 </main>
 
@@ -464,7 +496,8 @@ const SYMBOLS = [
   {id:"FS", tier:"fs", w:3, scatter:true}
 ];
 
-const C = 5, R = 5;
+const C = 5;
+const R = 5;
 const byId = Object.fromEntries(SYMBOLS.map(s => [s.id, s]));
 
 const reels = document.getElementById("reels");
@@ -500,7 +533,7 @@ let freeSpins = 0;
 let inBonus = false;
 let bonusWin = 0;
 
-function img(id, cls=""){
+function makeImg(id, cls=""){
   const i = document.createElement("img");
   i.src = ASSETS[id];
   i.alt = id;
@@ -515,6 +548,7 @@ function cell(c,r){
 
 function createBoard(){
   reels.innerHTML = "";
+
   for(let r=0;r<R;r++){
     for(let c=0;c<C;c++){
       const t = document.createElement("div");
@@ -522,10 +556,13 @@ function createBoard(){
       t.dataset.c = c;
       t.dataset.r = r;
 
-      const main = img("TEN","symbol");
+      const main = makeImg("TEN","symbol");
+
       const strip = document.createElement("div");
       strip.className = "strip";
-      for(let i=0;i<5;i++) strip.appendChild(img(randomAny()));
+      for(let i=0;i<5;i++){
+        strip.appendChild(makeImg(randomAny()));
+      }
 
       t.appendChild(main);
       t.appendChild(strip);
@@ -537,10 +574,12 @@ function createBoard(){
 function weightedRandom(){
   const total = SYMBOLS.reduce((a,s)=>a+s.w,0);
   let r = Math.random() * total;
+
   for(const s of SYMBOLS){
     r -= s.w;
     if(r <= 0) return s.id;
   }
+
   return "TEN";
 }
 
@@ -583,11 +622,13 @@ function refreshStrip(t){
 
 function sfx(type){
   if(muted) return;
+
   try{
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
     const o = audioCtx.createOscillator();
     const g = audioCtx.createGain();
     const now = audioCtx.currentTime;
+
     const m = {
       click:[260,.04,.04],
       spin:[95,.08,.06],
@@ -600,10 +641,15 @@ function sfx(type){
 
     o.type = type === "tease" ? "sawtooth" : "triangle";
     o.frequency.setValueAtTime(m[0],now);
-    if(type === "win" || type === "bonus") o.frequency.exponentialRampToValueAtTime(m[0]*3,now+m[1]);
+
+    if(type === "win" || type === "bonus"){
+      o.frequency.exponentialRampToValueAtTime(m[0]*3,now+m[1]);
+    }
+
     g.gain.setValueAtTime(0,now);
     g.gain.linearRampToValueAtTime(m[2],now+.01);
     g.gain.exponentialRampToValueAtTime(.0001,now+m[1]);
+
     o.connect(g);
     g.connect(audioCtx.destination);
     o.start(now);
@@ -651,11 +697,13 @@ function flash(){
 
 function countFS(cols, b){
   let n = 0;
+
   for(let c=0;c<cols;c++){
     for(let r=0;r<R;r++){
       if(b[c][r] === "FS") n++;
     }
   }
+
   return n;
 }
 
@@ -668,11 +716,14 @@ function calculate(b){
     if(s.scatter) continue;
 
     const counts = [];
+
     for(let c=0;c<C;c++){
       let n = 0;
+
       for(let r=0;r<R;r++){
         if(b[c][r] === s.id) n++;
       }
+
       if(!n) break;
       counts.push(n);
     }
@@ -702,10 +753,12 @@ function showWins(keys){
 
 function showBig(win){
   if(win / betValues[betIndex] < 15) return;
+
   bigAmount.textContent = win;
   overlay.classList.add("show");
   sfx("big");
   flash();
+
   setTimeout(()=>overlay.classList.remove("show"),1850);
 }
 
@@ -765,6 +818,7 @@ async function spin(){
     sfx("stop");
 
     const fs = countFS(c+1,outcome);
+
     if(fs === 2 && c < C-1 && !teased){
       teased = true;
       setMsg("Two FS runes... one more opens the bonus!", true);
@@ -774,7 +828,9 @@ async function spin(){
 
       for(let cc=0;cc<=c;cc++){
         for(let r=0;r<R;r++){
-          if(outcome[cc][r] === "FS") cell(cc,r).classList.add("tease");
+          if(outcome[cc][r] === "FS"){
+            cell(cc,r).classList.add("tease");
+          }
         }
       }
 
@@ -783,6 +839,7 @@ async function spin(){
   }
 
   board = outcome;
+
   const result = calculate(board);
   let win = result.total;
 
@@ -790,6 +847,7 @@ async function spin(){
 
   lastWin = win;
   balance += win;
+
   if(inBonus) bonusWin += win;
 
   showWins(result.wins);
@@ -798,10 +856,12 @@ async function spin(){
     const award = result.fs === 3 ? 8 : result.fs === 4 ? 12 : 20;
     freeSpins += award;
     inBonus = true;
+
     setMsg(`${result.fs} FS symbols! ${award} free spins!`);
     showBubble("The gates of Miðgarður open!");
     sfx("bonus");
     flash();
+
     [...reels.children].forEach(t => {
       if(t.dataset.id === "FS") t.classList.add("tease");
     });
@@ -817,6 +877,7 @@ async function spin(){
   }
 
   showBig(win);
+
   spinning = false;
   updateUI();
 
@@ -844,7 +905,10 @@ betDown.onclick = () => {
 autoBtn.onclick = () => {
   auto = auto ? 0 : 25;
   autoBtn.textContent = auto ? `Auto ${auto}` : "Auto 25";
-  if(auto && !spinning) spin();
+
+  if(auto && !spinning){
+    spin();
+  }
 };
 
 soundBtn.onclick = () => {
@@ -852,7 +916,9 @@ soundBtn.onclick = () => {
   soundBtn.textContent = `Sound: ${muted ? "Off" : "On"}`;
 };
 
-notesBtn.onclick = () => notes.classList.toggle("show");
+notesBtn.onclick = () => {
+  notes.classList.toggle("show");
+};
 
 createBoard();
 board = randomBoard();
@@ -860,7 +926,9 @@ render();
 updateUI();
 
 setInterval(() => {
-  if(!spinning && Math.random() < .22) flash();
+  if(!spinning && Math.random() < .22){
+    flash();
+  }
 }, 3800);
 })();
 </script>
