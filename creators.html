@@ -8,13 +8,104 @@
 <link rel="canonical" href="https://thorshall.gg/creators"/>
 <style>
 :root{--bg:#0c0805;--panel:#18110b;--panel2:#24170e;--gold:#d4a74f;--gold2:#f0d28b;--gold3:#fff0be;--text:#f4eee5;--muted:#cdbfa8;--line:rgba(212,167,79,.20);--green:#83f0b8;--red:#ff8a6a}*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--text);background:radial-gradient(circle at top right,rgba(212,167,79,.10),transparent 28%),linear-gradient(rgba(10,6,4,.86),rgba(10,6,4,.96)),url('viking-hall-bg.png') center/cover fixed no-repeat;line-height:1.7}.wrap{max-width:1180px;margin:auto;padding:28px 18px 80px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 20px;border-radius:18px;border:1px solid var(--line);background:rgba(0,0,0,.36);backdrop-filter:blur(6px)}.brand-link{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--text);font-weight:800;letter-spacing:.06em}.brand-logo{width:36px;height:36px;border-radius:8px}.btn,.btn-secondary{display:inline-block;text-decoration:none;border-radius:14px;padding:14px 22px;font-weight:800;border:1px solid rgba(255,220,140,.28);background:linear-gradient(180deg,var(--gold3),var(--gold));color:#221407;box-shadow:0 12px 28px rgba(212,167,79,.28)}.btn:hover,.btn-secondary:hover{transform:translateY(-2px)}.hero{margin-top:26px;padding:72px 48px;border-radius:34px;border:1px solid var(--line);background:radial-gradient(circle at top right,rgba(212,167,79,.13),transparent 34%),linear-gradient(180deg,rgba(0,0,0,.55),rgba(18,10,4,.96));position:relative;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.38)}.kicker{color:var(--muted);margin-bottom:10px;font-weight:700;letter-spacing:.04em}.hero h1{font-size:56px;line-height:1.02;margin:0 0 18px;max-width:940px}.lead{max-width:930px;font-size:20px;color:var(--muted)}.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:28px}.trust-strip{margin-top:30px;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}.trust-tile{padding:20px;border-radius:20px;background:rgba(255,255,255,.035);border:1px solid var(--line);text-align:center}.trust-tile strong{display:block;color:var(--gold2);font-size:24px;margin-bottom:5px}.section{margin-top:26px;padding:34px;border-radius:26px;border:1px solid var(--line);background:linear-gradient(180deg,#17100b,#0f0a06);box-shadow:0 14px 34px rgba(0,0,0,.24)}h2{margin:0 0 16px;font-size:36px}h3{margin-top:0}p,ul,ol{color:var(--muted)}.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-top:22px}.card{padding:24px;border-radius:22px;border:1px solid var(--line);background:linear-gradient(180deg,var(--panel),var(--panel2));height:100%}.two{display:grid;grid-template-columns:1fr 1fr;gap:18px}.table-wrap{overflow:auto;border-radius:20px;border:1px solid var(--line);margin-top:20px}table{width:100%;border-collapse:collapse;min-width:720px;background:linear-gradient(180deg,var(--panel),var(--panel2))}th,td{padding:15px 16px;border-bottom:1px solid rgba(212,167,79,.13);text-align:left;color:var(--muted)}th{color:var(--gold2);background:rgba(212,167,79,.08)}tr:last-child td{border-bottom:none}.note-box{margin-top:22px;padding:22px;border-radius:20px;background:rgba(212,167,79,.06);border:1px solid var(--line);color:var(--muted)}.related-link{text-decoration:none;color:inherit;display:block}.footer-actions{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap;margin-top:26px}.footer-note{margin-top:22px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:#c9b89c}.footer-note a{color:var(--gold2);text-decoration:underline;margin-left:6px}@media(max-width:950px){.grid,.two,.trust-strip{grid-template-columns:1fr}.hero{padding:46px 24px}.hero h1{font-size:42px}.topbar{flex-direction:column;align-items:flex-start}table{min-width:640px}}
+
+/* Full Thor's Hall top navigation */
+.topbar{
+  display:flex!important;
+  justify-content:space-between!important;
+  align-items:center!important;
+  gap:18px!important;
+  padding:16px 18px!important;
+  border-radius:22px!important;
+  border:1px solid rgba(212,167,79,.28)!important;
+  background:rgba(0,0,0,.62)!important;
+  box-shadow:0 18px 44px rgba(0,0,0,.36)!important;
+}
+.brand-link{
+  display:flex!important;
+  align-items:center!important;
+  gap:14px!important;
+  text-decoration:none!important;
+  color:var(--text)!important;
+  font-size:30px!important;
+  font-weight:900!important;
+  letter-spacing:.04em!important;
+}
+.brand-logo{
+  width:44px!important;
+  height:44px!important;
+  border-radius:10px!important;
+  object-fit:cover!important;
+}
+.nav{
+  display:flex!important;
+  gap:10px!important;
+  flex-wrap:wrap!important;
+  justify-content:flex-end!important;
+}
+.nav a,.nav .btn{
+  text-decoration:none!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-width:96px!important;
+  padding:14px 20px!important;
+  border-radius:14px!important;
+  font-weight:900!important;
+  border:1px solid rgba(255,220,145,.44)!important;
+  background:linear-gradient(180deg,var(--gold3),var(--gold))!important;
+  color:#211407!important;
+  box-shadow:0 10px 22px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.26)!important;
+}
+.nav a.manager-btn{
+  color:#fff!important;
+  background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424)!important;
+  border-color:rgba(255,140,130,.52)!important;
+  text-shadow:0 1px 0 rgba(0,0,0,.28)!important;
+}
+.nav a.analytics-nav{
+  min-width:auto!important;
+  width:64px!important;
+  height:64px!important;
+  padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  filter:drop-shadow(0 0 14px rgba(255,90,0,.55)) drop-shadow(0 0 28px rgba(255,120,0,.22))!important;
+}
+.nav a.analytics-nav img{
+  width:64px!important;
+  height:64px!important;
+  object-fit:contain!important;
+  display:block!important;
+}
+@media(max-width:950px){
+  .topbar{flex-direction:column!important;align-items:flex-start!important}
+  .nav{width:100%!important}
+  .nav a{flex:1!important;min-width:120px!important}
+  .nav a.analytics-nav{flex:0 0 auto!important;margin-left:auto!important}
+}
+
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="topbar">
-    <a class="brand-link" href="https://thorshall.gg"><img alt="Thor's Hall Logo" class="brand-logo" src="logo.png"/><span>THOR'S HALL</span></a>
-    <a class="btn" href="https://thorshall.gg/creators" rel="nofollow noopener sponsored">View Creator Program</a>
+    <a class="brand-link" href="https://thorshall.gg">
+      <img alt="Thor's Hall Logo" class="brand-logo" src="img/logo.png"/>
+      <span>THOR'S HALL</span>
+    </a>
+    <nav class="nav">
+      <a href="https://thorshall.gg/about">About</a>
+      <a href="https://thorshall.gg/info">Info</a>
+      <a href="https://thorshall.gg/guide">Guide</a>
+      <a href="https://thorshall.gg/creators">Creators</a>
+      <a class="manager-btn" href="https://thorshall.gg/managers">Managers</a>
+      <a href="https://playrainbet.com/tkpmo0r1x" rel="nofollow noopener sponsored" target="_blank">Join Rainbet</a>
+      <a class="analytics-nav" href="https://thorshall.gg/partners" aria-label="View partner statistics">
+        <img alt="Thor's Hall partner analytics" src="img/infernal-diamond.png"/>
+      </a>
+    </nav>
   </div>
   <section class="hero">
     <div class="kicker">Thor&#x27;s Hall Creator Program</div>
