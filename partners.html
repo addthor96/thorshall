@@ -315,6 +315,101 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
   font-weight:900;
 }
 
+
+
+/* LEDGER INFO POPUP */
+.board-title{
+  position:relative;
+  overflow:visible;
+}
+.ledger-title-row{
+  position:relative;
+  display:block;
+  text-align:center;
+  padding:0 58px;
+}
+.ledger-info-wrap{
+  position:absolute;
+  right:0;
+  top:50%;
+  transform:translateY(-50%);
+  display:inline-flex;
+  align-items:center;
+  z-index:30;
+}
+.ledger-info-btn{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:1px solid rgba(255,230,170,.48);
+  background:linear-gradient(180deg,#fff0be,#d4a74f);
+  color:#211407;
+  font-family:Arial,Helvetica,sans-serif;
+  font-weight:900;
+  font-size:18px;
+  cursor:pointer;
+  box-shadow:0 8px 20px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.28);
+}
+.ledger-info-pop{
+  position:absolute;
+  top:calc(100% + 12px);
+  left:calc(100% - 12px);
+  right:auto;
+  width:min(360px,82vw);
+  padding:18px 18px 16px;
+  border-radius:18px;
+  border:1px solid rgba(240,210,139,.34);
+  background:linear-gradient(180deg,rgba(18,10,5,.97),rgba(34,20,10,.99));
+  box-shadow:0 20px 48px rgba(0,0,0,.62);
+  color:var(--muted);
+  font-family:Arial,Helvetica,sans-serif;
+  text-align:left;
+  opacity:0;
+  visibility:hidden;
+  transform:translateY(-5px);
+  transition:.18s ease;
+  z-index:40;
+}
+.ledger-info-pop:before{
+  content:"";
+  position:absolute;
+  top:-8px;
+  left:14px;
+  right:auto;
+  width:14px;
+  height:14px;
+  transform:rotate(45deg);
+  background:rgba(18,10,5,.97);
+  border-left:1px solid rgba(240,210,139,.28);
+  border-top:1px solid rgba(240,210,139,.28);
+}
+.ledger-info-pop strong{
+  display:block;
+  color:var(--gold2);
+  font-size:16px;
+  margin-bottom:7px;
+  letter-spacing:.02em;
+}
+.ledger-info-pop p{
+  margin:0 0 10px;
+  color:#d8c8aa;
+  font-size:14px;
+  line-height:1.55;
+}
+.ledger-info-pop p:last-child{margin-bottom:0}
+.ledger-info-wrap:hover .ledger-info-pop,
+.ledger-info-wrap:focus-within .ledger-info-pop,
+.ledger-info-wrap.open .ledger-info-pop{
+  opacity:1;
+  visibility:visible;
+  transform:translateY(0);
+}
+@media(max-width:640px){
+  .ledger-title-row{padding:0 46px}
+  .ledger-info-wrap{right:0}
+  .ledger-info-pop{width:min(320px,86vw);left:calc(100% - 10px);right:auto}
+}
+
 @media(max-width:920px){
   .topbar{flex-direction:column;align-items:flex-start}
   .nav,.nav a{width:100%}
@@ -374,7 +469,18 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 </div>
 <div class="partner-board">
 <div class="board-title engraved-box">
+<div class="ledger-title-row">
 <strong>Partner Ledger</strong>
+<div class="ledger-info-wrap">
+<button class="ledger-info-btn" type="button" aria-label="What is this ledger?">i</button>
+<div class="ledger-info-pop" role="note">
+<strong>What is this ledger?</strong>
+<p>This page shows tracked Thor's Hall partner activity where public data is available.</p>
+<p>Public rows are only shown for creators or managers who agree to be listed. Empty rows are reserved for future partners.</p>
+<p>Metrics may include visits, registrations, deposits, wagered totals, NGR, and tracking data pulled from Rainbet where available.</p>
+</div>
+</div>
+</div>
 </div>
 <table class="partner-table">
 <thead>
@@ -468,6 +574,20 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 
 </div>
 <script>
+
+(function(){
+  const wrap=document.querySelector('.ledger-info-wrap');
+  const btn=document.querySelector('.ledger-info-btn');
+  if(!wrap||!btn) return;
+  btn.addEventListener('click',function(e){
+    e.preventDefault();
+    wrap.classList.toggle('open');
+  });
+  document.addEventListener('click',function(e){
+    if(!wrap.contains(e.target)) wrap.classList.remove('open');
+  });
+})();
+
 (async function(){
 const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
 const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
