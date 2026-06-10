@@ -332,6 +332,93 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 
 .footer-note{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:#c9b89c;}
 .footer-note a{color:var(--gold2, var(--g2, #f0d28b));text-decoration:underline;margin-left:6px;}
+
+/* INFO POPUP — added only to Partner Ledger */
+.board-title{
+  position:relative;
+}
+
+.ledger-info-btn{
+  position:absolute;
+  right:18px;
+  top:50%;
+  transform:translateY(-50%);
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  border:1px solid rgba(255,230,170,.48);
+  background:linear-gradient(180deg,#fff0be,#d4a74f);
+  color:#211407;
+  font-family:Arial,Helvetica,sans-serif;
+  font-weight:900;
+  font-size:18px;
+  line-height:1;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 8px 20px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.28);
+  cursor:default;
+  z-index:25;
+}
+
+.ledger-popup{
+  position:fixed;
+  width:310px;
+  padding:16px 16px 14px;
+  border-radius:18px;
+  border:1px solid rgba(240,210,139,.34);
+  background:linear-gradient(180deg,rgba(18,10,5,.98),rgba(34,20,10,.99));
+  box-shadow:0 20px 48px rgba(0,0,0,.62);
+  color:var(--muted);
+  font-family:Arial,Helvetica,sans-serif;
+  text-align:left;
+  opacity:0;
+  visibility:hidden;
+  pointer-events:none;
+  transition:opacity .14s ease;
+  z-index:999999;
+}
+
+.ledger-popup.open{
+  opacity:1;
+  visibility:visible;
+  pointer-events:auto;
+}
+
+.ledger-popup:before{
+  content:"";
+  position:absolute;
+  left:-8px;
+  top:var(--arrow-top, 24px);
+  width:14px;
+  height:14px;
+  transform:rotate(45deg);
+  background:rgba(18,10,5,.98);
+  border-left:1px solid rgba(240,210,139,.28);
+  border-bottom:1px solid rgba(240,210,139,.28);
+}
+
+.ledger-popup strong{
+  display:block;
+  color:var(--gold2);
+  font-size:15px;
+  margin-bottom:7px;
+  letter-spacing:.02em;
+}
+
+.ledger-popup p{
+  margin:0 0 9px;
+  line-height:1.38;
+  font-size:14px;
+}
+
+.ledger-popup p:last-child{margin-bottom:0}
+
+@media(max-width:700px){
+  .ledger-info-btn{right:12px;width:32px;height:32px;font-size:17px}
+  .ledger-popup{width:min(310px,calc(100vw - 24px));}
+}
+
 </style>
 </head>
 <body>
@@ -375,6 +462,7 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 <div class="partner-board">
 <div class="board-title engraved-box">
 <strong>Partner Ledger</strong>
+<div class="ledger-info-btn" id="ledgerInfoBtn" aria-label="What is this ledger?">i</div>
 </div>
 <table class="partner-table">
 <thead>
@@ -467,6 +555,19 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 </section>
 
 </div>
+
+<div class="ledger-popup" id="ledgerPopup" role="note" aria-hidden="true">
+  <strong>What is this ledger?</strong>
+  <p>This ledger shows tracked Thor's Hall partner activity where public data is available.</p>
+  <p><strong>Wagered</strong> = total amount wagered by tracked users.</p>
+  <p><strong>Deposits</strong> = total deposits tracked through the partner link.</p>
+  <p><strong>Visits</strong> = users who visited through the tracked campaign.</p>
+  <p><strong>Registrations</strong> = accounts created through the tracked campaign.</p>
+  <p><strong>NGR</strong> = net gaming revenue after wins, bonuses, and adjustments where available.</p>
+  <p>This ledger shows tracked all-time activity, not monthly payout amounts. Creator payouts are calculated from Thor's Hall's final received affiliate commission for the payout period, not directly from the public NGR total shown here.</p>
+  <p>Some rows may be private, reserved, or waiting for activity. Public partner rows are only shown when the creator or manager agrees to be listed.</p>
+</div>
+
 <script>
 (async function(){
 const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -499,5 +600,73 @@ try{
 }catch(e){}
 })();
 </script>
+
+<script>
+(function(){
+  const btn = document.getElementById('ledgerInfoBtn');
+  const pop = document.getElementById('ledgerPopup');
+  if(!btn || !pop) return;
+
+  function place(){
+    pop.classList.add('open');
+    pop.style.visibility = 'hidden';
+    pop.style.opacity = '0';
+
+    const r = btn.getBoundingClientRect();
+    const w = pop.offsetWidth;
+    const h = pop.offsetHeight;
+
+    let left = r.right + 34;   // more to the right of the button
+    let top = r.top - 2;       // starts almost in line with the ledger header
+
+    if(left + w > window.innerWidth - 12){
+      left = window.innerWidth - w - 12;
+    }
+    if(top < 12) top = 12;
+    if(top + h > window.innerHeight - 12){
+      top = window.innerHeight - h - 12;
+    }
+
+    pop.style.left = left + 'px';
+    pop.style.top = top + 'px';
+
+    const arrowTop = (r.top + r.height / 2) - top - 7;
+    pop.style.setProperty('--arrow-top', Math.max(18, Math.min(h - 18, arrowTop)) + 'px');
+
+    pop.style.visibility = '';
+    pop.style.opacity = '';
+  }
+
+  function open(){
+    place();
+    pop.setAttribute('aria-hidden','false');
+  }
+
+  function close(){
+    pop.classList.remove('open');
+    pop.setAttribute('aria-hidden','true');
+  }
+
+  btn.addEventListener('mouseenter', open);
+  btn.addEventListener('focus', open);
+  btn.addEventListener('mouseleave', function(){
+    setTimeout(function(){
+      if(!pop.matches(':hover')) close();
+    }, 90);
+  });
+
+  pop.addEventListener('mouseenter', open);
+  pop.addEventListener('mouseleave', close);
+
+  window.addEventListener('resize', function(){
+    if(pop.classList.contains('open')) place();
+  });
+
+  window.addEventListener('scroll', function(){
+    if(pop.classList.contains('open')) place();
+  }, true);
+})();
+</script>
+
 </body>
 </html>
