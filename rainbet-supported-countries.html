@@ -44,6 +44,21 @@
     @media(max-width:980px){.strip,.grid,.split,.related{grid-template-columns:1fr 1fr}.row{grid-template-columns:1fr}}
     @media(max-width:700px){.strip,.grid,.split,.related{grid-template-columns:1fr}.hero{padding:42px 22px}h1{font-size:40px}.hero:after{font-size:50px}}
   .footer-note a{color:var(--gold2, var(--g2, #f0d28b));text-decoration:underline;margin-left:6px;}
+
+    .fast-answer{margin-top:22px;position:relative;z-index:2;border-left:4px solid var(--g);padding:20px 22px;border-radius:20px;background:rgba(212,167,79,.10);border-top:1px solid rgba(212,167,79,.18);border-right:1px solid rgba(212,167,79,.18);border-bottom:1px solid rgba(212,167,79,.18)}
+    .fast-answer p{margin:0;color:var(--t);font-size:18px}
+    .fast-answer strong{color:var(--g2)}
+    .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px;position:relative;z-index:2}
+    .hero-actions .btn-secondary{border-color:rgba(240,210,139,.32)}
+    .btn-restricted{background:linear-gradient(180deg,#ff9b62,#c9452f)!important;color:#1d0b06!important;border-color:rgba(255,130,90,.45)!important}
+    .btn-vpn{background:linear-gradient(180deg,#8fe8ff,#2b8cc9)!important;color:#061722!important;border-color:rgba(121,231,255,.45)!important}
+    .country-preview{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:18px;position:relative;z-index:2}
+    .country-pill{padding:14px 15px;border-radius:16px;background:rgba(255,255,255,.035);border:1px solid color-mix(in srgb,var(--a) 22%,transparent);font-size:14px;color:var(--m)}
+    .country-pill strong{display:block;color:var(--a2);font-size:17px;margin-bottom:3px}
+    .country-pill.bad strong{color:#ffb2a7}
+    @media(max-width:980px){.country-preview{grid-template-columns:1fr 1fr}}
+    @media(max-width:700px){.country-preview{grid-template-columns:1fr}.hero-actions .btn,.hero-actions .btn-secondary{width:100%;text-align:center}}
+
 </style>
 </head>
 <body>
@@ -56,7 +71,26 @@
   <section class="hero">
     <div style="color:var(--m);margin-bottom:10px;">Rainbet Legal Access Guide</div>
     <h1>Where Is Rainbet Legal? Supported Countries & Restricted Regions</h1>
-    <p class="lead">Rainbet availability depends on your location, local gambling laws, platform terms, and account verification checks. This guide explains how to think about Rainbet supported countries, restricted regions, VPN access, and what to verify before signing up.</p>
+
+    <div class="fast-answer">
+      <p><strong>Quick answer:</strong> Rainbet may be available if your country is not restricted by Rainbet and online gambling is allowed where you live. The safest path is to check your country first, then confirm Rainbet access, VPN rules, and KYC requirements before depositing.</p>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn" href="https://thorshall.gg/rainbet-available-countries">View Available Countries</a>
+      <a class="btn-secondary btn-restricted" href="https://thorshall.gg/rainbet-restricted-countries">View Restricted Countries</a>
+      <a class="btn-secondary btn-vpn" href="https://thorshall.gg/rainbet-vpn">Rainbet VPN Guide</a>
+    </div>
+
+    <div class="country-preview">
+      <div class="country-pill"><strong>New Zealand</strong>Strong available-country candidate</div>
+      <div class="country-pill"><strong>Mexico</strong>Online gambling is regulated</div>
+      <div class="country-pill"><strong>Peru</strong>Remote gaming framework exists</div>
+      <div class="country-pill bad"><strong>US / UK / Australia</strong>Restricted in Rainbet terms</div>
+    </div>
+
+    <p class="lead">Use this page to quickly understand Rainbet supported countries, restricted regions, VPN access, local-law checks, and what to verify before creating an account.</p>
+
     <div class="strip">
       <div class="strip-box"><strong>Legal</strong>Local laws matter</div>
       <div class="strip-box"><strong>Countries</strong>Access can vary</div>
