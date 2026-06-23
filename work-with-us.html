@@ -128,17 +128,18 @@ input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px
   <div class="form-box">
     <h2>Start here</h2>
     <p>Short answers are fine.</p>
-    <form name="work-with-us-creator-apply" method="POST" action="/thanks" data-netlify="true" netlify-honeypot="bot-field">
-      <input type="hidden" name="form-name" value="work-with-us-creator-apply"/>
-      <p class="hidden"><label>Do not fill this out <input name="bot-field"/></label></p>
-      <div><label for="name">Name</label><input id="name" name="name" type="text" required/></div>
-      <div><label for="email">Email</label><input id="email" name="email" type="email" required/></div>
-      <div><label for="socials">Main socials / channel links</label><input id="socials" name="socials" type="text" required placeholder="YouTube, Kick, Twitch, TikTok, X, Discord..."/></div>
-      <div><label for="audience">Audience type</label><select id="audience" name="audience" required><option value="">Choose one</option><option>Gaming</option><option>Casino / gambling</option><option>Crypto</option><option>Sports betting</option><option>Streamer community</option><option>Other adult audience</option></select></div>
-      <div><label for="placement">Where would you place the link?</label><textarea id="placement" name="placement" required placeholder="Bio, stream panel, video description, Discord, Telegram, pinned post, etc."></textarea></div>
-      <div><label for="notes">Anything important?</label><textarea id="notes" name="notes" placeholder="Audience size, countries, content style, past affiliate experience, etc."></textarea></div>
+    <form name="creator-apply" method="POST" action="/thanks.html" data-netlify="true" netlify-honeypot="bot-field" enctype="application/x-www-form-urlencoded">
+      <input type="hidden" name="form-name" value="creator-apply"/>
+      <input type="hidden" name="source-page" value="work-with-us"/>
+      <p class="hidden"><label>Do not fill this out <input name="bot-field" autocomplete="off"/></label></p>
+      <div><label for="name">Name</label><input id="name" name="name" type="text" autocomplete="name" required/></div>
+      <div><label for="email">Email</label><input id="email" name="email" type="email" autocomplete="email" required/></div>
+      <div><label for="socials">Main socials / channel links</label><input id="socials" name="source" type="text" required placeholder="YouTube, Kick, Twitch, TikTok, X, Discord..."/></div>
+      <div><label for="audience">Audience type</label><select id="audience" name="creator-type" required><option value="">Choose one</option><option>Gaming</option><option>Casino / gambling</option><option>Crypto</option><option>Sports betting</option><option>Streamer community</option><option>Other adult audience</option></select></div>
+      <div><label for="placement">Where would you place the link?</label><textarea id="placement" name="message" required placeholder="Bio, stream panel, video description, Discord, Telegram, pinned post, etc."></textarea></div>
+      <div><label for="notes">Anything important?</label><textarea id="notes" name="extra-notes" placeholder="Audience size, countries, content style, past affiliate experience, etc."></textarea></div>
       <button class="btn" type="submit">Send Creator Application</button>
-      <div class="form-note">18+ only. No guaranteed earnings. Gambling-related promotion must follow local laws and platform rules.</div>
+      <div class="form-note">18+ only. No guaranteed earnings. Gambling-related promotion must follow local laws and platform rules. If the form fails, contact Thor's Hall directly from the email listed on the site.</div>
     </form>
   </div>
 </section>
