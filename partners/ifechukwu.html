@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>Ifechukwu | Thor's Hall x Rainbet</title>
+  <meta name="description" content="Ifechukwu's Thor's Hall Rainbet partner page. Join Rainbet through her tracked link. 18+ only. Play responsibly." />
+
+  <style>
+    :root{
+      --bg:#050506;
+      --panel:#101010;
+      --panel2:#15120d;
+      --gold:#d9a441;
+      --gold2:#f5d47a;
+      --red:#8b2020;
+      --text:#f6efe2;
+      --muted:#b7aa97;
+      --line:rgba(217,164,65,.28);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      min-height:100vh;
+      background:
+        radial-gradient(circle at 50% -10%, rgba(217,164,65,.20), transparent 34rem),
+        radial-gradient(circle at 85% 80%, rgba(139,32,32,.25), transparent 28rem),
+        linear-gradient(180deg,#070707 0%,#030303 100%);
+      color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+
+    a{text-decoration:none;color:inherit}
+
+    .page{
+      width:min(1040px,calc(100% - 34px));
+      margin:0 auto;
+    }
+
+    .top{
+      padding:24px 0 10px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+
+    .brand{
+      display:inline-flex;
+      align-items:center;
+      gap:12px;
+      color:var(--gold2);
+      font-weight:900;
+      letter-spacing:.14em;
+      font-size:13px;
+      text-transform:uppercase;
+    }
+
+    .brand-mark{
+      width:36px;
+      height:36px;
+      border-radius:11px;
+      display:grid;
+      place-items:center;
+      background:linear-gradient(145deg,var(--gold2),var(--gold));
+      color:#100b03;
+      font-size:13px;
+      letter-spacing:0;
+      box-shadow:0 0 30px rgba(217,164,65,.22);
+    }
+
+    .hero{
+      text-align:center;
+      padding:64px 0 46px;
+    }
+
+    .eyebrow{
+      color:var(--gold2);
+      text-transform:uppercase;
+      letter-spacing:.18em;
+      font-size:13px;
+      font-weight:900;
+      margin-bottom:22px;
+    }
+
+    h1{
+      margin:0;
+      font-size:clamp(54px,10vw,118px);
+      line-height:.86;
+      letter-spacing:-.075em;
+      text-transform:uppercase;
+    }
+
+    .sub{
+      max-width:720px;
+      margin:26px auto 0;
+      color:var(--muted);
+      font-size:20px;
+      line-height:1.62;
+    }
+
+    .bonus{
+      color:var(--gold2);
+      font-weight:900;
+    }
+
+    .cta{
+      display:flex;
+      justify-content:center;
+      flex-wrap:wrap;
+      gap:14px;
+      margin-top:34px;
+    }
+
+    .btn{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      min-height:58px;
+      padding:0 30px;
+      border-radius:999px;
+      font-weight:950;
+      letter-spacing:.02em;
+      text-transform:uppercase;
+      transition:.16s ease;
+    }
+
+    .btn:hover{transform:translateY(-2px)}
+
+    .btn-primary{
+      color:#110b02;
+      background:linear-gradient(135deg,var(--gold2),var(--gold));
+      box-shadow:0 18px 52px rgba(217,164,65,.20);
+    }
+
+    .btn-secondary{
+      color:var(--gold2);
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.035);
+    }
+
+    .claim{
+      margin:26px auto 72px;
+      border:1px solid var(--line);
+      border-radius:30px;
+      background:
+        linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.018)),
+        rgba(16,16,16,.92);
+      overflow:hidden;
+    }
+
+    .claim-head{
+      padding:28px 26px;
+      text-align:center;
+      border-bottom:1px solid rgba(217,164,65,.18);
+      background:linear-gradient(135deg,rgba(217,164,65,.12),rgba(139,32,32,.10));
+    }
+
+    .claim-head h2{
+      margin:0;
+      color:var(--gold2);
+      font-size:clamp(24px,4vw,42px);
+      letter-spacing:-.04em;
+      text-transform:uppercase;
+    }
+
+    .claim-head p{
+      max-width:760px;
+      margin:14px auto 0;
+      color:var(--muted);
+      line-height:1.65;
+      font-size:16px;
+    }
+
+    .steps{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:0;
+    }
+
+    .step{
+      padding:22px 24px;
+      border-bottom:1px solid rgba(255,255,255,.07);
+      min-height:102px;
+      display:flex;
+      gap:15px;
+      align-items:flex-start;
+    }
+
+    .step:nth-child(odd){
+      border-right:1px solid rgba(255,255,255,.07);
+    }
+
+    .num{
+      width:34px;
+      height:34px;
+      flex:0 0 34px;
+      border-radius:11px;
+      display:grid;
+      place-items:center;
+      color:#120b02;
+      background:linear-gradient(135deg,var(--gold2),var(--gold));
+      font-weight:950;
+      margin-top:1px;
+    }
+
+    .step strong{
+      display:block;
+      margin-bottom:7px;
+      color:var(--text);
+      font-size:16px;
+    }
+
+    .step span{
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
+    }
+
+    .note-row{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      padding:22px;
+      background:rgba(0,0,0,.16);
+    }
+
+    .note{
+      border:1px solid rgba(217,164,65,.18);
+      border-radius:18px;
+      padding:17px;
+      color:var(--muted);
+      line-height:1.5;
+      font-size:14px;
+      background:rgba(255,255,255,.025);
+    }
+
+    .note strong{
+      color:var(--gold2);
+      display:block;
+      margin-bottom:6px;
+    }
+
+    .flow{
+      margin:0 auto 70px;
+      text-align:center;
+      padding:24px;
+      border-radius:24px;
+      border:1px solid var(--line);
+      color:var(--gold2);
+      font-weight:950;
+      letter-spacing:.055em;
+      text-transform:uppercase;
+      background:rgba(217,164,65,.06);
+    }
+
+    .final{
+      text-align:center;
+      margin-bottom:52px;
+      padding:44px 24px;
+      border-radius:30px;
+      border:1px solid rgba(255,255,255,.08);
+      background:linear-gradient(145deg,rgba(139,32,32,.20),rgba(217,164,65,.09));
+    }
+
+    .final h2{
+      margin:0;
+      font-size:clamp(30px,5vw,56px);
+      letter-spacing:-.055em;
+      text-transform:uppercase;
+    }
+
+    .final p{
+      max-width:640px;
+      margin:14px auto 0;
+      color:var(--muted);
+      line-height:1.65;
+    }
+
+    footer{
+      padding:28px 0 42px;
+      text-align:center;
+      color:#8e826f;
+      font-size:13px;
+      line-height:1.65;
+      border-top:1px solid rgba(255,255,255,.07);
+    }
+
+    footer strong{color:var(--gold2)}
+
+    @media(max-width:760px){
+      .hero{padding-top:46px}
+      .steps,.note-row{grid-template-columns:1fr}
+      .step:nth-child(odd){border-right:0}
+      .flow{font-size:13px;line-height:1.8}
+    }
+  </style>
+</head>
+
+<body>
+  <div class="page">
+    <header class="top">
+      <a class="brand" href="https://thorshall.gg" aria-label="Thor's Hall">
+        <span class="brand-mark">TH</span>
+        <span>Thor's Hall x Ifechukwu</span>
+      </a>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="eyebrow">Dedicated Rainbet Partner Page</div>
+        <h1>Ifechukwu</h1>
+        <p class="sub">
+          New players signing up on Rainbet through Ifechukwu's link may unlock a
+          <span class="bonus">250% first deposit bonus</span>, giving you more starting balance if you choose to claim it.
+        </p>
+
+        <div class="cta">
+          <a class="btn btn-primary" href="https://playrainbet.com/twf35cati" rel="nofollow sponsored">Join Rainbet</a>
+          <a class="btn btn-secondary" href="#claim">How to claim</a>
+        </div>
+      </section>
+
+      <section class="claim" id="claim">
+        <div class="claim-head">
+          <h2>How to claim the 250% bonus</h2>
+          <p>
+            The bonus is optional and may include wagering requirements before withdrawal.
+            Read Rainbet's terms before accepting any promotion.
+          </p>
+        </div>
+
+        <div class="steps">
+          <div class="step">
+            <div class="num">1</div>
+            <div>
+              <strong>Click Join Rainbet</strong>
+              <span>Use Ifechukwu's tracked Rainbet link on this page.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="num">2</div>
+            <div>
+              <strong>Create your account</strong>
+              <span>Make sure you are 18+ and allowed to play from your location.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="num">3</div>
+            <div>
+              <strong>Keep the bonus enabled</strong>
+              <span>On the signup/deposit screen, choose the 250% bonus only if you want to use it.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="num">4</div>
+            <div>
+              <strong>Verify your account</strong>
+              <span>Complete Rainbet verification if required for security, deposits, or withdrawals.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="num">5</div>
+            <div>
+              <strong>Go to wallet / deposit</strong>
+              <span>Open the deposit area and choose your preferred eligible payment option.</span>
+            </div>
+          </div>
+
+          <div class="step">
+            <div class="num">6</div>
+            <div>
+              <strong>Deposit and play</strong>
+              <span>Your bonus may activate after the eligible first deposit. Example: deposit $100, play with up to $350.</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="note-row">
+          <div class="note">
+            <strong>18+ only</strong>
+            You must be an adult and legally allowed to use Rainbet in your country.
+          </div>
+          <div class="note">
+            <strong>Bonus terms</strong>
+            Bonus funds may require wagering before withdrawal. Check the latest Rainbet terms.
+          </div>
+          <div class="note">
+            <strong>Play responsibly</strong>
+            Gambling involves risk. Never gamble money you cannot afford to lose.
+          </div>
+        </div>
+      </section>
+
+      <div class="flow">
+        Sign up → Verify → Deposit → Bonus activates → Play
+      </div>
+
+      <section class="final">
+        <h2>Join through Ifechukwu</h2>
+        <p>
+          Continue to Rainbet using Ifechukwu's tracked partner link.
+        </p>
+        <div class="cta">
+          <a class="btn btn-primary" href="https://playrainbet.com/twf35cati" rel="nofollow sponsored">Join Rainbet</a>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <strong>18+ Only · Play responsibly</strong><br />
+      Thor's Hall is an independent affiliate and creator partnership hub. Thor's Hall is not Rainbet,
+      does not operate games, does not accept deposits, and does not process withdrawals.
+      Thor's Hall may receive affiliate commission from eligible tracked activity.
+    </footer>
+  </div>
+</body>
+</html>
