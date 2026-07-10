@@ -12,3 +12,7 @@
 
 /*
   X-Content-Type-Options: nosniff
+
+/404.html
+  X-Robots-Tag: noindex, follow
+  Cache-Control: no-cache, no-store, must-revalidate
