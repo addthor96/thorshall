@@ -2,12 +2,12 @@
 
 <html lang="en">
 <head>
-<meta name="robots" content="index,follow,max-image-preview:large">
-<meta charset="utf-8"/>
+<meta content="index,follow,max-image-preview:large" name="robots"/>
+<meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
 <title>Partners | Thor's Hall</title>
-<meta name="description" content="Thor's Hall partner page showing public partner information, creator/manager tracking context, Rainbet affiliate activity, and transparent responsible-play notes."/>
-<link rel="canonical" href="https://thorshall.gg/partners">
+<meta content="Thor's Hall partner page showing public partner information, creator/manager tracking context, Rainbet affiliate activity, and transparent responsible-play notes." name="description"/>
+<link href="https://thorshall.gg/partners" rel="canonical"/>
 <style>
 :root{
   --gold:#d4a74f;
@@ -427,16 +427,16 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 <body>
 <div class="wrap">
 <header class="topbar">
-<a class="brand" href="https://thorshall.gg">
+<a class="brand" href="/">
 <img alt="Thor's Hall Logo" src="img/logo.png"/>
 <span>THOR'S HALL</span>
 </a>
 <nav class="nav">
-<a href="https://thorshall.gg/about">About</a>
-<a href="https://thorshall.gg/info">Info</a>
-<a href="https://thorshall.gg/guide">Guide</a>
-<a href="https://thorshall.gg/creators">Creators</a>
-<a class="manager-btn" href="https://thorshall.gg/managers">Managers</a>
+<a href="/about">About</a>
+<a href="/info">Info</a>
+<a href="/guide">Guide</a>
+<a href="/creators">Creators</a>
+<a class="manager-btn" href="/managers">Managers</a>
 <a href="https://playrainbet.com/tkpmo0r1x" rel="nofollow noopener sponsored" target="_blank">Join Rainbet</a>
 </nav>
 </header>
@@ -465,7 +465,7 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 <div class="partner-board">
 <div class="board-title engraved-box">
 <h1>Thor's Hall Partner Ledger</h1>
-<div class="ledger-info-btn" id="ledgerInfoBtn" aria-label="What is this ledger?">i</div>
+<div aria-label="What is this ledger?" class="ledger-info-btn" id="ledgerInfoBtn">i</div>
 </div>
 <table class="partner-table">
 <thead>
@@ -550,28 +550,25 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
       Public partner rows are only shown for creators or managers who agree to be listed.
     </div>
 <div class="wall-actions">
-<a class="btn" href="https://thorshall.gg/creators">Apply as Creator</a>
+<a class="btn" href="/creators">Apply as Creator</a>
 <a class="btn" href="/work-with-us">Work With Thor's Hall</a>
-<a class="btn manager-red" href="https://thorshall.gg/managers">Manager Program</a>
+<a class="btn manager-red" href="/managers">Manager Program</a>
 </div>
 </div>
-<div class="footer-note">18+ only. Gamble responsibly. <a href="https://thorshall.gg/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/work-with-us">Creator Partnerships</a> <span class="thorshall-context-link" style="float:right;"><a href="https://thorshall.gg/what-is-thors-hall">What Is Thor's Hall?</a></span></div>
+<div class="footer-note">18+ only. Gamble responsibly. <a href="/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/work-with-us">Creator Partnerships</a> <span class="thorshall-context-link" style="float:right;"><a href="/what-is-thors-hall">What Is Thor's Hall?</a></span></div>
 </section>
-
 </div>
-
-<div class="ledger-popup" id="ledgerPopup" role="note" aria-hidden="true">
-  <strong>What is this ledger?</strong>
-  <p>This ledger shows tracked Thor's Hall partner activity where public data is available.</p>
-  <p><strong>Wagered</strong> = total amount wagered by tracked users.</p>
-  <p><strong>Deposits</strong> = total deposits tracked through the partner link.</p>
-  <p><strong>Visits</strong> = users who visited through the tracked campaign.</p>
-  <p><strong>Registrations</strong> = accounts created through the tracked campaign.</p>
-  <p><strong>NGR</strong> = net gaming revenue after wins, bonuses, and adjustments where available.</p>
-  <p>This ledger shows tracked all-time activity, not monthly payout amounts. Creator payouts are calculated from Thor's Hall's final received affiliate commission for the payout period, not directly from the public NGR total shown here.</p>
-  <p>Some rows may be private, reserved, or waiting for activity. Public partner rows are only shown when the creator or manager agrees to be listed.</p>
+<div aria-hidden="true" class="ledger-popup" id="ledgerPopup" role="note">
+<strong>What is this ledger?</strong>
+<p>This ledger shows tracked Thor's Hall partner activity where public data is available.</p>
+<p><strong>Wagered</strong> = total amount wagered by tracked users.</p>
+<p><strong>Deposits</strong> = total deposits tracked through the partner link.</p>
+<p><strong>Visits</strong> = users who visited through the tracked campaign.</p>
+<p><strong>Registrations</strong> = accounts created through the tracked campaign.</p>
+<p><strong>NGR</strong> = net gaming revenue after wins, bonuses, and adjustments where available.</p>
+<p>This ledger shows tracked all-time activity, not monthly payout amounts. Creator payouts are calculated from Thor's Hall's final received affiliate commission for the payout period, not directly from the public NGR total shown here.</p>
+<p>Some rows may be private, reserved, or waiting for activity. Public partner rows are only shown when the creator or manager agrees to be listed.</p>
 </div>
-
 <script>
 (async function(){
 const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
@@ -604,7 +601,6 @@ try{
 }catch(e){}
 })();
 </script>
-
 <script>
 (function(){
   const btn = document.getElementById('ledgerInfoBtn');
