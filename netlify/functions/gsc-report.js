@@ -44,6 +44,12 @@ function validSession(event) {
   }
 }
 
+function validAiKey(event) {
+  const configured = process.env.GSC_AI_ACCESS_KEY || "";
+  const supplied = event.queryStringParameters?.key || "";
+  return Boolean(configured && supplied && safeEqual(supplied, configured));
+}
+
 function json(statusCode, body) {
   return {
     statusCode,
@@ -215,7 +221,7 @@ exports.handler = async function (event) {
   if (!process.env.DASHBOARD_PASSWORD || !envSecret()) {
     return json(503, { ok: false, error: "Dashboard security is not configured." });
   }
-  if (!validSession(event)) {
+  if (!validSession(event) && !validAiKey(event)) {
     return json(401, { ok: false, error: "Unauthorized" });
   }
 
