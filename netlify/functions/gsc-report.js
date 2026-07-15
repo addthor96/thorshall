@@ -1,231 +1,289 @@
-const DEFAULT_SITE = 'sc-domain:thorshall.gg';
-const API_ROOT = 'https://www.googleapis.com/webmasters/v3';
+const crypto = require("crypto");
+
+const COOKIE_NAME = "th_gsc_session";
+const SITE_URL = process.env.GSC_SITE_URL || "sc-domain:thorshall.gg";
+
+function envSecret() {
+  return process.env.DASHBOARD_SESSION_SECRET ||
+    process.env.GSC_OAUTH_STATE_SECRET ||
+    "";
+}
+
+function safeEqual(a, b) {
+  const aa = Buffer.from(String(a));
+  const bb = Buffer.from(String(b));
+  return aa.length === bb.length && crypto.timingSafeEqual(aa, bb);
+}
+
+function sign(value) {
+  return crypto.createHmac("sha256", envSecret()).update(value).digest("base64url");
+}
+
+function readCookie(header, name) {
+  const cookies = String(header || "").split(";");
+  for (const cookie of cookies) {
+    const index = cookie.indexOf("=");
+    if (index < 0) continue;
+    if (cookie.slice(0, index).trim() === name) {
+      return decodeURIComponent(cookie.slice(index + 1).trim());
+    }
+  }
+  return "";
+}
+
+function validSession(event) {
+  const token = readCookie(event.headers?.cookie || event.headers?.Cookie, COOKIE_NAME);
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature || !envSecret()) return false;
+  if (!safeEqual(sign(payload), signature)) return false;
+  try {
+    const decoded = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
+    return Number(decoded.exp) > Math.floor(Date.now() / 1000);
+  } catch {
+    return false;
+  }
+}
 
 function json(statusCode, body) {
   return {
     statusCode,
     headers: {
-      'content-type': 'application/json; charset=utf-8',
-      'cache-control': 'no-store, max-age=0',
-      'access-control-allow-origin': '*',
-      'x-content-type-options': 'nosniff',
-      'x-robots-tag': 'noindex, nofollow',
+      "Content-Type": "application/json; charset=utf-8",
+      "Cache-Control": "no-store, private",
+      "X-Robots-Tag": "noindex, nofollow, noarchive",
+      "X-Content-Type-Options": "nosniff"
     },
-    body: JSON.stringify(body, null, 2),
+    body: JSON.stringify(body, null, 2)
   };
 }
 
-function isAuthorized(event) {
-  const requiredKey = process.env.GSC_REPORT_KEY;
-  if (!requiredKey) return true;
-  const supplied = event.headers?.['x-gsc-key'] || event.headers?.['X-Gsc-Key'] || event.queryStringParameters?.key;
-  return Boolean(supplied) && supplied === requiredKey;
+function isoDate(date) {
+  return date.toISOString().slice(0, 10);
 }
 
-async function fetchWithTimeout(url, options = {}, timeoutMs = 20000) {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    return await fetch(url, { ...options, signal: controller.signal });
-  } finally {
-    clearTimeout(timer);
-  }
+function utcDateDaysAgo(days) {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate() - days));
 }
 
-async function parseGoogleResponse(response) {
-  const raw = await response.text();
+function change(current, previous) {
+  if (!previous) return current ? null : 0;
+  return (current - previous) / previous;
+}
+
+async function googleFetch(url, options, accessToken) {
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Authorization": `Bearer ${accessToken}`,
+      "Content-Type": "application/json",
+      ...(options?.headers || {})
+    }
+  });
+  const text = await response.text();
   let data;
-  try {
-    data = raw ? JSON.parse(raw) : {};
-  } catch {
-    data = { raw };
-  }
+  try { data = text ? JSON.parse(text) : {}; } catch { data = { raw: text }; }
   if (!response.ok) {
-    const message = data?.error?.message || data?.error_description || data?.error || `Google API error ${response.status}`;
+    const message = data?.error?.message || data?.error_description || `Google API error ${response.status}`;
     const error = new Error(message);
-    error.statusCode = response.status;
+    error.status = response.status;
+    error.details = data;
     throw error;
   }
   return data;
 }
 
-async function accessToken() {
-  const response = await fetchWithTimeout('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+async function getAccessToken() {
+  const required = ["GOOGLE_CLIENT_ID", "GOOGLE_CLIENT_SECRET", "GSC_REFRESH_TOKEN"];
+  const missing = required.filter(name => !process.env[name]);
+  if (missing.length) throw new Error(`Missing environment variable(s): ${missing.join(", ")}`);
+
+  const response = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
     body: new URLSearchParams({
       client_id: process.env.GOOGLE_CLIENT_ID,
       client_secret: process.env.GOOGLE_CLIENT_SECRET,
       refresh_token: process.env.GSC_REFRESH_TOKEN,
-      grant_type: 'refresh_token',
-    }),
+      grant_type: "refresh_token"
+    })
   });
-  const data = await parseGoogleResponse(response);
-  if (!data.access_token) throw new Error('Google did not return an access token.');
+
+  const data = await response.json();
+  if (!response.ok || !data.access_token) {
+    throw new Error(data.error_description || data.error || "Google token refresh failed.");
+  }
   return data.access_token;
 }
 
-async function googleApi(path, token, options = {}) {
-  const response = await fetchWithTimeout(`${API_ROOT}${path}`, {
-    ...options,
-    headers: {
-      authorization: `Bearer ${token}`,
-      ...(options.body ? { 'content-type': 'application/json' } : {}),
-      ...(options.headers || {}),
+async function query(accessToken, startDate, endDate, dimensions = []) {
+  const site = encodeURIComponent(SITE_URL);
+  return googleFetch(
+    `https://www.googleapis.com/webmasters/v3/sites/${site}/searchAnalytics/query`,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        startDate,
+        endDate,
+        dimensions,
+        rowLimit: dimensions.length ? 25000 : 1,
+        dataState: "all"
+      })
     },
-  });
-  return parseGoogleResponse(response);
+    accessToken
+  );
 }
 
-function dateInPacific(daysAgo = 0) {
-  const date = new Date(Date.now() - daysAgo * 86400000);
-  const parts = new Intl.DateTimeFormat('en-US', {
-    timeZone: 'America/Los_Angeles',
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-  }).formatToParts(date);
-  const map = Object.fromEntries(parts.map((part) => [part.type, part.value]));
-  return `${map.year}-${map.month}-${map.day}`;
-}
-
-function period(days, offset = 1) {
+function totalsFrom(result) {
+  const row = result?.rows?.[0] || {};
   return {
-    startDate: dateInPacific(offset + days - 1),
-    endDate: dateInPacific(offset),
+    clicks: Number(row.clicks || 0),
+    impressions: Number(row.impressions || 0),
+    ctr: Number(row.ctr || 0),
+    position: Number(row.position || 0)
   };
 }
 
-function totals(row) {
-  return {
-    clicks: Number(row?.clicks || 0),
-    impressions: Number(row?.impressions || 0),
-    ctr: Number(row?.ctr || 0),
-    position: Number(row?.position || 0),
-  };
+function keyedRows(result, key) {
+  return (result?.rows || []).map(row => ({
+    [key]: row.keys?.[0] || "",
+    clicks: Number(row.clicks || 0),
+    impressions: Number(row.impressions || 0),
+    ctr: Number(row.ctr || 0),
+    position: Number(row.position || 0)
+  }));
 }
 
-function percentChange(current, previous) {
-  if (previous === 0) return current === 0 ? 0 : null;
-  return (current - previous) / previous;
-}
-
-function changes(current, previous) {
-  return {
-    clicks: percentChange(current.clicks, previous.clicks),
-    impressions: percentChange(current.impressions, previous.impressions),
-    ctr: percentChange(current.ctr, previous.ctr),
-    position: previous.position === 0 ? null : current.position - previous.position,
-  };
-}
-
-function queryBody(range, dimensions = [], rowLimit = 100) {
-  return {
-    ...range,
-    type: 'web',
-    dataState: 'all',
-    dimensions,
-    rowLimit,
-  };
-}
-
-exports.handler = async (event) => {
-  if (!isAuthorized(event)) return json(401, { ok: false, error: 'Unauthorized.' });
-
-  const required = ['GOOGLE_CLIENT_ID', 'GOOGLE_CLIENT_SECRET', 'GSC_REFRESH_TOKEN'];
-  const missing = required.filter((key) => !process.env[key]);
-  if (missing.length) {
-    return json(503, {
-      ok: false,
-      connected: false,
-      error: `Missing environment variables: ${missing.join(', ')}`,
-      nextStep: missing.includes('GSC_REFRESH_TOKEN') ? 'Complete Google authorization and add GSC_REFRESH_TOKEN in Netlify.' : 'Check the Google OAuth environment variables in Netlify.',
+function dailyRows(result, startDate, days) {
+  const byDate = new Map(
+    keyedRows(result, "date").map(row => [row.date, row])
+  );
+  const rows = [];
+  const start = new Date(`${startDate}T00:00:00Z`);
+  for (let i = 0; i < days; i++) {
+    const date = new Date(start);
+    date.setUTCDate(start.getUTCDate() + i);
+    const key = isoDate(date);
+    rows.push(byDate.get(key) || {
+      date: key, clicks: 0, impressions: 0, ctr: 0, position: 0
     });
   }
+  return rows;
+}
 
-  const requestedDays = Number(event.queryStringParameters?.days || 28);
-  const days = Number.isFinite(requestedDays) ? Math.min(Math.max(Math.round(requestedDays), 1), 90) : 28;
-  const siteUrl = process.env.GSC_SITE_URL || DEFAULT_SITE;
-  const currentPeriod = period(days, 1);
-  const previousPeriod = period(days, days + 1);
+async function getProperty(accessToken) {
+  const site = encodeURIComponent(SITE_URL);
+  try {
+    const result = await googleFetch(
+      `https://www.googleapis.com/webmasters/v3/sites/${site}`,
+      { method: "GET" },
+      accessToken
+    );
+    return {
+      siteUrl: result.siteUrl || SITE_URL,
+      permissionLevel: result.permissionLevel || "unknown"
+    };
+  } catch {
+    return { siteUrl: SITE_URL, permissionLevel: "unknown" };
+  }
+}
+
+async function getSitemaps(accessToken) {
+  const site = encodeURIComponent(SITE_URL);
+  const result = await googleFetch(
+    `https://www.googleapis.com/webmasters/v3/sites/${site}/sitemaps`,
+    { method: "GET" },
+    accessToken
+  );
+  return (result.sitemap || []).map(item => ({
+    path: item.path,
+    lastSubmitted: item.lastSubmitted || null,
+    lastDownloaded: item.lastDownloaded || null,
+    isPending: Boolean(item.isPending),
+    isSitemapsIndex: Boolean(item.isSitemapsIndex),
+    warnings: Number(item.warnings || 0),
+    errors: Number(item.errors || 0),
+    contents: (item.contents || []).map(content => ({
+      type: content.type,
+      submitted: String(content.submitted ?? "0"),
+      indexed: String(content.indexed ?? "0")
+    }))
+  }));
+}
+
+exports.handler = async function (event) {
+  if (!process.env.DASHBOARD_PASSWORD || !envSecret()) {
+    return json(503, { ok: false, error: "Dashboard security is not configured." });
+  }
+  if (!validSession(event)) {
+    return json(401, { ok: false, error: "Unauthorized" });
+  }
 
   try {
-    const token = await accessToken();
-    const encodedSite = encodeURIComponent(siteUrl);
-    const sites = await googleApi('/sites', token);
-    const siteEntry = (sites.siteEntry || []).find((site) => site.siteUrl === siteUrl);
+    const accessToken = await getAccessToken();
+    const days = 28;
+    const currentEnd = utcDateDaysAgo(1);
+    const currentStart = utcDateDaysAgo(days);
+    const previousEnd = utcDateDaysAgo(days + 1);
+    const previousStart = utcDateDaysAgo(days * 2);
 
-    if (!siteEntry) {
-      return json(403, {
-        ok: false,
-        connected: true,
-        error: `The authorized Google account does not have access to ${siteUrl}.`,
-      });
-    }
+    const current = { startDate: isoDate(currentStart), endDate: isoDate(currentEnd) };
+    const previous = { startDate: isoDate(previousStart), endDate: isoDate(previousEnd) };
 
-    const analyticsPath = `/sites/${encodedSite}/searchAnalytics/query`;
-    const post = (body) => googleApi(analyticsPath, token, { method: 'POST', body: JSON.stringify(body) });
-
-    const [currentSummary, previousSummary, daily, pages, queries, sitemaps] = await Promise.all([
-      post(queryBody(currentPeriod, [], 1)),
-      post(queryBody(previousPeriod, [], 1)),
-      post(queryBody(currentPeriod, ['date'], Math.min(days, 90))),
-      post(queryBody(currentPeriod, ['page'], 50)),
-      post(queryBody(currentPeriod, ['query'], 50)),
-      googleApi(`/sites/${encodedSite}/sitemaps`, token),
+    const [
+      property,
+      currentTotalsResult,
+      previousTotalsResult,
+      dailyResult,
+      pagesResult,
+      queriesResult,
+      sitemaps
+    ] = await Promise.all([
+      getProperty(accessToken),
+      query(accessToken, current.startDate, current.endDate),
+      query(accessToken, previous.startDate, previous.endDate),
+      query(accessToken, current.startDate, current.endDate, ["date"]),
+      query(accessToken, current.startDate, current.endDate, ["page"]),
+      query(accessToken, current.startDate, current.endDate, ["query"]),
+      getSitemaps(accessToken)
     ]);
 
-    const currentTotals = totals(currentSummary.rows?.[0]);
-    const previousTotals = totals(previousSummary.rows?.[0]);
+    const totals = totalsFrom(currentTotalsResult);
+    const previousTotals = totalsFrom(previousTotalsResult);
 
     return json(200, {
       ok: true,
       connected: true,
       generatedAt: new Date().toISOString(),
-      property: {
-        siteUrl,
-        permissionLevel: siteEntry.permissionLevel,
-      },
+      property,
       period: {
         days,
-        current: currentPeriod,
-        previous: previousPeriod,
-        dataState: 'all',
-        firstIncompleteDate: daily.metadata?.first_incomplete_date || null,
+        current,
+        previous,
+        dataState: "all",
+        firstIncompleteDate: null
       },
-      totals: currentTotals,
+      totals,
       previousTotals,
-      change: changes(currentTotals, previousTotals),
-      daily: (daily.rows || []).map((row) => ({
-        date: row.keys?.[0] || null,
-        ...totals(row),
-      })),
-      topPages: (pages.rows || []).map((row) => ({
-        page: row.keys?.[0] || null,
-        ...totals(row),
-      })),
-      topQueries: (queries.rows || []).map((row) => ({
-        query: row.keys?.[0] || null,
-        ...totals(row),
-      })),
-      sitemaps: (sitemaps.sitemap || []).map((sitemap) => ({
-        path: sitemap.path,
-        lastSubmitted: sitemap.lastSubmitted || null,
-        lastDownloaded: sitemap.lastDownloaded || null,
-        isPending: Boolean(sitemap.isPending),
-        isSitemapsIndex: Boolean(sitemap.isSitemapsIndex),
-        warnings: Number(sitemap.warnings || 0),
-        errors: Number(sitemap.errors || 0),
-        contents: sitemap.contents || [],
-      })),
+      change: {
+        clicks: change(totals.clicks, previousTotals.clicks),
+        impressions: change(totals.impressions, previousTotals.impressions),
+        ctr: change(totals.ctr, previousTotals.ctr),
+        position: totals.position - previousTotals.position
+      },
+      daily: dailyRows(dailyResult, current.startDate, days),
+      topPages: keyedRows(pagesResult, "page")
+        .sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions),
+      topQueries: keyedRows(queriesResult, "query")
+        .sort((a, b) => b.clicks - a.clicks || b.impressions - a.impressions),
+      sitemaps
     });
   } catch (error) {
-    const invalidGrant = String(error.message || '').includes('invalid_grant');
-    return json(error.statusCode === 401 ? 401 : 502, {
+    console.error("gsc-report error", error);
+    return json(error.status || 500, {
       ok: false,
-      connected: !invalidGrant,
-      error: error.message,
-      nextStep: invalidGrant ? 'The Google refresh token expired or was revoked. Run the authorization flow again.' : undefined,
+      connected: false,
+      error: error.message || "Search Console report failed."
     });
   }
 };
