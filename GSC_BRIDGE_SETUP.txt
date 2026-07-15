@@ -1,0 +1,30 @@
+THOR'S HALL — GOOGLE SEARCH CONSOLE BRIDGE
+
+Functions added:
+- /.netlify/functions/gsc-auth-start
+- /.netlify/functions/gsc-oauth-callback
+- /.netlify/functions/gsc-report
+
+Required Netlify environment variables:
+- GOOGLE_CLIENT_ID
+- GOOGLE_CLIENT_SECRET
+- GOOGLE_REDIRECT_URI
+- GSC_OAUTH_STATE_SECRET
+- GSC_REFRESH_TOKEN (added after authorization)
+
+Optional:
+- GSC_SITE_URL (defaults to sc-domain:thorshall.gg)
+- GSC_REPORT_KEY (when set, gsc-report requires ?key=VALUE or x-gsc-key header)
+
+Important:
+Before authorizing, move the Google OAuth app out of Testing and into Production. Google refresh tokens for an External app left in Testing expire after 7 days when non-basic scopes are requested.
+
+After the production deploy:
+1. Open https://thorshall.gg/.netlify/functions/gsc-auth-start
+2. Approve read-only Search Console access.
+3. Copy the returned refresh token into Netlify as GSC_REFRESH_TOKEN.
+4. Trigger a new production deploy.
+5. Open https://thorshall.gg/.netlify/functions/gsc-report
+6. Optional ranges: ?days=7, ?days=28, or ?days=90
+
+The bridge is read-only. It does not submit sitemaps, request indexing, modify properties, or change Search Console settings.
