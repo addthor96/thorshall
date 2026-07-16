@@ -1180,7 +1180,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 
 /* =========================================================
-   V15 VIKING AUDIO & BOOSTED MODE
+   V16 FULL AUDIO ENGINE & BOOSTED MODE
    ========================================================= */
 :root{
   --stage-unit:min(1vw,1.7778vh);
@@ -1367,7 +1367,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
   pointer-events:none;
 }
 
-/* V15 keeps V14 exact reel alignment and refines symbol landing */
+/* V16 keeps the exact row alignment and adds a softer physical reel settle */
 .column-reel.spinning .reel-item img{
   filter:blur(.92px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
   opacity:.91;
@@ -1382,13 +1382,24 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
 }
 
 .tile.land .symbol{
-  animation:symbolLand .28s cubic-bezier(.18,.82,.22,1) var(--land-delay,0ms) both;
+  animation:symbolLand .34s cubic-bezier(.16,.84,.18,1) var(--land-delay,0ms) both;
 }
 
 @keyframes symbolLand{
-  0%{transform:translateY(-5.5%) scaleX(.985) scaleY(1.025);filter:blur(.18px) drop-shadow(0 .18vw .22vw rgba(0,0,0,.64))}
-  48%{transform:translateY(2.2%) scaleX(1.012) scaleY(.976)}
-  74%{transform:translateY(-.7%) scaleX(.996) scaleY(1.006)}
+  0%{transform:translateY(-4.2%) scaleX(.992) scaleY(1.018);filter:blur(.14px) drop-shadow(0 .16vw .20vw rgba(0,0,0,.62))}
+  46%{transform:translateY(1.45%) scaleX(1.007) scaleY(.986)}
+  72%{transform:translateY(-.38%) scaleX(.998) scaleY(1.003)}
+  100%{transform:translateY(0) scale(1);filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
+}
+
+.tile.fs.land .symbol{
+  animation:fsRuneLand .52s cubic-bezier(.16,.84,.18,1) var(--land-delay,0ms) both;
+}
+
+@keyframes fsRuneLand{
+  0%{transform:translateY(-5%) scale(.90);filter:brightness(1.35) drop-shadow(0 0 0 rgba(71,215,255,0))}
+  46%{transform:translateY(1.4%) scale(1.075);filter:brightness(1.22) drop-shadow(0 0 1.05vw rgba(71,215,255,.95))}
+  72%{transform:translateY(-.25%) scale(.99);filter:brightness(1.10) drop-shadow(0 0 .72vw rgba(71,215,255,.72))}
   100%{transform:translateY(0) scale(1);filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
 }
 
@@ -1398,7 +1409,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
 }
 
 
-/* V15: Viking sound identity and persistent boosted-spins mode */
+/* V16: reliable Web Audio mixer, complete Viking sound identity and persistent boosted-spins mode */
 .betpill{position:relative}
 .betpill small{
   display:block;
@@ -1526,12 +1537,12 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
     <div id="historyList"></div>
   </div>
 
-  <div class="version-tag">V15</div>
+  <div class="version-tag">V16</div>
   <div class="release-badge">Demo Build</div>
   <div class="build-info" id="buildInfo">
-    Build: V15<br>
+    Build: V16<br>
     Math: target ~96% simulated RTP<br>
-    Sound: Viking V15 pack<br>
+    Sound: Full V16 Web Audio mix<br>
     QA: add <code>?qa=1</code>
   </div>
 
@@ -1611,7 +1622,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
       <div class="start-chips">
         <span class="start-chip">1,024 ways</span>
         <span class="start-chip">10,000x max win</span>
-        <span class="start-chip">V15 Viking audio</span>
+        <span class="start-chip">V16 full audio mix</span>
       </div>
       <label class="age-check"><input type="checkbox" id="ageCheck"> I am 18+ and understand this demo has no cash value.</label>
       <div class="preload-bar"><div class="preload-fill" id="preloadFill"></div></div>
@@ -1701,29 +1712,55 @@ const ASSETS = {
 };
 
 const SOUND_FILES = {
-  spinStart: "/sounds/spin-start-v15.ogg",
-  spin: "/sounds/reel-spin-v15.ogg",
-  stop: "/sounds/reel-lock-v15.ogg",
-  land: "/sounds/symbol-lock-v15.ogg",
-  fs: "/sounds/fs-rune-v15.ogg",
-  boost: "/sounds/boost-on-v15.ogg",
-  bonus: "/sounds/bonus-popup.ogg",
-  hidden: "/sounds/hidden-bonus.ogg",
-  thunder: "/sounds/thunder.ogg",
-  big: "/sounds/big-win.ogg"
+  click: "/sounds/v16/ui-click.mp3",
+  toggleOn: "/sounds/v16/toggle-on.mp3",
+  toggleOff: "/sounds/v16/toggle-off.mp3",
+  spinStart: "/sounds/v16/spin-start.mp3",
+  spin: "/sounds/v16/reel-loop.mp3",
+  stop1: "/sounds/v16/reel-stop-1.mp3",
+  stop2: "/sounds/v16/reel-stop-2.mp3",
+  stop3: "/sounds/v16/reel-stop-3.mp3",
+  stop4: "/sounds/v16/reel-stop-4.mp3",
+  stop5: "/sounds/v16/reel-stop-5.mp3",
+  land: "/sounds/v16/symbol-land.mp3",
+  fs: "/sounds/v16/fs-hit.mp3",
+  tease: "/sounds/v16/tease.mp3",
+  winSmall: "/sounds/v16/win-small.mp3",
+  winMedium: "/sounds/v16/win-medium.mp3",
+  big: "/sounds/v16/win-big.mp3",
+  bonus: "/sounds/v16/bonus-open.mp3",
+  hidden: "/sounds/v16/hidden-open.mp3",
+  thunder: "/sounds/v16/thunder.mp3",
+  boost: "/sounds/v16/boost-on.mp3",
+  boostOff: "/sounds/v16/boost-off.mp3",
+  autoOn: "/sounds/v16/auto-on.mp3",
+  autoOff: "/sounds/v16/auto-off.mp3"
 };
 
 const SOUND_VOLUME = {
-  spinStart: .66,
-  spin: .30,
-  stop: .58,
-  land: .17,
-  fs: .62,
-  boost: .58,
-  bonus: .58,
-  hidden: .64,
-  thunder: .58,
-  big: .60
+  click:.42,
+  toggleOn:.68,
+  toggleOff:.58,
+  spinStart:.88,
+  spin:.47,
+  stop1:.78,
+  stop2:.80,
+  stop3:.82,
+  stop4:.84,
+  stop5:.88,
+  land:.28,
+  fs:.94,
+  tease:.72,
+  winSmall:.62,
+  winMedium:.76,
+  big:.90,
+  bonus:.84,
+  hidden:.92,
+  thunder:.78,
+  boost:.78,
+  boostOff:.56,
+  autoOn:.55,
+  autoOff:.50
 };
 
 const SYMBOLS = [
@@ -1870,7 +1907,7 @@ const state = {
   sessionWagered: 0,
   sessionReturned: 0,
   started: false,
-  saveVersion: "midgardur-v15",
+  saveVersion: "midgardur-v16",
   assetsReady: false,
   ageAccepted: false,
   forceNext: null,
@@ -1886,9 +1923,16 @@ const state = {
 };
 
 let audioCtx = null;
-const audioCache = new Map();
+let audioMaster = null;
+let audioCompressor = null;
+const audioRawCache = new Map();
+const audioBufferCache = new Map();
+const audioLoadErrors = new Map();
+const audioEventLog = [];
+let audioDecodePromise = null;
 let activeSpinAudio = null;
-let spinFadeFrame = 0;
+let audioUnlocked = false;
+let v16MigrationApplied = false;
 
 function preloadAssets(){
   const imgSources = Object.values(ASSETS);
@@ -1911,7 +1955,7 @@ function preloadAssets(){
       state.assetsReady = true;
       dom.startBtn.disabled = !(state.ageAccepted || (dom.ageCheck && dom.ageCheck.checked));
       if(dom.preloadFill) dom.preloadFill.style.width = "100%";
-      if(dom.preloadText) dom.preloadText.textContent = "Ready.";
+      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V16 audio loaded.";
     }
   }
 
@@ -1923,29 +1967,22 @@ function preloadAssets(){
     img.src = src;
   });
 
-  soundSources.forEach((src, index) => {
+  Object.entries(SOUND_FILES).forEach(([type, src], index) => {
     const key = `sound-${index}-${src}`;
 
-    try{
-      const a = new Audio(src);
-      a.preload = "auto";
-      const type = Object.keys(SOUND_FILES).find(key => SOUND_FILES[key] === src);
-      a.volume = SOUND_VOLUME[type] ?? .46;
-      audioCache.set(src, a);
-
-      const timeout = setTimeout(() => progress(key), 550);
-      a.oncanplaythrough = () => {
-        clearTimeout(timeout);
+    fetch(src, {cache:"force-cache"})
+      .then(response => {
+        if(!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.arrayBuffer();
+      })
+      .then(raw => {
+        audioRawCache.set(type, raw);
         progress(key);
-      };
-      a.onerror = () => {
-        clearTimeout(timeout);
+      })
+      .catch(error => {
+        audioLoadErrors.set(type, String(error));
         progress(key);
-      };
-      a.load();
-    }catch(e){
-      progress(key);
-    }
+      });
   });
 
   setTimeout(() => {
@@ -1953,7 +1990,7 @@ function preloadAssets(){
       state.assetsReady = true;
       dom.startBtn.disabled = !(state.ageAccepted || (dom.ageCheck && dom.ageCheck.checked));
       if(dom.preloadFill) dom.preloadFill.style.width = "100%";
-      if(dom.preloadText) dom.preloadText.textContent = "Ready. Optional sound files can be added later.";
+      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V16 audio loaded.";
       dom.startBtn.disabled = false;
     }
   }, 2200);
@@ -1963,8 +2000,8 @@ function preloadAssets(){
 
 const BUILD = {
   name: "midgardur-training-slot",
-  version: "v15-viking-audio-boost-mode",
-  buildHash: "midgardur-v15-20260716",
+  version: "v16-full-web-audio-mix",
+  buildHash: "midgardur-v16-20260716",
   fakeMoneyOnly: true,
   deployFile: "training.html"
 };
@@ -2028,18 +2065,19 @@ function saveGame(){
 }
 
 function loadGame(){
-  const raw = safeStorageGet(state.saveVersion) || safeStorageGet("midgardur-v14") || safeStorageGet("midgardur-v13");
+  const raw = safeStorageGet(state.saveVersion) || safeStorageGet("midgardur-v15") || safeStorageGet("midgardur-v14") || safeStorageGet("midgardur-v13");
   if(!raw) return;
 
   try{
     const data = JSON.parse(raw);
-    if(!data || ![state.saveVersion,"midgardur-v14","midgardur-v13"].includes(data.version)) return;
+    if(!data || ![state.saveVersion,"midgardur-v15","midgardur-v14","midgardur-v13"].includes(data.version)) return;
 
     state.balance = Number.isFinite(data.balance) ? data.balance : state.balance;
     state.displayBalance = state.balance;
     state.betIndex = Number.isFinite(data.betIndex) ? data.betIndex : state.betIndex;
     state.featureActive = !!data.featureActive;
-    state.muted = !!data.muted;
+    v16MigrationApplied = data.version !== state.saveVersion;
+    state.muted = v16MigrationApplied ? false : !!data.muted;
     state.turbo = !!data.turbo;
     state.sessionSpins = Number.isFinite(data.sessionSpins) ? data.sessionSpins : 0;
     state.sessionWagered = Number.isFinite(data.sessionWagered) ? data.sessionWagered : 0;
@@ -2111,11 +2149,79 @@ function installImageFallbacks(){
   }, true);
 }
 
-function unlockAudio(){
+function ensureAudioGraph(){
+  if(audioCtx) return true;
+
   try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    if(audioCtx.state === "suspended") audioCtx.resume();
-  }catch(e){}
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if(!Ctx) return false;
+
+    audioCtx = new Ctx({latencyHint:"interactive"});
+    audioMaster = audioCtx.createGain();
+    audioCompressor = audioCtx.createDynamicsCompressor();
+
+    audioCompressor.threshold.value = -14;
+    audioCompressor.knee.value = 12;
+    audioCompressor.ratio.value = 5;
+    audioCompressor.attack.value = .004;
+    audioCompressor.release.value = .18;
+
+    audioMaster.gain.value = state.muted ? 0 : .92;
+    audioMaster.connect(audioCompressor);
+    audioCompressor.connect(audioCtx.destination);
+    return true;
+  }catch(error){
+    audioLoadErrors.set("context", String(error));
+    return false;
+  }
+}
+
+async function decodeAudioBuffers(){
+  if(audioDecodePromise) return audioDecodePromise;
+  if(!ensureAudioGraph()) return false;
+
+  audioDecodePromise = Promise.all(Object.keys(SOUND_FILES).map(async type => {
+    if(audioBufferCache.has(type)) return;
+
+    try{
+      let raw = audioRawCache.get(type);
+      if(!raw){
+        const response = await fetch(SOUND_FILES[type], {cache:"force-cache"});
+        if(!response.ok) throw new Error(`HTTP ${response.status}`);
+        raw = await response.arrayBuffer();
+        audioRawCache.set(type, raw);
+      }
+
+      const buffer = await audioCtx.decodeAudioData(raw.slice(0));
+      audioBufferCache.set(type, buffer);
+      audioLoadErrors.delete(type);
+    }catch(error){
+      audioLoadErrors.set(type, String(error));
+    }
+  })).then(() => true).catch(() => false);
+
+  return audioDecodePromise;
+}
+
+async function unlockAudio(){
+  if(!ensureAudioGraph()) return false;
+
+  try{
+    if(audioCtx.state === "suspended") await audioCtx.resume();
+    await decodeAudioBuffers();
+    audioUnlocked = audioCtx.state === "running";
+
+    if(audioMaster){
+      const now = audioCtx.currentTime;
+      audioMaster.gain.cancelScheduledValues(now);
+      audioMaster.gain.setTargetAtTime(state.muted ? 0 : .92, now, .012);
+    }
+
+    return audioUnlocked;
+  }catch(error){
+    audioLoadErrors.set("unlock", String(error));
+    return false;
+  }
 }
 
 function getBet(){
@@ -2448,9 +2554,9 @@ function stopReelIntoResult(c, finalColumn){
     const finalY = -before * itemH;
     const travelRows = state.turbo ? 9.2 : 14.4;
     const startY = finalY - travelRows * itemH;
-    const overshootY = finalY + itemH * (state.turbo ? .055 : .115);
-    const reboundY = finalY - itemH * (state.turbo ? .014 : .034);
-    const duration = state.turbo ? 118 : 430;
+    const overshootY = finalY + itemH * (state.turbo ? .043 : .086);
+    const reboundY = finalY - itemH * (state.turbo ? .010 : .022);
+    const duration = state.turbo ? 126 : 455;
     const startTime = performance.now();
     const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -2463,12 +2569,12 @@ function stopReelIntoResult(c, finalColumn){
       const t = reduced ? 1 : Math.min((now - startTime) / duration, 1);
       let y;
 
-      if(t < .80){
-        y = startY + (overshootY - startY) * easeOutCubic(t / .80);
-      }else if(t < .93){
-        y = overshootY + (reboundY - overshootY) * easeInOutCubic((t - .80) / .13);
+      if(t < .82){
+        y = startY + (overshootY - startY) * easeOutCubic(t / .82);
+      }else if(t < .94){
+        y = overshootY + (reboundY - overshootY) * easeInOutCubic((t - .82) / .12);
       }else{
-        y = reboundY + (finalY - reboundY) * easeOutCubic((t - .93) / .07);
+        y = reboundY + (finalY - reboundY) * easeOutCubic((t - .94) / .06);
       }
 
       track.style.transform = `translate3d(0,${y}px,0)`;
@@ -2501,228 +2607,153 @@ function hideReel(c){
   }, state.turbo ? 35 : 105);
 }
 
-function getAudioFile(type){
-  const path = SOUND_FILES[type];
-  if(!path) return null;
-
-  if(!audioCache.has(path)){
-    const a = new Audio(path);
-    a.preload = "auto";
-    a.volume = SOUND_VOLUME[type] ?? .46;
-    audioCache.set(path, a);
-  }
-
-  return audioCache.get(path);
+function logAudioEvent(type, status="played"){
+  audioEventLog.unshift({type,status,time:Date.now()});
+  if(audioEventLog.length > 40) audioEventLog.length = 40;
 }
 
-function tryFileSound(type, options={}){
-  const base = getAudioFile(type);
-  if(!base) return false;
+function synthFallback(type, options={}){
+  if(state.muted && !options.force) return null;
+  if(!ensureAudioGraph() || audioCtx.state !== "running") return null;
+
+  const now = audioCtx.currentTime + Math.max(0, options.delay || 0);
+  const output = audioCtx.createGain();
+  output.gain.value = Math.max(.05, Math.min(1.2, (options.volume || 1) * .48));
+  output.connect(audioMaster);
+
+  function tone(freq, endFreq, duration, gain=.18, delay=0, wave="triangle"){
+    const source = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    const t = now + delay;
+    source.type = wave;
+    source.frequency.setValueAtTime(Math.max(20,freq), t);
+    source.frequency.exponentialRampToValueAtTime(Math.max(20,endFreq || freq), t + duration);
+    g.gain.setValueAtTime(.0001,t);
+    g.gain.exponentialRampToValueAtTime(gain,t+.006);
+    g.gain.exponentialRampToValueAtTime(.0001,t+duration);
+    source.connect(g); g.connect(output);
+    source.start(t); source.stop(t+duration+.03);
+  }
+
+  const key = String(type).toLowerCase();
+  if(key.startsWith("stop")){ tone(120,54,.18,.30,0,"sine"); tone(520,270,.10,.13,.004); }
+  else if(key === "fs"){ tone(392,590,.44,.24); tone(587,880,.48,.20,.08); tone(96,42,.58,.22,.01,"sine"); }
+  else if(key === "spinstart"){ tone(92,36,.55,.31,0,"sine"); tone(260,110,.18,.10,.035); }
+  else if(key === "tease"){ tone(230,480,.55,.22,0,"sawtooth"); }
+  else if(key.includes("big") || key === "hidden"){ tone(92,31,.76,.34,0,"sine"); tone(392,784,.54,.22,.08); }
+  else if(key.includes("win")){ tone(520,880,.24,.20); tone(660,990,.30,.15,.055); }
+  else if(key === "bonus"){ tone(196,98,.46,.22,0,"sine"); tone(392,784,.52,.20,.05); }
+  else if(key === "thunder"){ tone(48,22,1.1,.32,0,"sine"); }
+  else if(key === "boost" || key === "toggleon"){ tone(294,440,.35,.18); tone(440,660,.32,.14,.06); }
+  else { tone(260,190,.08,.16); }
+
+  logAudioEvent(type,"fallback");
+  return {fallback:true, gain:output};
+}
+
+function playBuffer(type, options={}){
+  if(state.muted && !options.force) return null;
+
+  if(!ensureAudioGraph() || audioCtx.state !== "running"){
+    unlockAudio().then(ok => {
+      if(ok && !state.muted && !options.noRetry) playBuffer(type,{...options,noRetry:true});
+    });
+    return null;
+  }
+
+  const buffer = audioBufferCache.get(type);
+  if(!buffer) return synthFallback(type, options);
 
   try{
-    const a = base.cloneNode(true);
-    a.volume = Math.max(0,Math.min(1,(SOUND_VOLUME[type] ?? base.volume ?? .46) * (options.volume ?? 1)));
-    a.playbackRate = Math.max(.72,Math.min(1.35,options.rate ?? 1));
-    a.preservesPitch = false;
-    a.play().catch(() => {});
-    return true;
-  }catch(e){
-    return false;
+    const source = audioCtx.createBufferSource();
+    const gain = audioCtx.createGain();
+    const panner = audioCtx.createStereoPanner ? audioCtx.createStereoPanner() : null;
+    const delay = Math.max(0, Number(options.delay) || 0);
+    const when = audioCtx.currentTime + delay;
+    const baseVolume = SOUND_VOLUME[type] ?? .62;
+    const volume = Math.max(0, Math.min(1.45, baseVolume * (Number(options.volume) || 1)));
+
+    source.buffer = buffer;
+    source.loop = !!options.loop;
+    source.playbackRate.value = Math.max(.68, Math.min(1.45, Number(options.rate) || 1));
+    gain.gain.setValueAtTime(options.fadeIn ? .0001 : volume, when);
+    if(options.fadeIn) gain.gain.exponentialRampToValueAtTime(Math.max(.0001,volume), when + options.fadeIn);
+
+    if(panner){
+      panner.pan.value = Math.max(-1,Math.min(1,Number(options.pan) || 0));
+      source.connect(gain); gain.connect(panner); panner.connect(audioMaster);
+    }else{
+      source.connect(gain); gain.connect(audioMaster);
+    }
+
+    source.start(when);
+    logAudioEvent(type);
+    return {source,gain,panner,type,volume,startedAt:when};
+  }catch(error){
+    audioLoadErrors.set(`play-${type}`, String(error));
+    return synthFallback(type, options);
   }
 }
 
-function fadeAudioElement(audio,target,duration=160,onDone=null){
-  cancelAnimationFrame(spinFadeFrame);
-  const from = Number(audio.volume) || 0;
-  const started = performance.now();
-
-  function frame(now){
-    const t = Math.max(0,Math.min(1,(now-started)/Math.max(1,duration)));
-    audio.volume = Math.max(0,Math.min(1,from + (target-from) * easeOutCubic(t)));
-    if(t < 1){
-      spinFadeFrame = requestAnimationFrame(frame);
-    }else if(onDone){
-      onDone();
-    }
+function fadeSound(handle, target=0, duration=.16, stopAfter=false){
+  if(!handle || !handle.gain || !audioCtx) return;
+  try{
+    const now = audioCtx.currentTime;
+    const param = handle.gain.gain;
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(Math.max(.0001,param.value || handle.volume || .2),now);
+    param.exponentialRampToValueAtTime(Math.max(.0001,target),now+Math.max(.01,duration));
+    if(stopAfter && handle.source) handle.source.stop(now+Math.max(.02,duration)+.02);
+  }catch(error){
+    try{if(stopAfter && handle.source) handle.source.stop();}catch(e){}
   }
-
-  spinFadeFrame = requestAnimationFrame(frame);
 }
 
 function startSpinSound(){
   if(state.muted) return;
   stopSpinSound(true);
-  sfx("spinStart", {volume:state.turbo ? .82 : 1, rate:state.turbo ? 1.10 : 1});
-
-  const base = getAudioFile("spin");
-  if(!base) return;
-
-  try{
-    const a = base.cloneNode(true);
-    a.loop = true;
-    a.volume = 0;
-    a.playbackRate = state.turbo ? 1.16 : 1;
-    a.preservesPitch = false;
-    activeSpinAudio = a;
-    a.play().then(() => {
-      if(activeSpinAudio === a) fadeAudioElement(a,SOUND_VOLUME.spin,state.turbo ? 45 : 190);
-    }).catch(() => {});
-  }catch(e){}
+  sfx("spinStart", {volume:state.turbo ? .90 : 1, rate:state.turbo ? 1.08 : 1});
+  activeSpinAudio = playBuffer("spin", {
+    loop:true,
+    volume:state.turbo ? .92 : 1,
+    rate:state.turbo ? 1.13 : 1,
+    fadeIn:state.turbo ? .035 : .13
+  });
 }
 
 function setSpinSoundProgress(progress){
-  const a = activeSpinAudio;
-  if(!a || state.muted) return;
+  const handle = activeSpinAudio;
+  if(!handle || !handle.source || !handle.gain || !audioCtx || state.muted) return;
   const p = Math.max(0,Math.min(1,progress));
-  a.playbackRate = (state.turbo ? 1.16 : 1) - p * .075;
-  a.volume = Math.max(.08,SOUND_VOLUME.spin * (1 - p * .34));
+  const now = audioCtx.currentTime;
+  handle.source.playbackRate.setTargetAtTime((state.turbo ? 1.13 : 1) - p*.085,now,.025);
+  const target = Math.max(.15,handle.volume*(1-p*.44));
+  handle.gain.gain.setTargetAtTime(target,now,.025);
 }
 
 function stopSpinSound(immediate=false){
-  const a = activeSpinAudio;
+  const handle = activeSpinAudio;
   activeSpinAudio = null;
-  if(!a) return;
+  if(!handle) return;
 
-  const finish = () => {
-    try{a.pause();a.currentTime=0}catch(e){}
-  };
-
-  if(immediate){
-    cancelAnimationFrame(spinFadeFrame);
-    finish();
-  }else{
-    fadeAudioElement(a,0,state.turbo ? 55 : 170,finish);
+  if(handle.source){
+    if(immediate){
+      try{handle.source.stop();}catch(e){}
+    }else{
+      fadeSound(handle,.0001,state.turbo ? .055 : .16,true);
+    }
   }
 }
 
 function sfx(type, options={}){
-  if(state.muted) return;
+  return playBuffer(type, options);
+}
 
-  if(tryFileSound(type, options)) return;
-
-  try{
-    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-    const now = audioCtx.currentTime;
-
-    function tone(freq, dur, gain, wave="sine", endFreq=null, delay=0){
-      const t = now + delay;
-      const o = audioCtx.createOscillator();
-      const g = audioCtx.createGain();
-
-      o.type = wave;
-      o.frequency.setValueAtTime(freq, t);
-      if(endFreq) o.frequency.exponentialRampToValueAtTime(endFreq, t + dur);
-
-      g.gain.setValueAtTime(0.0001, t);
-      g.gain.exponentialRampToValueAtTime(gain, t + 0.012);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-
-      o.connect(g);
-      g.connect(audioCtx.destination);
-      o.start(t);
-      o.stop(t + dur + .03);
-    }
-
-    function noiseBurst(duration=1.2, peak=.09, lowpass=380, delay=0){
-      const t = now + delay;
-      const sr = audioCtx.sampleRate;
-      const len = Math.floor(sr * duration);
-      const buffer = audioCtx.createBuffer(1, len, sr);
-      const data = buffer.getChannelData(0);
-
-      for(let i=0;i<len;i++){
-        const white = Math.random() * 2 - 1;
-        const fall = 1 - i / len;
-        data[i] = white * (0.55 + Math.random() * 0.45) * Math.pow(fall, 1.25);
-      }
-
-      const src = audioCtx.createBufferSource();
-      const filter = audioCtx.createBiquadFilter();
-      const gain = audioCtx.createGain();
-
-      src.buffer = buffer;
-      filter.type = "lowpass";
-      filter.frequency.setValueAtTime(lowpass, t);
-      filter.Q.value = .85;
-
-      gain.gain.setValueAtTime(0.0001, t);
-      gain.gain.exponentialRampToValueAtTime(peak, t + 0.05);
-      gain.gain.exponentialRampToValueAtTime(peak * .55, t + duration * .35);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + duration);
-
-      src.connect(filter);
-      filter.connect(gain);
-      gain.connect(audioCtx.destination);
-      src.start(t);
-      src.stop(t + duration + .03);
-    }
-
-    if(type === "spinStart"){
-      noiseBurst(.48,.045,950,0);
-      tone(84,.52,.07,"sine",38);
-      tone(210,.16,.025,"triangle",120,.04);
-      return;
-    }
-
-    if(type === "spin"){
-      noiseBurst(.42,.035,1200,0);
-      tone(64,.46,.032,"triangle",44);
-      return;
-    }
-
-    if(type === "stop"){
-      tone(72,.16,.085,"sine",40);
-      tone(310,.10,.038,"triangle",180,.006);
-      return;
-    }
-
-    if(type === "land"){
-      tone(118,.09,.042,"sine",65);
-      tone(520,.07,.018,"triangle",330,.004);
-      return;
-    }
-
-    if(type === "fs"){
-      tone(392,.42,.065,"triangle",590);
-      tone(587,.48,.05,"triangle",784,.10);
-      tone(110,.55,.045,"sine",62,.025);
-      return;
-    }
-
-    if(type === "boost"){
-      tone(72,.42,.06,"sine",38);
-      tone(294,.36,.045,"triangle",440,.04);
-      return;
-    }
-
-    if(type === "bonus"){
-      tone(130,.18,.08,"triangle",390);
-      tone(520,.20,.055,"triangle",820,.045);
-      return;
-    }
-
-    if(type === "hidden"){
-      tone(76,.52,.11,"sine",35);
-      tone(520,.38,.07,"triangle",980,.08);
-      tone(1040,.32,.04,"triangle",680,.16);
-      return;
-    }
-
-    if(type === "thunder"){
-      noiseBurst(1.55,.085,260,0);
-      noiseBurst(1.18,.052,160,0.10);
-      tone(42,1.25,.052,"sine",25,.04);
-      tone(27,1.55,.038,"triangle",21,.12);
-      return;
-    }
-
-    if(type === "click"){tone(230,.045,.028,"triangle",190);return;}
-    if(type === "win"){tone(520,.12,.055,"triangle",980);return;}
-    if(type === "tease"){tone(320,.22,.068,"sawtooth",430);return;}
-    if(type === "big"){tone(180,.35,.09,"triangle",65); tone(480,.28,.05,"triangle",900,.05); return;}
-
-    tone(220,.05,.035,"triangle");
-  }catch(e){}
+function setMasterMute(muted){
+  if(!audioMaster || !audioCtx) return;
+  const now=audioCtx.currentTime;
+  audioMaster.gain.cancelScheduledValues(now);
+  audioMaster.gain.setTargetAtTime(muted ? 0 : .92,now,.012);
 }
 
 function approachNumber(current, target, step=.18){
@@ -2860,7 +2891,7 @@ function animateColumnLanding(c){
 
   setTimeout(() => {
     for(let r=0;r<R;r++) cell(c,r).classList.remove("land");
-  }, state.turbo ? 120 : 330);
+  }, state.turbo ? 140 : 410);
 }
 
 function clearFX(){
@@ -3160,6 +3191,8 @@ async function spin(options={}){
   if(state.phase !== "IDLE" && state.phase !== "BONUS_PLAYING") return;
   if(state.pendingBonus) return;
 
+  if(!state.muted) await unlockAudio();
+
   const bet = getBet();
   const feature = !state.inBonus && (options.feature === undefined ? state.featureActive : !!options.feature);
   const cost = feature ? bet * MATH.featureSpinCostX : bet;
@@ -3231,15 +3264,15 @@ async function spin(options={}){
     animateColumnLanding(c);
     hideReel(c);
     setSpinSoundProgress((c + 1) / C);
-    sfx("stop", {rate:.93 + c * .019, volume:1 - c * .03});
-    setTimeout(() => sfx("land", {rate:.98 + c * .01, volume:.46}), state.turbo ? 10 : 30);
+    sfx(`stop${c+1}`, {rate:.99 + c * .006, volume:1, pan:(c-2)*.14});
+    setTimeout(() => sfx("land", {rate:.98 + c * .012, volume:.72, pan:(c-2)*.10}), state.turbo ? 8 : 24);
 
     if(c === C - 1) stopSpinSound();
 
     const reelHasFS = finalColumn.includes("FS");
     const fs = countFS(c+1,outcome);
 
-    if(reelHasFS && (c < C - 1 || fs >= 3)) sfx("fs", {rate:.96 + Math.min(fs,4) * .018, volume:1});
+    if(reelHasFS && (c < C - 1 || fs >= 3)) sfx("fs", {rate:.90 + Math.min(fs,5) * .045, volume:1.08, pan:(c-2)*.12});
 
     if(fs === 2 && c < C-1 && !teased){
       teased = true;
@@ -3300,7 +3333,9 @@ async function spin(options={}){
     // message already set
   }else if(win > 0){
     setMsg(`Win: ${fmt(win)} fake coins.`);
-    sfx("win");
+    const currentWinX = win / Math.max(1,getBet());
+    if(currentWinX < 5) sfx("winSmall");
+    else if(currentWinX < 15) sfx("winMedium");
     setPhase(state.inBonus ? "BONUS_PLAYING" : "IDLE");
   }else{
     setMsg(state.inBonus ? `Free spins left: ${state.freeSpins}` : "No win. Spin again.");
@@ -3351,6 +3386,7 @@ dom.spinBtn.onclick = () => {
 };
 
 dom.buyBtn.onclick = (e) => {
+  sfx("click");
   trackEvent("bonus_buy_menu_open");
   e.stopPropagation();
   dom.autoMenu.classList.remove("show");
@@ -3364,7 +3400,7 @@ dom.buyFeatureOpt.onclick = () => {
   state.featureActive = !state.featureActive;
   trackEvent("feature_mode_toggle", {active:state.featureActive, price:getBet() * MATH.featureSpinCostX});
   hideMenus();
-  sfx(state.featureActive ? "boost" : "click");
+  sfx(state.featureActive ? "boost" : "boostOff");
   setMsg(state.featureActive
     ? `Boosted Spins active — ${MATH.featureSpinCostX}x total bet and 2x FS chance. Press Spin.`
     : "Boosted Spins disabled — normal stake restored.");
@@ -3435,6 +3471,7 @@ dom.autoBtn.onclick = (e) => {
   e.stopPropagation();
 
   if(state.autoLeft > 0){
+    sfx("autoOff");
     state.autoLeft = 0;
     setMsg(state.inBonus ? "Auto spins stopped after the bonus." : "Auto spins stopped.");
     hideMenus();
@@ -3444,6 +3481,7 @@ dom.autoBtn.onclick = (e) => {
 
   if(state.phase !== "IDLE" || state.inBonus || state.pendingBonus) return;
 
+  sfx("click");
   dom.buyMenu.classList.remove("show");
   const showing = !dom.autoMenu.classList.contains("show");
   dom.autoMenu.classList.toggle("show", showing);
@@ -3453,6 +3491,7 @@ dom.autoBtn.onclick = (e) => {
 document.querySelectorAll(".auto-opt").forEach(btn => {
   btn.onclick = () => {
     state.autoLeft = Number(btn.dataset.auto || "25");
+    sfx("autoOn");
     trackEvent("auto_start", {autoLeft:state.autoLeft});
     hideMenus();
     updateUI();
@@ -3468,15 +3507,28 @@ document.querySelectorAll(".auto-opt").forEach(btn => {
   };
 });
 
-dom.soundBtn.onclick = () => {
+dom.soundBtn.onclick = async () => {
+  const turningOn = state.muted;
   state.muted = !state.muted;
-  unlockAudio();
-  if(state.muted) stopSpinSound(true);
-  else sfx("click");
+
+  if(turningOn){
+    await unlockAudio();
+    setMasterMute(false);
+    sfx("toggleOn", {force:true});
+    setMsg("Sound on — V16 audio engine ready.");
+  }else{
+    sfx("toggleOff", {force:true});
+    setTimeout(() => {
+      stopSpinSound(true);
+      setMasterMute(true);
+    }, 90);
+  }
+
   updateUI();
 };
 
 dom.notesBtn.onclick = () => {
+  sfx("click");
   const showing = !dom.notes.classList.contains("show");
   trackEvent("rules_toggle", {showing});
   dom.notes.classList.toggle("show", showing);
@@ -3484,6 +3536,7 @@ dom.notesBtn.onclick = () => {
 };
 
 dom.notesCloseBtn.onclick = () => {
+  sfx("click");
   dom.notes.classList.remove("show");
   dom.notesBtn.setAttribute("aria-expanded", "false");
   dom.notesBtn.focus();
@@ -3491,7 +3544,7 @@ dom.notesCloseBtn.onclick = () => {
 
 dom.turboBtn.onclick = () => {
   state.turbo = !state.turbo;
-  sfx("click");
+  sfx(state.turbo ? "toggleOn" : "toggleOff", {volume:.64});
   updateUI();
 };
 
@@ -3522,6 +3575,7 @@ dom.resetBtn.onclick = () => {
 };
 
 dom.fullBtn.onclick = async () => {
+  sfx("click");
   trackEvent("fullscreen_toggle");
   try{
     if(!document.fullscreenElement){
@@ -3539,16 +3593,17 @@ document.addEventListener("fullscreenchange", () => {
   dom.fullBtn.setAttribute("aria-label", document.fullscreenElement ? "Exit fullscreen" : "Enter fullscreen");
 });
 
-dom.startBtn.onclick = () => {
+dom.startBtn.onclick = async () => {
   if(!state.assetsReady) return;
   if(!state.ageAccepted && !(dom.ageCheck && dom.ageCheck.checked)) return;
   state.ageAccepted = true;
   saveGame();
   trackEvent("start");
   state.started = true;
-  unlockAudio();
+  await unlockAudio();
   dom.startScreen.classList.add("hide");
-  sfx("click");
+  sfx("toggleOn", {volume:.72, force:true});
+  if(v16MigrationApplied) setMsg("V16 loaded — sound reset to On for the new audio engine.");
 };
 
 dom.ageCheck.onchange = () => {
@@ -3558,6 +3613,7 @@ dom.ageCheck.onchange = () => {
 };
 
 dom.bonusNotice.onclick = () => {
+  sfx("click");
   startPendingBonus();
 };
 
@@ -3735,6 +3791,11 @@ window.midgardurFinalAudit = function(){
     dataLayerAvailable: !!window.dataLayer,
     currentPhase: state.phase,
     spinAudioActive: !!activeSpinAudio,
+    audioContextState: audioCtx ? audioCtx.state : "not-created",
+    audioUnlocked,
+    decodedSounds: audioBufferCache.size,
+    audioLoadErrors: Object.fromEntries(audioLoadErrors),
+    recentAudioEvents: audioEventLog.slice(0,24),
     featureActive: state.featureActive,
     activeReels: dom.reels.querySelectorAll(".column-reel.active").length,
     balance: state.balance,
@@ -3795,6 +3856,11 @@ window.midgardurDiagnostics = function(){
     pendingBonus: !!state.pendingBonus,
     forceNext: state.forceNext,
     spinAudioActive: !!activeSpinAudio,
+    audioContextState: audioCtx ? audioCtx.state : "not-created",
+    audioUnlocked,
+    decodedSounds: audioBufferCache.size,
+    audioLoadErrorCount: audioLoadErrors.size,
+    recentAudioEvents: audioEventLog.slice(0,24),
     activeReels: dom.reels.querySelectorAll(".column-reel.active").length,
     sessionRTP: state.sessionWagered ? (state.sessionReturned / state.sessionWagered * 100).toFixed(2) + "%" : "n/a"
   };
