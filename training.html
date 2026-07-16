@@ -590,6 +590,7 @@ button.qa-only{
 @media (prefers-reduced-motion: reduce){
   .tile.win .symbol,
   .tile.tease .symbol,
+  .tile.land .symbol,
   .mascot{
     animation:none !important;
   }
@@ -1179,7 +1180,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 
 /* =========================================================
-   V13 PRODUCTION POLISH
+   V14 SOUND & MOTION POLISH
    ========================================================= */
 :root{
   --stage-unit:min(1vw,1.7778vh);
@@ -1366,6 +1367,36 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
   pointer-events:none;
 }
 
+/* V14: exact reel alignment and smoother symbol landing */
+.column-reel.spinning .reel-item img{
+  filter:blur(.92px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+  opacity:.91;
+}
+
+.column-reel.settling .reel-item img{
+  filter:blur(.42px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+}
+
+.column-reel.landed .reel-item.final img{
+  filter:blur(0) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
+}
+
+.tile.land .symbol{
+  animation:symbolLand .28s cubic-bezier(.18,.82,.22,1) var(--land-delay,0ms) both;
+}
+
+@keyframes symbolLand{
+  0%{transform:translateY(-5.5%) scaleX(.985) scaleY(1.025);filter:blur(.18px) drop-shadow(0 .18vw .22vw rgba(0,0,0,.64))}
+  48%{transform:translateY(2.2%) scaleX(1.012) scaleY(.976)}
+  74%{transform:translateY(-.7%) scaleX(.996) scaleY(1.006)}
+  100%{transform:translateY(0) scale(1);filter:drop-shadow(0 .22vw .25vw rgba(0,0,0,.76))}
+}
+
+.tile[data-r="0"] .symbol{
+  /* The artwork's first row is taller; V14's reel metrics now match it exactly. */
+  object-position:50% 50%;
+}
+
 @media (max-width:900px) and (orientation:landscape){
   .hud{width:78%;height:10.5%;bottom:.7%}
   .msg{bottom:12.2%;font-size:1.55vw}
@@ -1422,11 +1453,12 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
     <div id="historyList"></div>
   </div>
 
-  <div class="version-tag">V13</div>
+  <div class="version-tag">V14</div>
   <div class="release-badge">Demo Build</div>
   <div class="build-info" id="buildInfo">
-    Build: V13<br>
+    Build: V14<br>
     Math: target ~96% simulated RTP<br>
+    Sound: original V14 pack<br>
     QA: add <code>?qa=1</code>
   </div>
 
@@ -1504,7 +1536,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
       <div class="start-chips">
         <span class="start-chip">1,024 ways</span>
         <span class="start-chip">10,000x max win</span>
-        <span class="start-chip">Demo currency</span>
+        <span class="start-chip">V14 sound + motion</span>
       </div>
       <label class="age-check"><input type="checkbox" id="ageCheck"> I am 18+ and understand this demo has no cash value.</label>
       <div class="preload-bar"><div class="preload-fill" id="preloadFill"></div></div>
@@ -1594,12 +1626,25 @@ const ASSETS = {
 };
 
 const SOUND_FILES = {
+  spin: "/sounds/reel-spin.ogg",
   stop: "/sounds/reel-stop.ogg",
+  land: "/sounds/symbol-land.ogg",
   fs: "/sounds/fs-hit.ogg",
   bonus: "/sounds/bonus-popup.ogg",
   hidden: "/sounds/hidden-bonus.ogg",
   thunder: "/sounds/thunder.ogg",
   big: "/sounds/big-win.ogg"
+};
+
+const SOUND_VOLUME = {
+  spin: .24,
+  stop: .56,
+  land: .24,
+  fs: .52,
+  bonus: .58,
+  hidden: .64,
+  thunder: .58,
+  big: .60
 };
 
 const SYMBOLS = [
@@ -1618,6 +1663,12 @@ const SYMBOLS = [
 
 const C = 5;
 const R = 4;
+const LAYOUT = {
+  baseW: 1672,
+  baseH: 941,
+  colLines: [445, 594, 748, 902, 1058, 1212],
+  rowLines: [184, 343, 477, 614, 751]
+};
 const byId = Object.fromEntries(SYMBOLS.map(s => [s.id, s]));
 
 const MATH = {
@@ -1734,7 +1785,7 @@ const state = {
   sessionWagered: 0,
   sessionReturned: 0,
   started: false,
-  saveVersion: "midgardur-v13",
+  saveVersion: "midgardur-v14",
   assetsReady: false,
   ageAccepted: false,
   forceNext: null,
@@ -1751,6 +1802,8 @@ const state = {
 
 let audioCtx = null;
 const audioCache = new Map();
+let activeSpinAudio = null;
+let spinFadeFrame = 0;
 
 function preloadAssets(){
   const imgSources = Object.values(ASSETS);
@@ -1791,7 +1844,8 @@ function preloadAssets(){
     try{
       const a = new Audio(src);
       a.preload = "auto";
-      a.volume = src.includes("thunder") ? .62 : .46;
+      const type = Object.keys(SOUND_FILES).find(key => SOUND_FILES[key] === src);
+      a.volume = SOUND_VOLUME[type] ?? .46;
       audioCache.set(src, a);
 
       const timeout = setTimeout(() => progress(key), 550);
@@ -1824,8 +1878,8 @@ function preloadAssets(){
 
 const BUILD = {
   name: "midgardur-training-slot",
-  version: "v13-production-demo",
-  buildHash: "midgardur-v13-20260716",
+  version: "v14-sound-motion-demo",
+  buildHash: "midgardur-v14-20260716",
   fakeMoneyOnly: true,
   deployFile: "training.html"
 };
@@ -1888,12 +1942,12 @@ function saveGame(){
 }
 
 function loadGame(){
-  const raw = safeStorageGet(state.saveVersion);
+  const raw = safeStorageGet(state.saveVersion) || safeStorageGet("midgardur-v13");
   if(!raw) return;
 
   try{
     const data = JSON.parse(raw);
-    if(!data || data.version !== state.saveVersion) return;
+    if(!data || ![state.saveVersion,"midgardur-v13"].includes(data.version)) return;
 
     state.balance = Number.isFinite(data.balance) ? data.balance : state.balance;
     state.displayBalance = state.balance;
@@ -2029,10 +2083,7 @@ function createBoard(){
   dom.reels.innerHTML = "";
   state.columnReels = [];
 
-  const colLines = [445, 594, 748, 902, 1058, 1212];
-  const rowLines = [184, 343, 477, 614, 751];
-  const baseW = 1672;
-  const baseH = 941;
+  const {colLines,rowLines,baseW,baseH} = LAYOUT;
 
   const pctX = (px) => (px / baseW * 100).toFixed(4) + "%";
   const pctY = (px) => (px / baseH * 100).toFixed(4) + "%";
@@ -2189,9 +2240,25 @@ function render(b=state.board){
   }
 }
 
-function addReelItem(track, id, itemH, final=false){
+function getReelMetrics(c=0){
+  const reel = state.columnReels[c];
+  const reelHeight = Math.max(1, reel.getBoundingClientRect().height);
+  const designHeights = LAYOUT.rowLines.slice(1).map((line,i) => line - LAYOUT.rowLines[i]);
+  const designTotal = designHeights.reduce((a,b)=>a+b,0);
+  const scale = reelHeight / designTotal;
+  const rowHeights = designHeights.map(h => h * scale);
+
+  return {
+    reelHeight,
+    rowHeights,
+    averageHeight: reelHeight / R
+  };
+}
+
+function addReelItem(track, id, itemH, final=false, rowIndex=null){
   const item = document.createElement("div");
   item.className = `reel-item ${byId[id].tier}${final ? " final" : ""}`;
+  if(rowIndex !== null) item.dataset.row = rowIndex;
   item.style.height = `${itemH}px`;
   item.appendChild(makeImg(id));
   track.appendChild(item);
@@ -2202,9 +2269,9 @@ function fillLoopReel(c){
   const track = reel.querySelector(".reel-track");
   track.innerHTML = "";
 
-  const itemH = reel.getBoundingClientRect().height / R;
+  const itemH = getReelMetrics(c).averageHeight;
 
-  for(let i=0;i<24;i++){
+  for(let i=0;i<28;i++){
     addReelItem(track, randomAny(), itemH);
   }
 
@@ -2212,16 +2279,17 @@ function fillLoopReel(c){
     reel,
     track,
     itemH,
-    y:-itemH * 12,
-    speed:itemH * 0.028,
+    y:-itemH * 14,
+    speed:itemH * (state.turbo ? .020 : .010),
+    targetSpeed:itemH * (state.turbo ? .050 : .032),
     running:true,
     last:performance.now()
   };
 
   track.style.transition = "none";
   track.style.transform = `translate3d(0,${state.loops[c].y}px,0)`;
-  reel.classList.remove("fade-out","stop-accent");
-  reel.classList.add("active");
+  reel.classList.remove("fade-out","stop-accent","settling");
+  reel.classList.add("active","spinning");
 }
 
 function runLoop(c){
@@ -2231,9 +2299,11 @@ function runLoop(c){
   const now = performance.now();
   const dt = Math.min(now - loop.last, 32);
   loop.last = now;
+  const accel = 1 - Math.exp(-dt / (state.turbo ? 45 : 95));
+  loop.speed += (loop.targetSpeed - loop.speed) * accel;
   loop.y += loop.speed * dt;
 
-  if(loop.y > -loop.itemH * 6){
+  if(loop.y > -loop.itemH * 7){
     loop.y -= loop.itemH;
     const first = loop.track.firstElementChild;
     if(first){
@@ -2253,8 +2323,12 @@ function startLoopingReels(){
   }
 }
 
-function easeOutQuint(t){
-  return 1 - Math.pow(1 - t, 5);
+function easeOutCubic(t){
+  return 1 - Math.pow(1 - t, 3);
+}
+
+function easeInOutCubic(t){
+  return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t + 2,3)/2;
 }
 
 function stopReelIntoResult(c, finalColumn){
@@ -2264,39 +2338,55 @@ function stopReelIntoResult(c, finalColumn){
 
     const reel = state.columnReels[c];
     const track = reel.querySelector(".reel-track");
-    const itemH = reel.getBoundingClientRect().height / R;
+    const metrics = getReelMetrics(c);
+    const itemH = metrics.averageHeight;
 
     track.innerHTML = "";
 
-    const before = 30;
-    const after = 8;
+    const before = 32;
+    const after = 9;
 
     for(let i=0;i<before;i++) addReelItem(track, randomAny(), itemH);
-    for(let r=0;r<R;r++) addReelItem(track, finalColumn[r], itemH, true);
+    for(let r=0;r<R;r++) addReelItem(track, finalColumn[r], metrics.rowHeights[r], true, r);
     for(let i=0;i<after;i++) addReelItem(track, randomAny(), itemH);
 
+    // Final four symbols now use the exact non-uniform row heights from the artwork.
+    // This keeps every row—especially the taller top row—perfectly centred at landing.
     const finalY = -before * itemH;
-    const startY = finalY - 13.5 * itemH;
-    const duration = state.turbo ? 95 : 335;
+    const travelRows = state.turbo ? 9.2 : 14.4;
+    const startY = finalY - travelRows * itemH;
+    const overshootY = finalY + itemH * (state.turbo ? .055 : .115);
+    const reboundY = finalY - itemH * (state.turbo ? .014 : .034);
+    const duration = state.turbo ? 118 : 430;
     const startTime = performance.now();
+    const reduced = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     track.style.transition = "none";
     track.style.transform = `translate3d(0,${startY}px,0)`;
-    reel.classList.remove("fade-out","stop-accent");
-    reel.classList.add("active");
+    reel.classList.remove("fade-out","stop-accent","spinning");
+    reel.classList.add("active","settling");
 
     function frame(now){
-      const t = Math.min((now - startTime) / duration, 1);
-      const eased = easeOutQuint(t);
-      const y = startY + (finalY - startY) * eased;
+      const t = reduced ? 1 : Math.min((now - startTime) / duration, 1);
+      let y;
+
+      if(t < .80){
+        y = startY + (overshootY - startY) * easeOutCubic(t / .80);
+      }else if(t < .93){
+        y = overshootY + (reboundY - overshootY) * easeInOutCubic((t - .80) / .13);
+      }else{
+        y = reboundY + (finalY - reboundY) * easeOutCubic((t - .93) / .07);
+      }
+
       track.style.transform = `translate3d(0,${y}px,0)`;
 
       if(t < 1){
         requestAnimationFrame(frame);
       }else{
         track.style.transform = `translate3d(0,${finalY}px,0)`;
-        reel.classList.add("stop-accent");
-        setTimeout(resolve, state.turbo ? 12 : 42);
+        reel.classList.remove("settling");
+        reel.classList.add("stop-accent","landed");
+        setTimeout(resolve, state.turbo ? 12 : 46);
       }
     }
 
@@ -2311,7 +2401,7 @@ function hideReel(c){
   reel.classList.add("fade-out");
 
   setTimeout(() => {
-    reel.classList.remove("active","fade-out","stop-accent");
+    reel.classList.remove("active","fade-out","stop-accent","spinning","settling","landed");
     track.style.transition = "none";
     track.style.transform = "translate3d(0,0,0)";
     track.innerHTML = "";
@@ -2325,20 +2415,22 @@ function getAudioFile(type){
   if(!audioCache.has(path)){
     const a = new Audio(path);
     a.preload = "auto";
-    a.volume = type === "thunder" ? .62 : .46;
+    a.volume = SOUND_VOLUME[type] ?? .46;
     audioCache.set(path, a);
   }
 
   return audioCache.get(path);
 }
 
-function tryFileSound(type){
+function tryFileSound(type, options={}){
   const base = getAudioFile(type);
   if(!base) return false;
 
   try{
     const a = base.cloneNode(true);
-    a.volume = base.volume;
+    a.volume = Math.max(0,Math.min(1,(SOUND_VOLUME[type] ?? base.volume ?? .46) * (options.volume ?? 1)));
+    a.playbackRate = Math.max(.72,Math.min(1.35,options.rate ?? 1));
+    a.preservesPitch = false;
     a.play().catch(() => {});
     return true;
   }catch(e){
@@ -2346,10 +2438,73 @@ function tryFileSound(type){
   }
 }
 
-function sfx(type){
+function fadeAudioElement(audio,target,duration=160,onDone=null){
+  cancelAnimationFrame(spinFadeFrame);
+  const from = Number(audio.volume) || 0;
+  const started = performance.now();
+
+  function frame(now){
+    const t = Math.max(0,Math.min(1,(now-started)/Math.max(1,duration)));
+    audio.volume = Math.max(0,Math.min(1,from + (target-from) * easeOutCubic(t)));
+    if(t < 1){
+      spinFadeFrame = requestAnimationFrame(frame);
+    }else if(onDone){
+      onDone();
+    }
+  }
+
+  spinFadeFrame = requestAnimationFrame(frame);
+}
+
+function startSpinSound(){
+  if(state.muted) return;
+  stopSpinSound(true);
+
+  const base = getAudioFile("spin");
+  if(!base) return;
+
+  try{
+    const a = base.cloneNode(true);
+    a.loop = true;
+    a.volume = 0;
+    a.playbackRate = state.turbo ? 1.16 : 1;
+    a.preservesPitch = false;
+    activeSpinAudio = a;
+    a.play().then(() => {
+      if(activeSpinAudio === a) fadeAudioElement(a,SOUND_VOLUME.spin,state.turbo ? 55 : 150);
+    }).catch(() => {});
+  }catch(e){}
+}
+
+function setSpinSoundProgress(progress){
+  const a = activeSpinAudio;
+  if(!a || state.muted) return;
+  const p = Math.max(0,Math.min(1,progress));
+  a.playbackRate = (state.turbo ? 1.16 : 1) - p * .075;
+  a.volume = Math.max(.08,SOUND_VOLUME.spin * (1 - p * .34));
+}
+
+function stopSpinSound(immediate=false){
+  const a = activeSpinAudio;
+  activeSpinAudio = null;
+  if(!a) return;
+
+  const finish = () => {
+    try{a.pause();a.currentTime=0}catch(e){}
+  };
+
+  if(immediate){
+    cancelAnimationFrame(spinFadeFrame);
+    finish();
+  }else{
+    fadeAudioElement(a,0,state.turbo ? 55 : 170,finish);
+  }
+}
+
+function sfx(type, options={}){
   if(state.muted) return;
 
-  if(tryFileSound(type)) return;
+  if(tryFileSound(type, options)) return;
 
   try{
     audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
@@ -2408,9 +2563,21 @@ function sfx(type){
       src.stop(t + duration + .03);
     }
 
+    if(type === "spin"){
+      noiseBurst(.42,.035,1200,0);
+      tone(86,.40,.022,"triangle",92);
+      return;
+    }
+
     if(type === "stop"){
-      tone(70,.13,.09,"sine",40);
-      tone(42,.09,.045,"triangle",31,.012);
+      tone(72,.16,.085,"sine",40);
+      tone(310,.10,.038,"triangle",180,.006);
+      return;
+    }
+
+    if(type === "land"){
+      tone(118,.09,.042,"sine",65);
+      tone(520,.07,.018,"triangle",330,.004);
       return;
     }
 
@@ -2558,8 +2725,22 @@ function updateUI(){
   saveGame();
 }
 
+function animateColumnLanding(c){
+  for(let r=0;r<R;r++){
+    const tile = cell(c,r);
+    tile.classList.remove("land");
+    tile.style.setProperty("--land-delay", `${r * 8}ms`);
+    void tile.offsetWidth;
+    tile.classList.add("land");
+  }
+
+  setTimeout(() => {
+    for(let r=0;r<R;r++) cell(c,r).classList.remove("land");
+  }, state.turbo ? 120 : 330);
+}
+
 function clearFX(){
-  [...dom.reels.querySelectorAll(".tile")].forEach(t => t.classList.remove("win","tease","hidden-static"));
+  [...dom.reels.querySelectorAll(".tile")].forEach(t => t.classList.remove("win","tease","hidden-static","land"));
   dom.msg.classList.remove("tease");
   dom.bubble.classList.remove("show");
   dom.stage.classList.remove("lightning","shake");
@@ -2900,6 +3081,7 @@ async function spin(options={}){
   }
 
   startLoopingReels();
+  startSpinSound();
   await new Promise(res => setTimeout(res, state.turbo ? 90 : 350));
 
   setPhase("REEL_STOPPING");
@@ -2922,8 +3104,13 @@ async function spin(options={}){
       cell(c,r).classList.remove("hidden-static");
     }
 
+    animateColumnLanding(c);
     hideReel(c);
-    sfx("stop");
+    setSpinSoundProgress((c + 1) / C);
+    sfx("stop", {rate:.94 + c * .018, volume:1 - c * .035});
+    setTimeout(() => sfx("land", {rate:.96 + c * .012, volume:.72}), state.turbo ? 8 : 22);
+
+    if(c === C - 1) stopSpinSound();
 
     const reelHasFS = finalColumn.includes("FS");
     const fs = countFS(c+1,outcome);
@@ -2945,6 +3132,7 @@ async function spin(options={}){
     }
   }
 
+  stopSpinSound();
   setPhase("EVALUATING");
 
   state.board = outcome;
@@ -3147,7 +3335,8 @@ document.querySelectorAll(".auto-opt").forEach(btn => {
 dom.soundBtn.onclick = () => {
   state.muted = !state.muted;
   unlockAudio();
-  sfx("click");
+  if(state.muted) stopSpinSound(true);
+  else sfx("click");
   updateUI();
 };
 
@@ -3409,6 +3598,8 @@ window.midgardurFinalAudit = function(){
     optionalSoundCount: optionalSounds.length,
     dataLayerAvailable: !!window.dataLayer,
     currentPhase: state.phase,
+    spinAudioActive: !!activeSpinAudio,
+    activeReels: dom.reels.querySelectorAll(".column-reel.active").length,
     balance: state.balance,
     bet: getBet(),
     localSaveKey: state.saveVersion
@@ -3461,6 +3652,8 @@ window.midgardurDiagnostics = function(){
     freeSpins: state.freeSpins,
     pendingBonus: !!state.pendingBonus,
     forceNext: state.forceNext,
+    spinAudioActive: !!activeSpinAudio,
+    activeReels: dom.reels.querySelectorAll(".column-reel.active").length,
     sessionRTP: state.sessionWagered ? (state.sessionReturned / state.sessionWagered * 100).toFixed(2) + "%" : "n/a"
   };
 
