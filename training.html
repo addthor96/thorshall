@@ -1180,7 +1180,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 
 /* =========================================================
-   V16 FULL AUDIO ENGINE & BOOSTED MODE
+   V17 AUDIO ENGINE, WIN PATHS & MUSIC
    ========================================================= */
 :root{
   --stage-unit:min(1vw,1.7778vh);
@@ -1367,7 +1367,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
   pointer-events:none;
 }
 
-/* V16 keeps the exact row alignment and adds a softer physical reel settle */
+/* V17 keeps the exact row alignment and smooth physical reel settle */
 .column-reel.spinning .reel-item img{
   filter:blur(.92px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
   opacity:.91;
@@ -1409,7 +1409,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
 }
 
 
-/* V16: reliable Web Audio mixer, complete Viking sound identity and persistent boosted-spins mode */
+/* V17: reliable Web Audio mixer, Viking sound identity, background music and boosted-spins mode */
 .betpill{position:relative}
 .betpill small{
   display:block;
@@ -1499,6 +1499,84 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
   .start-kicker,.start-chip{font-size:.95vw}
 }
 
+
+/* =========================================================
+   V17 WIN PRESENTATION & BACKGROUND MUSIC POLISH
+   ========================================================= */
+.win-lines{
+  position:absolute;
+  z-index:13;
+  inset:0;
+  width:100%;
+  height:100%;
+  overflow:visible;
+  pointer-events:none;
+  opacity:0;
+  transition:opacity .13s ease;
+}
+.win-lines.show{opacity:1}
+.win-link-glow,.win-link-core{
+  fill:none;
+  stroke-linecap:round;
+  stroke-linejoin:round;
+  vector-effect:non-scaling-stroke;
+  pathLength:1;
+  stroke-dasharray:1;
+  stroke-dashoffset:1;
+  animation:winLinkDraw .34s cubic-bezier(.18,.78,.24,1) forwards;
+}
+.win-link-glow{stroke:rgba(61,220,255,.25);stroke-width:11}
+.win-link-core{stroke:#ffe29a;stroke-width:2.7;filter:drop-shadow(0 0 5px rgba(255,210,102,.92))}
+.win-node-glow{fill:rgba(75,223,255,.18);stroke:rgba(255,226,154,.90);stroke-width:2;vector-effect:non-scaling-stroke;animation:winNodeIn .27s ease-out both}
+.win-node-core{fill:#fff1b4;filter:drop-shadow(0 0 6px rgba(255,218,117,.95));animation:winNodePulse .72s ease-in-out infinite alternate}
+@keyframes winLinkDraw{to{stroke-dashoffset:0}}
+@keyframes winNodeIn{from{opacity:0;transform:scale(.35);transform-origin:center}to{opacity:1;transform:scale(1)}}
+@keyframes winNodePulse{to{opacity:.62;transform:scale(1.28);transform-origin:center}}
+
+.win-route{
+  position:absolute;
+  z-index:21;
+  left:50%;
+  top:14.1%;
+  min-width:17vw;
+  max-width:48vw;
+  padding:.36vw .82vw;
+  border:1px solid rgba(255,220,139,.30);
+  border-radius:999px;
+  background:linear-gradient(180deg,rgba(12,20,26,.94),rgba(3,8,12,.92));
+  box-shadow:0 .35vw 1vw rgba(0,0,0,.42),0 0 1vw rgba(53,213,255,.12);
+  color:#d9f8ff;
+  text-align:center;
+  font-size:.64vw;
+  letter-spacing:.035em;
+  opacity:0;
+  transform:translate(-50%,-.35vw) scale(.97);
+  transition:opacity .16s ease,transform .18s ease;
+  pointer-events:none;
+  white-space:nowrap;
+}
+.win-route.show{opacity:1;transform:translate(-50%,0) scale(1)}
+.win-route b{color:#ffe29a;font-size:.72vw;letter-spacing:.075em}
+.win-route .route-symbol{color:#80eaff;font-weight:700}
+.win-route .route-amount{color:#fff4ce;font-weight:700}
+
+.tile.win-focus::before{
+  inset:7%;
+  background:radial-gradient(circle at 50% 48%,rgba(255,221,128,.24),rgba(49,217,255,.08) 48%,transparent 72%);
+  box-shadow:inset 0 0 .9vw rgba(255,228,154,.16),0 0 .7vw rgba(68,217,255,.16);
+}
+.tile.win-focus .symbol{
+  animation:winFocusPulse .48s cubic-bezier(.2,.78,.2,1) infinite alternate;
+}
+@keyframes winFocusPulse{to{transform:scale(1.115);filter:drop-shadow(0 0 .68vw rgba(255,229,157,.98)) drop-shadow(0 0 1.4vw rgba(71,215,255,.65))}}
+.stage.win-evaluating .tile:not(.win-focus) .symbol{opacity:.66;filter:grayscale(.10) brightness(.78) drop-shadow(0 .18vw .2vw rgba(0,0,0,.7))}
+.stage.win-evaluating .tile.win-focus .symbol{opacity:1}
+
+@media (max-aspect-ratio: 1.55/1){
+  .win-route{font-size:.9vw;top:13.8%;padding:.42vw 1vw;max-width:58vw}
+  .win-route b{font-size:1vw}
+}
+
 </style>
 
 <script type="application/ld+json">
@@ -1523,6 +1601,8 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
   <div class="vignette"></div>
 
   <section class="reels" id="reels"></section>
+  <svg class="win-lines" id="winLines" viewBox="0 0 1672 941" preserveAspectRatio="none" aria-hidden="true"></svg>
+  <div class="win-route" id="winRoute" aria-live="polite"></div>
 
   <div class="session-stats" id="sessionStats">
     Spins: <b id="statSpins">0</b><br>
@@ -1537,12 +1617,12 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
     <div id="historyList"></div>
   </div>
 
-  <div class="version-tag">V16</div>
+  <div class="version-tag">V17</div>
   <div class="release-badge">Demo Build</div>
   <div class="build-info" id="buildInfo">
-    Build: V16<br>
+    Build: V17<br>
     Math: target ~96% simulated RTP<br>
-    Sound: Full V16 Web Audio mix<br>
+    Sound: V17 music + win sequencing<br>
     QA: add <code>?qa=1</code>
   </div>
 
@@ -1622,7 +1702,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
       <div class="start-chips">
         <span class="start-chip">1,024 ways</span>
         <span class="start-chip">10,000x max win</span>
-        <span class="start-chip">V16 full audio mix</span>
+        <span class="start-chip">V17 win paths + music</span>
       </div>
       <label class="age-check"><input type="checkbox" id="ageCheck"> I am 18+ and understand this demo has no cash value.</label>
       <div class="preload-bar"><div class="preload-fill" id="preloadFill"></div></div>
@@ -1712,29 +1792,31 @@ const ASSETS = {
 };
 
 const SOUND_FILES = {
-  click: "/sounds/v16/ui-click.mp3",
-  toggleOn: "/sounds/v16/toggle-on.mp3",
-  toggleOff: "/sounds/v16/toggle-off.mp3",
-  spinStart: "/sounds/v16/spin-start.mp3",
-  spin: "/sounds/v16/reel-loop.mp3",
-  stop1: "/sounds/v16/reel-stop-1.mp3",
-  stop2: "/sounds/v16/reel-stop-2.mp3",
-  stop3: "/sounds/v16/reel-stop-3.mp3",
-  stop4: "/sounds/v16/reel-stop-4.mp3",
-  stop5: "/sounds/v16/reel-stop-5.mp3",
-  land: "/sounds/v16/symbol-land.mp3",
-  fs: "/sounds/v16/fs-hit.mp3",
-  tease: "/sounds/v16/tease.mp3",
-  winSmall: "/sounds/v16/win-small.mp3",
-  winMedium: "/sounds/v16/win-medium.mp3",
-  big: "/sounds/v16/win-big.mp3",
-  bonus: "/sounds/v16/bonus-open.mp3",
-  hidden: "/sounds/v16/hidden-open.mp3",
-  thunder: "/sounds/v16/thunder.mp3",
-  boost: "/sounds/v16/boost-on.mp3",
-  boostOff: "/sounds/v16/boost-off.mp3",
-  autoOn: "/sounds/v16/auto-on.mp3",
-  autoOff: "/sounds/v16/auto-off.mp3"
+  click: "/sounds/v17/ui-click.mp3",
+  toggleOn: "/sounds/v17/toggle-on.mp3",
+  toggleOff: "/sounds/v17/toggle-off.mp3",
+  spinStart: "/sounds/v17/spin-start.mp3",
+  spin: "/sounds/v17/reel-loop.mp3",
+  stop1: "/sounds/v17/reel-stop-1.mp3",
+  stop2: "/sounds/v17/reel-stop-2.mp3",
+  stop3: "/sounds/v17/reel-stop-3.mp3",
+  stop4: "/sounds/v17/reel-stop-4.mp3",
+  stop5: "/sounds/v17/reel-stop-5.mp3",
+  land: "/sounds/v17/symbol-land.mp3",
+  fs: "/sounds/v17/fs-hit.mp3",
+  tease: "/sounds/v17/tease.mp3",
+  winSmall: "/sounds/v17/win-small.mp3",
+  winMedium: "/sounds/v17/win-medium.mp3",
+  big: "/sounds/v17/win-big.mp3",
+  bonus: "/sounds/v17/bonus-open.mp3",
+  hidden: "/sounds/v17/hidden-open.mp3",
+  thunder: "/sounds/v17/thunder.mp3",
+  boost: "/sounds/v17/boost-on.mp3",
+  boostOff: "/sounds/v17/boost-off.mp3",
+  autoOn: "/sounds/v17/auto-on.mp3",
+  autoOff: "/sounds/v17/auto-off.mp3",
+  winLine: "/sounds/v17/win-line.mp3",
+  music: "/sounds/v17/midgardur-ambience.mp3"
 };
 
 const SOUND_VOLUME = {
@@ -1760,7 +1842,9 @@ const SOUND_VOLUME = {
   boost:.78,
   boostOff:.56,
   autoOn:.55,
-  autoOff:.50
+  autoOff: .54,
+  winLine: .46,
+  music: .16
 };
 
 const SYMBOLS = [
@@ -1811,6 +1895,8 @@ const MATH = {
 
 const dom = {
   reels: document.getElementById("reels"),
+  winLines: document.getElementById("winLines"),
+  winRoute: document.getElementById("winRoute"),
   stage: document.getElementById("stage"),
   msg: document.getElementById("msg"),
   bubble: document.getElementById("bubble"),
@@ -1907,7 +1993,7 @@ const state = {
   sessionWagered: 0,
   sessionReturned: 0,
   started: false,
-  saveVersion: "midgardur-v16",
+  saveVersion: "midgardur-v17",
   assetsReady: false,
   ageAccepted: false,
   forceNext: null,
@@ -1925,6 +2011,9 @@ const state = {
 let audioCtx = null;
 let audioMaster = null;
 let audioCompressor = null;
+let audioMusicGain = null;
+let backgroundMusic = null;
+const MUSIC_BASE_GAIN = .16;
 const audioRawCache = new Map();
 const audioBufferCache = new Map();
 const audioLoadErrors = new Map();
@@ -1932,7 +2021,7 @@ const audioEventLog = [];
 let audioDecodePromise = null;
 let activeSpinAudio = null;
 let audioUnlocked = false;
-let v16MigrationApplied = false;
+let v17MigrationApplied = false;
 
 function preloadAssets(){
   const imgSources = Object.values(ASSETS);
@@ -1955,7 +2044,7 @@ function preloadAssets(){
       state.assetsReady = true;
       dom.startBtn.disabled = !(state.ageAccepted || (dom.ageCheck && dom.ageCheck.checked));
       if(dom.preloadFill) dom.preloadFill.style.width = "100%";
-      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V16 audio loaded.";
+      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V17 audio loaded.";
     }
   }
 
@@ -1990,7 +2079,7 @@ function preloadAssets(){
       state.assetsReady = true;
       dom.startBtn.disabled = !(state.ageAccepted || (dom.ageCheck && dom.ageCheck.checked));
       if(dom.preloadFill) dom.preloadFill.style.width = "100%";
-      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V16 audio loaded.";
+      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V17 audio loaded.";
       dom.startBtn.disabled = false;
     }
   }, 2200);
@@ -2000,8 +2089,8 @@ function preloadAssets(){
 
 const BUILD = {
   name: "midgardur-training-slot",
-  version: "v16-full-web-audio-mix",
-  buildHash: "midgardur-v16-20260716",
+  version: "v17-win-paths-music",
+  buildHash: "midgardur-v17-20260716",
   fakeMoneyOnly: true,
   deployFile: "training.html"
 };
@@ -2065,19 +2154,19 @@ function saveGame(){
 }
 
 function loadGame(){
-  const raw = safeStorageGet(state.saveVersion) || safeStorageGet("midgardur-v15") || safeStorageGet("midgardur-v14") || safeStorageGet("midgardur-v13");
+  const raw = safeStorageGet(state.saveVersion) || safeStorageGet("midgardur-v16") || safeStorageGet("midgardur-v15") || safeStorageGet("midgardur-v14") || safeStorageGet("midgardur-v13");
   if(!raw) return;
 
   try{
     const data = JSON.parse(raw);
-    if(!data || ![state.saveVersion,"midgardur-v15","midgardur-v14","midgardur-v13"].includes(data.version)) return;
+    if(!data || ![state.saveVersion,"midgardur-v16","midgardur-v15","midgardur-v14","midgardur-v13"].includes(data.version)) return;
 
     state.balance = Number.isFinite(data.balance) ? data.balance : state.balance;
     state.displayBalance = state.balance;
     state.betIndex = Number.isFinite(data.betIndex) ? data.betIndex : state.betIndex;
     state.featureActive = !!data.featureActive;
-    v16MigrationApplied = data.version !== state.saveVersion;
-    state.muted = v16MigrationApplied ? false : !!data.muted;
+    v17MigrationApplied = data.version !== state.saveVersion;
+    state.muted = !!data.muted;
     state.turbo = !!data.turbo;
     state.sessionSpins = Number.isFinite(data.sessionSpins) ? data.sessionSpins : 0;
     state.sessionWagered = Number.isFinite(data.sessionWagered) ? data.sessionWagered : 0;
@@ -2158,6 +2247,7 @@ function ensureAudioGraph(){
 
     audioCtx = new Ctx({latencyHint:"interactive"});
     audioMaster = audioCtx.createGain();
+    audioMusicGain = audioCtx.createGain();
     audioCompressor = audioCtx.createDynamicsCompressor();
 
     audioCompressor.threshold.value = -14;
@@ -2167,6 +2257,8 @@ function ensureAudioGraph(){
     audioCompressor.release.value = .18;
 
     audioMaster.gain.value = state.muted ? 0 : .92;
+    audioMusicGain.gain.value = MUSIC_BASE_GAIN;
+    audioMusicGain.connect(audioMaster);
     audioMaster.connect(audioCompressor);
     audioCompressor.connect(audioCtx.destination);
     return true;
@@ -2222,6 +2314,40 @@ async function unlockAudio(){
     audioLoadErrors.set("unlock", String(error));
     return false;
   }
+}
+
+function setMusicDuck(multiplier=1, duration=.28){
+  if(!audioCtx || !audioMusicGain) return;
+  const now = audioCtx.currentTime;
+  const target = Math.max(.012, MUSIC_BASE_GAIN * Math.max(.08,Math.min(1.1,multiplier)));
+  audioMusicGain.gain.cancelScheduledValues(now);
+  audioMusicGain.gain.setTargetAtTime(target, now, Math.max(.015,duration/3));
+}
+
+function startBackgroundMusic(){
+  if(state.muted || !audioCtx || audioCtx.state !== "running" || backgroundMusic) return false;
+  const buffer = audioBufferCache.get("music");
+  if(!buffer) return false;
+
+  try{
+    const source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+    source.connect(audioMusicGain);
+    source.start();
+    backgroundMusic = source;
+    source.onended = () => { if(backgroundMusic === source) backgroundMusic = null; };
+    setMusicDuck(1,.35);
+    logAudioEvent("music","looping");
+    return true;
+  }catch(error){
+    audioLoadErrors.set("music-play",String(error));
+    return false;
+  }
+}
+
+function sleep(ms){
+  return new Promise(resolve => setTimeout(resolve, Math.max(0,ms)));
 }
 
 function getBet(){
@@ -2895,7 +3021,8 @@ function animateColumnLanding(c){
 }
 
 function clearFX(){
-  [...dom.reels.querySelectorAll(".tile")].forEach(t => t.classList.remove("win","tease","hidden-static","land"));
+  clearWinConnections();
+  [...dom.reels.querySelectorAll(".tile")].forEach(t => t.classList.remove("win","win-focus","tease","hidden-static","land"));
   dom.msg.classList.remove("tease");
   dom.bubble.classList.remove("show");
   dom.stage.classList.remove("lightning","shake");
@@ -2943,38 +3070,201 @@ function countFS(cols, b){
 function calculate(b){
   let total = 0;
   let wins = [];
+  const groups = [];
+  const fsCells = [];
   const bet = getBet();
+
+  for(let c=0;c<C;c++) for(let r=0;r<R;r++) if(b[c][r] === "FS") fsCells.push(`${c}-${r}`);
 
   for(const s of SYMBOLS){
     if(s.scatter) continue;
 
     const counts = [];
+    const cellsByReel = [];
 
     for(let c=0;c<C;c++){
-      let n = 0;
-      for(let r=0;r<R;r++){
-        if(b[c][r] === s.id) n++;
-      }
-      if(!n) break;
-      counts.push(n);
+      const rows = [];
+      for(let r=0;r<R;r++) if(b[c][r] === s.id) rows.push(r);
+      if(!rows.length) break;
+      counts.push(rows.length);
+      cellsByReel.push(rows);
     }
 
     if(counts.length >= 3){
       const ways = counts.reduce((a,n)=>a*n,1);
       const pay = s.p[counts.length] || s.p[5];
-      total += bet * pay * ways;
+      const rawAmount = bet * pay * ways;
+      total += rawAmount;
+      const cells = [];
 
-      for(let c=0;c<counts.length;c++){
-        for(let r=0;r<R;r++){
-          if(b[c][r] === s.id) wins.push(`${c}-${r}`);
+      for(let c=0;c<cellsByReel.length;c++){
+        for(const r of cellsByReel[c]){
+          const key = `${c}-${r}`;
+          wins.push(key);
+          cells.push(key);
         }
       }
+
+      groups.push({
+        symbol:s.id,
+        label:s.label,
+        reels:counts.length,
+        counts,
+        cellsByReel,
+        cells,
+        ways,
+        pay,
+        rawAmount
+      });
     }
   }
 
-  return {total:Math.floor(total), wins:[...new Set(wins)], fs:countFS(C,b)};
+  return {total:Math.floor(total), wins:[...new Set(wins)], groups, fs:fsCells.length, fsCells};
 }
 
+
+function clearWinConnections(keepWinningTiles=false){
+  if(dom.winLines){
+    dom.winLines.innerHTML = "";
+    dom.winLines.classList.remove("show");
+  }
+  if(dom.winRoute){
+    dom.winRoute.classList.remove("show");
+    dom.winRoute.innerHTML = "";
+  }
+  dom.stage.classList.remove("win-evaluating");
+  if(!keepWinningTiles){
+    [...dom.reels.querySelectorAll(".tile")].forEach(t => t.classList.remove("win","win-focus"));
+  }else{
+    [...dom.reels.querySelectorAll(".tile")].forEach(t => t.classList.remove("win-focus"));
+  }
+}
+
+function tileCenter(c,r){
+  return {
+    x:(LAYOUT.colLines[c]+LAYOUT.colLines[c+1])/2,
+    y:(LAYOUT.rowLines[r]+LAYOUT.rowLines[r+1])/2
+  };
+}
+
+function svgEl(name, attrs={}){
+  const el=document.createElementNS("http://www.w3.org/2000/svg",name);
+  for(const [key,value] of Object.entries(attrs)) el.setAttribute(key,String(value));
+  return el;
+}
+
+function drawConnectionSet(cellsByReel){
+  if(!dom.winLines || !cellsByReel || cellsByReel.length<2) return;
+  dom.winLines.innerHTML="";
+
+  const centroids=cellsByReel.map((rows,c)=>{
+    const pts=rows.map(r=>tileCenter(c,r));
+    return {x:pts[0].x,y:pts.reduce((sum,p)=>sum+p.y,0)/pts.length};
+  });
+
+  // One clean left-to-right spine shows the winning connection.
+  let spine=`M ${centroids[0].x} ${centroids[0].y}`;
+  for(let i=1;i<centroids.length;i++){
+    const a=centroids[i-1], b=centroids[i];
+    const dx=(b.x-a.x)*.46;
+    spine+=` C ${a.x+dx} ${a.y}, ${b.x-dx} ${b.y}, ${b.x} ${b.y}`;
+  }
+  dom.winLines.append(svgEl("path",{d:spine,class:"win-link-glow",pathLength:1}));
+  dom.winLines.append(svgEl("path",{d:spine,class:"win-link-core",pathLength:1}));
+
+  // Short branches identify every symbol that contributes to the ways win.
+  for(let c=0;c<cellsByReel.length;c++){
+    const hub=centroids[c];
+    for(const r of cellsByReel[c]){
+      const pt=tileCenter(c,r);
+      if(Math.abs(pt.y-hub.y)>2){
+        const d=`M ${hub.x} ${hub.y} L ${pt.x} ${pt.y}`;
+        dom.winLines.append(svgEl("path",{d,class:"win-link-glow win-branch",pathLength:1}));
+        dom.winLines.append(svgEl("path",{d,class:"win-link-core win-branch",pathLength:1}));
+      }
+      dom.winLines.append(svgEl("circle",{cx:pt.x,cy:pt.y,r:11,class:"win-node-glow"}));
+      dom.winLines.append(svgEl("circle",{cx:pt.x,cy:pt.y,r:3.6,class:"win-node-core"}));
+    }
+  }
+  dom.winLines.classList.add("show");
+}
+
+function drawScatterPath(keys){
+  if(!dom.winLines || !keys.length) return;
+  const ordered=keys.map(k=>k.split("-").map(Number)).sort((a,b)=>a[0]-b[0] || a[1]-b[1]);
+  dom.winLines.innerHTML="";
+  for(let i=0;i<ordered.length-1;i++){
+    const a=tileCenter(ordered[i][0],ordered[i][1]);
+    const b=tileCenter(ordered[i+1][0],ordered[i+1][1]);
+    const d=`M ${a.x} ${a.y} L ${b.x} ${b.y}`;
+    dom.winLines.append(svgEl("path",{d,class:"win-link-glow",pathLength:1}));
+    dom.winLines.append(svgEl("path",{d,class:"win-link-core",pathLength:1}));
+  }
+  for(const [c,r] of ordered){
+    const pt=tileCenter(c,r);
+    dom.winLines.append(svgEl("circle",{cx:pt.x,cy:pt.y,r:12,class:"win-node-glow"}));
+    dom.winLines.append(svgEl("circle",{cx:pt.x,cy:pt.y,r:4,class:"win-node-core"}));
+  }
+  dom.winLines.classList.add("show");
+}
+
+function focusCells(keys){
+  [...dom.reels.querySelectorAll(".tile")].forEach(t=>t.classList.remove("win","win-focus"));
+  for(const key of keys){
+    const [c,r]=key.split("-").map(Number);
+    cell(c,r).classList.add("win","win-focus");
+  }
+  dom.stage.classList.add("win-evaluating");
+}
+
+function showRoute(html){
+  dom.winRoute.innerHTML=html;
+  dom.winRoute.classList.add("show");
+}
+
+async function presentWinningGroups(result, win, multiplier=1){
+  const rawTotal=(result.groups||[]).reduce((sum,g)=>sum+g.rawAmount*multiplier,0);
+  const payoutScale=rawTotal>0 ? Math.min(1,win/rawTotal) : 1;
+  const groups=(result.groups||[]).map(g=>({...g,displayAmount:Math.max(0,Math.floor(g.rawAmount*multiplier*payoutScale))}))
+    .sort((a,b)=>b.displayAmount-a.displayAmount || b.ways-a.ways);
+  if(win<=0 || !groups.length){
+    clearWinConnections();
+    await sleep(state.turbo?35:155);
+    setMusicDuck(1,.24);
+    return;
+  }
+
+  setMusicDuck(win/getBet()>=15?.22:.46,.20);
+  const selected=groups.slice(0,state.turbo?1:Math.min(4,groups.length));
+  const winX=win/Math.max(1,getBet());
+  const stepMs=state.turbo?105:(winX>=15?570:winX>=5?500:420);
+
+  for(let i=0;i<selected.length;i++){
+    const g=selected[i];
+    focusCells(g.cells);
+    drawConnectionSet(g.cellsByReel);
+    showRoute(`<span class="route-symbol">${g.label.toUpperCase()}</span> &nbsp;•&nbsp; <b>${g.ways} ${g.ways===1?"WAY":"WAYS"}</b> &nbsp;•&nbsp; ${g.reels} REELS &nbsp;•&nbsp; ${fmtX(g.pay)} / WAY &nbsp;•&nbsp; <span class="route-amount">${fmt(g.displayAmount)} COINS</span>`);
+    sfx("winLine",{rate:.96+i*.035,volume:winX>=15?1.08:.90});
+    await sleep(stepMs);
+  }
+
+  focusCells(result.wins||[]);
+  const extra=groups.length-selected.length;
+  showRoute(`<b>TOTAL WIN ${fmt(win)}</b>${extra>0?` &nbsp;•&nbsp; ${groups.length} CONNECTING SYMBOLS`:""}`);
+  await sleep(state.turbo?100:(winX>=15?620:winX>=5?480:360));
+  setMusicDuck(winX>=15?.30:.72,.24);
+}
+
+async function presentScatterTrigger(result){
+  const keys=result.fsCells||[];
+  if(result.fs<3 || !keys.length) return;
+  focusCells(keys);
+  drawScatterPath(keys);
+  showRoute(`<span class="route-symbol">FS RUNES</span> &nbsp;•&nbsp; <b>${result.fs} SCATTERS</b> &nbsp;•&nbsp; BONUS UNLOCKED`);
+  setMusicDuck(.25,.18);
+  sfx("winLine",{rate:.82,volume:1.05});
+  await sleep(state.turbo?180:760);
+}
 
 function countUp(el, from, to, duration=650){
   const start = performance.now();
@@ -3009,12 +3299,12 @@ function showWinFloat(win){
   dom.winFloatLabel.textContent = winLabelFor(win);
   dom.winFloatAmount.textContent = "0";
   dom.winFloat.classList.add("show");
-  countUp(dom.winFloatAmount, 0, win, Math.min(1200, 450 + win / Math.max(1,getBet()) * 25));
+  countUp(dom.winFloatAmount, 0, win, Math.min(1650, 520 + win / Math.max(1,getBet()) * 30));
 
   clearTimeout(state.winFloatTimer);
   state.winFloatTimer = setTimeout(() => {
     dom.winFloat.classList.remove("show");
-  }, Math.max(1200, Math.min(2800, 900 + win / Math.max(1,getBet()) * 45)));
+  }, Math.max(1800, Math.min(4800, 1350 + win / Math.max(1,getBet()) * 55)));
 }
 
 function showWins(keys){
@@ -3238,6 +3528,7 @@ async function spin(options={}){
   }
 
   startLoopingReels();
+  setMusicDuck(state.turbo ? .62 : .52,.16);
   startSpinSound();
   await new Promise(res => setTimeout(res, state.turbo ? 90 : 350));
 
@@ -3317,51 +3608,70 @@ async function spin(options={}){
   state.sessionReturned += win;
   if(state.inBonus) state.bonusWin += win;
 
-  showWins(result.wins);
+  const winX = win / Math.max(1, getBet());
+  const bonusMultiplierForDisplay = state.inBonus ? state.bonusMultiplier : 1;
+  const triggeredBonus = result.fs >= 3 && !state.inBonus && !state.maxWinReached;
+  const bonusWillFinish = state.inBonus && state.freeSpins <= 0;
+
+  if(state.maxWinReached){
+    setMsg(`MAX WIN ${MATH.maxWinX.toLocaleString()}x!`);
+  }else if(triggeredBonus){
+    setMsg(`${result.fs} FS runes connected — bonus unlocked!`);
+  }else if(win > 0){
+    setMsg(`Win: ${fmt(win)} fake coins.`);
+    if(winX < 5) sfx("winSmall");
+    else if(winX < 15) sfx("winMedium");
+  }else{
+    setMsg(state.inBonus ? `Free spins left: ${state.freeSpins}` : "No win. Spin again.");
+  }
+
+  trackEvent("spin_end", {win, winX:+winX.toFixed(2), fs:result.fs, inBonus:state.inBonus, bonusMode:state.bonusMode});
+
+  const spinLabel = result.fs >= 3 ? `${result.fs} FS` : (win > 0 ? "WIN" : "MISS");
+  addHistory({
+    label: spinLabel,
+    value: win > 0 ? `${fmt(win)} (${winX.toFixed(1)}x)` : "0"
+  });
+
+  showWinFloat(win);
+  updateUI();
+
+  await sleep(state.turbo ? 35 : 145);
+  if(win > 0) await presentWinningGroups(result,win,bonusMultiplierForDisplay);
+  else if(triggeredBonus) await presentScatterTrigger(result);
+  else{
+    clearWinConnections();
+    setMusicDuck(1,.28);
+    await sleep(state.turbo ? 45 : 210);
+  }
+
+  if(winX >= 15){
+    showBig(win);
+    setMusicDuck(.16,.16);
+    await sleep(state.turbo ? 520 : 2080);
+    setMusicDuck(.72,.30);
+  }
 
   if(state.maxWinReached){
     if(state.inBonus){
       finishBonusIfNeeded();
     }else{
       state.autoLeft = 0;
-      setMsg(`MAX WIN ${MATH.maxWinX.toLocaleString()}x!`);
       setPhase("IDLE");
     }
-  }else if(result.fs >= 3 && !state.inBonus){
+  }else if(triggeredBonus){
     startBonusByScatters(result.fs);
-  }else if(finishBonusIfNeeded()){
-    // message already set
-  }else if(win > 0){
-    setMsg(`Win: ${fmt(win)} fake coins.`);
-    const currentWinX = win / Math.max(1,getBet());
-    if(currentWinX < 5) sfx("winSmall");
-    else if(currentWinX < 15) sfx("winMedium");
-    setPhase(state.inBonus ? "BONUS_PLAYING" : "IDLE");
+  }else if(bonusWillFinish){
+    finishBonusIfNeeded();
   }else{
-    setMsg(state.inBonus ? `Free spins left: ${state.freeSpins}` : "No win. Spin again.");
     setPhase(state.inBonus ? "BONUS_PLAYING" : "IDLE");
   }
 
-  trackEvent("spin_end", {win, winX:+(win / getBet()).toFixed(2), fs:result.fs, inBonus:state.inBonus, bonusMode:state.bonusMode});
-
-  const spinLabel = result.fs >= 3 ? `${result.fs} FS` : (win > 0 ? "WIN" : "MISS");
-  addHistory({
-    label: spinLabel,
-    value: win > 0 ? `${fmt(win)} (${(win / getBet()).toFixed(1)}x)` : "0"
-  });
-
-  showWinFloat(win);
-  showBig(win);
   updateUI();
-
-  const winX = win / Math.max(1, getBet());
-  const celebrationDelay = winX >= 15
-    ? (state.turbo ? 700 : 2150)
-    : (state.turbo ? 110 : 520);
+  const nextSpinGap = state.turbo ? 70 : (win > 0 ? 310 : 230);
 
   if(!state.pendingBonus && state.inBonus){
-    updateUI();
-    setTimeout(spin, celebrationDelay);
+    setTimeout(spin, nextSpinGap);
   }else if(!state.pendingBonus && state.autoLeft > 0){
     state.autoLeft--;
 
@@ -3371,7 +3681,7 @@ async function spin(options={}){
     }
 
     updateUI();
-    if(state.autoLeft > 0) setTimeout(spin, celebrationDelay);
+    if(state.autoLeft > 0) setTimeout(spin, nextSpinGap);
   }
 }
 
@@ -3514,8 +3824,9 @@ dom.soundBtn.onclick = async () => {
   if(turningOn){
     await unlockAudio();
     setMasterMute(false);
+    startBackgroundMusic();
     sfx("toggleOn", {force:true});
-    setMsg("Sound on — V16 audio engine ready.");
+    setMsg("Sound on — V17 mix and music ready.");
   }else{
     sfx("toggleOff", {force:true});
     setTimeout(() => {
@@ -3601,9 +3912,10 @@ dom.startBtn.onclick = async () => {
   trackEvent("start");
   state.started = true;
   await unlockAudio();
+  startBackgroundMusic();
   dom.startScreen.classList.add("hide");
   sfx("toggleOn", {volume:.72, force:true});
-  if(v16MigrationApplied) setMsg("V16 loaded — sound reset to On for the new audio engine.");
+  if(v17MigrationApplied) setMsg("V17 loaded — music and win presentation ready.");
 };
 
 dom.ageCheck.onchange = () => {
@@ -3791,6 +4103,8 @@ window.midgardurFinalAudit = function(){
     dataLayerAvailable: !!window.dataLayer,
     currentPhase: state.phase,
     spinAudioActive: !!activeSpinAudio,
+    backgroundMusicActive: !!backgroundMusic,
+    winLinesVisible: !!(dom.winLines && dom.winLines.classList.contains("show")),
     audioContextState: audioCtx ? audioCtx.state : "not-created",
     audioUnlocked,
     decodedSounds: audioBufferCache.size,
@@ -3856,6 +4170,8 @@ window.midgardurDiagnostics = function(){
     pendingBonus: !!state.pendingBonus,
     forceNext: state.forceNext,
     spinAudioActive: !!activeSpinAudio,
+    backgroundMusicActive: !!backgroundMusic,
+    winLinesVisible: !!(dom.winLines && dom.winLines.classList.contains("show")),
     audioContextState: audioCtx ? audioCtx.state : "not-created",
     audioUnlocked,
     decodedSounds: audioBufferCache.size,
