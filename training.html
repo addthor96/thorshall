@@ -4,10 +4,10 @@
 <meta name="robots" content="noindex,follow">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Miðgarður — Thor's Hall Final Training Slot</title>
-<meta name="description" content="Miðgarður is a fake-money Norse slot training prototype on Thor's Hall. No deposits, no real-money gambling.">
-<meta property="og:title" content="Miðgarður — Thor's Hall Training Slot">
-<meta property="og:description" content="Fake-money Norse slot training prototype. No deposits, no real-money gambling.">
+<title>Miðgarður — Norse Slot Demo | Thor's Hall</title>
+<meta name="description" content="Play Miðgarður, a polished fake-money Norse slot demo by Thor's Hall. No deposits, withdrawals, or cash prizes.">
+<meta property="og:title" content="Miðgarður — Norse Slot Demo">
+<meta property="og:description" content="A polished fake-money Norse slot demo. No deposits, withdrawals, or cash prizes.">
 <meta property="og:type" content="website">
 <style>
 :root{
@@ -1176,6 +1176,214 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 .bonus-notice-card.super-bonus{border-color:rgba(255,190,80,.36)}
 .bonus-notice-card.normal-bonus{border-color:rgba(242,195,107,.30)}
+
+
+/* =========================================================
+   V13 PRODUCTION POLISH
+   ========================================================= */
+:root{
+  --stage-unit:min(1vw,1.7778vh);
+  --panel-strong:rgba(3,7,11,.92);
+  --panel-soft:rgba(3,7,11,.70);
+  --gold-bright:#ffe39a;
+}
+
+button{
+  -webkit-tap-highlight-color:transparent;
+  touch-action:manipulation;
+  transition:filter .16s ease,transform .16s ease,border-color .16s ease,box-shadow .16s ease,opacity .16s ease;
+}
+
+button:not(:disabled):hover{filter:brightness(1.12)}
+button:not(:disabled):active{transform:translateY(.08vw) scale(.985)}
+button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12vw}
+
+.session-stats{
+  min-width:11.8%;
+  padding:.55% .72%;
+  border-radius:.72vw;
+  background:linear-gradient(180deg,rgba(2,6,10,.82),rgba(2,5,8,.65));
+  border-color:rgba(242,195,107,.24);
+  box-shadow:0 .45vw 1vw rgba(0,0,0,.30);
+  backdrop-filter:blur(7px);
+}
+
+.session-stats .demo-inline{
+  display:block;
+  margin-top:.3vw;
+  padding-top:.28vw;
+  border-top:1px solid rgba(255,255,255,.08);
+  color:rgba(255,235,180,.72);
+  font-size:.58vw;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+
+.topbtn{
+  right:1%;
+  min-width:5.2vw;
+  padding:.48vw .62vw;
+  background:linear-gradient(180deg,rgba(12,17,22,.88),rgba(2,5,8,.78));
+  border-color:rgba(242,195,107,.24);
+  color:#f7ddb0;
+  box-shadow:0 .35vw .8vw rgba(0,0,0,.25);
+  backdrop-filter:blur(7px);
+}
+#soundBtn{top:1%}
+#notesBtn{top:5.6%}
+#resetBtn{top:10.2%}
+#fullBtn{top:14.8%}
+
+.msg{
+  bottom:10.4%;
+  min-width:25%;
+  max-width:62%;
+  padding:.36vw .9vw;
+  border-radius:999px;
+  background:linear-gradient(90deg,transparent,rgba(0,0,0,.62) 18%,rgba(0,0,0,.62) 82%,transparent);
+  font-size:1.08vw;
+  line-height:1.15;
+}
+
+.hud{
+  bottom:.85%;
+  width:57.5%;
+  height:8.55%;
+  gap:.48%;
+  padding:.42% .58%;
+  background:linear-gradient(180deg,rgba(10,13,16,.91),rgba(1,3,5,.86));
+  border-color:rgba(242,195,107,.28);
+  box-shadow:0 .7vw 1.8vw rgba(0,0,0,.64),inset 0 1px rgba(255,255,255,.035);
+  backdrop-filter:blur(8px);
+}
+
+.pill{
+  background:linear-gradient(180deg,rgba(11,14,17,.72),rgba(0,0,0,.56));
+  border-color:rgba(242,195,107,.16);
+}
+
+.small,.auto-mini{
+  background:linear-gradient(180deg,rgba(46,37,24,.96),rgba(8,8,9,.94));
+  border-color:rgba(242,195,107,.25);
+}
+
+.spin{
+  width:5.1vw;
+  height:5.1vw;
+  border-width:.18vw;
+  box-shadow:0 0 1.35vw rgba(255,179,63,.58),inset 0 .18vw .3vw rgba(255,255,255,.35);
+}
+.spin:not(:disabled):hover{box-shadow:0 0 1.8vw rgba(255,179,63,.8),inset 0 .18vw .3vw rgba(255,255,255,.38)}
+
+.buy{
+  min-width:8.1vw;
+  border-color:rgba(71,215,255,.33);
+  color:#d8f8ff;
+}
+
+.turbo.on{
+  background:linear-gradient(180deg,rgba(18,65,78,.96),rgba(5,17,22,.94));
+}
+
+.keyboard-hint{bottom:.55%;right:1%;font-size:.58vw}
+
+.bonus{
+  left:50%;
+  bottom:18.8%;
+  transform:translateX(-50%);
+  padding:.46vw .85vw;
+  background:rgba(2,7,11,.78);
+  box-shadow:0 .4vw 1vw rgba(0,0,0,.35);
+}
+
+.win-float{top:16.2%}
+
+.notes{
+  display:block;
+  visibility:hidden;
+  opacity:0;
+  transform:translateX(.8vw);
+  right:.8%;
+  top:1.2%;
+  width:34%;
+  max-height:96%;
+  padding:1.05%;
+  border-radius:1vw;
+  background:linear-gradient(180deg,rgba(3,7,11,.97),rgba(2,5,8,.95));
+  border-color:rgba(242,195,107,.35);
+  box-shadow:0 1vw 2.4vw rgba(0,0,0,.62);
+  backdrop-filter:blur(12px);
+  transition:opacity .18s ease,transform .18s ease,visibility .18s;
+}
+.notes.show{visibility:visible;opacity:1;transform:translateX(0)}
+.notes-header{display:flex;align-items:center;justify-content:space-between;gap:.6vw;margin-bottom:.55vw;padding-bottom:.5vw;border-bottom:1px solid rgba(242,195,107,.18)}
+.notes-header strong{font-size:1.02vw;color:#fff0bf}
+.notes-close{width:2vw;height:2vw;border-radius:50%;background:rgba(255,255,255,.06);border:1px solid rgba(242,195,107,.22);font-size:1vw}
+.notes-subtitle{color:#a9f2ff;font-size:.7vw;line-height:1.35}
+
+.paytable-live{margin-top:.7vw}
+.paytable-live h3{margin:.45vw 0;font-size:.86vw;color:#fff0bf}
+.paytable-head,.paytable-symbol-row{display:grid;grid-template-columns:1.45fr repeat(3,.7fr);align-items:center;gap:.28vw}
+.paytable-head{padding:.28vw .4vw;color:#c99d5c;font-size:.62vw;text-transform:uppercase;letter-spacing:.08em}
+.paytable-symbol-row{padding:.3vw .4vw;border-radius:.48vw;border-bottom:1px solid rgba(255,255,255,.05);font-size:.67vw}
+.paytable-symbol-row:nth-child(even){background:rgba(255,255,255,.025)}
+.paytable-symbol{display:flex;align-items:center;gap:.35vw;color:#f7e3bb}
+.paytable-symbol img{width:1.55vw;height:1.55vw;object-fit:contain;filter:drop-shadow(0 .12vw .16vw rgba(0,0,0,.7))}
+.paytable-value{text-align:right;color:#d8f8ff}
+.math-note{margin-top:.65vw;padding:.55vw;border-radius:.6vw;background:rgba(71,215,255,.045);border:1px solid rgba(71,215,255,.14);font-size:.65vw;color:#bddbe1;line-height:1.35}
+
+.start-screen{background:radial-gradient(circle at 50% 42%,rgba(20,43,60,.78),rgba(0,0,0,.94))}
+.start-card{
+  width:min(36vw,90%);
+  padding:1.35vw 1.5vw;
+  border-radius:1.2vw;
+  background:linear-gradient(180deg,rgba(4,9,14,.97),rgba(2,5,8,.96));
+  border-color:rgba(242,195,107,.38);
+  box-shadow:0 1.2vw 3vw rgba(0,0,0,.62),0 0 2.6vw rgba(71,215,255,.12);
+}
+.start-kicker{font-size:.66vw;letter-spacing:.2em;text-transform:uppercase;color:#7fe5ff}
+.start-card h1{font-size:2.35vw;margin:.2vw 0 .4vw}
+.start-card p{font-size:.84vw;max-width:30vw;margin:.25vw auto .7vw}
+.start-chips{display:flex;justify-content:center;gap:.38vw;flex-wrap:wrap;margin:.55vw 0}
+.start-chip{padding:.28vw .5vw;border-radius:999px;background:rgba(255,255,255,.04);border:1px solid rgba(242,195,107,.14);font-size:.62vw;color:#d7c28d}
+.age-check{padding:.45vw;border-radius:.6vw;background:rgba(255,255,255,.025)}
+.start-card button{min-width:10vw;font-size:.82vw}
+
+.bonus-notice{background:rgba(0,0,0,.36);pointer-events:auto}
+.bonus-notice-card{width:min(35vw,88%);padding:1.35vw}
+
+.overlay{backdrop-filter:blur(2px)}
+.big{animation:bigWinIn .38s cubic-bezier(.2,.9,.2,1)}
+@keyframes bigWinIn{from{opacity:0;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
+
+.tile.win::after{
+  content:"";
+  position:absolute;
+  inset:8%;
+  border-radius:.45vw;
+  border:1px solid rgba(255,225,135,.42);
+  box-shadow:inset 0 0 .8vw rgba(71,215,255,.12),0 0 .65vw rgba(255,198,75,.14);
+  pointer-events:none;
+}
+
+@media (max-width:900px) and (orientation:landscape){
+  .hud{width:78%;height:10.5%;bottom:.7%}
+  .msg{bottom:12.2%;font-size:1.55vw}
+  .topbtn{font-size:1vw;min-width:7vw}
+  .session-stats{font-size:1.05vw;min-width:15vw}
+  .session-stats .demo-inline{font-size:.8vw}
+  .notes{width:48%;font-size:1.05vw}
+  .notes-header strong{font-size:1.35vw}
+  .notes-subtitle,.math-note{font-size:.95vw}
+  .paytable-symbol-row{font-size:.95vw}
+  .paytable-symbol img{width:2.3vw;height:2.3vw}
+  .bonus{bottom:23%;font-size:1.1vw}
+  .start-card{width:58vw;padding:2vw}
+  .start-card h1{font-size:3.4vw}
+  .start-card p{font-size:1.25vw;max-width:50vw}
+  .start-kicker,.start-chip{font-size:.95vw}
+}
+
 </style>
 
 <script type="application/ld+json">
@@ -1183,11 +1391,11 @@ button:disabled{opacity:.45;cursor:not-allowed}
   "@context": "https://schema.org",
   "@type": "VideoGame",
   "name": "Mi\u00f0gar\u00f0ur Training Slot",
-  "description": "A fake-money Norse slot training prototype on Thor's Hall. No deposits and no real-money gambling.",
+  "description": "A polished fake-money Norse slot demonstration on Thor's Hall. No deposits, withdrawals, or cash prizes.",
   "applicationCategory": "Game",
   "operatingSystem": "Web Browser",
   "isAccessibleForFree": true,
-  "genre": "Slot training prototype"
+  "genre": "Norse slot demo"
 }
 </script>
 
@@ -1206,6 +1414,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
     Wagered: <b id="statWagered">0</b><br>
     Returned: <b id="statReturned">0</b><br>
     <span class="rtp-line">Session RTP: <b id="statRtp">0%</b></span>
+    <span class="demo-inline">18+ demo • no cash value</span>
   </div>
 
   <div class="history-panel" id="historyPanel">
@@ -1213,43 +1422,41 @@ button:disabled{opacity:.45;cursor:not-allowed}
     <div id="historyList"></div>
   </div>
 
-  <div class="version-tag">STEP 12 FINAL</div>
-  <div class="release-badge">Training Prototype</div>
+  <div class="version-tag">V13</div>
+  <div class="release-badge">Demo Build</div>
   <div class="build-info" id="buildInfo">
-    Build: Step 10<br>
-    Mode: Production integration<br>
+    Build: V13<br>
+    Math: target ~96% simulated RTP<br>
     QA: add <code>?qa=1</code>
   </div>
-  <div class="compliance-strip"><b>18+</b><span>Fake-money training only</span><span>•</span><span>No deposits</span><span>•</span><span>No real gambling</span></div>
-  <div class="production-disclaimer">Fake-money training prototype • no deposits • no real gambling</div>
 
   <div class="bubble" id="bubble">Two FS runes... the hall is watching.</div>
 
   <button class="topbtn" id="soundBtn" aria-label="Toggle sound">Sound: On</button>
-  <button class="topbtn" id="notesBtn" aria-label="Open rules and paytable">Rules</button>
+  <button class="topbtn" id="notesBtn" aria-label="Open rules and paytable" aria-controls="notes" aria-expanded="false">Rules</button>
   <button class="topbtn" id="resetBtn" aria-label="Reset fake balance and session stats">Reset</button>
   <button class="topbtn" id="fullBtn" aria-label="Toggle fullscreen">Full</button>
 
-  <div class="win-float" id="winFloat">
+  <div class="win-float" id="winFloat" aria-live="polite">
     <span class="label" id="winFloatLabel">Win</span>
     <span class="amount" id="winFloatAmount">0</span>
   </div>
 
-  <div class="msg" id="msg">Spin to enter Miðgarður.</div>
-  <div class="bonus" id="bonusPanel">FREE SPINS: <b id="fsLeft">0</b> | BONUS WIN: <b id="bonusWin">0</b></div>
+  <div class="msg" id="msg" role="status" aria-live="polite">Spin to enter Miðgarður.</div>
+  <div class="bonus" id="bonusPanel" aria-live="polite">FREE SPINS: <b id="fsLeft">0</b> &nbsp;•&nbsp; MULTIPLIER: <b id="bonusMult">1x</b> &nbsp;•&nbsp; BONUS WIN: <b id="bonusWin">0</b></div>
 
   <div class="hud">
     <div class="hud-anchor">
-      <button class="small buy" id="buyBtn" aria-label="Open bonus buy menu">Bonus Buy</button>
+      <button class="small buy" id="buyBtn" aria-label="Open bonus buy menu" aria-expanded="false">Bonus Buy</button>
       <div class="menu-panel" id="buyMenu">
         <div class="menu-title">Bonus Buy</div>
-        <button class="menu-opt" id="buyFeatureOpt">Feature Spin<br><b>3x bet</b> • 5x FS chance</button>
-        <button class="menu-opt" id="buy3fsOpt">Buy 3 FS Bonus<br><b>100x bet</b> • 10 free spins</button>
-        <button class="menu-opt" id="buy4fsOpt">Buy 4 FS Bonus<br><b>250x bet</b> • 12 super spins</button>
+        <button class="menu-opt" id="buyFeatureOpt">Boosted Spin<br><b>3x bet</b> • 2x FS chance</button>
+        <button class="menu-opt" id="buy3fsOpt">Buy 3 FS Bonus<br><b>100x bet</b> • 10 spins at 13x</button>
+        <button class="menu-opt" id="buy4fsOpt">Buy 4 FS Bonus<br><b>250x bet</b> • 12 spins at 27x</button>
       </div>
     </div>
 
-    <div class="pill"><span>Balance</span><b id="balance">5000</b></div>
+    <div class="pill"><span>Balance</span><b id="balance">10,000</b></div>
 
     <button class="small betbtn" id="betDown">−</button>
     <div class="pill betpill"><span>Bet</span><b id="bet">20</b></div>
@@ -1257,7 +1464,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
     <div class="hud-anchor spin-group">
       <button class="spin" id="spinBtn" aria-label="Spin reels">Spin</button>
-      <button class="auto-mini" id="autoBtn" aria-label="Open auto spin menu">A</button>
+      <button class="auto-mini" id="autoBtn" aria-label="Open auto spin menu" aria-expanded="false">↻</button>
       <div class="menu-panel" id="autoMenu">
         <div class="menu-title">Auto Spins</div>
         <button class="menu-opt auto-opt" data-auto="10">10 auto spins</button>
@@ -1291,13 +1498,19 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
   <div class="start-screen" id="startScreen">
     <div class="start-card">
+      <div class="start-kicker">Thor's Hall presents</div>
       <h1>Miðgarður</h1>
-      <p>Fake-money training prototype. No deposits, no real-money gambling. Assets preload before entry, then browser audio unlocks on click.</p>
-      <label class="age-check"><input type="checkbox" id="ageCheck"> I understand this is 18+ fake-money training only.</label>
+      <p>A high-volatility Norse slot demonstration with 1,024 ways, three bonus tiers, and fake coins only.</p>
+      <div class="start-chips">
+        <span class="start-chip">1,024 ways</span>
+        <span class="start-chip">10,000x max win</span>
+        <span class="start-chip">Demo currency</span>
+      </div>
+      <label class="age-check"><input type="checkbox" id="ageCheck"> I am 18+ and understand this demo has no cash value.</label>
       <div class="preload-bar"><div class="preload-fill" id="preloadFill"></div></div>
       <div class="preload-text" id="preloadText">Preparing assets...</div>
-      <button id="startBtn" disabled>Enter</button>
-      <div class="responsible-note">Play responsibly. This demo has no cash value and cannot be withdrawn.</div>
+      <button id="startBtn" disabled>Enter Miðgarður</button>
+      <div class="responsible-note">No deposits, withdrawals, prizes, or real-money wagering.</div>
     </div>
   </div>
 
@@ -1309,77 +1522,58 @@ button:disabled{opacity:.45;cursor:not-allowed}
   </div>
 
   <aside class="notes" id="notes" aria-label="Rules and paytable">
-    <b>Miðgarður Rules / Paytable</b><br><span style="color:#a9f2ff">18+ fake-money training prototype. No deposits, no withdrawals, no real-money gambling. QA tools only show with <code>?qa=1</code>.</span><br><br>
-    Fake-money prototype. 5 reels, 4 rows, left-to-right ways. FS symbols trigger bonus rounds. Maximum 1 FS can land per reel.
+    <div class="notes-header">
+      <strong>Miðgarður — Rules & Paytable</strong>
+      <button class="notes-close" id="notesCloseBtn" type="button" aria-label="Close rules">×</button>
+    </div>
+    <div class="notes-subtitle">18+ fake-money demonstration. No deposits, withdrawals, cash prizes, or real-money gambling.</div>
 
     <div class="rules-grid">
       <div class="rules-box">
-        <b>Bonuses</b><br>
-        3 FS = 10 Free Spins<br>
-        4 FS = 12 Super Spins, 2x wins<br>
-        5 FS = 15 Hidden Spins, 3x wins, minimum 500x bet
+        <b>Core Game</b><br>
+        5 reels × 4 rows<br>
+        1,024 left-to-right ways<br>
+        Wins begin on reel 1
       </div>
       <div class="rules-box">
-        <b>Buy Menu</b><br>
-        Feature Spin = 3x bet, 5x FS chance<br>
-        3 FS Bonus = 100x bet<br>
-        4 FS Bonus = 250x bet
+        <b>Bonus Triggers</b><br>
+        3 FS = 10 spins at 13x<br>
+        4 FS = 12 spins at 27x<br>
+        5 FS = 15 spins at 50x
       </div>
       <div class="rules-box">
-        <b>Low Symbols</b>
-        <div class="paytable-row"><span>10 / J / Q / K / A</span><span>3–5 of a kind</span></div>
-        Lower pays, higher hit frequency.
+        <b>Feature Options</b><br>
+        Boosted Spin = 3x bet<br>
+        3 FS Buy = 100x bet<br>
+        4 FS Buy = 250x bet
       </div>
       <div class="rules-box">
-        <b>Premium Symbols</b>
-        <div class="paytable-row"><span>Raven / Ship / Axe / Rune / Mjolnir</span><span>Higher pays</span></div>
-        Premium wins are rarer and more volatile.
+        <b>Limits</b><br>
+        Maximum win = 10,000x<br>
+        5 FS feature guarantees 500x<br>
+        Fake coins have no value
       </div>
     </div>
 
-    <br>
-    Dev tools: <code>midgardurSim(100000)</code>, <code>midgardurSim(100000, true)</code>, <code>midgardurReleaseCheck()</code>, <code>midgardurComplianceCheck()</code>, <code>midgardurDiagnostics()</code>, <code>midgardurState</code>, <code>midgardurMath</code>.<br><br>
+    <div class="paytable-live" id="paytableDynamic"></div>
+    <div class="math-note"><b>Math note:</b> the browser simulator is tuned near 96% long-run RTP, including natural bonuses. This is development math for a free demo and is not independently certified.</div>
 
     <button class="menu-opt qa-only" id="qaToggleBtn" type="button">Show QA Tester Tools</button>
     <div class="qa-panel qa-only" id="qaPanel">
       <b>QA Tester Tools</b><br>
-      Use these to test rare states without waiting for random results.
+      Queue rare outcomes for the next paid spin.
       <div class="qa-actions">
-        <button id="force3Btn" type="button">Next Spin: 3 FS</button>
-        <button id="force4Btn" type="button">Next Spin: 4 FS</button>
-        <button id="force5Btn" type="button">Next Spin: 5 FS</button>
-        <button id="forceBigBtn" type="button">Next Spin: Big Win</button>
+        <button id="force3Btn" type="button">Next: 3 FS</button>
+        <button id="force4Btn" type="button">Next: 4 FS</button>
+        <button id="force5Btn" type="button">Next: 5 FS</button>
+        <button id="forceBigBtn" type="button">Next: Max Win</button>
       </div>
       <div class="qa-note" id="qaNote">No forced result queued.</div>
-    </div><br>
-
-    <div class="changelog">
-      <b>Step 12 Final Handover</b>
-      <ul>
-        <li>Single-file deploy target: <code>training.html</code></li>
-        <li>QA tools remain hidden unless <code>?qa=1</code></li>
-        <li>Compliance copy and age acknowledgment included</li>
-        <li>Analytics hooks are passive only; no external tracker loaded</li>
-        <li>Console helpers included for testing and diagnostics</li>
-      </ul>
     </div>
 
-    <div class="smoke-list">
-      <b>Quick smoke test</b><br>
-      1. Open <code>/training</code> and enter after preload.<br>
-      2. Spin once and confirm balance changes.<br>
-      3. Open <code>/training?qa=1</code>, force 3 FS, 4 FS, and 5 FS.<br>
-      4. Run <code>midgardurComplianceCheck()</code> in console.<br>
-      5. Run <code>midgardurFinalAudit()</code> in console.
-    </div><br>
-
-    <b>Deploy checklist</b><br>
-    1. Upload all symbol PNGs to <code>/img/slots/</code>.<br>
-    2. Optional real sounds go in <code>/sounds/</code>.<br>
-    3. Use browser console simulator before changing math.<br>
-    4. Test desktop and mobile landscape after every deploy.<br>
-    5. Use final file as <code>training.html</code> on Netlify.<br>
-    6. Optional: listen for <code>midgardur:event</code> or <code>dataLayer</code> pushes for analytics.
+    <div class="smoke-list qa-only">
+      Console: <code>midgardurSim(1000000)</code>, <code>midgardurSim(1000000, true)</code>, <code>midgardurDiagnostics()</code>, <code>midgardurFinalCheck()</code>.
+    </div>
   </aside>
 </main>
 
@@ -1409,17 +1603,17 @@ const SOUND_FILES = {
 };
 
 const SYMBOLS = [
-  {id:"TEN", tier:"low", w:25, p:{3:.25,4:.75,5:1.8}},
-  {id:"J", tier:"low", w:22, p:{3:.35,4:1,5:2.4}},
-  {id:"Q", tier:"low", w:20, p:{3:.45,4:1.2,5:3.2}},
-  {id:"K", tier:"low", w:18, p:{3:.55,4:1.5,5:4.2}},
-  {id:"A", tier:"low", w:16, p:{3:.75,4:2,5:5.5}},
-  {id:"RAVEN", tier:"premium", w:11, p:{3:1.1,4:3.5,5:9}},
-  {id:"SHIP", tier:"premium", w:9, p:{3:1.5,4:4.5,5:12}},
-  {id:"AXE", tier:"premium", w:8, p:{3:2,4:6,5:18}},
-  {id:"RUNE", tier:"premium", w:7, p:{3:2.6,4:8,5:28}},
-  {id:"MJOLNIR", tier:"premium", w:5, p:{3:4,4:14,5:55}},
-  {id:"FS", tier:"fs", w:3, scatter:true}
+  {id:"TEN", label:"10", tier:"low", w:25, p:{3:.10,4:.31,5:.75}},
+  {id:"J", label:"Jack", tier:"low", w:22, p:{3:.15,4:.42,5:1.01}},
+  {id:"Q", label:"Queen", tier:"low", w:20, p:{3:.19,4:.50,5:1.34}},
+  {id:"K", label:"King", tier:"low", w:18, p:{3:.23,4:.63,5:1.76}},
+  {id:"A", label:"Ace", tier:"low", w:16, p:{3:.31,4:.84,5:2.30}},
+  {id:"RAVEN", label:"Raven", tier:"premium", w:11, p:{3:.46,4:1.47,5:3.77}},
+  {id:"SHIP", label:"Longship", tier:"premium", w:9, p:{3:.63,4:1.89,5:5.03}},
+  {id:"AXE", label:"Axes", tier:"premium", w:8, p:{3:.84,4:2.51,5:7.54}},
+  {id:"RUNE", label:"Rune", tier:"premium", w:7, p:{3:1.09,4:3.35,5:11.73}},
+  {id:"MJOLNIR", label:"Mjölnir", tier:"premium", w:5, p:{3:1.68,4:5.87,5:23.05}},
+  {id:"FS", label:"Free Spins", tier:"fs", w:3, scatter:true}
 ];
 
 const C = 5;
@@ -1427,9 +1621,10 @@ const R = 4;
 const byId = Object.fromEntries(SYMBOLS.map(s => [s.id, s]));
 
 const MATH = {
-  baseFsChance: 0.085,
-  featureFsMultiplier: 5,
-  featureFsCap: 0.42,
+  targetRtp: 0.96,
+  baseFsChance: 0.067,
+  featureFsMultiplier: 2.05,
+  featureFsCap: 0.20,
 
   featureSpinCostX: 3,
   buy3FsCostX: 100,
@@ -1439,9 +1634,9 @@ const MATH = {
   superBonusSpins: 12,
   hiddenBonusSpins: 15,
 
-  normalBonusMultiplier: 1,
-  superBonusMultiplier: 2,
-  hiddenBonusMultiplier: 3,
+  normalBonusMultiplier: 13,
+  superBonusMultiplier: 27,
+  hiddenBonusMultiplier: 50,
   hiddenMinWinX: 500,
 
   maxWinX: 10000
@@ -1476,6 +1671,8 @@ const dom = {
   preloadText: document.getElementById("preloadText"),
   assetWarning: document.getElementById("assetWarning"),
   notes: document.getElementById("notes"),
+  notesCloseBtn: document.getElementById("notesCloseBtn"),
+  paytableDynamic: document.getElementById("paytableDynamic"),
   qaToggleBtn: document.getElementById("qaToggleBtn"),
   qaPanel: document.getElementById("qaPanel"),
   qaNote: document.getElementById("qaNote"),
@@ -1493,6 +1690,7 @@ const dom = {
   bonusPanel: document.getElementById("bonusPanel"),
   fsLeft: document.getElementById("fsLeft"),
   bonusWin: document.getElementById("bonusWin"),
+  bonusMult: document.getElementById("bonusMult"),
   overlay: document.getElementById("overlay"),
   bigAmount: document.getElementById("bigAmount"),
   bonusNotice: document.getElementById("bonusNotice"),
@@ -1506,7 +1704,7 @@ const dom = {
 
 const state = {
   phase: "IDLE",
-  balance: 5000,
+  balance: 10000,
   betIndex: 1,
   betValues: [10,20,50,100,200],
   lastWin: 0,
@@ -1528,7 +1726,7 @@ const state = {
   pendingBonus: null,
   pendingBonusTimer: null,
 
-  displayBalance: 5000,
+  displayBalance: 10000,
   displayLastWin: 0,
 
   turbo: false,
@@ -1536,12 +1734,19 @@ const state = {
   sessionWagered: 0,
   sessionReturned: 0,
   started: false,
-  saveVersion: "midgardur-step12-v1",
+  saveVersion: "midgardur-v13",
   assetsReady: false,
   ageAccepted: false,
   forceNext: null,
   history: [],
-  saveQueued: false
+  saveQueued: false,
+  hudAnimating: false,
+  bubbleTimer: null,
+  winFloatTimer: null,
+  bigWinTimer: null,
+  roundBet: 0,
+  roundWin: 0,
+  maxWinReached: false
 };
 
 let audioCtx = null;
@@ -1619,8 +1824,8 @@ function preloadAssets(){
 
 const BUILD = {
   name: "midgardur-training-slot",
-  version: "step12-final-handover",
-  buildHash: "4dcfe6c41fd3",
+  version: "v13-production-demo",
+  buildHash: "midgardur-v13-20260716",
   fakeMoneyOnly: true,
   deployFile: "training.html"
 };
@@ -1710,8 +1915,8 @@ function applyAgeState(){
 
 function resetGame(){
   state.phase = "IDLE";
-  state.balance = 5000;
-  state.displayBalance = 5000;
+  state.balance = 10000;
+  state.displayBalance = 10000;
   state.betIndex = 1;
   state.lastWin = 0;
   state.displayLastWin = 0;
@@ -1729,6 +1934,9 @@ function resetGame(){
   state.sessionReturned = 0;
   state.history = [];
   state.forceNext = null;
+  state.roundBet = 0;
+  state.roundWin = 0;
+  state.maxWinReached = false;
   clearTimeout(state.pendingBonusTimer);
   dom.bonusNotice.classList.remove("show");
   hideMenus();
@@ -1770,6 +1978,33 @@ function unlockAudio(){
 
 function getBet(){
   return state.betValues[state.betIndex];
+}
+
+const numberFormatter = new Intl.NumberFormat("en-US", {maximumFractionDigits:0});
+
+function fmt(value){
+  return numberFormatter.format(Math.max(0, Math.floor(Number(value) || 0)));
+}
+
+function fmtX(value){
+  const n = Number(value) || 0;
+  return Number.isInteger(n) ? `${n}x` : `${n.toFixed(2).replace(/0+$/," ").trim().replace(/\.$/,"")}x`;
+}
+
+function renderPaytable(){
+  if(!dom.paytableDynamic) return;
+  const rows = SYMBOLS.filter(s => !s.scatter).map(s => `
+    <div class="paytable-symbol-row">
+      <span class="paytable-symbol"><img src="${ASSETS[s.id]}" alt=""><span>${s.label}</span></span>
+      <span class="paytable-value">${fmtX(s.p[3])}</span>
+      <span class="paytable-value">${fmtX(s.p[4])}</span>
+      <span class="paytable-value">${fmtX(s.p[5])}</span>
+    </div>`).join("");
+
+  dom.paytableDynamic.innerHTML = `
+    <h3>Paytable — multiplier per winning way</h3>
+    <div class="paytable-head"><span>Symbol</span><span>3 reels</span><span>4 reels</span><span>5 reels</span></div>
+    ${rows}`;
 }
 
 function setPhase(phase){
@@ -2042,7 +2277,7 @@ function stopReelIntoResult(c, finalColumn){
 
     const finalY = -before * itemH;
     const startY = finalY - 13.5 * itemH;
-    const duration = state.turbo ? 620 : 1080;
+    const duration = state.turbo ? 95 : 335;
     const startTime = performance.now();
 
     track.style.transition = "none";
@@ -2061,7 +2296,7 @@ function stopReelIntoResult(c, finalColumn){
       }else{
         track.style.transform = `translate3d(0,${finalY}px,0)`;
         reel.classList.add("stop-accent");
-        setTimeout(resolve, 90);
+        setTimeout(resolve, state.turbo ? 12 : 42);
       }
     }
 
@@ -2080,7 +2315,7 @@ function hideReel(c){
     track.style.transition = "none";
     track.style.transform = "translate3d(0,0,0)";
     track.innerHTML = "";
-  }, 145);
+  }, state.turbo ? 35 : 105);
 }
 
 function getAudioFile(type){
@@ -2222,21 +2457,31 @@ function approachNumber(current, target, step=.18){
 }
 
 function animateHudNumbers(){
-  const nextBalance = approachNumber(state.displayBalance, state.balance);
-  const nextLastWin = approachNumber(state.displayLastWin, state.lastWin);
+  if(state.hudAnimating) return;
+  state.hudAnimating = true;
 
-  state.displayBalance = nextBalance;
-  state.displayLastWin = nextLastWin;
+  function frame(){
+    const nextBalance = approachNumber(state.displayBalance, state.balance);
+    const nextLastWin = approachNumber(state.displayLastWin, state.lastWin);
 
-  dom.balance.textContent = Math.floor(nextBalance);
-  dom.lastWin.textContent = Math.floor(nextLastWin);
+    state.displayBalance = nextBalance;
+    state.displayLastWin = nextLastWin;
 
-  if(Math.abs(nextBalance - state.balance) >= 1 || Math.abs(nextLastWin - state.lastWin) >= 1){
-    requestAnimationFrame(animateHudNumbers);
-  }else{
-    dom.balance.textContent = Math.floor(state.balance);
-    dom.lastWin.textContent = Math.floor(state.lastWin);
+    dom.balance.textContent = fmt(nextBalance);
+    dom.lastWin.textContent = fmt(nextLastWin);
+
+    if(Math.abs(nextBalance - state.balance) >= 1 || Math.abs(nextLastWin - state.lastWin) >= 1){
+      requestAnimationFrame(frame);
+    }else{
+      state.displayBalance = state.balance;
+      state.displayLastWin = state.lastWin;
+      dom.balance.textContent = fmt(state.balance);
+      dom.lastWin.textContent = fmt(state.lastWin);
+      state.hudAnimating = false;
+    }
   }
+
+  requestAnimationFrame(frame);
 }
 
 function addHistory(entry){
@@ -2276,32 +2521,34 @@ function updateUI(){
   const locked = state.phase === "SPINNING" || state.phase === "REEL_STOPPING" || state.phase === "EVALUATING";
   const pending = !!state.pendingBonus;
 
-  dom.bet.textContent = bet;
-  requestAnimationFrame(animateHudNumbers);
+  dom.bet.textContent = fmt(bet);
+  animateHudNumbers();
 
   dom.spinBtn.disabled = locked || pending || (!state.inBonus && state.balance < bet);
   dom.betUp.disabled = locked || state.inBonus || pending || state.betIndex >= state.betValues.length-1;
   dom.betDown.disabled = locked || state.inBonus || pending || state.betIndex <= 0;
 
   dom.buyBtn.disabled = locked || state.inBonus || pending;
-  dom.autoBtn.disabled = locked && !state.inBonus;
+  dom.autoBtn.disabled = pending || ((locked || state.inBonus) && state.autoLeft === 0);
 
   dom.buyFeatureOpt.disabled = locked || state.inBonus || pending || state.balance < bet * MATH.featureSpinCostX;
   dom.buy3fsOpt.disabled = locked || state.inBonus || pending || state.balance < bet * MATH.buy3FsCostX;
   dom.buy4fsOpt.disabled = locked || state.inBonus || pending || state.balance < bet * MATH.buy4FsCostX;
 
-  dom.buyFeatureOpt.innerHTML = `Feature Spin<br><b>${bet * MATH.featureSpinCostX} coins</b> • 5x FS chance`;
-  dom.buy3fsOpt.innerHTML = `Buy 3 FS Bonus<br><b>${bet * MATH.buy3FsCostX} coins</b> • ${MATH.normalBonusSpins} free spins`;
-  dom.buy4fsOpt.innerHTML = `Buy 4 FS Bonus<br><b>${bet * MATH.buy4FsCostX} coins</b> • ${MATH.superBonusSpins} super spins`;
+  dom.buyFeatureOpt.innerHTML = `Boosted Spin<br><b>${fmt(bet * MATH.featureSpinCostX)} coins</b> • 2x FS chance`;
+  dom.buy3fsOpt.innerHTML = `Buy 3 FS Bonus<br><b>${fmt(bet * MATH.buy3FsCostX)} coins</b> • ${MATH.normalBonusSpins} spins at ${MATH.normalBonusMultiplier}x`;
+  dom.buy4fsOpt.innerHTML = `Buy 4 FS Bonus<br><b>${fmt(bet * MATH.buy4FsCostX)} coins</b> • ${MATH.superBonusSpins} spins at ${MATH.superBonusMultiplier}x`;
 
-  dom.autoBtn.textContent = state.autoLeft > 0 ? `${state.autoLeft}` : "A";
+  dom.autoBtn.textContent = state.autoLeft > 0 ? `${state.autoLeft}` : "↻";
+  dom.autoBtn.setAttribute("aria-label", state.autoLeft > 0 ? `Stop auto spins — ${state.autoLeft} remaining` : "Open auto spin menu");
   dom.fsLeft.textContent = state.freeSpins;
-  dom.bonusWin.textContent = Math.floor(state.bonusWin);
+  dom.bonusWin.textContent = fmt(state.bonusWin);
+  dom.bonusMult.textContent = `${state.bonusMultiplier}x`;
   dom.bonusPanel.classList.toggle("show", state.inBonus);
 
   dom.statSpins.textContent = state.sessionSpins;
-  dom.statWagered.textContent = Math.floor(state.sessionWagered);
-  dom.statReturned.textContent = Math.floor(state.sessionReturned);
+  dom.statWagered.textContent = fmt(state.sessionWagered);
+  dom.statReturned.textContent = fmt(state.sessionReturned);
   dom.statRtp.textContent = state.sessionWagered ? `${(state.sessionReturned / state.sessionWagered * 100).toFixed(1)}%` : "0%";
   dom.turboBtn.classList.toggle("on", state.turbo);
   dom.stage.classList.toggle("turbo-mode", state.turbo);
@@ -2325,9 +2572,10 @@ function setMsg(text, tease=false){
 }
 
 function showBubble(text){
+  clearTimeout(state.bubbleTimer);
   dom.bubble.textContent = text;
   dom.bubble.classList.add("show");
-  setTimeout(()=>dom.bubble.classList.remove("show"),2400);
+  state.bubbleTimer = setTimeout(()=>dom.bubble.classList.remove("show"),2400);
 }
 
 function flash(){
@@ -2378,7 +2626,7 @@ function calculate(b){
     if(counts.length >= 3){
       const ways = counts.reduce((a,n)=>a*n,1);
       const pay = s.p[counts.length] || s.p[5];
-      total += Math.floor(bet * pay * ways);
+      total += bet * pay * ways;
 
       for(let c=0;c<counts.length;c++){
         for(let r=0;r<R;r++){
@@ -2388,7 +2636,7 @@ function calculate(b){
     }
   }
 
-  return {total, wins:[...new Set(wins)], fs:countFS(C,b)};
+  return {total:Math.floor(total), wins:[...new Set(wins)], fs:countFS(C,b)};
 }
 
 
@@ -2399,7 +2647,7 @@ function countUp(el, from, to, duration=650){
   function frame(now){
     const t = Math.min((now - start) / duration, 1);
     const eased = 1 - Math.pow(1 - t, 3);
-    el.textContent = Math.floor(from + diff * eased);
+    el.textContent = fmt(from + diff * eased);
     if(t < 1) requestAnimationFrame(frame);
   }
 
@@ -2408,6 +2656,7 @@ function countUp(el, from, to, duration=650){
 
 function winLabelFor(win){
   const x = win / getBet();
+  if(x >= MATH.maxWinX) return "MAX WIN";
   if(x >= 100) return "EPIC WIN";
   if(x >= 50) return "MEGA WIN";
   if(x >= 15) return "BIG WIN";
@@ -2426,7 +2675,8 @@ function showWinFloat(win){
   dom.winFloat.classList.add("show");
   countUp(dom.winFloatAmount, 0, win, Math.min(1200, 450 + win / Math.max(1,getBet()) * 25));
 
-  setTimeout(() => {
+  clearTimeout(state.winFloatTimer);
+  state.winFloatTimer = setTimeout(() => {
     dom.winFloat.classList.remove("show");
   }, Math.max(1200, Math.min(2800, 900 + win / Math.max(1,getBet()) * 45)));
 }
@@ -2445,7 +2695,7 @@ function showBig(win){
   const label = winLabelFor(win);
   title.childNodes[0].nodeValue = label;
 
-  dom.bigAmount.textContent = win;
+  dom.bigAmount.textContent = fmt(win);
   dom.overlay.classList.add("show");
   sfx("big");
   flash();
@@ -2454,12 +2704,15 @@ function showBig(win){
   void dom.stage.offsetWidth;
   dom.stage.classList.add("shake");
 
-  setTimeout(()=>dom.overlay.classList.remove("show"),2050);
+  clearTimeout(state.bigWinTimer);
+  state.bigWinTimer = setTimeout(()=>dom.overlay.classList.remove("show"),2050);
 }
 
 function hideMenus(){
   dom.buyMenu.classList.remove("show");
   dom.autoMenu.classList.remove("show");
+  dom.autoBtn.setAttribute("aria-expanded", "false");
+  dom.buyBtn.setAttribute("aria-expanded", "false");
 }
 
 function showPendingBonus(config){
@@ -2472,9 +2725,13 @@ function showPendingBonus(config){
   dom.bonusNoticeCard.className = `bonus-notice-card ${config.css || ""}`;
   dom.bonusNotice.classList.add("show");
 
+  const autoStartMs = Number.isFinite(config.autoStartMs)
+    ? config.autoStartMs
+    : (state.autoLeft > 0 ? 1800 : 25000);
+
   state.pendingBonusTimer = setTimeout(() => {
     startPendingBonus();
-  }, 25000);
+  }, autoStartMs);
 
   updateUI();
 }
@@ -2493,7 +2750,7 @@ function startPendingBonus(){
   state.bonusMultiplier = p.multiplier;
   state.freeSpins += p.spins;
   state.hiddenMinWin = p.hiddenMinWin || 0;
-  state.bonusBet = getBet();
+  state.bonusBet = state.roundBet || getBet();
   state.inBonus = true;
 
   setMsg(p.startMessage);
@@ -2505,7 +2762,7 @@ function startPendingBonus(){
 
   setTimeout(() => {
     if(state.phase === "BONUS_PLAYING") spin();
-  }, 700);
+  }, state.turbo ? 180 : 650);
 }
 
 function startBonusByScatters(fsCount, paidBuy=false){
@@ -2515,12 +2772,13 @@ function startBonusByScatters(fsCount, paidBuy=false){
   if(fsCount >= 5){
     showPendingBonus({
       mode:"hidden",
+      autoStartMs: paidBuy ? 1400 : undefined,
       multiplier:MATH.hiddenBonusMultiplier,
       spins:MATH.hiddenBonusSpins,
       hiddenMinWin:state.bonusBet * MATH.hiddenMinWinX,
       title:"Hidden Bonus Activated",
-      body:`You won ${MATH.hiddenBonusSpins} free spins. Hidden bonus activated. Minimum win ${state.bonusBet * MATH.hiddenMinWinX} fake coins.`,
-      startMessage:`HIDDEN BONUS! Minimum win ${state.bonusBet * MATH.hiddenMinWinX} fake coins.`,
+      body:`${MATH.hiddenBonusSpins} spins at ${MATH.hiddenBonusMultiplier}x. Minimum win ${fmt(state.bonusBet * MATH.hiddenMinWinX)} fake coins.`,
+      startMessage:`HIDDEN BONUS — ${MATH.hiddenBonusMultiplier}x wins, minimum ${fmt(state.bonusBet * MATH.hiddenMinWinX)} coins.`,
       bubble:"The hidden gate opens. Minimum 500x.",
       sound:"hidden",
       css:"hidden-bonus"
@@ -2531,11 +2789,12 @@ function startBonusByScatters(fsCount, paidBuy=false){
   if(fsCount === 4){
     showPendingBonus({
       mode:"super",
+      autoStartMs: paidBuy ? 1400 : undefined,
       multiplier:MATH.superBonusMultiplier,
       spins:MATH.superBonusSpins,
       title:"Super Bonus Won",
-      body:`You won ${MATH.superBonusSpins} free spins. Super bonus activated.`,
-      startMessage:`SUPER FREE SPINS! ${MATH.superBonusSpins} spins with ${MATH.superBonusMultiplier}x wins.`,
+      body:`${MATH.superBonusSpins} free spins with a ${MATH.superBonusMultiplier}x win multiplier.`,
+      startMessage:`SUPER FREE SPINS — ${MATH.superBonusSpins} spins at ${MATH.superBonusMultiplier}x.`,
       bubble:"Super game unlocked. Wins are doubled.",
       sound:"bonus",
       css:"super-bonus"
@@ -2545,12 +2804,13 @@ function startBonusByScatters(fsCount, paidBuy=false){
 
   showPendingBonus({
     mode:"normal",
+    autoStartMs: paidBuy ? 1400 : undefined,
     multiplier:MATH.normalBonusMultiplier,
     spins:MATH.normalBonusSpins,
     hiddenMinWin:0,
     title:"Free Spins Won",
-    body: paidBuy ? "You bought 10 free spins." : "You won 10 free spins.",
-    startMessage:`${MATH.normalBonusSpins} FREE SPINS!`,
+    body: `${MATH.normalBonusSpins} free spins with a ${MATH.normalBonusMultiplier}x win multiplier.`,
+    startMessage:`${MATH.normalBonusSpins} FREE SPINS AT ${MATH.normalBonusMultiplier}x!`,
     bubble: paidBuy ? "Bonus bought. The gates open." : "The gates of Miðgarður open!",
     sound:"bonus",
     css:"normal-bonus"
@@ -2560,15 +2820,22 @@ function startBonusByScatters(fsCount, paidBuy=false){
 function finishBonusIfNeeded(){
   if(!state.inBonus || state.freeSpins > 0) return false;
 
-  if(state.bonusMode === "hidden" && state.bonusWin < state.hiddenMinWin){
-    const topUp = state.hiddenMinWin - state.bonusWin;
+  if(state.bonusMode === "hidden" && state.bonusWin < state.hiddenMinWin && !state.maxWinReached){
+    const maxRoundWin = state.bonusBet * MATH.maxWinX;
+    const requestedTopUp = state.hiddenMinWin - state.bonusWin;
+    const topUp = Math.max(0, Math.min(requestedTopUp, maxRoundWin - state.roundWin));
     state.bonusWin += topUp;
+    state.roundWin += topUp;
     state.balance += topUp;
+    state.sessionReturned += topUp;
     state.lastWin += topUp;
-    setMsg(`Hidden bonus guarantee paid. Bonus win: ${Math.floor(state.bonusWin)}.`);
+    if(state.roundWin >= maxRoundWin) state.maxWinReached = true;
+    setMsg(`Hidden guarantee paid. Bonus win: ${fmt(state.bonusWin)}.`);
     sfx("hidden");
+  }else if(state.maxWinReached){
+    setMsg(`MAX WIN ${MATH.maxWinX}x reached. Bonus complete.`);
   }else{
-    setMsg(`Bonus complete. Bonus win: ${Math.floor(state.bonusWin)}.`);
+    setMsg(`Bonus complete. Bonus win: ${fmt(state.bonusWin)}.`);
   }
 
   state.inBonus = false;
@@ -2577,6 +2844,9 @@ function finishBonusIfNeeded(){
   state.hiddenMinWin = 0;
   state.bonusBet = 0;
   state.bonusWin = 0;
+  state.roundBet = 0;
+  state.roundWin = 0;
+  state.maxWinReached = false;
   setPhase("IDLE");
   return true;
 }
@@ -2588,6 +2858,12 @@ async function spin(options={}){
   const bet = getBet();
   const feature = !!options.feature;
   const cost = feature && !state.inBonus ? bet * MATH.featureSpinCostX : bet;
+
+  if(!state.inBonus){
+    state.roundBet = bet;
+    state.roundWin = 0;
+    state.maxWinReached = false;
+  }
 
   if(!state.inBonus && state.balance < cost){
     setMsg("Not enough fake coins.");
@@ -2607,13 +2883,15 @@ async function spin(options={}){
     setMsg(`${state.bonusMode === "super" ? "Super" : state.bonusMode === "hidden" ? "Hidden" : "Free"} spin... ${state.freeSpins + 1}`);
   }else{
     state.balance -= cost;
-    setMsg(feature ? "Feature spin: FS chance boosted 5x..." : "The reels are spinning...");
+    setMsg(feature ? "Boosted spin: FS chance increased..." : "The reels are spinning...");
   }
 
   state.lastWin = 0;
   updateUI();
 
-  const outcome = makeOutcome(feature ? MATH.featureFsMultiplier : 1);
+  const outcome = state.inBonus
+    ? randomBoard(0)
+    : makeOutcome(feature ? MATH.featureFsMultiplier : 1);
 
   for(let c=0;c<C;c++){
     for(let r=0;r<R;r++){
@@ -2622,7 +2900,7 @@ async function spin(options={}){
   }
 
   startLoopingReels();
-  await new Promise(res => setTimeout(res, state.turbo ? 280 : 620));
+  await new Promise(res => setTimeout(res, state.turbo ? 90 : 350));
 
   setPhase("REEL_STOPPING");
 
@@ -2634,7 +2912,7 @@ async function spin(options={}){
 
     if(teased && c === C - 1 && !state.turbo){
       setMsg("Final reel... hold...");
-      await new Promise(res => setTimeout(res, 520));
+      await new Promise(res => setTimeout(res, 430));
     }
 
     await stopReelIntoResult(c, finalColumn);
@@ -2676,13 +2954,19 @@ async function spin(options={}){
 
   if(state.inBonus) win = Math.floor(win * state.bonusMultiplier);
 
-  const maxWin = getBet() * MATH.maxWinX;
-  if(win > maxWin){
-    win = maxWin;
+  const roundBet = state.roundBet || getBet();
+  const maxRoundWin = roundBet * MATH.maxWinX;
+  const remainingWin = Math.max(0, maxRoundWin - state.roundWin);
+
+  if(win >= remainingWin && remainingWin >= 0){
+    win = remainingWin;
+    state.maxWinReached = true;
+    if(state.inBonus) state.freeSpins = 0;
     setMsg(`MAX WIN ${MATH.maxWinX}x!`);
     sfx("big");
   }
 
+  state.roundWin += win;
   state.lastWin = win;
   state.balance += win;
   state.sessionReturned += win;
@@ -2690,12 +2974,20 @@ async function spin(options={}){
 
   showWins(result.wins);
 
-  if(result.fs >= 3 && !state.inBonus){
+  if(state.maxWinReached){
+    if(state.inBonus){
+      finishBonusIfNeeded();
+    }else{
+      state.autoLeft = 0;
+      setMsg(`MAX WIN ${MATH.maxWinX.toLocaleString()}x!`);
+      setPhase("IDLE");
+    }
+  }else if(result.fs >= 3 && !state.inBonus){
     startBonusByScatters(result.fs);
   }else if(finishBonusIfNeeded()){
     // message already set
   }else if(win > 0){
-    setMsg(`Win: ${Math.floor(win)} fake coins.`);
+    setMsg(`Win: ${fmt(win)} fake coins.`);
     sfx("win");
     setPhase(state.inBonus ? "BONUS_PLAYING" : "IDLE");
   }else{
@@ -2708,17 +3000,31 @@ async function spin(options={}){
   const spinLabel = result.fs >= 3 ? `${result.fs} FS` : (win > 0 ? "WIN" : "MISS");
   addHistory({
     label: spinLabel,
-    value: win > 0 ? `${Math.floor(win)} (${(win / getBet()).toFixed(1)}x)` : "0"
+    value: win > 0 ? `${fmt(win)} (${(win / getBet()).toFixed(1)}x)` : "0"
   });
 
   showWinFloat(win);
   showBig(win);
   updateUI();
 
-  if(!state.pendingBonus && (state.autoLeft > 0 || state.inBonus) && (state.inBonus || state.balance >= getBet())){
-    if(state.autoLeft > 0) state.autoLeft--;
+  const winX = win / Math.max(1, getBet());
+  const celebrationDelay = winX >= 15
+    ? (state.turbo ? 700 : 2150)
+    : (state.turbo ? 110 : 520);
+
+  if(!state.pendingBonus && state.inBonus){
     updateUI();
-    setTimeout(spin, state.inBonus ? 820 : 520);
+    setTimeout(spin, celebrationDelay);
+  }else if(!state.pendingBonus && state.autoLeft > 0){
+    state.autoLeft--;
+
+    if(state.autoLeft > 0 && state.balance < getBet()){
+      state.autoLeft = 0;
+      setMsg("Auto spins stopped — not enough fake coins.");
+    }
+
+    updateUI();
+    if(state.autoLeft > 0) setTimeout(spin, celebrationDelay);
   }
 }
 
@@ -2736,7 +3042,9 @@ dom.buyBtn.onclick = (e) => {
   trackEvent("bonus_buy_menu_open");
   e.stopPropagation();
   dom.autoMenu.classList.remove("show");
-  dom.buyMenu.classList.toggle("show");
+  const showing = !dom.buyMenu.classList.contains("show");
+  dom.buyMenu.classList.toggle("show", showing);
+  dom.buyBtn.setAttribute("aria-expanded", String(showing));
 };
 
 dom.buyFeatureOpt.onclick = () => {
@@ -2760,8 +3068,11 @@ dom.buy3fsOpt.onclick = () => {
   state.sessionWagered += price;
   state.lastWin = 0;
   state.bonusWin = 0;
+  state.roundBet = bet;
+  state.roundWin = 0;
+  state.maxWinReached = false;
   trackEvent("bonus_buy_3fs", {price});
-  setMsg(`3 FS Bonus bought for ${price}.`);
+  setMsg(`3 FS Bonus bought for ${fmt(price)}.`);
   updateUI();
   startBonusByScatters(3, true);
 };
@@ -2781,8 +3092,11 @@ dom.buy4fsOpt.onclick = () => {
   state.sessionWagered += price;
   state.lastWin = 0;
   state.bonusWin = 0;
+  state.roundBet = bet;
+  state.roundWin = 0;
+  state.maxWinReached = false;
   trackEvent("bonus_buy_4fs", {price});
-  setMsg(`4 FS Super Bonus bought for ${price}.`);
+  setMsg(`4 FS Super Bonus bought for ${fmt(price)}.`);
   updateUI();
   startBonusByScatters(4, true);
 };
@@ -2802,14 +3116,20 @@ dom.betDown.onclick = () => {
 dom.autoBtn.onclick = (e) => {
   e.stopPropagation();
 
-  if(state.autoLeft > 0 && state.phase === "IDLE"){
+  if(state.autoLeft > 0){
     state.autoLeft = 0;
+    setMsg(state.inBonus ? "Auto spins stopped after the bonus." : "Auto spins stopped.");
+    hideMenus();
     updateUI();
     return;
   }
 
+  if(state.phase !== "IDLE" || state.inBonus || state.pendingBonus) return;
+
   dom.buyMenu.classList.remove("show");
-  dom.autoMenu.classList.toggle("show");
+  const showing = !dom.autoMenu.classList.contains("show");
+  dom.autoMenu.classList.toggle("show", showing);
+  dom.autoBtn.setAttribute("aria-expanded", String(showing));
 };
 
 document.querySelectorAll(".auto-opt").forEach(btn => {
@@ -2818,7 +3138,9 @@ document.querySelectorAll(".auto-opt").forEach(btn => {
     trackEvent("auto_start", {autoLeft:state.autoLeft});
     hideMenus();
     updateUI();
-    if(state.phase === "IDLE" && !state.pendingBonus) spin();
+    if(state.phase === "IDLE" && !state.pendingBonus){
+      spin();
+    }
   };
 });
 
@@ -2830,8 +3152,16 @@ dom.soundBtn.onclick = () => {
 };
 
 dom.notesBtn.onclick = () => {
-  trackEvent("rules_toggle", {showing:!dom.notes.classList.contains("show")});
-  dom.notes.classList.toggle("show");
+  const showing = !dom.notes.classList.contains("show");
+  trackEvent("rules_toggle", {showing});
+  dom.notes.classList.toggle("show", showing);
+  dom.notesBtn.setAttribute("aria-expanded", String(showing));
+};
+
+dom.notesCloseBtn.onclick = () => {
+  dom.notes.classList.remove("show");
+  dom.notesBtn.setAttribute("aria-expanded", "false");
+  dom.notesBtn.focus();
 };
 
 dom.turboBtn.onclick = () => {
@@ -2874,8 +3204,15 @@ dom.fullBtn.onclick = async () => {
     }else{
       await document.exitFullscreen();
     }
-  }catch(e){}
+  }catch(e){
+    setMsg("Fullscreen is not available in this browser.");
+  }
 };
+
+document.addEventListener("fullscreenchange", () => {
+  dom.fullBtn.textContent = document.fullscreenElement ? "Exit" : "Full";
+  dom.fullBtn.setAttribute("aria-label", document.fullscreenElement ? "Exit fullscreen" : "Enter fullscreen");
+});
 
 dom.startBtn.onclick = () => {
   if(!state.assetsReady) return;
@@ -2913,6 +3250,13 @@ document.addEventListener("keydown", (e) => {
   if(!state.started && (e.code === "Space" || e.key === "Enter")){
     e.preventDefault();
     dom.startBtn.click();
+    return;
+  }
+
+  if(e.key === "Escape"){
+    hideMenus();
+    dom.notes.classList.remove("show");
+    dom.notesBtn.setAttribute("aria-expanded", "false");
     return;
   }
 
@@ -2980,11 +3324,11 @@ function calculateWithBet(b, forcedBet){
     if(counts.length >= 3){
       const ways = counts.reduce((a,n)=>a*n,1);
       const pay = s.p[counts.length] || s.p[5];
-      total += Math.floor(forcedBet * pay * ways);
+      total += forcedBet * pay * ways;
     }
   }
 
-  return {total, fs:countFS(C,b)};
+  return {total:Math.floor(total), fs:countFS(C,b)};
 }
 
 function simulateBonusMath(mode, bet){
@@ -3058,7 +3402,7 @@ window.midgardurFinalAudit = function(){
     buildHash: BUILD.buildHash,
     fakeMoneyOnly: BUILD.fakeMoneyOnly,
     ageGatePresent: !!document.getElementById("ageCheck"),
-    complianceStripPresent: !!document.querySelector(".compliance-strip"),
+    complianceCopyPresent: document.body.innerText.toLowerCase().includes("no cash value"),
     qaMode: dom.stage.classList.contains("qa-mode"),
     debugMode: dom.stage.classList.contains("debug"),
     requiredImageCount: requiredImages.length,
@@ -3076,7 +3420,7 @@ window.midgardurFinalAudit = function(){
 
 window.midgardurComplianceCheck = function(){
   const checks = {
-    fakeMoneyDisclaimerVisible: !!document.querySelector(".compliance-strip"),
+    fakeMoneyDisclaimerVisible: document.body.innerText.toLowerCase().includes("no cash value"),
     ageGatePresent: !!document.getElementById("ageCheck"),
     noDepositCopy: document.body.innerText.toLowerCase().includes("no deposits"),
     noRealGamblingCopy: document.body.innerText.toLowerCase().includes("no real"),
@@ -3152,7 +3496,7 @@ window.midgardurSim = function(spins=100000, feature=false){
 
   const summary = {
     spins,
-    mode: feature ? "Feature Spin" : "Base Spin",
+    mode: feature ? "Boosted Spin" : "Base Spin",
     rtp: +(paid / wagered * 100).toFixed(2) + "%",
     hitRate: +(hits / spins * 100).toFixed(2) + "%",
     bonusEvery: bonuses ? Math.round(spins / bonuses) : "never",
@@ -3172,17 +3516,17 @@ loadGame();
 applyAgeState();
 preloadAssets();
 createBoard();
+renderPaytable();
 state.board = randomBoard();
 render();
 renderHistory();
 updateUI();
 
 setInterval(() => {
-  if(state.phase === "IDLE" && Math.random() < .45) thunderThenFlash();
-}, 20000);
+  if(state.started && state.phase === "IDLE" && !dom.notes.classList.contains("show") && Math.random() < .35) thunderThenFlash();
+}, 24000);
 })();
 </script>
 
-<div class="thorshall-context-link" style="max-width:1180px;margin:24px auto 0;padding:16px 18px;text-align:right;font-size:14px;"><a href="https://thorshall.gg/what-is-thors-hall" style="color:#f0d28b;text-decoration:underline;font-weight:800;">What Is Thor's Hall?</a></div>
 </body>
 </html>
