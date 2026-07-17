@@ -1180,7 +1180,7 @@ button:disabled{opacity:.45;cursor:not-allowed}
 
 
 /* =========================================================
-   V17 AUDIO ENGINE, WIN PATHS & MUSIC
+   V18 AUDIO ENGINE, WIN PATHS & ADAPTIVE MUSIC
    ========================================================= */
 :root{
   --stage-unit:min(1vw,1.7778vh);
@@ -1367,7 +1367,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
   pointer-events:none;
 }
 
-/* V17 keeps the exact row alignment and smooth physical reel settle */
+/* V18 preserves exact row alignment and smooth physical reel settle */
 .column-reel.spinning .reel-item img{
   filter:blur(.92px) drop-shadow(0 .22vw .25vw rgba(0,0,0,.76));
   opacity:.91;
@@ -1409,7 +1409,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
 }
 
 
-/* V17: reliable Web Audio mixer, Viking sound identity, background music and boosted-spins mode */
+/* V18: reliable Web Audio mixer, adaptive Viking sound identity and boosted-spins mode */
 .betpill{position:relative}
 .betpill small{
   display:block;
@@ -1501,7 +1501,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
 
 
 /* =========================================================
-   V17 WIN PRESENTATION & BACKGROUND MUSIC POLISH
+   V18 WIN PRESENTATION & ADAPTIVE MUSIC POLISH
    ========================================================= */
 .win-lines{
   position:absolute;
@@ -1577,6 +1577,27 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
   .win-route b{font-size:1vw}
 }
 
+
+/* =========================================================
+   V18 ADAPTIVE AUDIO & WIN PACING POLISH
+   ========================================================= */
+.win-link-tracer{
+  fill:none;
+  stroke:#ffffff;
+  stroke-width:1.7;
+  stroke-linecap:round;
+  vector-effect:non-scaling-stroke;
+  filter:drop-shadow(0 0 5px rgba(121,235,255,.95));
+  stroke-dasharray:.055 .945;
+  animation:winTracer 1.05s linear infinite;
+  opacity:.92;
+}
+@keyframes winTracer{to{stroke-dashoffset:-1}}
+.stage.audio-spin .frame-glow{opacity:.78}
+.stage.audio-tease .frame-glow{opacity:1;filter:drop-shadow(0 0 1.3vw rgba(57,224,255,.70))}
+.stage.audio-win .frame-glow{opacity:.95;filter:drop-shadow(0 0 1.15vw rgba(255,216,119,.68))}
+.win-route .route-tier{color:#8feeff;font-weight:800;letter-spacing:.08em}
+
 </style>
 
 <script type="application/ld+json">
@@ -1617,12 +1638,12 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
     <div id="historyList"></div>
   </div>
 
-  <div class="version-tag">V17</div>
+  <div class="version-tag">V18</div>
   <div class="release-badge">Demo Build</div>
   <div class="build-info" id="buildInfo">
-    Build: V17<br>
+    Build: V18<br>
     Math: target ~96% simulated RTP<br>
-    Sound: V17 music + win sequencing<br>
+    Sound: V18 adaptive Nordic mix<br>
     QA: add <code>?qa=1</code>
   </div>
 
@@ -1702,7 +1723,7 @@ button:focus-visible{outline:.14vw solid rgba(71,215,255,.92);outline-offset:.12
       <div class="start-chips">
         <span class="start-chip">1,024 ways</span>
         <span class="start-chip">10,000x max win</span>
-        <span class="start-chip">V17 win paths + music</span>
+        <span class="start-chip">V18 adaptive audio</span>
       </div>
       <label class="age-check"><input type="checkbox" id="ageCheck"> I am 18+ and understand this demo has no cash value.</label>
       <div class="preload-bar"><div class="preload-fill" id="preloadFill"></div></div>
@@ -1792,59 +1813,60 @@ const ASSETS = {
 };
 
 const SOUND_FILES = {
-  click: "/sounds/v17/ui-click.mp3",
-  toggleOn: "/sounds/v17/toggle-on.mp3",
-  toggleOff: "/sounds/v17/toggle-off.mp3",
-  spinStart: "/sounds/v17/spin-start.mp3",
-  spin: "/sounds/v17/reel-loop.mp3",
-  stop1: "/sounds/v17/reel-stop-1.mp3",
-  stop2: "/sounds/v17/reel-stop-2.mp3",
-  stop3: "/sounds/v17/reel-stop-3.mp3",
-  stop4: "/sounds/v17/reel-stop-4.mp3",
-  stop5: "/sounds/v17/reel-stop-5.mp3",
-  land: "/sounds/v17/symbol-land.mp3",
-  fs: "/sounds/v17/fs-hit.mp3",
-  tease: "/sounds/v17/tease.mp3",
-  winSmall: "/sounds/v17/win-small.mp3",
-  winMedium: "/sounds/v17/win-medium.mp3",
-  big: "/sounds/v17/win-big.mp3",
-  bonus: "/sounds/v17/bonus-open.mp3",
-  hidden: "/sounds/v17/hidden-open.mp3",
-  thunder: "/sounds/v17/thunder.mp3",
-  boost: "/sounds/v17/boost-on.mp3",
-  boostOff: "/sounds/v17/boost-off.mp3",
-  autoOn: "/sounds/v17/auto-on.mp3",
-  autoOff: "/sounds/v17/auto-off.mp3",
-  winLine: "/sounds/v17/win-line.mp3",
-  music: "/sounds/v17/midgardur-ambience.mp3"
+  click: "/sounds/v18/ui-click.mp3",
+  toggleOn: "/sounds/v18/toggle-on.mp3",
+  toggleOff: "/sounds/v18/toggle-off.mp3",
+  spinStart: "/sounds/v18/spin-start.mp3",
+  spinStartBoosted: "/sounds/v18/spin-start-boosted.mp3",
+  spin: "/sounds/v18/reel-loop.mp3",
+  stop1: "/sounds/v18/reel-stop-1.mp3",
+  stop2: "/sounds/v18/reel-stop-2.mp3",
+  stop3: "/sounds/v18/reel-stop-3.mp3",
+  stop4: "/sounds/v18/reel-stop-4.mp3",
+  stop5: "/sounds/v18/reel-stop-5.mp3",
+  land1: "/sounds/v18/symbol-land-1.mp3",
+  land2: "/sounds/v18/symbol-land-2.mp3",
+  land3: "/sounds/v18/symbol-land-3.mp3",
+  fs1: "/sounds/v18/fs-hit-1.mp3",
+  fs2: "/sounds/v18/fs-hit-2.mp3",
+  fs3: "/sounds/v18/fs-hit-3.mp3",
+  fs4: "/sounds/v18/fs-hit-4.mp3",
+  fs5: "/sounds/v18/fs-hit-5.mp3",
+  tease: "/sounds/v18/tease.mp3",
+  winTiny: "/sounds/v18/win-tiny.mp3",
+  winSmall: "/sounds/v18/win-small.mp3",
+  winMedium: "/sounds/v18/win-medium.mp3",
+  winBig: "/sounds/v18/win-big.mp3",
+  winMega: "/sounds/v18/win-mega.mp3",
+  winEpic: "/sounds/v18/win-epic.mp3",
+  winMax: "/sounds/v18/win-max.mp3",
+  bonus: "/sounds/v18/bonus-open.mp3",
+  bonusSuper: "/sounds/v18/bonus-super.mp3",
+  hidden: "/sounds/v18/hidden-open.mp3",
+  thunder: "/sounds/v18/thunder.mp3",
+  boost: "/sounds/v18/boost-on.mp3",
+  boostOff: "/sounds/v18/boost-off.mp3",
+  autoOn: "/sounds/v18/auto-on.mp3",
+  autoOff: "/sounds/v18/auto-off.mp3",
+  buyOpen: "/sounds/v18/buy-open.mp3",
+  winLine: "/sounds/v18/win-line.mp3",
+  musicAmbient: "/sounds/v18/music-ambient.mp3",
+  musicPulse: "/sounds/v18/music-pulse.mp3",
+  musicTension: "/sounds/v18/music-tension.mp3"
 };
 
 const SOUND_VOLUME = {
-  click:.42,
-  toggleOn:.68,
-  toggleOff:.58,
-  spinStart:.88,
-  spin:.47,
-  stop1:.78,
-  stop2:.80,
-  stop3:.82,
-  stop4:.84,
-  stop5:.88,
-  land:.28,
-  fs:.94,
-  tease:.72,
-  winSmall:.62,
-  winMedium:.76,
-  big:.90,
-  bonus:.84,
-  hidden:.92,
-  thunder:.78,
-  boost:.78,
-  boostOff:.56,
-  autoOn:.55,
-  autoOff: .54,
-  winLine: .46,
-  music: .16
+  click:.36, toggleOn:.58, toggleOff:.48,
+  spinStart:.82, spinStartBoosted:.92, spin:.38,
+  stop1:.72, stop2:.75, stop3:.78, stop4:.82, stop5:.88,
+  land1:.24, land2:.23, land3:.25,
+  fs1:.68, fs2:.76, fs3:.88, fs4:.94, fs5:1.0,
+  tease:.68,
+  winTiny:.42, winSmall:.55, winMedium:.68, winBig:.80, winMega:.88, winEpic:.94, winMax:1.0,
+  bonus:.88, bonusSuper:.94, hidden:1.0, thunder:.76,
+  boost:.72, boostOff:.48, autoOn:.50, autoOff:.46, buyOpen:.58,
+  winLine:.38,
+  musicAmbient:1, musicPulse:1, musicTension:1
 };
 
 const SYMBOLS = [
@@ -1993,7 +2015,7 @@ const state = {
   sessionWagered: 0,
   sessionReturned: 0,
   started: false,
-  saveVersion: "midgardur-v17",
+  saveVersion: "midgardur-v18",
   assetsReady: false,
   ageAccepted: false,
   forceNext: null,
@@ -2013,7 +2035,17 @@ let audioMaster = null;
 let audioCompressor = null;
 let audioMusicGain = null;
 let backgroundMusic = null;
-const MUSIC_BASE_GAIN = .16;
+let musicMode = "idle";
+const MUSIC_MASTER_BASE = 1;
+const MUSIC_MODE_GAINS = {
+  idle:        {ambient:.165,pulse:.018,tension:.0001},
+  spin:        {ambient:.105,pulse:.105,tension:.006},
+  boostedSpin: {ambient:.095,pulse:.145,tension:.026},
+  tease:       {ambient:.070,pulse:.120,tension:.145},
+  evaluate:    {ambient:.105,pulse:.038,tension:.025},
+  win:         {ambient:.085,pulse:.030,tension:.055},
+  bonus:       {ambient:.125,pulse:.072,tension:.050}
+};
 const audioRawCache = new Map();
 const audioBufferCache = new Map();
 const audioLoadErrors = new Map();
@@ -2021,7 +2053,7 @@ const audioEventLog = [];
 let audioDecodePromise = null;
 let activeSpinAudio = null;
 let audioUnlocked = false;
-let v17MigrationApplied = false;
+let v18MigrationApplied = false;
 
 function preloadAssets(){
   const imgSources = Object.values(ASSETS);
@@ -2044,7 +2076,7 @@ function preloadAssets(){
       state.assetsReady = true;
       dom.startBtn.disabled = !(state.ageAccepted || (dom.ageCheck && dom.ageCheck.checked));
       if(dom.preloadFill) dom.preloadFill.style.width = "100%";
-      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V17 audio loaded.";
+      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V18 adaptive audio loaded.";
     }
   }
 
@@ -2079,7 +2111,7 @@ function preloadAssets(){
       state.assetsReady = true;
       dom.startBtn.disabled = !(state.ageAccepted || (dom.ageCheck && dom.ageCheck.checked));
       if(dom.preloadFill) dom.preloadFill.style.width = "100%";
-      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V17 audio loaded.";
+      if(dom.preloadText) dom.preloadText.textContent = audioLoadErrors.size ? "Ready — audio fallback armed." : "Ready — V18 adaptive audio loaded.";
       dom.startBtn.disabled = false;
     }
   }, 2200);
@@ -2089,8 +2121,8 @@ function preloadAssets(){
 
 const BUILD = {
   name: "midgardur-training-slot",
-  version: "v17-win-paths-music",
-  buildHash: "midgardur-v17-20260716",
+  version: "v18-adaptive-audio",
+  buildHash: "midgardur-v18-20260716",
   fakeMoneyOnly: true,
   deployFile: "training.html"
 };
@@ -2154,18 +2186,18 @@ function saveGame(){
 }
 
 function loadGame(){
-  const raw = safeStorageGet(state.saveVersion) || safeStorageGet("midgardur-v16") || safeStorageGet("midgardur-v15") || safeStorageGet("midgardur-v14") || safeStorageGet("midgardur-v13");
+  const raw = safeStorageGet(state.saveVersion) || safeStorageGet("midgardur-v17") || safeStorageGet("midgardur-v16") || safeStorageGet("midgardur-v15") || safeStorageGet("midgardur-v14") || safeStorageGet("midgardur-v13");
   if(!raw) return;
 
   try{
     const data = JSON.parse(raw);
-    if(!data || ![state.saveVersion,"midgardur-v16","midgardur-v15","midgardur-v14","midgardur-v13"].includes(data.version)) return;
+    if(!data || ![state.saveVersion,"midgardur-v17","midgardur-v16","midgardur-v15","midgardur-v14","midgardur-v13"].includes(data.version)) return;
 
     state.balance = Number.isFinite(data.balance) ? data.balance : state.balance;
     state.displayBalance = state.balance;
     state.betIndex = Number.isFinite(data.betIndex) ? data.betIndex : state.betIndex;
     state.featureActive = !!data.featureActive;
-    v17MigrationApplied = data.version !== state.saveVersion;
+    v18MigrationApplied = data.version !== state.saveVersion;
     state.muted = !!data.muted;
     state.turbo = !!data.turbo;
     state.sessionSpins = Number.isFinite(data.sessionSpins) ? data.sessionSpins : 0;
@@ -2257,7 +2289,7 @@ function ensureAudioGraph(){
     audioCompressor.release.value = .18;
 
     audioMaster.gain.value = state.muted ? 0 : .92;
-    audioMusicGain.gain.value = MUSIC_BASE_GAIN;
+    audioMusicGain.gain.value = MUSIC_MASTER_BASE;
     audioMusicGain.connect(audioMaster);
     audioMaster.connect(audioCompressor);
     audioCompressor.connect(audioCtx.destination);
@@ -2319,29 +2351,67 @@ async function unlockAudio(){
 function setMusicDuck(multiplier=1, duration=.28){
   if(!audioCtx || !audioMusicGain) return;
   const now = audioCtx.currentTime;
-  const target = Math.max(.012, MUSIC_BASE_GAIN * Math.max(.08,Math.min(1.1,multiplier)));
+  const target = Math.max(.025, MUSIC_MASTER_BASE * Math.max(.03,Math.min(1.05,multiplier)));
   audioMusicGain.gain.cancelScheduledValues(now);
-  audioMusicGain.gain.setTargetAtTime(target, now, Math.max(.015,duration/3));
+  audioMusicGain.gain.setTargetAtTime(target, now, Math.max(.018,duration/3));
+}
+
+function setMusicMode(mode="idle", duration=.30){
+  musicMode = MUSIC_MODE_GAINS[mode] ? mode : "idle";
+  dom.stage.classList.toggle("audio-spin", musicMode === "spin" || musicMode === "boostedSpin");
+  dom.stage.classList.toggle("audio-tease", musicMode === "tease");
+  dom.stage.classList.toggle("audio-win", musicMode === "win");
+  if(!audioCtx || !backgroundMusic) return;
+  const values = MUSIC_MODE_GAINS[musicMode];
+  const now = audioCtx.currentTime;
+  for(const [name,gainNode] of Object.entries(backgroundMusic.gains)){
+    const target = Math.max(.0001, values[name] ?? .0001);
+    gainNode.gain.cancelScheduledValues(now);
+    gainNode.gain.setTargetAtTime(target,now,Math.max(.018,duration/3));
+  }
+}
+
+function restoreMusicMode(duration=.32){
+  const mode = state.pendingBonus ? "tease" : (state.inBonus ? "bonus" : "idle");
+  setMusicMode(mode,duration);
+  setMusicDuck(mode === "tease" ? .55 : 1,duration);
 }
 
 function startBackgroundMusic(){
-  if(state.muted || !audioCtx || audioCtx.state !== "running" || backgroundMusic) return false;
-  const buffer = audioBufferCache.get("music");
-  if(!buffer) return false;
-
+  if(state.muted || !audioCtx || audioCtx.state !== "running") return false;
+  if(backgroundMusic){ setMusicMode(state.inBonus ? "bonus" : "idle",.2); return true; }
+  const defs = [
+    ["ambient","musicAmbient"],
+    ["pulse","musicPulse"],
+    ["tension","musicTension"]
+  ];
+  if(defs.some(([,key]) => !audioBufferCache.get(key))) return false;
   try{
-    const source = audioCtx.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-    source.connect(audioMusicGain);
-    source.start();
-    backgroundMusic = source;
-    source.onended = () => { if(backgroundMusic === source) backgroundMusic = null; };
-    setMusicDuck(1,.35);
-    logAudioEvent("music","looping");
+    const startAt = audioCtx.currentTime + .065;
+    const sources = {};
+    const gains = {};
+    for(const [name,key] of defs){
+      const source = audioCtx.createBufferSource();
+      const gain = audioCtx.createGain();
+      source.buffer = audioBufferCache.get(key);
+      source.loop = true;
+      gain.gain.value = .0001;
+      source.connect(gain);
+      gain.connect(audioMusicGain);
+      source.start(startAt);
+      sources[name] = source;
+      gains[name] = gain;
+    }
+    backgroundMusic = {sources,gains,startedAt:startAt};
+    setMusicMode(state.inBonus ? "bonus" : "idle",.42);
+    setMusicDuck(1,.38);
+    logAudioEvent("musicAmbient","adaptive-loop");
+    logAudioEvent("musicPulse","adaptive-loop");
+    logAudioEvent("musicTension","adaptive-loop");
     return true;
   }catch(error){
     audioLoadErrors.set("music-play",String(error));
+    backgroundMusic = null;
     return false;
   }
 }
@@ -2763,8 +2833,8 @@ function synthFallback(type, options={}){
 
   const key = String(type).toLowerCase();
   if(key.startsWith("stop")){ tone(120,54,.18,.30,0,"sine"); tone(520,270,.10,.13,.004); }
-  else if(key === "fs"){ tone(392,590,.44,.24); tone(587,880,.48,.20,.08); tone(96,42,.58,.22,.01,"sine"); }
-  else if(key === "spinstart"){ tone(92,36,.55,.31,0,"sine"); tone(260,110,.18,.10,.035); }
+  else if(key.startsWith("fs")){ tone(392,590,.44,.24); tone(587,880,.48,.20,.08); tone(96,42,.58,.22,.01,"sine"); }
+  else if(key.startsWith("spinstart")){ tone(92,36,.55,.31,0,"sine"); tone(260,110,.18,.10,.035); }
   else if(key === "tease"){ tone(230,480,.55,.22,0,"sawtooth"); }
   else if(key.includes("big") || key === "hidden"){ tone(92,31,.76,.34,0,"sine"); tone(392,784,.54,.22,.08); }
   else if(key.includes("win")){ tone(520,880,.24,.20); tone(660,990,.30,.15,.055); }
@@ -2835,13 +2905,14 @@ function fadeSound(handle, target=0, duration=.16, stopAfter=false){
   }
 }
 
-function startSpinSound(){
+function startSpinSound(boosted=false){
   if(state.muted) return;
   stopSpinSound(true);
-  sfx("spinStart", {volume:state.turbo ? .90 : 1, rate:state.turbo ? 1.08 : 1});
+  setMusicMode(boosted ? "boostedSpin" : "spin", state.turbo ? .08 : .18);
+  sfx(boosted ? "spinStartBoosted" : "spinStart", {volume:state.turbo ? .90 : 1, rate:state.turbo ? 1.08 : 1});
   activeSpinAudio = playBuffer("spin", {
     loop:true,
-    volume:state.turbo ? .92 : 1,
+    volume:state.turbo ? .88 : 1,
     rate:state.turbo ? 1.13 : 1,
     fadeIn:state.turbo ? .035 : .13
   });
@@ -3181,6 +3252,7 @@ function drawConnectionSet(cellsByReel){
         const d=`M ${hub.x} ${hub.y} L ${pt.x} ${pt.y}`;
         dom.winLines.append(svgEl("path",{d,class:"win-link-glow win-branch",pathLength:1}));
         dom.winLines.append(svgEl("path",{d,class:"win-link-core win-branch",pathLength:1}));
+        dom.winLines.append(svgEl("path",{d,class:"win-link-tracer win-branch",pathLength:1}));
       }
       dom.winLines.append(svgEl("circle",{cx:pt.x,cy:pt.y,r:11,class:"win-node-glow"}));
       dom.winLines.append(svgEl("circle",{cx:pt.x,cy:pt.y,r:3.6,class:"win-node-core"}));
@@ -3199,6 +3271,7 @@ function drawScatterPath(keys){
     const d=`M ${a.x} ${a.y} L ${b.x} ${b.y}`;
     dom.winLines.append(svgEl("path",{d,class:"win-link-glow",pathLength:1}));
     dom.winLines.append(svgEl("path",{d,class:"win-link-core",pathLength:1}));
+    dom.winLines.append(svgEl("path",{d,class:"win-link-tracer",pathLength:1}));
   }
   for(const [c,r] of ordered){
     const pt=tileCenter(c,r);
@@ -3230,29 +3303,32 @@ async function presentWinningGroups(result, win, multiplier=1){
   if(win<=0 || !groups.length){
     clearWinConnections();
     await sleep(state.turbo?35:155);
-    setMusicDuck(1,.24);
+    restoreMusicMode(.24);
     return;
   }
 
-  setMusicDuck(win/getBet()>=15?.22:.46,.20);
-  const selected=groups.slice(0,state.turbo?1:Math.min(4,groups.length));
+  const timing=winPresentationTiming(win);
   const winX=win/Math.max(1,getBet());
-  const stepMs=state.turbo?105:(winX>=15?570:winX>=5?500:420);
+  setMusicMode("win",.18);
+  setMusicDuck(winX>=15?.18:.42,.18);
+  sfx(winSoundFor(win),{volume:1,rate:state.turbo?1.06:1});
+  const selected=groups.slice(0,state.turbo?1:Math.min(4,groups.length));
 
   for(let i=0;i<selected.length;i++){
     const g=selected[i];
     focusCells(g.cells);
     drawConnectionSet(g.cellsByReel);
-    showRoute(`<span class="route-symbol">${g.label.toUpperCase()}</span> &nbsp;•&nbsp; <b>${g.ways} ${g.ways===1?"WAY":"WAYS"}</b> &nbsp;•&nbsp; ${g.reels} REELS &nbsp;•&nbsp; ${fmtX(g.pay)} / WAY &nbsp;•&nbsp; <span class="route-amount">${fmt(g.displayAmount)} COINS</span>`);
-    sfx("winLine",{rate:.96+i*.035,volume:winX>=15?1.08:.90});
-    await sleep(stepMs);
+    const tier=winLabelFor(win);
+    showRoute(`<span class="route-tier">${tier}</span> &nbsp;•&nbsp; <span class="route-symbol">${g.label.toUpperCase()}</span> &nbsp;•&nbsp; <b>${g.ways} ${g.ways===1?"WAY":"WAYS"}</b> &nbsp;•&nbsp; ${g.reels} REELS &nbsp;•&nbsp; ${fmtX(g.pay)} / WAY &nbsp;•&nbsp; <span class="route-amount">${fmt(g.displayAmount)} COINS</span>`);
+    sfx("winLine",{rate:.96+i*.035,volume:winX>=15?1.04:.84,delay:i?0:.02});
+    await sleep(timing.group);
   }
 
   focusCells(result.wins||[]);
   const extra=groups.length-selected.length;
-  showRoute(`<b>TOTAL WIN ${fmt(win)}</b>${extra>0?` &nbsp;•&nbsp; ${groups.length} CONNECTING SYMBOLS`:""}`);
-  await sleep(state.turbo?100:(winX>=15?620:winX>=5?480:360));
-  setMusicDuck(winX>=15?.30:.72,.24);
+  showRoute(`<span class="route-tier">${winLabelFor(win)}</span> &nbsp;•&nbsp; <b>TOTAL ${fmt(win)}</b>${extra>0?` &nbsp;•&nbsp; ${groups.length} CONNECTING SYMBOLS`:""}`);
+  await sleep(timing.total);
+  setMusicDuck(winX>=15?.25:.66,.24);
 }
 
 async function presentScatterTrigger(result){
@@ -3261,8 +3337,10 @@ async function presentScatterTrigger(result){
   focusCells(keys);
   drawScatterPath(keys);
   showRoute(`<span class="route-symbol">FS RUNES</span> &nbsp;•&nbsp; <b>${result.fs} SCATTERS</b> &nbsp;•&nbsp; BONUS UNLOCKED`);
-  setMusicDuck(.25,.18);
-  sfx("winLine",{rate:.82,volume:1.05});
+  setMusicMode("tease",.16);
+  setMusicDuck(.22,.18);
+  sfx(`fs${Math.min(5,result.fs)}`,{rate:.96,volume:1.08});
+  sfx("winLine",{rate:.82,volume:.92,delay:.08});
   await sleep(state.turbo?180:760);
 }
 
@@ -3314,6 +3392,28 @@ function showWins(keys){
   });
 }
 
+function winSoundFor(win){
+  const x = win / Math.max(1,getBet());
+  if(x >= MATH.maxWinX) return "winMax";
+  if(x >= 100) return "winEpic";
+  if(x >= 50) return "winMega";
+  if(x >= 15) return "winBig";
+  if(x >= 5) return "winMedium";
+  if(x >= 1) return "winSmall";
+  return "winTiny";
+}
+
+function winPresentationTiming(win){
+  const x = win / Math.max(1,getBet());
+  if(state.turbo) return {group:95,total:110,big:520,gap:85};
+  if(x >= MATH.maxWinX) return {group:730,total:1050,big:3300,gap:700};
+  if(x >= 100) return {group:650,total:900,big:2900,gap:600};
+  if(x >= 50) return {group:600,total:800,big:2600,gap:520};
+  if(x >= 15) return {group:535,total:700,big:2250,gap:430};
+  if(x >= 5) return {group:455,total:520,big:0,gap:320};
+  return {group:360,total:380,big:0,gap:245};
+}
+
 function showBig(win){
   if(win / getBet() < 15) return;
 
@@ -3323,7 +3423,6 @@ function showBig(win){
 
   dom.bigAmount.textContent = fmt(win);
   dom.overlay.classList.add("show");
-  sfx("big");
   flash();
 
   dom.stage.classList.remove("shake");
@@ -3381,6 +3480,8 @@ function startPendingBonus(){
 
   setMsg(p.startMessage);
   showBubble(p.bubble);
+  setMusicMode("bonus",.34);
+  setMusicDuck(.30,.18);
   sfx(p.sound || "bonus");
   flash();
 
@@ -3422,7 +3523,7 @@ function startBonusByScatters(fsCount, paidBuy=false){
       body:`${MATH.superBonusSpins} free spins with a ${MATH.superBonusMultiplier}x win multiplier.`,
       startMessage:`SUPER FREE SPINS — ${MATH.superBonusSpins} spins at ${MATH.superBonusMultiplier}x.`,
       bubble:"Super game unlocked. Wins are doubled.",
-      sound:"bonus",
+      sound:"bonusSuper",
       css:"super-bonus"
     });
     return;
@@ -3466,6 +3567,7 @@ function finishBonusIfNeeded(){
 
   state.inBonus = false;
   state.bonusMode = null;
+  restoreMusicMode(.45);
   state.bonusMultiplier = 1;
   state.hiddenMinWin = 0;
   state.bonusBet = 0;
@@ -3529,7 +3631,7 @@ async function spin(options={}){
 
   startLoopingReels();
   setMusicDuck(state.turbo ? .62 : .52,.16);
-  startSpinSound();
+  startSpinSound(feature);
   await new Promise(res => setTimeout(res, state.turbo ? 90 : 350));
 
   setPhase("REEL_STOPPING");
@@ -3556,19 +3658,25 @@ async function spin(options={}){
     hideReel(c);
     setSpinSoundProgress((c + 1) / C);
     sfx(`stop${c+1}`, {rate:.99 + c * .006, volume:1, pan:(c-2)*.14});
-    setTimeout(() => sfx("land", {rate:.98 + c * .012, volume:.72, pan:(c-2)*.10}), state.turbo ? 8 : 24);
+    const landVariant = 1 + ((state.sessionSpins + c) % 3);
+    setTimeout(() => sfx(`land${landVariant}`, {rate:.97 + c * .012, volume:.80, pan:(c-2)*.10}), state.turbo ? 8 : 24);
 
     if(c === C - 1) stopSpinSound();
 
     const reelHasFS = finalColumn.includes("FS");
     const fs = countFS(c+1,outcome);
 
-    if(reelHasFS && (c < C - 1 || fs >= 3)) sfx("fs", {rate:.90 + Math.min(fs,5) * .045, volume:1.08, pan:(c-2)*.12});
+    if(reelHasFS && (c < C - 1 || fs >= 3)){
+      const fsStage = Math.max(1,Math.min(5,fs));
+      sfx(`fs${fsStage}`, {rate:.98 + fsStage*.008, volume:1.03, pan:(c-2)*.12});
+    }
 
     if(fs === 2 && c < C-1 && !teased){
       teased = true;
       setMsg("Two FS runes... one more opens the bonus!", true);
       showBubble("Hold... the gate may open.");
+      setMusicMode("tease",.18);
+      setMusicDuck(.42,.16);
       sfx("tease");
       flash();
 
@@ -3581,6 +3689,8 @@ async function spin(options={}){
   }
 
   stopSpinSound();
+  setMusicMode("evaluate",.22);
+  setMusicDuck(.70,.20);
   setPhase("EVALUATING");
 
   state.board = outcome;
@@ -3599,7 +3709,6 @@ async function spin(options={}){
     state.maxWinReached = true;
     if(state.inBonus) state.freeSpins = 0;
     setMsg(`MAX WIN ${MATH.maxWinX}x!`);
-    sfx("big");
   }
 
   state.roundWin += win;
@@ -3619,8 +3728,6 @@ async function spin(options={}){
     setMsg(`${result.fs} FS runes connected — bonus unlocked!`);
   }else if(win > 0){
     setMsg(`Win: ${fmt(win)} fake coins.`);
-    if(winX < 5) sfx("winSmall");
-    else if(winX < 15) sfx("winMedium");
   }else{
     setMsg(state.inBonus ? `Free spins left: ${state.freeSpins}` : "No win. Spin again.");
   }
@@ -3646,11 +3753,15 @@ async function spin(options={}){
   }
 
   if(winX >= 15){
+    const timing=winPresentationTiming(win);
     showBig(win);
-    setMusicDuck(.16,.16);
-    await sleep(state.turbo ? 520 : 2080);
-    setMusicDuck(.72,.30);
+    setMusicDuck(.11,.16);
+    await sleep(timing.big);
+    setMusicDuck(.58,.30);
   }
+
+  clearWinConnections();
+  await sleep(state.turbo ? 35 : 125);
 
   if(state.maxWinReached){
     if(state.inBonus){
@@ -3667,8 +3778,9 @@ async function spin(options={}){
     setPhase(state.inBonus ? "BONUS_PLAYING" : "IDLE");
   }
 
+  restoreMusicMode(.34);
   updateUI();
-  const nextSpinGap = state.turbo ? 70 : (win > 0 ? 310 : 230);
+  const nextSpinGap = win > 0 ? winPresentationTiming(win).gap : (state.turbo ? 70 : 220);
 
   if(!state.pendingBonus && state.inBonus){
     setTimeout(spin, nextSpinGap);
@@ -3696,7 +3808,7 @@ dom.spinBtn.onclick = () => {
 };
 
 dom.buyBtn.onclick = (e) => {
-  sfx("click");
+  sfx("buyOpen");
   trackEvent("bonus_buy_menu_open");
   e.stopPropagation();
   dom.autoMenu.classList.remove("show");
@@ -3826,7 +3938,7 @@ dom.soundBtn.onclick = async () => {
     setMasterMute(false);
     startBackgroundMusic();
     sfx("toggleOn", {force:true});
-    setMsg("Sound on — V17 mix and music ready.");
+    setMsg("Sound on — V18 adaptive mix ready.");
   }else{
     sfx("toggleOff", {force:true});
     setTimeout(() => {
@@ -3915,7 +4027,7 @@ dom.startBtn.onclick = async () => {
   startBackgroundMusic();
   dom.startScreen.classList.add("hide");
   sfx("toggleOn", {volume:.72, force:true});
-  if(v17MigrationApplied) setMsg("V17 loaded — music and win presentation ready.");
+  if(v18MigrationApplied) setMsg("V18 loaded — adaptive music and enhanced win pacing ready.");
 };
 
 dom.ageCheck.onchange = () => {
@@ -4104,6 +4216,8 @@ window.midgardurFinalAudit = function(){
     currentPhase: state.phase,
     spinAudioActive: !!activeSpinAudio,
     backgroundMusicActive: !!backgroundMusic,
+    musicMode,
+    musicStemCount: backgroundMusic ? Object.keys(backgroundMusic.sources).length : 0,
     winLinesVisible: !!(dom.winLines && dom.winLines.classList.contains("show")),
     audioContextState: audioCtx ? audioCtx.state : "not-created",
     audioUnlocked,
@@ -4171,6 +4285,8 @@ window.midgardurDiagnostics = function(){
     forceNext: state.forceNext,
     spinAudioActive: !!activeSpinAudio,
     backgroundMusicActive: !!backgroundMusic,
+    musicMode,
+    musicStemCount: backgroundMusic ? Object.keys(backgroundMusic.sources).length : 0,
     winLinesVisible: !!(dom.winLines && dom.winLines.classList.contains("show")),
     audioContextState: audioCtx ? audioCtx.state : "not-created",
     audioUnlocked,
