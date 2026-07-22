@@ -284,9 +284,90 @@
       color: var(--gold-light);
     }
 
+
+    .live-stats {
+      margin-top: 18px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 19px;
+      background: var(--panel);
+    }
+
+    .live-stats-head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 14px;
+    }
+
+    .live-stats h2 {
+      margin: 0;
+      color: var(--gold-light);
+      font-size: 23px;
+      line-height: 1.2;
+    }
+
+    .live-stats-note {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: right;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 11px;
+    }
+
+    .stat-box {
+      padding: 17px 14px;
+      text-align: center;
+      border: 1px solid rgba(210, 162, 74, 0.2);
+      border-radius: 14px;
+      background: var(--panel-soft);
+    }
+
+    .stat-box span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 900;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .stat-box strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--text);
+      font-size: 22px;
+      line-height: 1.15;
+    }
+
+    .stats-status {
+      margin-top: 12px;
+      color: #9f917e;
+      font-size: 12px;
+      text-align: center;
+    }
+
     @media (max-width: 760px) {
       .content-grid {
         grid-template-columns: 1fr;
+      }
+
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .live-stats-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .live-stats-note {
+        text-align: left;
       }
 
       .hero {
@@ -351,6 +432,42 @@
 
         <div class="legal-note">
           18+ only. Bonus availability depends on eligibility, location and Rainbet's current terms.
+        </div>
+      </section>
+
+
+      <section class="live-stats" aria-label="Live campaign statistics">
+        <div class="live-stats-head">
+          <h2>Live campaign statistics</h2>
+          <div class="live-stats-note">
+            Campaign totals reported through Rainbet.
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-box">
+            <span>Wagered</span>
+            <strong id="georgina-wager">$0.00</strong>
+          </div>
+
+          <div class="stat-box">
+            <span>Deposits</span>
+            <strong id="georgina-deposits">$0.00</strong>
+          </div>
+
+          <div class="stat-box">
+            <span>Visits</span>
+            <strong id="georgina-visits">0</strong>
+          </div>
+
+          <div class="stat-box">
+            <span>Registrations</span>
+            <strong id="georgina-registrations">0</strong>
+          </div>
+        </div>
+
+        <div class="stats-status" id="georgina-stats-status">
+          Loading campaign data…
         </div>
       </section>
 
@@ -424,5 +541,55 @@
       <a href="/affiliate-disclosure">Affiliate Disclosure</a>
     </footer>
   </div>
+
+  <script>
+    (async function () {
+      const money = (value) =>
+        "$" + Number(value || 0).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+      const setText = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+      };
+
+      try {
+        const response = await fetch(
+          "/.netlify/functions/rainbet-stats-partners",
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) {
+          throw new Error("Campaign statistics are temporarily unavailable.");
+        }
+
+        const data = await response.json();
+        const georgina = data.partners && data.partners.georgina;
+
+        if (!georgina) {
+          throw new Error("Georgina campaign has not been connected yet.");
+        }
+
+        setText("georgina-wager", money(georgina.wager));
+        setText("georgina-deposits", money(georgina.deposits));
+        setText("georgina-visits", georgina.visits || 0);
+        setText("georgina-registrations", georgina.registrations || 0);
+
+        const updated = data.updated
+          ? new Date(data.updated).toLocaleString()
+          : "just now";
+
+        setText("georgina-stats-status", "Last refreshed: " + updated);
+      } catch (error) {
+        setText(
+          "georgina-stats-status",
+          error.message || "Campaign statistics are temporarily unavailable."
+        );
+      }
+    })();
+  </script>
+
 </body>
 </html>
