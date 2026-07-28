@@ -447,22 +447,22 @@
         <div class="stats-grid">
           <div class="stat-box">
             <span>Wagered</span>
-            <strong id="georgina-wager">$0.00</strong>
+            <strong id="georgina-wager">—</strong>
           </div>
 
           <div class="stat-box">
             <span>Deposits</span>
-            <strong id="georgina-deposits">$0.00</strong>
+            <strong id="georgina-deposits">—</strong>
           </div>
 
           <div class="stat-box">
             <span>Visits</span>
-            <strong id="georgina-visits">0</strong>
+            <strong id="georgina-visits">—</strong>
           </div>
 
           <div class="stat-box">
             <span>Registrations</span>
-            <strong id="georgina-registrations">0</strong>
+            <strong id="georgina-registrations">—</strong>
           </div>
         </div>
 
@@ -568,14 +568,18 @@
         const data = await response.json();
         const georgina = data.partners && data.partners.georgina;
 
-        if (!georgina) {
+        if (!georgina || georgina.connected !== true) {
           throw new Error("Georgina campaign has not been connected yet.");
+        }
+
+        if (georgina.available !== true) {
+          throw new Error(georgina.error || "Campaign statistics are temporarily unavailable.");
         }
 
         setText("georgina-wager", money(georgina.wager));
         setText("georgina-deposits", money(georgina.deposits));
-        setText("georgina-visits", georgina.visits || 0);
-        setText("georgina-registrations", georgina.registrations || 0);
+        setText("georgina-visits", Number(georgina.visits ?? 0).toLocaleString("en-US"));
+        setText("georgina-registrations", Number(georgina.registrations ?? 0).toLocaleString("en-US"));
 
         const updated = data.updated
           ? new Date(data.updated).toLocaleString()

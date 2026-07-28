@@ -183,6 +183,17 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
   line-height:1;
 }
 
+.stats-status-line{
+  max-width:980px;
+  margin:-16px auto 22px;
+  color:rgba(230,211,176,.72);
+  font-size:12px;
+  letter-spacing:.035em;
+  text-align:center;
+  text-shadow:0 1px 0 #000;
+}
+.stats-status-line.error{color:#f2b5a8}
+
 
 .cut-top-left{
   clip-path:polygon(
@@ -446,22 +457,23 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 <div class="live-summary">
 <div class="stat-card engraved-box">
 <span>Total wagered</span>
-<strong id="stat-wager">$0.00</strong>
+<strong id="stat-wager">—</strong>
 </div>
 <div class="stat-card engraved-box cut-top-right">
 <span>Deposits tracked</span>
-<strong id="stat-deposits">$0.00</strong>
+<strong id="stat-deposits">—</strong>
 </div>
 <div class="face-gap"></div>
 <div class="stat-card engraved-box cut-top-left">
 <span>Visits</span>
-<strong id="stat-visits">0</strong>
+<strong id="stat-visits">—</strong>
 </div>
 <div class="stat-card engraved-box">
 <span>Registrations</span>
-<strong id="stat-registrations">0</strong>
+<strong id="stat-registrations">—</strong>
 </div>
 </div>
+<div class="stats-status-line" id="stats-status" aria-live="polite">Loading live statistics…</div>
 <div class="partner-board">
 <div class="board-title engraved-box">
 <h1>Thor's Hall Partner Ledger</h1>
@@ -481,11 +493,11 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 <tbody>
 <tr>
 <td class="partner-name active">Mithra</td>
-<td id="row-wager">$0.00</td>
-<td id="row-deposits">$0.00</td>
-<td id="row-visits">0</td>
-<td id="row-registrations">0</td>
-<td id="row-ngr">$0.00</td>
+<td id="row-wager">—</td>
+<td id="row-deposits">—</td>
+<td id="row-visits">—</td>
+<td id="row-registrations">—</td>
+<td id="row-ngr">—</td>
 </tr>
 <tr>
 <td class="partner-name inactive">Manager Network</td>
@@ -571,34 +583,73 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 </div>
 <script>
 (async function(){
-const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});
-const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  const set = (id, value) => {
+    const element = document.getElementById(id);
+    if(element) element.textContent = value;
+  };
 
-try{
-  // Top boxes = overall all-time account stats
-  const overallRes = await fetch('/.netlify/functions/rainbet-stats',{cache:'no-store'});
-  if(overallRes.ok){
-    const overall = await overallRes.json();
+  const status = document.getElementById('stats-status');
+  const setStatus = (message, isError = false) => {
+    if(!status) return;
+    status.textContent = message;
+    status.classList.toggle('error', isError);
+  };
 
-    set('stat-wager',money(overall.wager));
-    set('stat-deposits',money(overall.deposits));
-    set('stat-visits',overall.visits || 0);
-    set('stat-registrations',overall.registrations || 0);
-  }
+  const validNumber = value => value !== null && value !== undefined && Number.isFinite(Number(value));
+  const money = value => validNumber(value)
+    ? '$' + Number(value).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+    : '—';
+  const count = value => validNumber(value)
+    ? Number(value).toLocaleString('en-US', {maximumFractionDigits:0})
+    : '—';
 
-  // Creator rows = creator campaign stats only
-  const partnersRes = await fetch('/.netlify/functions/rainbet-stats-partners',{cache:'no-store'});
-  if(partnersRes.ok){
-    const data = await partnersRes.json();
+  try{
+    const response = await fetch('/.netlify/functions/rainbet-stats-partners', {cache:'no-store'});
+    const data = await response.json().catch(() => null);
+
+    if(!response.ok || !data){
+      throw new Error(data?.details || data?.error || 'Live statistics request failed.');
+    }
+
+    const overall = data.overall || {};
     const mithra = data.partners?.mithra || {};
+    let sectionsLoaded = 0;
 
-    set('row-wager',money(mithra.wager));
-    set('row-deposits',money(mithra.deposits));
-    set('row-visits',mithra.visits || 0);
-    set('row-registrations',mithra.registrations || 0);
-    set('row-ngr',money(mithra.ngr));
+    if(overall.available){
+      set('stat-wager', money(overall.wager));
+      set('stat-deposits', money(overall.deposits));
+      set('stat-visits', count(overall.visits));
+      set('stat-registrations', count(overall.registrations));
+      sectionsLoaded += 1;
+    }
+
+    if(mithra.available){
+      set('row-wager', money(mithra.wager));
+      set('row-deposits', money(mithra.deposits));
+      set('row-visits', count(mithra.visits));
+      set('row-registrations', count(mithra.registrations));
+      set('row-ngr', money(mithra.ngr ?? mithra.casinoNgr));
+      sectionsLoaded += 1;
+    }
+
+    if(!sectionsLoaded){
+      throw new Error('Rainbet returned no available statistics.');
+    }
+
+    const refreshed = data.updated ? new Date(data.updated) : null;
+    const timeText = refreshed && !Number.isNaN(refreshed.getTime())
+      ? refreshed.toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'})
+      : 'just now';
+
+    if(sectionsLoaded === 2){
+      setStatus('Live Rainbet statistics refreshed ' + timeText + '.');
+    }else{
+      setStatus('Some live statistics are temporarily unavailable. Refreshed ' + timeText + '.', true);
+    }
+  }catch(error){
+    setStatus('Live Rainbet statistics are temporarily unavailable. Please check again shortly.', true);
+    console.error("Thor's Hall partner stats error:", error);
   }
-}catch(e){}
 })();
 </script>
 <script>

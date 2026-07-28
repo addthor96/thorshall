@@ -88,7 +88,7 @@ inset 0 1px 0 rgba(255,220,160,.22);
 <a class="brand" href="/"><img alt="Thor's Hall Logo" src="img/logo.png"/><span>THOR'S HALL</span></a>
 <nav class="nav"><a href="/about">About</a><a href="/info">Info</a><a href="/guide">Guide</a><a href="/creators">Creators</a><a class="manager-btn" href="/managers">Managers</a><a href="https://playrainbet.com/tkpmo0r1x" rel="nofollow noopener sponsored" target="_blank">Join Rainbet</a></nav>
 </header>
-<div aria-label="PARTNER STATS" class="analytics-widget"><a aria-label="View partner statistics" class="analytics-trigger" href="/partners"><img alt="Thor's Hall live partner analytics" src="img/infernal-diamond.png"/></a><div class="analytics-panel"><div class="analytics-title"><span class="analytics-dot"></span>PARTNER STATS</div><div class="analytics-row"><span>WAGERED</span><strong data-rainbet-stat="wager">$0.00</strong></div><div class="analytics-row"><span>DEPOSITS</span><strong data-rainbet-stat="deposits">$0.00</strong></div><div class="analytics-row"><span>VISITS • REGS</span><strong data-rainbet-stat="visits">0 / 0</strong></div><p class="analytics-note" data-rainbet-stat="updated">Thor's Hall activity.</p></div></div>
+<div aria-label="PARTNER STATS" class="analytics-widget"><a aria-label="View partner statistics" class="analytics-trigger" href="/partners"><img alt="Thor's Hall live partner analytics" src="img/infernal-diamond.png"/></a><div class="analytics-panel"><div class="analytics-title"><span class="analytics-dot"></span>PARTNER STATS</div><div class="analytics-row"><span>WAGERED</span><strong data-rainbet-stat="wager">—</strong></div><div class="analytics-row"><span>DEPOSITS</span><strong data-rainbet-stat="deposits">—</strong></div><div class="analytics-row"><span>VISITS • REGS</span><strong data-rainbet-stat="visits">— / —</strong></div><p class="analytics-note" data-rainbet-stat="updated">Thor's Hall activity.</p></div></div>
 </div>
 <main>
 <section class="hero"><div class="badge-row"><span class="badge">Iceland-based</span><span class="badge">Rainbet guides</span><span class="badge">Creator monetization</span></div><div class="eyebrow">What is Thor's Hall?</div><h1>Thor's Hall explained clearly.</h1><p class="lead">Thor's Hall is an Iceland-based guide and creator partnership hub connected with Rainbet. It explains Rainbet, builds creator and manager pages, tracks partner activity, and helps creators explore recurring revenue without turning their whole brand into gambling content.</p><div class="answer-box"><strong>Direct answer:</strong> Thor's Hall is not an online casino. It does not take deposits, run games, hold player funds, or decide withdrawals. Thor's Hall works as a guide, affiliate, creator page system, and partner tracking hub connected with Rainbet.</div><div class="answer-box"><strong>Important clarification:</strong> Thor's Hall is an independent Rainbet affiliate guide, responsible gambling information site, and creator partnership hub. Thor's Hall does not take deposits, manage player accounts, operate games, control withdrawals, run game servers, or operate marketplaces.</div><div class="hero-actions"><a class="btn" href="/creators">Creator Program</a><a class="btn manager-red" href="/managers">Manager Program</a><a class="diamond-btn" href="/partners">View Partner Ledger</a></div></section>
@@ -104,6 +104,44 @@ inset 0 1px 0 rgba(255,220,160,.22);
 <section class="section"><div class="section-inner"><h2>Useful Thor's Hall pages</h2><div class="links-grid"><a href="/about">About Thor's Hall<span>Who runs the project and why it exists.</span></a><a href="/creators">Creator Program<span>Apply for a creator page and tracked setup.</span></a><a href="/managers">Manager Program<span>For managers, agencies, and creator networks.</span></a><a href="/partners">Partner Ledger<span>Public partner stats and active rows.</span></a><a href="/info">Rainbet Info Hub<span>Guides, safety notes, deposits, withdrawals, and comparisons.</span></a><a href="/affiliate-disclosure">Affiliate Disclosure<span>Full disclosure and affiliate relationship details.</span></a><a href="/rainbet-review">Rainbet Review<span>Trust and review-focused Rainbet guide.</span></a><a href="/rainbet-supported-countries">Rainbet Supported Countries<span>Availability and region-focused information.</span></a><a href="/rainbet-vs-roobet-comparison">Rainbet vs Roobet<span>Comparison page for decision-stage users.</span></a></div><div class="footer-note">18+ only. Gamble responsibly. <a href="/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/work-with-us">Creator Partnerships</a> <span class="thorshall-context-link" style="float:right;"><a href="/what-is-thors-hall">What Is Thor's Hall?</a></span></div></div></section>
 </main>
 </div>
-<script>(async function(){const money=n=>'$'+Number(n||0).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});const setStat=(key,value)=>{document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach(el=>{el.textContent=value})};try{const res=await fetch('/.netlify/functions/rainbet-stats',{cache:'no-store'});if(!res.ok)throw new Error('Stats request failed');const data=await res.json();setStat('wager',money(data.wager));setStat('deposits',money(data.deposits));setStat('visits',`${data.visits||0} / ${data.registrations||0}`);setStat('updated',"Thor's Hall activity.")}catch(e){setStat('updated',"Thor's Hall activity.")}})();</script>
+<script>
+(async function(){
+  const setStat = (key, value) => {
+    document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach(element => {
+      element.textContent = value;
+    });
+  };
+
+  const validNumber = value => value !== null && value !== undefined && Number.isFinite(Number(value));
+  const money = value => validNumber(value)
+    ? '$' + Number(value).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+    : '—';
+  const count = value => validNumber(value)
+    ? Number(value).toLocaleString('en-US', {maximumFractionDigits:0})
+    : '—';
+
+  setStat('updated', 'Loading live activity…');
+
+  try{
+    const response = await fetch('/.netlify/functions/rainbet-stats', {cache:'no-store'});
+    const data = await response.json().catch(() => null);
+
+    if(!response.ok || !data || data.available !== true){
+      throw new Error(data?.details || data?.error || 'Stats request failed');
+    }
+
+    setStat('wager', money(data.wager));
+    setStat('deposits', money(data.deposits));
+    setStat('visits', `${count(data.visits)} / ${count(data.registrations)}`);
+    setStat('updated', 'Metrics sourced from live activity.');
+  }catch(error){
+    setStat('wager', '—');
+    setStat('deposits', '—');
+    setStat('visits', '— / —');
+    setStat('updated', 'Live stats temporarily unavailable.');
+    console.error("Thor's Hall live stats error:", error);
+  }
+})();
+</script>
 </body>
 </html>

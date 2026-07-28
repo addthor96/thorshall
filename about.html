@@ -662,9 +662,9 @@ width:min(315px,calc(100vw - 36px));
 </a>
 <div class="analytics-panel">
 <div class="analytics-title"><span class="analytics-dot"></span>PARTNER STATS</div>
-<div class="analytics-row"><span>WAGERED</span><strong data-rainbet-stat="wager">$0.00</strong></div>
-<div class="analytics-row"><span>DEPOSITS</span><strong data-rainbet-stat="deposits">$0.00</strong></div>
-<div class="analytics-row"><span>VISITS • REGS</span><strong data-rainbet-stat="visits">0 / 0</strong></div>
+<div class="analytics-row"><span>WAGERED</span><strong data-rainbet-stat="wager">—</strong></div>
+<div class="analytics-row"><span>DEPOSITS</span><strong data-rainbet-stat="deposits">—</strong></div>
+<div class="analytics-row"><span>VISITS • REGS</span><strong data-rainbet-stat="visits">— / —</strong></div>
 <p class="analytics-note" data-rainbet-stat="updated">Metrics sourced from live activity.</p>
 </div>
 </div>
@@ -848,29 +848,40 @@ Users should only participate where legal, only if they are 18+, and only with m
 </div>
 <script>
 (async function(){
-  const money = n => '$' + Number(n || 0).toLocaleString('en-US', {
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  });
-
   const setStat = (key, value) => {
-    document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach(el => {
-      el.textContent = value;
+    document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach(element => {
+      element.textContent = value;
     });
   };
 
-  try{
-    const res = await fetch('/.netlify/functions/rainbet-stats', { cache: 'no-store' });
-    if(!res.ok) throw new Error('Stats request failed');
+  const validNumber = value => value !== null && value !== undefined && Number.isFinite(Number(value));
+  const money = value => validNumber(value)
+    ? '$' + Number(value).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+    : '—';
+  const count = value => validNumber(value)
+    ? Number(value).toLocaleString('en-US', {maximumFractionDigits:0})
+    : '—';
 
-    const data = await res.json();
+  setStat('updated', 'Loading live activity…');
+
+  try{
+    const response = await fetch('/.netlify/functions/rainbet-stats', {cache:'no-store'});
+    const data = await response.json().catch(() => null);
+
+    if(!response.ok || !data || data.available !== true){
+      throw new Error(data?.details || data?.error || 'Stats request failed');
+    }
 
     setStat('wager', money(data.wager));
     setStat('deposits', money(data.deposits));
-    setStat('visits', `${data.visits || 0} / ${data.registrations || 0}`);
-    setStat('updated', "Thor's Hall activity.");
-  }catch(e){
-    setStat('updated', "Thor's Hall activity.");
+    setStat('visits', `${count(data.visits)} / ${count(data.registrations)}`);
+    setStat('updated', 'Metrics sourced from live activity.');
+  }catch(error){
+    setStat('wager', '—');
+    setStat('deposits', '—');
+    setStat('visits', '— / —');
+    setStat('updated', 'Live stats temporarily unavailable.');
+    console.error("Thor's Hall live stats error:", error);
   }
 })();
 </script>
