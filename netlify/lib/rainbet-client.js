@@ -1,15 +1,16 @@
 "use strict";
 
 const API_URL = "https://portal.rainbetpartners.com/api/customer/v1/partner/report";
-const DEFAULT_FROM = "2019-01-01";
+const DEFAULT_FROM = "2019-01-01T00:00:00.000Z";
+const DEFAULT_EXCHANGE_DATE = "2019-01-01";
 const DEFAULT_COLUMNS = [
   "wager",
   "deposits_sum",
   "visits_count",
   "registrations_count",
-  "ftd_count",
-  "casino_ggr",
-  "casino_ngr"
+  "first_deposits_count",
+  "ggr",
+  "ngr"
 ];
 
 const FIELD_MAP = {
@@ -17,9 +18,14 @@ const FIELD_MAP = {
   deposits_sum: "deposits",
   visits_count: "visits",
   registrations_count: "registrations",
+  first_deposits_count: "ftd",
+  ggr: "ggr",
+  ngr: "ngr",
+
+  // Backward-compatible aliases in case Rainbet returns legacy names.
   ftd_count: "ftd",
-  casino_ggr: "casinoGgr",
-  casino_ngr: "casinoNgr"
+  casino_ggr: "ggr",
+  casino_ngr: "ngr"
 };
 
 function sleep(ms) {
@@ -29,7 +35,8 @@ function sleep(ms) {
 function tomorrowUtcDate() {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() + 1);
-  return date.toISOString().slice(0, 10);
+  date.setUTCHours(0, 0, 0, 0);
+  return date.toISOString();
 }
 
 function jsonResponse(statusCode, payload, extraHeaders = {}) {
@@ -163,14 +170,24 @@ function extractMetrics(data) {
     throw new Error("Rainbet returned a response, but the expected totals were not found.");
   }
 
-  const metrics = {};
+  const metrics = {
+    wager: null,
+    deposits: null,
+    visits: null,
+    registrations: null,
+    ftd: null,
+    ggr: null,
+    ngr: null
+  };
+
   for (const [source, destination] of Object.entries(FIELD_MAP)) {
-    metrics[destination] = Object.prototype.hasOwnProperty.call(raw, source)
-      ? raw[source]
-      : null;
+    if (!Object.prototype.hasOwnProperty.call(raw, source)) continue;
+    // Prefer the documented field names; aliases only fill an empty value.
+    if (metrics[destination] === null || ["wager", "deposits_sum", "visits_count", "registrations_count", "first_deposits_count", "ggr", "ngr"].includes(source)) {
+      metrics[destination] = raw[source];
+    }
   }
 
-  metrics.ngr = metrics.casinoNgr;
   return metrics;
 }
 
@@ -256,7 +273,7 @@ async function fetchReport({ token, campaignId = null, timeoutMs = 15000 }) {
     async: "false",
     from: DEFAULT_FROM,
     to: tomorrowUtcDate(),
-    exchange_rates_date: DEFAULT_FROM,
+    exchange_rates_date: DEFAULT_EXCHANGE_DATE,
     conversion_currency: "USD"
   });
 
