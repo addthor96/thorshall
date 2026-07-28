@@ -604,7 +604,7 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
     : '—';
 
   try{
-    const response = await fetch('/.netlify/functions/rainbet-stats-partners', {cache:'no-store'});
+    const response = await fetch('/.netlify/functions/rainbet-stats-partners');
     const data = await response.json().catch(() => null);
 
     if(!response.ok || !data){
@@ -644,7 +644,7 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
     if(sectionsLoaded === 2){
       setStatus('Live Rainbet statistics refreshed ' + timeText + '.');
     }else{
-      setStatus('Some live statistics are temporarily unavailable. Refreshed ' + timeText + '.', true);
+      setStatus('Live totals refreshed ' + timeText + '. One partner row is temporarily delayed.');
     }
   }catch(error){
     setStatus('Live Rainbet statistics are temporarily unavailable. Please check again shortly.', true);

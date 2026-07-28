@@ -22,6 +22,10 @@ const FIELD_MAP = {
   casino_ngr: "casinoNgr"
 };
 
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function tomorrowUtcDate() {
   const date = new Date();
   date.setUTCDate(date.getUTCDate() + 1);
@@ -198,7 +202,9 @@ async function requestOnce(url, authorization, timeoutMs) {
       try {
         data = JSON.parse(text);
       } catch (_error) {
-        throw new Error(`Rainbet returned an unreadable response (${response.status}).`);
+        const error = new Error(`Rainbet returned an unreadable response (${response.status}).`);
+        error.status = response.status;
+        throw error;
       }
     }
 
@@ -211,6 +217,35 @@ async function requestOnce(url, authorization, timeoutMs) {
   } finally {
     clearTimeout(timeout);
   }
+}
+
+function retryDelay(response, attempt) {
+  const header = response.headers.get("retry-after");
+  if (header) {
+    const seconds = Number(header);
+    if (Number.isFinite(seconds) && seconds >= 0) return Math.min(seconds * 1000, 10000);
+
+    const date = Date.parse(header);
+    if (Number.isFinite(date)) return Math.min(Math.max(date - Date.now(), 0), 10000);
+  }
+
+  return 1400 * (attempt + 1);
+}
+
+async function requestWithRateLimitRetry(url, authorization, timeoutMs) {
+  const maxRetries = 2;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    const result = await requestOnce(url, authorization, timeoutMs);
+
+    if (result.response.status !== 429 || attempt === maxRetries) {
+      return result;
+    }
+
+    await sleep(retryDelay(result.response, attempt));
+  }
+
+  throw new Error("Rainbet API request failed.");
 }
 
 async function fetchReport({ token, campaignId = null, timeoutMs = 15000 }) {
@@ -231,40 +266,38 @@ async function fetchReport({ token, campaignId = null, timeoutMs = 15000 }) {
   }
 
   const url = `${API_URL}?${params.toString()}`;
-  let lastError = null;
 
   for (let index = 0; index < candidates.length; index += 1) {
     const authorization = candidates[index];
+    const { response, data } = await requestWithRateLimitRetry(url, authorization, timeoutMs);
 
-    try {
-      const { response, data } = await requestOnce(url, authorization, timeoutMs);
-
-      if (response.ok) {
-        return extractMetrics(data);
-      }
-
-      const message =
-        data?.message ||
-        data?.error ||
-        data?.errors?.[0]?.message ||
-        `Rainbet API request failed with status ${response.status}.`;
-
-      lastError = new Error(String(message));
-
-      if (![401, 403].includes(response.status) || index === candidates.length - 1) {
-        throw lastError;
-      }
-    } catch (error) {
-      lastError = error instanceof Error ? error : new Error(String(error));
-      if (index === candidates.length - 1) throw lastError;
+    if (response.ok) {
+      return extractMetrics(data);
     }
+
+    const message =
+      data?.message ||
+      data?.error ||
+      data?.errors?.[0]?.message ||
+      `Rainbet API request failed with status ${response.status}.`;
+
+    const error = new Error(String(message));
+    error.status = response.status;
+
+    // Only try the alternate Authorization format for an actual auth failure.
+    if ([401, 403].includes(response.status) && index < candidates.length - 1) {
+      continue;
+    }
+
+    throw error;
   }
 
-  throw lastError || new Error("Rainbet API request failed.");
+  throw new Error("Rainbet API authentication failed.");
 }
 
 module.exports = {
   extractMetrics,
   fetchReport,
-  jsonResponse
+  jsonResponse,
+  sleep
 };

@@ -1,8 +1,25 @@
 "use strict";
 
-const { fetchReport, jsonResponse } = require("../lib/rainbet-client");
+const { fetchReport, jsonResponse, sleep } = require("../lib/rainbet-client");
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
+let memoryCache = null;
+let memoryCacheTime = 0;
+
+const cacheHeaders = {
+  "Cache-Control": "public, max-age=30, s-maxage=300, stale-while-revalidate=3600",
+  "Netlify-CDN-Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600"
+};
+
+function cachedResponse() {
+  if (!memoryCache || Date.now() - memoryCacheTime >= CACHE_TTL_MS) return null;
+  return jsonResponse(200, { ...memoryCache, cached: true }, cacheHeaders);
+}
 
 exports.handler = async function () {
+  const cached = cachedResponse();
+  if (cached) return cached;
+
   const token = process.env.RAINBET_STATISTIC_TOKEN;
 
   if (!token) {
@@ -23,73 +40,78 @@ exports.handler = async function () {
     }
   };
 
-  const jobs = [
-    ["overall", { name: "Overall", campaignId: null }],
-    ...Object.entries(partnersConfig).filter(([, config]) => String(config.campaignId || "").trim())
-  ];
-
-  const results = await Promise.allSettled(
-    jobs.map(([, config]) =>
-      fetchReport({
-        token,
-        campaignId: config.campaignId
-      })
-    )
-  );
-
   let overall = null;
   const partners = {};
   const errors = [];
 
-  jobs.forEach(([key, config], index) => {
-    const result = results[index];
-
-    if (result.status === "fulfilled") {
-      const payload = {
-        name: config.name,
-        connected: true,
-        available: true,
-        ...result.value
-      };
-
-      if (key === "overall") overall = payload;
-      else partners[key] = payload;
-      return;
-    }
-
-    const message = result.reason instanceof Error ? result.reason.message : String(result.reason);
-    errors.push(`${key}: ${message}`);
-
-    const payload = {
-      name: config.name,
+  // Rainbet rate-limits simultaneous report requests. Fetch them one at a time.
+  try {
+    overall = {
+      name: "Overall",
+      connected: true,
+      available: true,
+      ...(await fetchReport({ token }))
+    };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    errors.push(`overall: ${message}`);
+    overall = {
+      name: "Overall",
       connected: true,
       available: false,
       error: "Statistics are temporarily unavailable."
     };
-
-    if (key === "overall") overall = payload;
-    else partners[key] = payload;
-  });
+  }
 
   for (const [key, config] of Object.entries(partnersConfig)) {
-    if (partners[key]) continue;
+    const campaignId = String(config.campaignId || "").trim();
 
-    partners[key] = {
-      name: config.name,
-      connected: false,
-      available: false,
-      error: "Campaign ID has not been configured."
-    };
+    if (!campaignId) {
+      partners[key] = {
+        name: config.name,
+        connected: false,
+        available: false,
+        error: "Campaign ID has not been configured."
+      };
+      continue;
+    }
+
+    // Keep enough space between requests to avoid Rainbet's 429 response.
+    await sleep(1600);
+
+    try {
+      partners[key] = {
+        name: config.name,
+        connected: true,
+        available: true,
+        ...(await fetchReport({ token, campaignId }))
+      };
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      errors.push(`${key}: ${message}`);
+      partners[key] = {
+        name: config.name,
+        connected: true,
+        available: false,
+        error: "Statistics are temporarily unavailable."
+      };
+    }
   }
 
   const anyAvailable = Boolean(overall?.available) || Object.values(partners).some((partner) => partner.available);
-
-  return jsonResponse(anyAvailable ? 200 : 502, {
+  const payload = {
     ok: anyAvailable,
     available: anyAvailable,
     overall,
     partners,
     errors: errors.length ? errors : undefined,
     updated: new Date().toISOString()
-  });
+  };
+
+  if (anyAvailable) {
+    memoryCache = payload;
+    memoryCacheTime = Date.now();
+  }
+
+  return jsonResponse(anyAvailable ? 200 : 502, payload, anyAvailable ? cacheHeaders : {});
 };
