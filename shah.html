@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Thor's Hall — Play on Rainbet</title>
+  <meta name="theme-color" content="#09030f">
+  <style>
+    :root{
+      --bg:#08030d; --pink:#ff3fd8; --purple:#9c4dff; --blue:#45a7ff;
+      --text:#fff; --muted:#c8bfd1; --line:rgba(255,255,255,.12);
+      --shadow:0 18px 60px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0; min-height:100vh; color:var(--text);
+      font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:
+        linear-gradient(180deg,rgba(3,1,7,.34) 0%,rgba(5,2,10,.56) 58%,#08030d 100%),
+        url("casinobackground.png") center top / cover fixed no-repeat,
+        var(--bg);
+      overflow-x:hidden;
+    }
+    body:before{
+      content:""; position:fixed; inset:0; pointer-events:none;
+      background:
+        radial-gradient(circle at 50% 20%,rgba(160,65,255,.14),transparent 29%),
+        radial-gradient(circle at 50% 60%,rgba(255,44,190,.05),transparent 30%);
+      z-index:0;
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{width:min(1160px,calc(100% - 36px));margin:auto;position:relative;z-index:1}
+    header{
+      position:relative;z-index:2;border-bottom:1px solid rgba(255,255,255,.09);
+      background:linear-gradient(180deg,rgba(4,2,9,.92),rgba(4,2,9,.48));
+      backdrop-filter:blur(12px);
+    }
+    .nav{height:76px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+    .brand{font-weight:950;letter-spacing:.08em;font-size:22px}
+    .brand span{
+      background:linear-gradient(90deg,#fff,#f0c9ff 38%,#ff5ad7 68%,#9d7aff);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+    }
+    .navlinks{display:flex;align-items:center;gap:22px;color:#ddd4e4;font-size:14px;font-weight:700}
+    .navbtn{
+      padding:11px 18px;border-radius:12px;border:1px solid rgba(255,82,219,.5);
+      background:linear-gradient(135deg,rgba(255,50,202,.18),rgba(120,66,255,.18));
+      box-shadow:0 0 28px rgba(220,48,255,.12);
+    }
+    .hero{min-height:720px;display:grid;align-items:center;padding:88px 0 96px}
+    .hero-card{
+      max-width:700px;margin:auto;text-align:center;padding:40px 32px 36px;
+      border:1px solid rgba(255,255,255,.12);border-radius:28px;
+      background:linear-gradient(180deg,rgba(10,5,18,.45),rgba(8,4,14,.78));
+      box-shadow:var(--shadow),inset 0 1px rgba(255,255,255,.08),0 0 90px rgba(143,55,255,.10);
+      backdrop-filter:blur(10px);
+    }
+    .eyebrow{
+      display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.13);background:rgba(10,4,18,.62);
+      color:#e9dff0;font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;
+    }
+    .dot{width:8px;height:8px;border-radius:50%;background:var(--pink);box-shadow:0 0 16px var(--pink)}
+    h1{margin:18px 0 12px;font-size:clamp(48px,8vw,86px);line-height:.94;letter-spacing:-.045em;font-weight:950}
+    h1 .glow{
+      display:block;background:linear-gradient(90deg,#fff 0%,#ffd4f7 25%,#ff53d4 54%,#9a6dff 78%,#70c8ff 100%);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+      filter:drop-shadow(0 0 18px rgba(255,54,207,.18));
+    }
+    .sub{margin:0 auto;max-width:580px;color:#d5ccdc;font-size:18px;line-height:1.65}
+    .bonus{
+      margin:26px auto 0;display:flex;align-items:center;justify-content:center;gap:14px;
+      width:max-content;max-width:100%;padding:14px 20px;border-radius:16px;
+      border:1px solid rgba(255,210,90,.45);
+      background:linear-gradient(135deg,rgba(255,189,46,.14),rgba(255,63,209,.12));
+    }
+    .bonus strong{font-size:30px;line-height:1;color:#ffe18e;text-shadow:0 0 18px rgba(255,204,83,.2)}
+    .bonus span{font-size:13px;text-transform:uppercase;letter-spacing:.09em;color:#f4e7bd;font-weight:800;text-align:left}
+    .actions{margin-top:28px;display:flex;justify-content:center;gap:12px;flex-wrap:wrap}
+    .cta{
+      min-width:190px;padding:16px 24px;border-radius:14px;font-weight:900;letter-spacing:.02em;
+      transition:.2s ease;border:1px solid transparent
+    }
+    .cta:hover{transform:translateY(-2px)}
+    .primary{
+      background:linear-gradient(135deg,#ff3fcf 0%,#b34bff 52%,#5978ff 100%);
+      box-shadow:0 12px 40px rgba(198,57,255,.30),0 0 30px rgba(255,59,212,.20)
+    }
+    .secondary{background:rgba(12,7,20,.72);border-color:rgba(255,255,255,.16);color:#e9e1ef}
+    .trust{margin-top:18px;color:#aaa0b4;font-size:12px}
+    .section{padding:10px 0 84px}
+    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+    .card{
+      min-height:176px;padding:24px;border-radius:20px;border:1px solid var(--line);
+      background:linear-gradient(180deg,rgba(16,8,28,.82),rgba(10,5,17,.92));
+      box-shadow:var(--shadow);backdrop-filter:blur(9px)
+    }
+    .icon{
+      width:46px;height:46px;border-radius:14px;display:grid;place-items:center;margin-bottom:18px;font-size:22px;
+      background:linear-gradient(135deg,rgba(255,53,211,.22),rgba(86,124,255,.18));
+      border:1px solid rgba(255,255,255,.12)
+    }
+    .card h3{margin:0 0 8px;font-size:18px}
+    .card p{margin:0;color:#bdb3c6;line-height:1.6;font-size:14px}
+    .bottom-cta{
+      margin-top:18px;padding:30px;border-radius:22px;display:flex;align-items:center;justify-content:space-between;gap:20px;
+      background:linear-gradient(135deg,rgba(255,52,204,.13),rgba(77,87,255,.13)),rgba(11,6,19,.9);
+      border:1px solid rgba(255,255,255,.12);box-shadow:var(--shadow)
+    }
+    .bottom-cta h2{margin:0 0 6px;font-size:28px}.bottom-cta p{margin:0;color:#bfb5c8}
+    footer{
+      padding:28px 0 38px;color:#8f8499;font-size:12px;text-align:center;
+      border-top:1px solid rgba(255,255,255,.07);background:rgba(5,2,9,.68);position:relative;z-index:1
+    }
+    @media(max-width:760px){
+      body{background-attachment:scroll;background-position:center top}
+      .nav{height:68px}.navlinks a:not(.navbtn){display:none}
+      .hero{min-height:650px;padding:60px 0 72px}
+      .hero-card{padding:34px 18px 30px;border-radius:22px}
+      .sub{font-size:16px}.cards{grid-template-columns:1fr}
+      .bottom-cta{flex-direction:column;text-align:center}.cta{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav">
+      <a class="brand" href="/"><span>THOR'S HALL</span></a>
+      <nav class="navlinks">
+        <a href="/guide">Guide</a>
+        <a href="/info">Info</a>
+        <a class="navbtn" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-card">
+          <div class="eyebrow"><span class="dot"></span> Casino · Sportsbook · Live Games</div>
+          <h1>PLAY.<span class="glow">WIN. REPEAT.</span></h1>
+          <p class="sub">Explore casino games, live tables and sports markets through Rainbet — with fast access and crypto-friendly play.</p>
+
+          <div class="bonus">
+            <strong>250%</strong>
+            <span>First Deposit<br>Bonus</span>
+          </div>
+
+          <div class="actions">
+            <a class="cta primary" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">PLAY ON RAINBET</a>
+            <a class="cta secondary" href="#why">SEE MORE</a>
+          </div>
+
+          <div class="trust">18+ · Gamble responsibly · Availability and terms depend on your jurisdiction.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="why">
+      <div class="wrap">
+        <div class="cards">
+          <article class="card">
+            <div class="icon">🎰</div>
+            <h3>Casino & Live Games</h3>
+            <p>Slots, live tables and fast-paced casino games in one place.</p>
+          </article>
+          <article class="card">
+            <div class="icon">⚡</div>
+            <h3>Fast Access</h3>
+            <p>Simple signup and a smooth experience across desktop and mobile.</p>
+          </article>
+          <article class="card">
+            <div class="icon">₿</div>
+            <h3>Crypto Friendly</h3>
+            <p>Popular crypto payment options supported where available.</p>
+          </article>
+        </div>
+
+        <div class="bottom-cta">
+          <div>
+            <h2>Ready to play?</h2>
+            <p>Enter Rainbet through Thor's Hall and start exploring.</p>
+          </div>
+          <a class="cta primary" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">JOIN RAINBET</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="wrap">
+      18+ only. Gamble responsibly. Ensure online gaming is legal in your jurisdiction.
+      Thor's Hall may receive affiliate commission from qualifying activity.
+    </div>
+  </footer>
+</body>
+</html>
