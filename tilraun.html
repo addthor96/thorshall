@@ -1,0 +1,547 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Thor's Hall — Play Through Thor's Hall</title>
+  <meta name="theme-color" content="#080607">
+
+  <style>
+    :root{
+      --bg:#070607;
+      --panel:#0d0b0b;
+      --panel2:#11100f;
+      --orange:#ff7a00;
+      --orange2:#ffae32;
+      --gold:#d99b44;
+      --gold2:#f3c478;
+      --text:#f5f2eb;
+      --muted:#bdb8b2;
+      --line:rgba(233,143,49,.34);
+      --serif: Georgia, "Times New Roman", serif;
+      --sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    *{box-sizing:border-box}
+    html{scroll-behavior:smooth}
+    body{
+      margin:0;
+      color:var(--text);
+      font-family:var(--sans);
+      background:
+        linear-gradient(180deg,rgba(2,2,4,.08) 0%,rgba(5,3,5,.36) 36%,rgba(7,5,5,.92) 74%,#070607 100%),
+        url("img/casinobackground.png") center top / cover fixed no-repeat,
+        #070607;
+      overflow-x:hidden;
+    }
+
+    body::before{
+      content:"";
+      position:fixed;
+      inset:0;
+      z-index:-1;
+      pointer-events:none;
+      background:
+        radial-gradient(circle at 15% 34%,rgba(255,85,0,.12),transparent 26%),
+        radial-gradient(circle at 85% 35%,rgba(255,65,0,.12),transparent 28%),
+        radial-gradient(circle at 50% 66%,rgba(255,95,0,.08),transparent 31%);
+    }
+
+    a{color:inherit;text-decoration:none}
+    .shell{width:min(1120px,calc(100% - 34px));margin:auto}
+
+    /* HEADER */
+    header{
+      position:relative;
+      z-index:10;
+      background:
+        linear-gradient(180deg,rgba(7,7,7,.97),rgba(10,8,8,.92));
+      border-bottom:1px solid rgba(255,111,0,.38);
+      box-shadow:0 8px 35px rgba(0,0,0,.45),0 1px 20px rgba(255,86,0,.08);
+    }
+    .nav{
+      min-height:96px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:28px;
+    }
+    .logo{
+      display:flex;
+      align-items:center;
+      gap:14px;
+      font-family:var(--serif);
+      font-size:30px;
+      font-weight:900;
+      letter-spacing:.035em;
+      color:#d79a43;
+      text-shadow:0 2px 0 #3a1e0b,0 0 20px rgba(255,139,33,.16);
+      white-space:nowrap;
+    }
+    .logo-mark{
+      width:58px;height:58px;border-radius:50%;
+      display:grid;place-items:center;
+      border:1px solid rgba(238,164,73,.55);
+      background:
+        radial-gradient(circle at 50% 35%,#2a180e 0 28%,#100c09 60%,#080707 100%);
+      box-shadow:inset 0 0 0 3px rgba(255,135,27,.08),0 0 18px rgba(255,105,0,.12);
+    }
+    .logo-mark svg{width:37px;height:37px}
+    nav{display:flex;align-items:center;gap:34px;color:#eee7df}
+    nav a{font-size:16px;font-weight:600;opacity:.92}
+    nav a:hover{color:#ffb056}
+    .nav-cta{
+      padding:13px 22px;
+      border:1px solid #ff7a00;
+      border-radius:8px;
+      background:linear-gradient(180deg,#14100e,#0a0807);
+      box-shadow:0 0 0 2px rgba(255,112,0,.08),0 0 22px rgba(255,97,0,.28),inset 0 0 20px rgba(255,104,0,.06);
+    }
+
+    /* HERO */
+    .hero{
+      min-height:690px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      text-align:center;
+      position:relative;
+      padding:70px 0 58px;
+    }
+    .hero::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      background:
+        radial-gradient(ellipse at 50% 40%,rgba(5,4,5,.18) 0 24%,rgba(7,5,6,.20) 38%,rgba(8,5,7,.55) 74%,rgba(7,6,7,.92) 100%);
+      pointer-events:none;
+    }
+    .hero-content{
+      position:relative;
+      z-index:1;
+      width:min(780px,100%);
+      margin:auto;
+    }
+    .hero-title-small{
+      margin:0 0 -3px;
+      font-family:var(--serif);
+      font-weight:900;
+      font-size:clamp(38px,6vw,64px);
+      line-height:1;
+      letter-spacing:.02em;
+      color:#e7d6be;
+      text-transform:uppercase;
+      text-shadow:
+        0 3px 0 #5f280f,
+        0 0 14px rgba(255,122,0,.23),
+        0 8px 14px rgba(0,0,0,.72);
+    }
+    .hero-title{
+      margin:0;
+      font-family:var(--serif);
+      font-weight:900;
+      font-size:clamp(58px,9vw,102px);
+      line-height:.92;
+      letter-spacing:-.03em;
+      text-transform:uppercase;
+      background:linear-gradient(180deg,#efe4d0 0%,#c6a37a 34%,#8e5b33 62%,#f0b85d 92%);
+      -webkit-background-clip:text;background-clip:text;color:transparent;
+      -webkit-text-stroke:1px rgba(62,28,11,.65);
+      filter:drop-shadow(0 5px 0 #36180b) drop-shadow(0 9px 14px rgba(0,0,0,.8));
+    }
+    .divider{
+      width:min(610px,85%);
+      height:24px;
+      margin:12px auto 8px;
+      position:relative;
+    }
+    .divider::before,.divider::after{
+      content:"";
+      position:absolute;
+      top:11px;
+      width:44%;
+      height:1px;
+      background:linear-gradient(90deg,transparent,#f18116);
+      box-shadow:0 0 9px rgba(255,102,0,.35);
+    }
+    .divider::before{left:0}
+    .divider::after{right:0;transform:scaleX(-1)}
+    .divider span{
+      position:absolute;
+      left:50%;top:2px;transform:translateX(-50%);
+      color:#ff8c13;
+      font-family:var(--serif);
+      font-size:20px;
+      text-shadow:0 0 12px rgba(255,96,0,.45);
+    }
+    .hero-copy{
+      width:min(510px,90%);
+      margin:10px auto 16px;
+      color:#ddd8d1;
+      font-size:17px;
+      line-height:1.55;
+      text-shadow:0 2px 4px #000;
+    }
+    .bonus-box{
+      width:min(470px,92%);
+      margin:15px auto 21px;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:26px;
+      padding:14px 26px;
+      border:1px solid #ff7a00;
+      border-radius:18px;
+      background:
+        radial-gradient(circle at 50% 30%,rgba(255,105,0,.11),transparent 55%),
+        linear-gradient(180deg,rgba(27,16,11,.94),rgba(11,8,7,.95));
+      box-shadow:
+        0 0 0 3px rgba(255,108,0,.08),
+        0 0 28px rgba(255,82,0,.30),
+        inset 0 0 26px rgba(255,87,0,.10);
+    }
+    .bonus-number{
+      font-family:var(--serif);
+      font-size:60px;
+      font-weight:900;
+      color:#ff8b12;
+      line-height:.9;
+      text-shadow:0 0 10px rgba(255,80,0,.55),0 2px 0 #6a2700;
+    }
+    .bonus-label{
+      text-align:left;
+      font-family:var(--serif);
+      color:#e6b463;
+      font-size:22px;
+      line-height:1.06;
+      font-weight:900;
+      text-transform:uppercase;
+    }
+    .hero-actions{display:flex;justify-content:center;gap:18px;flex-wrap:wrap}
+    .btn{
+      min-width:220px;
+      padding:17px 28px;
+      border-radius:7px;
+      font-family:var(--serif);
+      font-size:18px;
+      font-weight:900;
+      text-transform:uppercase;
+      letter-spacing:.02em;
+      transition:.18s ease;
+    }
+    .btn:hover{transform:translateY(-2px);filter:brightness(1.08)}
+    .btn-primary{
+      border:1px solid #ff9b24;
+      background:linear-gradient(180deg,#a03f0e 0%,#5d1a08 100%);
+      box-shadow:0 0 0 2px rgba(255,126,0,.12),0 0 25px rgba(255,91,0,.34),inset 0 0 22px rgba(255,140,35,.17);
+      color:#f7e1c5;
+    }
+    .btn-secondary{
+      border:1px solid #d86b0b;
+      background:rgba(10,8,7,.86);
+      box-shadow:inset 0 0 18px rgba(255,93,0,.06);
+      color:#d8c9b7;
+    }
+
+    /* FEATURE CARDS */
+    .feature-wrap{padding:0 0 26px}
+    .feature-grid{
+      display:grid;
+      grid-template-columns:repeat(4,1fr);
+      gap:18px;
+    }
+    .feature{
+      position:relative;
+      min-height:245px;
+      padding:25px 18px 23px;
+      text-align:center;
+      background:
+        linear-gradient(180deg,rgba(19,17,16,.94),rgba(9,8,8,.97));
+      border:1px solid rgba(209,94,14,.50);
+      box-shadow:0 18px 36px rgba(0,0,0,.44),inset 0 0 30px rgba(255,85,0,.025);
+      border-radius:5px;
+    }
+    .feature::before{
+      content:"";
+      position:absolute;inset:6px;
+      border:1px solid rgba(255,143,38,.08);
+      pointer-events:none;
+    }
+    .hex{
+      width:78px;height:78px;margin:0 auto 17px;
+      display:grid;place-items:center;
+      color:#ff9a22;
+      filter:drop-shadow(0 0 8px rgba(255,115,0,.20));
+    }
+    .hex svg{width:76px;height:76px}
+    .feature h3{
+      margin:0 0 11px;
+      font:900 18px/1.1 var(--serif);
+      color:#d7a253;
+      text-transform:uppercase;
+    }
+    .feature p{
+      margin:0;
+      color:#bdb9b4;
+      font-size:14px;
+      line-height:1.48;
+    }
+
+    /* LOWER PANEL */
+    .why{
+      margin:0 auto 42px;
+      padding:28px 34px 32px;
+      background:linear-gradient(180deg,rgba(18,16,15,.96),rgba(9,8,8,.98));
+      border:1px solid rgba(213,91,10,.48);
+      border-radius:5px;
+      box-shadow:0 18px 40px rgba(0,0,0,.48),inset 0 0 30px rgba(255,88,0,.02);
+    }
+    .why-title{
+      display:flex;align-items:center;justify-content:center;gap:18px;
+      margin-bottom:27px;
+      color:#d49a45;
+      font:900 28px/1 var(--serif);
+      text-transform:uppercase;
+      text-align:center;
+    }
+    .why-title::before,.why-title::after{
+      content:"";height:1px;flex:1;max-width:90px;
+      background:linear-gradient(90deg,transparent,#d5761b);
+    }
+    .why-title::after{transform:scaleX(-1)}
+    .why-grid{display:grid;grid-template-columns:repeat(3,1fr)}
+    .why-item{
+      display:grid;
+      grid-template-columns:74px 1fr;
+      gap:14px;
+      padding:4px 25px;
+      min-height:120px;
+      align-items:center;
+    }
+    .why-item + .why-item{border-left:1px solid rgba(255,255,255,.08)}
+    .why-icon{color:#e88a17}
+    .why-icon svg{width:58px;height:58px}
+    .why-item h4{
+      margin:0 0 7px;
+      color:#dda755;
+      font:900 17px/1.1 var(--serif);
+      text-transform:uppercase;
+    }
+    .why-item p{
+      margin:0;
+      color:#bbb6b0;
+      font-size:14px;
+      line-height:1.45;
+    }
+
+    footer{
+      padding:27px 0 34px;
+      text-align:center;
+      color:#96928e;
+      font-size:13px;
+      background:rgba(6,6,6,.88);
+      border-top:1px solid rgba(255,102,0,.12);
+    }
+    .responsible{
+      display:inline-flex;
+      align-items:center;
+      gap:14px;
+    }
+    .age{
+      width:31px;height:31px;border:1px solid #aaa;border-radius:50%;
+      display:grid;place-items:center;color:#aaa;font-weight:700;font-size:12px
+    }
+
+    @media (max-width:900px){
+      .feature-grid{grid-template-columns:repeat(2,1fr)}
+      .why-grid{grid-template-columns:1fr}
+      .why-item + .why-item{border-left:0;border-top:1px solid rgba(255,255,255,.08)}
+      .why-item{padding:18px 10px}
+      nav a:not(.nav-cta){display:none}
+      .logo{font-size:24px}
+      .logo-mark{width:48px;height:48px}
+    }
+
+    @media (max-width:560px){
+      body{background-attachment:scroll}
+      .shell{width:min(100% - 22px,1120px)}
+      .nav{min-height:76px}
+      .logo{font-size:19px;gap:9px}
+      .logo-mark{width:40px;height:40px}
+      .logo-mark svg{width:28px;height:28px}
+      .nav-cta{padding:10px 12px;font-size:13px}
+      .hero{min-height:610px;padding:58px 0 46px}
+      .hero-title-small{font-size:34px}
+      .hero-title{font-size:56px}
+      .hero-copy{font-size:15px}
+      .bonus-box{gap:14px;padding:14px 16px}
+      .bonus-number{font-size:47px}
+      .bonus-label{font-size:17px}
+      .btn{width:100%;min-width:0}
+      .feature-grid{grid-template-columns:1fr}
+      .why{padding:24px 18px}
+      .why-title{font-size:22px}
+      .why-title::before,.why-title::after{display:none}
+      .why-item{grid-template-columns:62px 1fr}
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="shell nav">
+      <a class="logo" href="/">
+        <span class="logo-mark" aria-hidden="true">
+          <svg viewBox="0 0 64 64" fill="none">
+            <circle cx="32" cy="32" r="30" stroke="#9f5c1c" stroke-width="2"/>
+            <path d="M18 18l10 7 4-13 4 13 10-7-5 14v18l-9 6-9-6V32l-5-14Z" stroke="#e19a38" stroke-width="3" stroke-linejoin="round"/>
+            <path d="M23 32h18M27 37l5 6 5-6" stroke="#ffb64f" stroke-width="3" stroke-linecap="round"/>
+          </svg>
+        </span>
+        THOR'S HALL
+      </a>
+
+      <nav>
+        <a href="/guide">Guide</a>
+        <a href="/partners">Partners</a>
+        <a href="/creators">Creators</a>
+        <a class="nav-cta" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="shell hero-content">
+        <h1 class="hero-title-small">Play Through</h1>
+        <div class="hero-title">Thor's Hall</div>
+
+        <div class="divider"><span>ᛏ</span></div>
+
+        <p class="hero-copy">
+          Casino, Sportsbook, Live Games and<br>
+          crypto-friendly play — all through<br>
+          one premium hub.
+        </p>
+
+        <div class="bonus-box">
+          <div class="bonus-number">250%</div>
+          <div class="bonus-label">First Deposit<br>Bonus</div>
+        </div>
+
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+          <a class="btn btn-secondary" href="#features">Learn More</a>
+        </div>
+      </div>
+    </section>
+
+    <section class="feature-wrap" id="features">
+      <div class="shell feature-grid">
+
+        <article class="feature">
+          <div class="hex">
+            <svg viewBox="0 0 100 100" fill="none">
+              <path d="M50 5 88 27v46L50 95 12 73V27L50 5Z" stroke="#9b5419" stroke-width="3"/>
+              <path d="M50 12 81 31v38L50 88 19 69V31L50 12Z" stroke="#e48620" stroke-width="2"/>
+              <path d="M55 23 34 54h15l-4 24 22-34H52l3-21Z" fill="#ff9b1d"/>
+            </svg>
+          </div>
+          <h3>Fast Access</h3>
+          <p>Instant sign-up and seamless access across all platforms.</p>
+        </article>
+
+        <article class="feature">
+          <div class="hex">
+            <svg viewBox="0 0 100 100" fill="none">
+              <path d="M50 5 88 27v46L50 95 12 73V27L50 5Z" stroke="#9b5419" stroke-width="3"/>
+              <path d="M50 12 81 31v38L50 88 19 69V31L50 12Z" stroke="#e48620" stroke-width="2"/>
+              <text x="50" y="64" text-anchor="middle" font-size="45" font-weight="900" fill="#ff9b1d">₿</text>
+            </svg>
+          </div>
+          <h3>Crypto Friendly</h3>
+          <p>Deposit and withdraw with top cryptocurrencies with ease.</p>
+        </article>
+
+        <article class="feature">
+          <div class="hex">
+            <svg viewBox="0 0 100 100" fill="none">
+              <path d="M50 5 88 27v46L50 95 12 73V27L50 5Z" stroke="#9b5419" stroke-width="3"/>
+              <path d="M50 12 81 31v38L50 88 19 69V31L50 12Z" stroke="#e48620" stroke-width="2"/>
+              <path d="m26 49 11-10 12 7 11-6 14 9-9 12-9-4-7 7-9-7-6 3-8-11Z" stroke="#ff9b1d" stroke-width="4" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h3>Partner Driven</h3>
+          <p>Built for partners and creators with powerful tools and rewards.</p>
+        </article>
+
+        <article class="feature">
+          <div class="hex">
+            <svg viewBox="0 0 100 100" fill="none">
+              <path d="M50 5 88 27v46L50 95 12 73V27L50 5Z" stroke="#9b5419" stroke-width="3"/>
+              <path d="M50 12 81 31v38L50 88 19 69V31L50 12Z" stroke="#e48620" stroke-width="2"/>
+              <path d="M28 67V53h10v14H28Zm17 0V40h10v27H45Zm17 0V29h10v38H62Z" fill="#ff9b1d"/>
+            </svg>
+          </div>
+          <h3>Live Stats</h3>
+          <p>Real-time stats and performance insights that matter.</p>
+        </article>
+
+      </div>
+    </section>
+
+    <section class="shell why">
+      <div class="why-title">Why Players Use Thor's Hall</div>
+
+      <div class="why-grid">
+        <div class="why-item">
+          <div class="why-icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path d="M32 5 54 13v16c0 14-8 24-22 30C18 53 10 43 10 29V13L32 5Z" stroke="#e4871b" stroke-width="3"/>
+              <path d="m21 31 7 7 15-16" stroke="#ff9b1d" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Trusted & Secure</h4>
+            <p>Industry-leading security and fair play you can count on.</p>
+          </div>
+        </div>
+
+        <div class="why-item">
+          <div class="why-icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <path d="M9 26h46v31H9V26Zm23 0v31M7 20h50v10H7V20Z" stroke="#e4871b" stroke-width="3"/>
+              <path d="M32 20c-8-2-13-6-13-10 0-4 4-6 8-4 3 2 5 6 5 14Zm0 0c8-2 13-6 13-10 0-4-4-6-8-4-3 2-5 6-5 14Z" stroke="#ff9b1d" stroke-width="3"/>
+            </svg>
+          </div>
+          <div>
+            <h4>Bigger Rewards</h4>
+            <p>Exclusive bonuses, VIP perks and ongoing promotions.</p>
+          </div>
+        </div>
+
+        <div class="why-item">
+          <div class="why-icon">
+            <svg viewBox="0 0 64 64" fill="none">
+              <circle cx="32" cy="32" r="25" stroke="#e4871b" stroke-width="3"/>
+              <path d="M7 32h50M32 7c8 8 12 16 12 25S40 49 32 57M32 7c-8 8-12 16-12 25s4 17 12 25" stroke="#ff9b1d" stroke-width="2.5"/>
+            </svg>
+          </div>
+          <div>
+            <h4>All-In-One Hub</h4>
+            <p>Casino, Sportsbook, Live Games and more — all in one place.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="shell responsible">
+      <span class="age">18+</span>
+      <span>18+ only. Gamble responsibly. Ensure online gaming is legal in your jurisdiction.</span>
+    </div>
+  </footer>
+</body>
+</html>
