@@ -35,9 +35,13 @@ function rangeDates(key) {
   const from = new Date(now);
 
   switch (key) {
-    case "24h":
-      from.setTime(now.getTime() - 24 * 60 * 60 * 1000);
-      break;
+    case "today": {
+      const start = new Date(now);
+      start.setUTCHours(0, 0, 0, 0);
+      const end = new Date(start);
+      end.setUTCDate(end.getUTCDate() + 1);
+      return { key: "today", from: start.toISOString(), to: end.toISOString() };
+    }
     case "7d":
       from.setUTCDate(from.getUTCDate() - 7);
       break;
@@ -124,7 +128,24 @@ async function fetchMithraReport(token, range) {
   for (let index = 0; index < candidates.length; index += 1) {
     const { response, data } = await requestWithRetry(url, candidates[index]);
 
-    if (response.ok) return extractMetrics(data);
+    if (response.ok) {
+      try {
+        return extractMetrics(data);
+      } catch (error) {
+        if (error instanceof Error && error.message.includes("expected totals were not found")) {
+          return {
+            wager: 0,
+            deposits: 0,
+            visits: 0,
+            registrations: 0,
+            ftd: 0,
+            ggr: 0,
+            ngr: 0
+          };
+        }
+        throw error;
+      }
+    }
 
     if ([401, 403].includes(response.status) && index < candidates.length - 1) {
       continue;
@@ -148,7 +169,7 @@ exports.handler = async function (event) {
   }
 
   const requested = String(event.queryStringParameters?.range || "all").toLowerCase();
-  const allowed = new Set(["24h", "7d", "30d", "6m", "1y", "all"]);
+  const allowed = new Set(["today", "7d", "30d", "6m", "1y", "all"]);
   const range = rangeDates(allowed.has(requested) ? requested : "all");
 
   const cached = memoryCache.get(range.key);
