@@ -4,147 +4,177 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="theme-color" content="#070607">
-  <title>Thor's Hall — Campaign Dashboard</title>
+  <meta name="theme-color" content="#08040d">
+  <title>Mithra Campaign Tracker | Thor's Hall</title>
   <style>
     :root{
-      --bg:#070607;--panel:#100d0d;--panel2:#17110e;--line:rgba(255,132,24,.28);
-      --gold:#f0b45e;--orange:#ff7a00;--text:#f5f0e9;--muted:#aaa29b;--good:#9fd8a8;--bad:#ef9c9c;
-      --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      --panel:rgba(11,7,14,.82);
+      --panel2:rgba(20,10,25,.88);
+      --line:rgba(255,142,44,.34);
+      --gold:#ffc16a;
+      --orange:#ff7a00;
+      --text:#fff7ed;
+      --muted:#b9adbd;
+      --good:#9fe0ad;
+      --bad:#ffaaa3;
       --serif:Georgia,"Times New Roman",serif;
+      --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
     }
     *{box-sizing:border-box}
-    html{min-height:100%;background:var(--bg)}
+    html,body{margin:0;min-height:100%;background:#060309;color:var(--text)}
     body{
-      margin:0;min-height:100vh;color:var(--text);font-family:var(--sans);
-      background:
-        radial-gradient(circle at 50% 0,rgba(122,45,8,.24),transparent 38%),
-        linear-gradient(180deg,#090708 0%,#070607 68%,#040404 100%);
+      min-height:100vh;
+      font-family:var(--sans);
+      background-image:
+        linear-gradient(180deg,rgba(4,2,8,.62),rgba(4,2,8,.88)),
+        url('/img/casinobackground.png');
+      background-size:cover;
+      background-position:center;
+      background-attachment:fixed;
     }
-    a{color:inherit;text-decoration:none}
-    .wrap{width:min(1040px,calc(100% - 30px));margin:auto;padding:28px 0 48px}
-    .topbar{
-      display:flex;align-items:center;justify-content:space-between;gap:18px;padding:14px 16px;
-      border:1px solid var(--line);border-radius:18px;background:rgba(12,9,8,.82);box-shadow:0 20px 60px rgba(0,0,0,.34)
+    body:before{
+      content:"";position:fixed;inset:0;pointer-events:none;
+      background:radial-gradient(circle at 50% 12%,rgba(255,116,0,.16),transparent 38%);
     }
-    .brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:.05em}
+    .wrap{position:relative;z-index:1;width:min(1050px,calc(100% - 28px));margin:auto;padding:32px 0 44px}
+    .top{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      padding:13px 16px;border:1px solid var(--line);border-radius:18px;
+      background:rgba(8,5,10,.78);backdrop-filter:blur(10px);
+      box-shadow:0 18px 55px rgba(0,0,0,.34)
+    }
+    .brand{display:flex;align-items:center;gap:11px;font-weight:900}
     .brand img{width:42px;height:42px;border-radius:10px;object-fit:cover}
-    .brand span{font-family:var(--serif);color:var(--gold);font-size:20px}
-    .back{padding:10px 14px;border:1px solid var(--line);border-radius:11px;color:#e8d8c7;background:#0d0b0a;font-weight:800;font-size:13px}
-    .hero{text-align:center;padding:62px 16px 38px}
-    .eyebrow{color:var(--orange);font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
-    h1{margin:10px 0 10px;font:900 clamp(38px,7vw,66px)/.98 var(--serif);letter-spacing:-.035em}
-    .hero p{max-width:650px;margin:0 auto;color:var(--muted);font-size:15px;line-height:1.65}
+    .brand span{font:900 20px/1 var(--serif);color:var(--gold);letter-spacing:.03em}
+    .tag{font-size:10px;text-transform:uppercase;letter-spacing:.14em;color:#d5c2ae;font-weight:900}
+    .hero{text-align:center;padding:60px 12px 32px}
+    .eyebrow{color:#ff8b28;font-size:11px;font-weight:900;letter-spacing:.2em;text-transform:uppercase}
+    h1{margin:10px 0 9px;font:900 clamp(40px,7vw,66px)/.98 var(--serif);letter-spacing:-.035em;text-shadow:0 5px 28px rgba(0,0,0,.62)}
+    .hero p{max-width:650px;margin:0 auto;color:#c6bac7;font-size:14px;line-height:1.65}
     .status{
-      width:max-content;max-width:100%;margin:24px auto 0;padding:10px 14px;border:1px solid rgba(255,255,255,.09);
-      border-radius:999px;background:rgba(255,255,255,.035);color:#c7c0b9;font-size:12px
+      width:max-content;max-width:100%;margin:22px auto 0;padding:9px 14px;border-radius:999px;
+      border:1px solid rgba(255,255,255,.11);background:rgba(8,5,10,.72);backdrop-filter:blur(9px);
+      color:#d2c8d4;font-size:12px
     }
-    .status.ok{color:var(--good);border-color:rgba(98,190,112,.28)}
-    .status.error{color:var(--bad);border-color:rgba(225,90,90,.28)}
+    .status.ok{color:var(--good);border-color:rgba(100,213,122,.34)}
+    .status.error{color:var(--bad);border-color:rgba(255,105,95,.36)}
     .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
     .card{
-      min-height:150px;padding:22px;border:1px solid var(--line);border-radius:16px;
-      background:linear-gradient(180deg,rgba(24,17,13,.92),rgba(12,10,9,.97));
-      box-shadow:0 20px 55px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.025)
+      min-height:150px;padding:22px;border:1px solid var(--line);border-radius:18px;
+      background:linear-gradient(180deg,var(--panel2),var(--panel));backdrop-filter:blur(11px);
+      box-shadow:0 22px 60px rgba(0,0,0,.37),inset 0 1px 0 rgba(255,255,255,.035)
     }
-    .label{font-size:11px;color:#a9a098;text-transform:uppercase;letter-spacing:.13em;font-weight:900}
-    .value{margin-top:18px;font:900 32px/1 var(--serif);color:#f7e5cd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-    .sub{margin-top:10px;color:#817b76;font-size:12px}
-    .wide{
-      margin-top:14px;padding:18px 20px;border:1px solid rgba(255,255,255,.07);border-radius:15px;
-      background:rgba(255,255,255,.025);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap
+    .label{font-size:10px;color:#d1bda9;text-transform:uppercase;letter-spacing:.14em;font-weight:900}
+    .value{margin-top:19px;font:900 33px/1 var(--serif);color:#fff0dc;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .sub{margin-top:10px;color:#998d9d;font-size:11px}
+    .bottom{
+      margin-top:15px;padding:15px 18px;border:1px solid rgba(255,255,255,.09);border-radius:15px;
+      background:rgba(8,5,10,.72);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap
     }
-    .note{max-width:700px;color:#99918a;font-size:12px;line-height:1.55}
+    .note{max-width:730px;color:#a89dab;font-size:11px;line-height:1.55}
     button{
-      appearance:none;border:1px solid #ff8a18;border-radius:11px;padding:11px 16px;cursor:pointer;
-      background:linear-gradient(180deg,#8d350a,#511b06);color:#fff2df;font-weight:900
+      border:1px solid #ff941f;border-radius:10px;padding:10px 16px;cursor:pointer;
+      background:linear-gradient(180deg,#b44d0b,#6e2807);color:#fff7ed;font-weight:900;
+      box-shadow:0 8px 24px rgba(255,113,0,.14)
     }
+    button:hover{filter:brightness(1.08)}
     button:disabled{opacity:.55;cursor:wait}
-    footer{text-align:center;color:#77716c;font-size:11px;padding:34px 0 0}
-    @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.hero{padding-top:48px}}
-    @media(max-width:500px){.grid{grid-template-columns:1fr}.brand span{font-size:17px}.back{font-size:12px}.wrap{width:min(100% - 22px,1040px)}}
+    footer{text-align:center;color:#827888;font-size:10px;padding:28px 0 0}
+    @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.hero{padding-top:46px}}
+    @media(max-width:500px){.grid{grid-template-columns:1fr}.brand span{font-size:17px}.tag{display:none}.wrap{width:min(100% - 20px,1050px)}}
   </style>
 </head>
 <body>
   <main class="wrap">
-    <div class="topbar">
-      <a class="brand" href="/tilraun"><img src="/logo.png" alt="Thor's Hall"><span>THOR'S HALL</span></a>
-      <a class="back" href="/tilraun">Campaign page</a>
+    <div class="top">
+      <div class="brand">
+        <img src="/logo.png" alt="Thor's Hall">
+        <span>THOR'S HALL</span>
+      </div>
+      <div class="tag">Private tracker</div>
     </div>
 
     <section class="hero">
-      <div class="eyebrow">Private campaign statistics</div>
-      <h1>Campaign Dashboard</h1>
-      <p>Live tracked activity for this dedicated Rainbet campaign. Statistics are pulled from the Rainbet Partners reporting API and may update with a short delay.</p>
-      <div id="status" class="status">Loading live campaign statistics…</div>
+      <div class="eyebrow">Mithra campaign statistics</div>
+      <h1>Mithra Tracker</h1>
+      <p>Live Rainbet campaign activity for Mithra only. Statistics may update with a short delay.</p>
+      <div id="status" class="status">Loading Mithra statistics…</div>
     </section>
 
-    <section class="grid" aria-label="Campaign statistics">
-      <article class="card"><div class="label">Visits</div><div class="value" id="visits">—</div><div class="sub">Tracked campaign visits</div></article>
-      <article class="card"><div class="label">Registrations</div><div class="value" id="registrations">—</div><div class="sub">Tracked accounts created</div></article>
-      <article class="card"><div class="label">First Deposits</div><div class="value" id="ftd">—</div><div class="sub">First-time depositors</div></article>
-      <article class="card"><div class="label">Deposits</div><div class="value" id="deposits">—</div><div class="sub">Total tracked deposit value</div></article>
-      <article class="card"><div class="label">Wagered</div><div class="value" id="wager">—</div><div class="sub">Total tracked wagering</div></article>
-      <article class="card"><div class="label">NGR</div><div class="value" id="ngr">—</div><div class="sub">Net gaming revenue reported by Rainbet</div></article>
+    <section class="grid" aria-label="Mithra campaign statistics">
+      <article class="card"><div class="label">Visits</div><div id="visits" class="value">—</div><div class="sub">Tracked campaign visits</div></article>
+      <article class="card"><div class="label">Registrations</div><div id="registrations" class="value">—</div><div class="sub">Tracked accounts created</div></article>
+      <article class="card"><div class="label">First deposits</div><div id="ftd" class="value">—</div><div class="sub">First-time depositors</div></article>
+      <article class="card"><div class="label">Deposits</div><div id="deposits" class="value">—</div><div class="sub">Total tracked deposit value</div></article>
+      <article class="card"><div class="label">Wagered</div><div id="wager" class="value">—</div><div class="sub">Total tracked wagering</div></article>
+      <article class="card"><div class="label">NGR</div><div id="ngr" class="value">—</div><div class="sub">Net gaming revenue reported by Rainbet</div></article>
     </section>
 
-    <div class="wide">
-      <div class="note">This dashboard shows raw campaign activity only. It does not calculate Thor's Hall affiliate payout or the partner's revenue-share payment. Final payouts are based on the commission actually received by Thor's Hall for the relevant payout period.</div>
+    <div class="bottom">
+      <div class="note">This page displays raw Mithra campaign statistics only. It does not calculate Thor's Hall affiliate payout or partner revenue-share payments.</div>
       <button id="refresh" type="button">Refresh stats</button>
     </div>
 
-    <footer>Private Thor's Hall campaign dashboard · 18+ · Gamble responsibly.</footer>
+    <footer>Thor's Hall · Mithra campaign tracker · 18+</footer>
   </main>
 
   <script>
-  (() => {
-    const $ = id => document.getElementById(id);
-    const money = value => Number.isFinite(Number(value))
-      ? '$' + Number(value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
-      : '—';
-    const count = value => Number.isFinite(Number(value))
-      ? Number(value).toLocaleString('en-US',{maximumFractionDigits:0})
-      : '—';
+    (() => {
+      const $ = id => document.getElementById(id);
+      const valid = value => value !== null && value !== undefined && Number.isFinite(Number(value));
+      const money = value => valid(value)
+        ? '$' + Number(value).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2})
+        : '—';
+      const count = value => valid(value)
+        ? Number(value).toLocaleString('en-US',{maximumFractionDigits:0})
+        : '—';
 
-    async function loadStats(){
-      const button = $('refresh');
-      const status = $('status');
-      button.disabled = true;
-      status.className = 'status';
-      status.textContent = 'Loading live campaign statistics…';
+      async function loadStats(){
+        const status = $('status');
+        const button = $('refresh');
+        button.disabled = true;
+        status.className = 'status';
+        status.textContent = 'Loading Mithra statistics…';
 
-      try{
-        const response = await fetch('/.netlify/functions/rainbet-stats-shah', {cache:'no-store'});
-        const data = await response.json().catch(() => null);
-        if(!response.ok || !data || !data.available){
-          throw new Error(data?.error || 'Campaign statistics are unavailable.');
+        try{
+          const response = await fetch('/.netlify/functions/rainbet-stats-partners', {cache:'no-store'});
+          const data = await response.json().catch(() => null);
+
+          if(!response.ok || !data){
+            throw new Error(data?.error || 'Mithra statistics are unavailable.');
+          }
+
+          const mithra = data.partners?.mithra;
+          if(!mithra || !mithra.available){
+            throw new Error(mithra?.error || 'Mithra statistics are unavailable.');
+          }
+
+          $('visits').textContent = count(mithra.visits);
+          $('registrations').textContent = count(mithra.registrations);
+          $('ftd').textContent = count(mithra.ftd);
+          $('deposits').textContent = money(mithra.deposits);
+          $('wager').textContent = money(mithra.wager);
+          $('ngr').textContent = money(mithra.ngr ?? mithra.casinoNgr);
+
+          const updated = data.updated ? new Date(data.updated) : null;
+          const when = updated && !Number.isNaN(updated.getTime())
+            ? updated.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})
+            : 'just now';
+
+          status.textContent = 'Mithra statistics updated ' + when + '.';
+          status.className = 'status ok';
+        }catch(error){
+          status.textContent = error?.message || 'Mithra statistics are unavailable.';
+          status.className = 'status error';
+        }finally{
+          button.disabled = false;
         }
-
-        $('visits').textContent = count(data.visits);
-        $('registrations').textContent = count(data.registrations);
-        $('ftd').textContent = count(data.ftd);
-        $('deposits').textContent = money(data.deposits);
-        $('wager').textContent = money(data.wager);
-        $('ngr').textContent = money(data.ngr);
-
-        const refreshed = data.updated ? new Date(data.updated) : null;
-        const timeText = refreshed && !Number.isNaN(refreshed.getTime())
-          ? refreshed.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})
-          : 'just now';
-        status.textContent = 'Live statistics refreshed ' + timeText + '.';
-        status.className = 'status ok';
-      }catch(error){
-        status.textContent = error?.message || 'Campaign statistics are temporarily unavailable.';
-        status.className = 'status error';
-      }finally{
-        button.disabled = false;
       }
-    }
 
-    $('refresh').addEventListener('click', loadStats);
-    loadStats();
-    setInterval(loadStats, 5 * 60 * 1000);
-  })();
+      $('refresh').addEventListener('click', loadStats);
+      loadStats();
+      setInterval(loadStats, 5 * 60 * 1000);
+    })();
   </script>
 </body>
 </html>
