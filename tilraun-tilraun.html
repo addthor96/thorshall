@@ -71,7 +71,8 @@
       margin-top:15px;padding:15px 18px;border:1px solid rgba(255,255,255,.09);border-radius:15px;
       background:rgba(8,5,10,.72);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap
     }
-    .note{max-width:730px;color:#a89dab;font-size:11px;line-height:1.55}
+    .note{max-width:650px;color:#a89dab;font-size:11px;line-height:1.55}
+    .actions{display:flex;align-items:center;gap:9px;flex-wrap:wrap;position:relative}
     button{
       border:1px solid #ff941f;border-radius:10px;padding:10px 16px;cursor:pointer;
       background:linear-gradient(180deg,#b44d0b,#6e2807);color:#fff7ed;font-weight:900;
@@ -79,8 +80,20 @@
     }
     button:hover{filter:brightness(1.08)}
     button:disabled{opacity:.55;cursor:wait}
+    .range-button{min-width:118px;background:rgba(15,8,16,.94);border-color:rgba(255,148,31,.62)}
+    .range-menu{
+      display:none;position:absolute;right:112px;bottom:48px;min-width:150px;padding:6px;
+      border:1px solid var(--line);border-radius:12px;background:rgba(10,5,12,.98);
+      box-shadow:0 18px 45px rgba(0,0,0,.55);z-index:5
+    }
+    .range-menu.open{display:block}
+    .range-option{
+      width:100%;padding:9px 11px;border:0;border-radius:8px;background:transparent;box-shadow:none;
+      color:#e7d8ca;text-align:left;font-size:12px;font-weight:800
+    }
+    .range-option:hover,.range-option.active{background:rgba(255,126,15,.13);color:#ffd19b;filter:none}
     footer{text-align:center;color:#827888;font-size:10px;padding:28px 0 0}
-    @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.hero{padding-top:46px}}
+    @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.hero{padding-top:46px}.range-menu{right:auto;left:0}}
     @media(max-width:500px){.grid{grid-template-columns:1fr}.brand span{font-size:17px}.tag{display:none}.wrap{width:min(100% - 20px,1050px)}}
   </style>
 </head>
@@ -112,7 +125,18 @@
 
     <div class="bottom">
       <div class="note">This page displays raw Mithra campaign statistics only. It does not calculate Thor's Hall affiliate payout or partner revenue-share payments.</div>
-      <button id="refresh" type="button">Refresh stats</button>
+      <div class="actions">
+        <button id="rangeButton" class="range-button" type="button" aria-haspopup="true" aria-expanded="false">All time ▾</button>
+        <div id="rangeMenu" class="range-menu" role="menu">
+          <button class="range-option" type="button" data-range="24h">24 hours</button>
+          <button class="range-option" type="button" data-range="7d">7 days</button>
+          <button class="range-option" type="button" data-range="30d">Month</button>
+          <button class="range-option" type="button" data-range="6m">6 months</button>
+          <button class="range-option" type="button" data-range="1y">1 year</button>
+          <button class="range-option active" type="button" data-range="all">All time</button>
+        </div>
+        <button id="refresh" type="button">Refresh stats</button>
+      </div>
     </div>
 
     <footer>Thor's Hall · Mithra campaign tracker · 18+</footer>
@@ -129,15 +153,39 @@
         ? Number(value).toLocaleString('en-US',{maximumFractionDigits:0})
         : '—';
 
+      const labels = {
+        '24h':'24 hours',
+        '7d':'7 days',
+        '30d':'Month',
+        '6m':'6 months',
+        '1y':'1 year',
+        'all':'All time'
+      };
+
+      let selectedRange = 'all';
+
+      function setRange(range){
+        selectedRange = labels[range] ? range : 'all';
+        $('rangeButton').textContent = labels[selectedRange] + ' ▾';
+        document.querySelectorAll('.range-option').forEach(option => {
+          option.classList.toggle('active', option.dataset.range === selectedRange);
+        });
+        $('rangeMenu').classList.remove('open');
+        $('rangeButton').setAttribute('aria-expanded','false');
+        loadStats();
+      }
+
       async function loadStats(){
         const status = $('status');
         const button = $('refresh');
+        const rangeButton = $('rangeButton');
         button.disabled = true;
+        rangeButton.disabled = true;
         status.className = 'status';
         status.textContent = 'Loading Mithra statistics…';
 
         try{
-          const response = await fetch('/.netlify/functions/rainbet-stats-partners', {cache:'no-store'});
+          const response = await fetch('/.netlify/functions/rainbet-stats-mithra-range?range=' + encodeURIComponent(selectedRange), {cache:'no-store'});
           const data = await response.json().catch(() => null);
 
           if(!response.ok || !data){
@@ -161,15 +209,34 @@
             ? updated.toLocaleString(undefined,{dateStyle:'medium',timeStyle:'short'})
             : 'just now';
 
-          status.textContent = 'Mithra statistics updated ' + when + '.';
+          status.textContent = labels[selectedRange] + ' · updated ' + when + '.';
           status.className = 'status ok';
         }catch(error){
           status.textContent = error?.message || 'Mithra statistics are unavailable.';
           status.className = 'status error';
         }finally{
           button.disabled = false;
+          rangeButton.disabled = false;
         }
       }
+
+      $('rangeButton').addEventListener('click', () => {
+        const menu = $('rangeMenu');
+        const open = !menu.classList.contains('open');
+        menu.classList.toggle('open', open);
+        $('rangeButton').setAttribute('aria-expanded', String(open));
+      });
+
+      document.querySelectorAll('.range-option').forEach(option => {
+        option.addEventListener('click', () => setRange(option.dataset.range));
+      });
+
+      document.addEventListener('click', event => {
+        if(!$('rangeMenu').contains(event.target) && event.target !== $('rangeButton')){
+          $('rangeMenu').classList.remove('open');
+          $('rangeButton').setAttribute('aria-expanded','false');
+        }
+      });
 
       $('refresh').addEventListener('click', loadStats);
       loadStats();
