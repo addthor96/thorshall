@@ -130,7 +130,7 @@ header{display:flex;align-items:center;justify-content:space-between;gap:16px;ma
 <div class="wrap" id="app">
 <header>
 <div class="brand"><div class="mark">ᚦ</div><div><h1>Search Console Dashboard</h1><p>Private Thor's Hall performance report</p></div></div>
-<div class="actions"><button class="btn" id="refresh">Refresh</button><a class="btn" href="/.netlify/functions/gsc-dashboard?logout=1">Log out</a></div>
+<div class="actions"><button class="btn" id="refresh">Refresh</button><a class="btn" href="/.netlify/functions/gsc-index-status" target="_blank" rel="noopener">Index status</a><a class="btn" href="/.netlify/functions/gsc-dashboard?logout=1">Log out</a></div>
 </header>
 <div class="status"><strong id="property">Loading property…</strong><span id="generated">Connecting to Google Search Console…</span></div>
 <section class="metrics">
