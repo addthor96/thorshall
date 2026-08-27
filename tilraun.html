@@ -335,6 +335,150 @@
       line-height:1.45;
     }
 
+
+    /* SUPPORT SIGN-UP */
+    .support-strip{
+      margin:0 auto 42px;
+      padding:26px 30px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:22px;
+      border:1px solid rgba(255,122,0,.48);
+      border-radius:7px;
+      background:
+        radial-gradient(circle at 20% 30%,rgba(255,122,0,.08),transparent 38%),
+        linear-gradient(180deg,rgba(18,15,13,.97),rgba(9,8,8,.98));
+      box-shadow:0 18px 38px rgba(0,0,0,.42),inset 0 0 24px rgba(255,93,0,.025);
+    }
+    .support-strip strong{
+      display:block;
+      margin-bottom:6px;
+      color:#e1aa58;
+      font:900 19px/1.15 var(--serif);
+      text-transform:uppercase;
+    }
+    .support-strip span{
+      display:block;
+      max-width:720px;
+      color:#c5c0ba;
+      font-size:14px;
+      line-height:1.5;
+    }
+    .support-strip small{
+      display:block;
+      margin-top:6px;
+      color:#8f8a85;
+      font-size:11px;
+    }
+    .support-btn{
+      flex:0 0 auto;
+      padding:14px 20px;
+      border:1px solid #ff8b18;
+      border-radius:7px;
+      color:#f8e0c6;
+      background:linear-gradient(180deg,#a03f0e,#5d1a08);
+      box-shadow:0 0 22px rgba(255,91,0,.25),inset 0 0 18px rgba(255,140,35,.12);
+      font:900 15px var(--serif);
+      text-transform:uppercase;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .support-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
+
+    .support-modal{
+      position:fixed;
+      inset:0;
+      z-index:100;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:rgba(3,3,4,.84);
+      backdrop-filter:blur(8px);
+    }
+    .support-modal.open{display:flex}
+    .support-modal-card{
+      width:min(470px,100%);
+      position:relative;
+      padding:30px;
+      border:1px solid rgba(255,122,0,.55);
+      border-radius:12px;
+      background:
+        radial-gradient(circle at 50% 0%,rgba(255,122,0,.10),transparent 52%),
+        linear-gradient(180deg,#16110e,#0b0908);
+      box-shadow:0 22px 70px rgba(0,0,0,.68),0 0 34px rgba(255,91,0,.10);
+    }
+    .support-modal-card h3{
+      margin:0 34px 8px 0;
+      color:#e6b463;
+      font:900 25px/1.1 var(--serif);
+      text-transform:uppercase;
+    }
+    .support-modal-card p{
+      margin:0 0 18px;
+      color:#c9c3bc;
+      font-size:14px;
+      line-height:1.55;
+    }
+    .support-modal-card label{
+      display:block;
+      margin-bottom:7px;
+      color:#f3e5d3;
+      font-size:13px;
+      font-weight:800;
+    }
+    .support-modal-card input[type="text"]{
+      width:100%;
+      padding:13px 14px;
+      border:1px solid rgba(255,122,0,.46);
+      border-radius:7px;
+      outline:none;
+      color:#fff;
+      background:#090706;
+      font:600 15px var(--sans);
+    }
+    .support-modal-card input[type="text"]:focus{
+      border-color:#ff8b18;
+      box-shadow:0 0 0 3px rgba(255,122,0,.10);
+    }
+    .support-help{
+      display:block;
+      margin:8px 0 18px;
+      color:#8f8a85;
+      font-size:11px;
+      line-height:1.45;
+    }
+    .support-form-actions{display:flex;gap:10px;align-items:center}
+    .support-form-actions .support-btn{flex:1}
+    .support-cancel{
+      padding:12px 14px;
+      border:0;
+      color:#aaa39d;
+      background:transparent;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .support-close{
+      position:absolute;
+      top:14px;
+      right:15px;
+      width:34px;
+      height:34px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:50%;
+      color:#ddd4ca;
+      background:rgba(255,255,255,.04);
+      font-size:20px;
+      cursor:pointer;
+    }
+    .support-status{
+      min-height:17px;
+      margin-top:10px;
+      color:#ffb65c;
+      font-size:12px;
+    }
+
     footer{
       padding:27px 0 34px;
       text-align:center;
@@ -384,6 +528,8 @@
       .why-title{font-size:22px}
       .why-title::before,.why-title::after{display:none}
       .why-item{grid-template-columns:62px 1fr}
+      .support-strip{padding:22px 18px;flex-direction:column;align-items:stretch;text-align:center}
+      .support-btn{width:100%}
     }
   </style>
 </head>
@@ -535,6 +681,16 @@
         </div>
       </div>
     </section>
+
+    <section class="shell support-strip">
+      <div>
+        <strong>Just want to support Thor's Hall?</strong>
+        <span>You can create a free Rainbet account through our support link. No deposit or play is required.</span>
+        <small>18+ only. Availability depends on your jurisdiction.</small>
+      </div>
+      <button id="tilraunSupportSignup" class="support-btn" type="button">Support Thor's Hall</button>
+    </section>
+
   </main>
 
   <footer>
@@ -543,5 +699,127 @@
       <span>18+ only. Gamble responsibly. Ensure online gaming is legal in your jurisdiction.</span>
     </div>
   </footer>
+
+  <div id="tilraunSupportModal" class="support-modal" aria-hidden="true">
+    <div class="support-modal-card" role="dialog" aria-modal="true" aria-labelledby="tilraunSupportTitle">
+      <button id="tilraunSupportClose" class="support-close" type="button" aria-label="Close">×</button>
+
+      <h3 id="tilraunSupportTitle">Choose your Rainbet username</h3>
+      <p>
+        Enter the username you plan to use on Rainbet. Use the same username when you sign up
+        so we can match the registration to this page.
+      </p>
+
+      <form id="tilraunSupportForm" name="tilraun-support-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="tilraun-support-signup">
+        <input type="hidden" name="partner" value="Tilraun">
+        <input type="hidden" name="page" value="/tilraun">
+        <input type="hidden" name="destination" value="https://rainbet.com?r=addthor">
+        <input id="tilraunSubmittedAt" type="hidden" name="submitted_at" value="">
+
+        <p hidden>
+          <label>Do not fill this out: <input name="bot-field"></label>
+        </p>
+
+        <label for="tilraunRainbetUsername">Rainbet username</label>
+        <input
+          id="tilraunRainbetUsername"
+          type="text"
+          name="rainbet_username"
+          maxlength="64"
+          required
+          autocomplete="off"
+          placeholder="Enter the username you'll use"
+        >
+
+        <span class="support-help">
+          Use this exact username again when creating your Rainbet account.
+        </span>
+
+        <div class="support-form-actions">
+          <button id="tilraunContinueButton" class="support-btn" type="submit">Continue to Rainbet</button>
+          <button id="tilraunSupportCancel" class="support-cancel" type="button">Cancel</button>
+        </div>
+
+        <div id="tilraunSupportStatus" class="support-status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const destination = 'https://rainbet.com?r=addthor';
+      const openButton = document.getElementById('tilraunSupportSignup');
+      const modal = document.getElementById('tilraunSupportModal');
+      const closeButton = document.getElementById('tilraunSupportClose');
+      const cancelButton = document.getElementById('tilraunSupportCancel');
+      const form = document.getElementById('tilraunSupportForm');
+      const username = document.getElementById('tilraunRainbetUsername');
+      const submittedAt = document.getElementById('tilraunSubmittedAt');
+      const status = document.getElementById('tilraunSupportStatus');
+      const continueButton = document.getElementById('tilraunContinueButton');
+
+      if (!openButton || !modal || !form) return;
+
+      function openModal(){
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        status.textContent = '';
+        setTimeout(function(){ username.focus(); }, 30);
+      }
+
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      openButton.addEventListener('click', openModal);
+      closeButton.addEventListener('click', closeModal);
+      cancelButton.addEventListener('click', closeModal);
+
+      modal.addEventListener('click', function(event){
+        if (event.target === modal) closeModal();
+      });
+
+      document.addEventListener('keydown', function(event){
+        if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+      });
+
+      form.addEventListener('submit', async function(event){
+        event.preventDefault();
+
+        const chosenUsername = username.value.trim();
+        if (!chosenUsername) {
+          username.focus();
+          return;
+        }
+
+        submittedAt.value = new Date().toISOString();
+        continueButton.disabled = true;
+        continueButton.textContent = 'Saving...';
+        status.textContent = 'Saving your signup...';
+
+        const data = new URLSearchParams(new FormData(form));
+
+        try {
+          const response = await fetch('/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: data.toString()
+          });
+
+          if (!response.ok) throw new Error('Submission failed');
+
+          status.textContent = 'Saved. Opening Rainbet...';
+          window.location.href = destination;
+        } catch (error) {
+          status.textContent = 'Could not save right now. Please try again.';
+          continueButton.disabled = false;
+          continueButton.textContent = 'Continue to Rainbet';
+        }
+      });
+    })();
+  </script>
+
 </body>
 </html>
