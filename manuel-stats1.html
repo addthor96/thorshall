@@ -92,6 +92,19 @@
       color:#e7d8ca;text-align:left;font-size:12px;font-weight:800
     }
     .range-option:hover,.range-option.active{background:rgba(255,126,15,.13);color:#ffd19b;filter:none}
+
+    .payout-section{margin-top:16px;padding:20px;border:1px solid rgba(255,255,255,.09);border-radius:18px;background:rgba(8,5,10,.76);backdrop-filter:blur(10px);box-shadow:0 18px 50px rgba(0,0,0,.28)}
+    .payout-head{display:flex;align-items:flex-end;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:14px}
+    .payout-head h2{margin:0;font:900 24px/1 var(--serif);color:#ffd39a}
+    .payout-head p{margin:0;color:#9e93a1;font-size:11px;line-height:1.5;max-width:620px}
+    .payout-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .payout-card{padding:17px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(180deg,rgba(25,12,30,.88),rgba(11,7,14,.88))}
+    .payout-card .p-label{font-size:9px;color:#d1bda9;text-transform:uppercase;letter-spacing:.13em;font-weight:900}
+    .payout-card .p-value{margin-top:10px;font:900 25px/1 var(--serif);color:#fff0dc}
+    .payout-card .p-sub{margin-top:8px;color:#958a99;font-size:10px;line-height:1.45}
+    .payout-note{margin-top:12px;color:#8e838f;font-size:10px;line-height:1.5}
+    @media(max-width:760px){.payout-grid{grid-template-columns:repeat(2,1fr)}}
+    @media(max-width:500px){.payout-grid{grid-template-columns:1fr}}
     footer{text-align:center;color:#827888;font-size:10px;padding:28px 0 0}
     @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.hero{padding-top:46px}.range-menu{right:auto;left:0}}
     @media(max-width:500px){.grid{grid-template-columns:1fr}.brand span{font-size:17px}.tag{display:none}.wrap{width:min(100% - 20px,1050px)}}
@@ -120,11 +133,29 @@
       <article class="card"><div class="label">First deposits</div><div id="ftd" class="value">—</div><div class="sub">First-time depositors</div></article>
       <article class="card"><div class="label">Deposits</div><div id="deposits" class="value">—</div><div class="sub">Total tracked deposit value</div></article>
       <article class="card"><div class="label">Wagered</div><div id="wager" class="value">—</div><div class="sub">Total tracked wagering</div></article>
-      <article class="card"><div class="label">NGR</div><div id="ngr" class="value">—</div><div class="sub">Net gaming revenue reported by Rainbet</div></article>
+      <article class="card"><div class="label">Casino NGR</div><div id="ngr" class="value">—</div><div class="sub">Casino net gaming revenue reported by Rainbet</div></article>
+    </section>
+
+
+
+    <section class="payout-section" aria-label="Estimated payout calculator">
+      <div class="payout-head">
+        <div><h2>Estimated Payout</h2></div>
+        <p>Calculated from Manuel's current monthly billing-period NGR. Casino and sportsbook tiers are calculated separately.</p>
+      </div>
+      <div class="payout-grid">
+        <div class="payout-card"><div class="p-label">Casino NGR</div><div id="pCasinoNgr" class="p-value">—</div><div id="pCasinoRate" class="p-sub">Tier: —</div></div>
+        <div class="payout-card"><div class="p-label">Sportsbook NGR</div><div id="pSbNgr" class="p-value">—</div><div id="pSbRate" class="p-sub">Tier: —</div></div>
+        <div class="payout-card"><div class="p-label">Estimated Rainbet Commission</div><div id="pCommission" class="p-value">—</div><div class="p-sub">Based on current Rainbet tier rules</div></div>
+        <div class="payout-card"><div class="p-label">First 3 Months</div><div id="pFirst3" class="p-value">—</div><div class="p-sub">Estimated Manuel payout at 100%</div></div>
+        <div class="payout-card"><div class="p-label">After 3 Months</div><div id="pAfter3" class="p-value">—</div><div class="p-sub">Estimated Manuel payout at 50%</div></div>
+        <div class="payout-card"><div class="p-label">Rainbet Reported Income</div><div id="pReported" class="p-value">—</div><div id="pReportedSub" class="p-sub">Shown when Rainbet returns partner_income</div></div>
+      </div>
+      <div class="payout-note">Estimate only. Rainbet's finalized monthly bill is the authoritative payout amount. Negative NGR is treated as $0 for this estimate.</div>
     </section>
 
     <div class="bottom">
-      <div class="note">This page displays raw Manuel campaign statistics only. It does not calculate Thor's Hall affiliate payout or partner revenue-share payments.</div>
+      <div class="note">Campaign statistics are pulled from Rainbet. The payout section is an estimate; finalized Rainbet billing remains authoritative.</div>
       <div class="actions">
         <button id="rangeButton" class="range-button" type="button" aria-haspopup="true" aria-expanded="false">All time ▾</button>
         <div id="rangeMenu" class="range-menu" role="menu">
@@ -151,6 +182,9 @@
         : '—';
       const count = value => valid(value)
         ? Number(value).toLocaleString('en-US',{maximumFractionDigits:0})
+        : '—';
+      const percent = value => valid(value)
+        ? (Number(value) * 100).toFixed(0) + '%'
         : '—';
 
       const labels = {
@@ -203,6 +237,23 @@
           $('deposits').textContent = money(manuel.deposits);
           $('wager').textContent = money(manuel.wager);
           $('ngr').textContent = money(manuel.ngr ?? manuel.casinoNgr);
+
+          const payout = data.billing?.payout;
+          if(payout){
+            $('pCasinoNgr').textContent = money(payout.casinoNgr);
+            $('pSbNgr').textContent = money(payout.sbNgr);
+            $('pCasinoRate').textContent = 'Tier: ' + percent(payout.casinoRate);
+            $('pSbRate').textContent = 'Tier: ' + percent(payout.sbRate);
+            $('pCommission').textContent = money(payout.estimatedRainbetCommission);
+            $('pFirst3').textContent = money(payout.first3MonthsPayout);
+            $('pAfter3').textContent = money(payout.after3MonthsPayout);
+            $('pReported').textContent = valid(payout.rainbetReportedPartnerIncome)
+              ? money(payout.rainbetReportedPartnerIncome)
+              : 'Not returned';
+            $('pReportedSub').textContent = payout.basedOn === 'rainbet_partner_income'
+              ? 'Partner payout uses Rainbet reported income'
+              : 'Partner payout uses tier estimate';
+          }
 
           const updated = data.updated ? new Date(data.updated) : null;
           const when = updated && !Number.isNaN(updated.getTime())
