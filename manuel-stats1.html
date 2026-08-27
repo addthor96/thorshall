@@ -149,7 +149,6 @@
         <div class="payout-card"><div class="p-label">Estimated Rainbet Commission</div><div id="pCommission" class="p-value">—</div><div class="p-sub">Based on current Rainbet tier rules</div></div>
         <div class="payout-card"><div class="p-label">First 3 Months</div><div id="pFirst3" class="p-value">—</div><div class="p-sub">Estimated Manuel payout at 100%</div></div>
         <div class="payout-card"><div class="p-label">After 3 Months</div><div id="pAfter3" class="p-value">—</div><div class="p-sub">Estimated Manuel payout at 50%</div></div>
-        <div class="payout-card"><div class="p-label">Rainbet Reported Income</div><div id="pReported" class="p-value">—</div><div id="pReportedSub" class="p-sub">Shown when Rainbet returns partner_income</div></div>
       </div>
       <div class="payout-note">Estimate only. Rainbet's finalized monthly bill is the authoritative payout amount. Negative NGR is treated as $0 for this estimate.</div>
     </section>
@@ -247,12 +246,6 @@
             $('pCommission').textContent = money(payout.estimatedRainbetCommission);
             $('pFirst3').textContent = money(payout.first3MonthsPayout);
             $('pAfter3').textContent = money(payout.after3MonthsPayout);
-            $('pReported').textContent = valid(payout.rainbetReportedPartnerIncome)
-              ? money(payout.rainbetReportedPartnerIncome)
-              : 'Not returned';
-            $('pReportedSub').textContent = payout.basedOn === 'rainbet_partner_income'
-              ? 'Partner payout uses Rainbet reported income'
-              : 'Partner payout uses tier estimate';
           }
 
           const updated = data.updated ? new Date(data.updated) : null;

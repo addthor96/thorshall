@@ -13,8 +13,7 @@ const DEFAULT_COLUMNS = [
   "first_deposits_count",
   "ggr",
   "ngr",
-  "sb_ngr",
-  "partner_income"
+  "sb_ngr"
 ];
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -139,8 +138,7 @@ function extractExtraMetrics(data) {
   }
 
   return {
-    sbNgr: pick("sb_ngr"),
-    partnerIncome: pick("partner_income")
+    sbNgr: pick("sb_ngr")
   };
 }
 
@@ -159,11 +157,6 @@ function buildPayout(metrics) {
   const casinoRate = tierRate(casinoNgr);
   const sbRate = tierRate(sbNgr);
   const tierEstimate = (casinoNgr * casinoRate) + (sbNgr * sbRate);
-  const reportedPartnerIncome = Number.isFinite(Number(metrics.partnerIncome))
-    ? Number(metrics.partnerIncome)
-    : null;
-
-  const payoutBase = reportedPartnerIncome !== null ? reportedPartnerIncome : tierEstimate;
 
   return {
     casinoNgr,
@@ -171,10 +164,9 @@ function buildPayout(metrics) {
     casinoRate,
     sbRate,
     estimatedRainbetCommission: tierEstimate,
-    rainbetReportedPartnerIncome: reportedPartnerIncome,
-    first3MonthsPayout: Math.max(0, payoutBase),
-    after3MonthsPayout: Math.max(0, payoutBase) * 0.5,
-    basedOn: reportedPartnerIncome !== null ? "rainbet_partner_income" : "tier_estimate"
+    first3MonthsPayout: tierEstimate,
+    after3MonthsPayout: tierEstimate * 0.5,
+    basedOn: "tier_estimate"
   };
 }
 
@@ -255,8 +247,7 @@ async function fetchManuelReport(token, range) {
             ftd: 0,
             ggr: 0,
             ngr: 0,
-            sbNgr: 0,
-            partnerIncome: 0
+            sbNgr: 0
           };
         }
         throw error;
@@ -265,10 +256,13 @@ async function fetchManuelReport(token, range) {
 
     if ([401, 403].includes(response.status) && index < candidates.length - 1) continue;
 
+    const validation = Array.isArray(data?.errors)
+      ? data.errors.map(item => item?.message || item?.detail || item).filter(Boolean).join(" | ")
+      : "";
     const message =
       data?.message ||
       data?.error ||
-      data?.errors?.[0]?.message ||
+      validation ||
       `Rainbet API request failed with status ${response.status}.`;
     throw new Error(String(message));
   }
