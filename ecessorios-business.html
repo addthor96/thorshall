@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Thor's Hall — Play Through Thor's Hall</title>
+  <title>Thor's Hall — Play Through Manuel</title>
   <meta name="description" content="Join Rainbet through Manuel's Thor's Hall page for casino, sportsbook and live games access.">
   <meta name="theme-color" content="#0b0714">
 
@@ -332,6 +332,129 @@
       font-size:14px;
     }
 
+    .support-strip{
+      margin:0 auto 34px;
+      padding:26px 28px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:22px;
+      border:1px solid rgba(108,214,255,.30);
+      background:linear-gradient(90deg,rgba(12,15,27,.96),rgba(17,36,54,.92),rgba(12,15,27,.96));
+      border-radius:8px;
+      box-shadow:0 14px 34px rgba(0,0,0,.34),inset 0 0 28px rgba(68,180,255,.035);
+    }
+    .support-strip strong{display:block;font:900 18px/1.15 var(--serif);color:#c9eaff;text-transform:uppercase;margin-bottom:6px}
+    .support-strip span{display:block;color:#c7cbd2;font-size:14px;line-height:1.45;max-width:720px}
+    .support-strip small{display:block;margin-top:6px;color:#8f98a5;font-size:11px}
+    .support-btn{
+      flex:0 0 auto;
+      padding:13px 19px;
+      border:1px solid rgba(105,199,255,.68);
+      border-radius:7px;
+      color:#eefaff;
+      background:linear-gradient(180deg,rgba(28,111,159,.78),rgba(15,60,92,.88));
+      box-shadow:0 0 20px rgba(69,179,255,.13);
+      font-family:var(--sans);
+      font-weight:800;
+      font-size:14px;
+      cursor:pointer;
+      transition:.18s ease;
+    }
+    .support-btn:hover{filter:brightness(1.08);transform:translateY(-1px)}
+
+    .support-modal{
+      position:fixed;
+      inset:0;
+      z-index:100;
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:20px;
+      background:rgba(3,4,9,.82);
+      backdrop-filter:blur(8px);
+    }
+    .support-modal.open{display:flex}
+    .support-modal-card{
+      width:min(470px,100%);
+      position:relative;
+      padding:30px;
+      border:1px solid rgba(105,199,255,.40);
+      border-radius:14px;
+      background:
+        radial-gradient(circle at 50% 0%,rgba(53,142,198,.16),transparent 52%),
+        linear-gradient(180deg,#121522,#0b0d14);
+      box-shadow:0 22px 70px rgba(0,0,0,.65),0 0 35px rgba(69,179,255,.10);
+    }
+    .support-modal-card h3{
+      margin:0 34px 8px 0;
+      font:900 25px/1.1 var(--serif);
+      color:#d9f1ff;
+    }
+    .support-modal-card p{
+      margin:0 0 18px;
+      color:#c5cbd4;
+      font-size:14px;
+      line-height:1.55;
+    }
+    .support-modal-card label{
+      display:block;
+      margin-bottom:7px;
+      color:#eefaff;
+      font-size:13px;
+      font-weight:800;
+    }
+    .support-modal-card input[type="text"]{
+      width:100%;
+      padding:13px 14px;
+      border:1px solid rgba(105,199,255,.42);
+      border-radius:7px;
+      outline:none;
+      color:#fff;
+      background:#080b11;
+      font:600 15px var(--sans);
+    }
+    .support-modal-card input[type="text"]:focus{
+      border-color:rgba(105,199,255,.88);
+      box-shadow:0 0 0 3px rgba(69,179,255,.10);
+    }
+    .support-help{
+      display:block;
+      margin:8px 0 18px;
+      color:#8f98a5;
+      font-size:11px;
+      line-height:1.45;
+    }
+    .support-form-actions{display:flex;gap:10px;align-items:center}
+    .support-form-actions .support-btn{flex:1}
+    .support-cancel{
+      padding:12px 14px;
+      border:0;
+      color:#aeb4be;
+      background:transparent;
+      font-weight:700;
+      cursor:pointer;
+    }
+    .support-close{
+      position:absolute;
+      top:14px;
+      right:15px;
+      width:34px;
+      height:34px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:50%;
+      color:#d7dde5;
+      background:rgba(255,255,255,.04);
+      font-size:20px;
+      cursor:pointer;
+    }
+    .support-status{
+      min-height:17px;
+      margin-top:10px;
+      color:#ffcf8a;
+      font-size:12px;
+    }
+
     footer{
       padding:27px 0 34px;
       text-align:center;
@@ -351,7 +474,7 @@
       nav a:not(.nav-cta){display:none}
       .logo{font-size:24px}
       .logo-mark{width:48px;height:48px}
-      .manuel-strip{align-items:flex-start;flex-direction:column}
+      .manuel-strip,.support-strip{align-items:flex-start;flex-direction:column}
     }
 
     @media(max-width:560px){
@@ -398,7 +521,7 @@
         <a href="/guide">Guide</a>
         <a href="/partners">Partners</a>
         <a href="/creators">Creators</a>
-        <a class="nav-cta" href="https://playrainbet.com/ts5ttmsbr" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+        <a class="nav-cta" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
       </nav>
     </div>
   </header>
@@ -408,12 +531,12 @@
       <div class="shell hero-content">
         <div class="partner-tag">Thor's Hall Partner <span>•</span> Manuel</div>
         <h1 class="hero-title-small">Play Through</h1>
-        <div class="hero-title">Thor's Hall</div>
+        <div class="hero-title">Manuel</div>
 
         <div class="divider"><span>ᛏ</span></div>
 
         <p class="hero-copy">
-          Casino, Sportsbook, Live Games and crypto-friendly play through Thor's Hall's dedicated Thor's Hall page.
+          Casino, Sportsbook, Live Games and crypto-friendly play through Manuel's dedicated Thor's Hall page.
         </p>
 
         <div class="bonus-box">
@@ -422,7 +545,7 @@
         </div>
 
         <div class="hero-actions">
-          <a class="btn btn-primary" href="https://playrainbet.com/ts5ttmsbr" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+          <a class="btn btn-primary" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
           <a class="btn btn-secondary" href="#features">Learn More</a>
         </div>
       </div>
@@ -481,7 +604,7 @@
     </section>
 
     <section class="shell why">
-      <div class="why-title">Why play through Thor's Hall</div>
+      <div class="why-title">Why Play Through Manuel</div>
 
       <div class="why-grid">
         <div class="why-item">
@@ -530,7 +653,16 @@
         <strong>Manuel × Thor's Hall</strong>
         <span>Dedicated partner access powered by Thor's Hall.</span>
       </div>
-      <a class="mini-btn" href="https://playrainbet.com/ts5ttmsbr" target="_blank" rel="nofollow sponsored noopener">Join Through Manuel</a>
+      <a class="mini-btn" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Through Manuel</a>
+    </section>
+
+    <section class="shell support-strip">
+      <div>
+        <strong>Just want to support Manuel?</strong>
+        <span>That works too. Create a free Rainbet account through his support link — no deposit or play is required.</span>
+        <small>18+ only. Availability depends on your jurisdiction.</small>
+      </div>
+      <button id="manuelSupportSignup" class="support-btn" type="button">Support Manuel</button>
     </section>
   </main>
 
@@ -540,5 +672,110 @@
       <span>18+ only. Gamble responsibly. Ensure online gaming is legal in your jurisdiction.</span>
     </div>
   </footer>
+
+  <div id="manuelSupportModal" class="support-modal" aria-hidden="true">
+    <div class="support-modal-card" role="dialog" aria-modal="true" aria-labelledby="manuelSupportTitle">
+      <button id="manuelSupportClose" class="support-close" type="button" aria-label="Close">×</button>
+
+      <h3 id="manuelSupportTitle">Choose your Rainbet username</h3>
+      <p>Enter the username you plan to use on Rainbet. Use the same username when you sign up so we can credit the support to Manuel.</p>
+
+      <form id="manuelSupportForm" name="manuel-support-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+        <input type="hidden" name="form-name" value="manuel-support-signup">
+        <input type="hidden" name="partner" value="Manuel">
+        <input type="hidden" name="page" value="/ecessorios-business">
+        <input type="hidden" name="destination" value="https://rainbet.com?r=addthor">
+        <input id="manuelSubmittedAt" type="hidden" name="submitted_at" value="">
+        <p hidden><label>Do not fill this out: <input name="bot-field"></label></p>
+
+        <label for="manuelRainbetUsername">Rainbet username</label>
+        <input id="manuelRainbetUsername" type="text" name="rainbet_username" maxlength="64" required autocomplete="off" placeholder="Enter the username you'll use">
+        <span class="support-help">
+          You’ll enter the username once here and again when creating your Rainbet account. This lets us match the signup to Manuel.
+        </span>
+
+        <div class="support-form-actions">
+          <button id="manuelContinueButton" class="support-btn" type="submit">Continue to Rainbet</button>
+          <button id="manuelSupportCancel" class="support-cancel" type="button">Cancel</button>
+        </div>
+        <div id="manuelSupportStatus" class="support-status" aria-live="polite"></div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function(){
+      const destination = 'https://rainbet.com?r=addthor';
+      const openButton = document.getElementById('manuelSupportSignup');
+      const modal = document.getElementById('manuelSupportModal');
+      const closeButton = document.getElementById('manuelSupportClose');
+      const cancelButton = document.getElementById('manuelSupportCancel');
+      const form = document.getElementById('manuelSupportForm');
+      const username = document.getElementById('manuelRainbetUsername');
+      const submittedAt = document.getElementById('manuelSubmittedAt');
+      const status = document.getElementById('manuelSupportStatus');
+      const continueButton = document.getElementById('manuelContinueButton');
+
+      if (!openButton || !modal || !form) return;
+
+      function openModal(){
+        modal.classList.add('open');
+        modal.setAttribute('aria-hidden', 'false');
+        status.textContent = '';
+        setTimeout(function(){ username.focus(); }, 30);
+      }
+
+      function closeModal(){
+        modal.classList.remove('open');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+
+      openButton.addEventListener('click', openModal);
+      closeButton.addEventListener('click', closeModal);
+      cancelButton.addEventListener('click', closeModal);
+
+      modal.addEventListener('click', function(event){
+        if (event.target === modal) closeModal();
+      });
+
+      document.addEventListener('keydown', function(event){
+        if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
+      });
+
+      form.addEventListener('submit', async function(event){
+        event.preventDefault();
+
+        const chosenUsername = username.value.trim();
+        if (!chosenUsername) {
+          username.focus();
+          return;
+        }
+
+        submittedAt.value = new Date().toISOString();
+        continueButton.disabled = true;
+        continueButton.textContent = 'Saving...';
+        status.textContent = 'Saving your signup...';
+
+        const data = new URLSearchParams(new FormData(form));
+
+        try {
+          const response = await fetch('/', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+            body: data.toString()
+          });
+
+          if (!response.ok) throw new Error('Submission failed');
+
+          status.textContent = 'Saved. Opening Rainbet...';
+          window.location.href = destination;
+        } catch (error) {
+          status.textContent = 'Could not save right now. Please try again.';
+          continueButton.disabled = false;
+          continueButton.textContent = 'Continue to Rainbet';
+        }
+      });
+    })();
+  </script>
 </body>
 </html>
