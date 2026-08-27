@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Thor's Hall — Play Through Manuel</title>
+  <meta
+    name="description"
+    content="Play through Manuel on Thor's Hall. Casino, sportsbook, live games and crypto-friendly access through one premium hub."
+  />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #09060f;
+      --panel: rgba(14, 10, 24, 0.78);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --text: #f5f1ff;
+      --muted: rgba(245, 241, 255, 0.78);
+      --gold: #f5c96a;
+      --gold-2: #ffdf91;
+      --purple: #8e4dff;
+      --purple-2: #e95eff;
+      --shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
+      --radius: 20px;
+      --max: 1180px;
+    }
+
+    body {
+      font-family: Inter, Arial, sans-serif;
+      color: var(--text);
+      background:
+        linear-gradient(rgba(6, 3, 12, 0.72), rgba(6, 3, 12, 0.85)),
+        url('/img/manuel-background.png') center center / cover no-repeat fixed;
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .wrap {
+      width: min(100% - 32px, var(--max));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 20;
+      backdrop-filter: blur(12px);
+      background: rgba(8, 5, 14, 0.58);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .topbar-inner {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+    }
+
+    .brand-mark {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, rgba(245, 201, 106, 0.25), rgba(142, 77, 255, 0.25));
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: var(--shadow);
+      font-size: 18px;
+      color: var(--gold-2);
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      gap: 22px;
+      flex-wrap: wrap;
+    }
+
+    .nav a {
+      color: var(--muted);
+      font-size: 15px;
+      transition: 0.2s ease;
+    }
+
+    .nav a:hover {
+      color: #fff;
+    }
+
+    .nav-cta {
+      padding: 11px 18px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color: #120c03 !important;
+      font-weight: 700;
+      box-shadow: 0 10px 30px rgba(245, 201, 106, 0.25);
+    }
+
+    .hero {
+      padding: 72px 0 48px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+
+    .hero-card,
+    .bonus-card,
+    .feature,
+    .why-card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-card {
+      padding: 42px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.05);
+      color: var(--gold-2);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      font-size: clamp(38px, 6vw, 72px);
+      line-height: 0.95;
+      margin-bottom: 18px;
+      letter-spacing: -1.8px;
+    }
+
+    .hero-card p {
+      max-width: 680px;
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 26px;
+    }
+
+    .cta-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      margin-bottom: 28px;
+    }
+
+    .btn {
+      padding: 14px 22px;
+      border-radius: 14px;
+      font-weight: 700;
+      transition: 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--gold), var(--gold-2));
+      color: #150e04;
+      box-shadow: 0 10px 30px rgba(245, 201, 106, 0.22);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.02);
+    }
+
+    .btn-secondary {
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(255, 255, 255, 0.04);
+      color: #fff;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.08);
+    }
+
+    .mini-points {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .mini-point {
+      padding: 16px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .mini-point strong {
+      display: block;
+      margin-bottom: 6px;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    .mini-point span {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .bonus-card {
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .bonus-card::before {
+      content: "";
+      position: absolute;
+      inset: auto -60px -60px auto;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(233, 94, 255, 0.22), transparent 70%);
+      pointer-events: none;
+    }
+
+    .bonus-label {
+      color: var(--gold-2);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 0.6px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .bonus-value {
+      font-size: clamp(44px, 6vw, 76px);
+      font-weight: 800;
+      line-height: 0.95;
+      margin-bottom: 10px;
+    }
+
+    .bonus-sub {
+      color: var(--muted);
+      font-size: 18px;
+      margin-bottom: 18px;
+    }
+
+    .bonus-note {
+      color: rgba(245, 241, 255, 0.65);
+      font-size: 14px;
+    }
+
+    .section {
+      padding: 18px 0 60px;
+    }
+
+    .section h2 {
+      font-size: clamp(28px, 4vw, 42px);
+      margin-bottom: 10px;
+      letter-spacing: -0.8px;
+    }
+
+    .section-intro {
+      color: var(--muted);
+      max-width: 760px;
+      margin-bottom: 24px;
+    }
+
+    .features {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+
+    .feature {
+      padding: 22px;
+    }
+
+    .feature h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .feature p {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .why {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .why-card {
+      padding: 24px;
+    }
+
+    .why-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .why-card p {
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .footer {
+      padding: 26px 0 34px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+      color: rgba(255, 255, 255, 0.62);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 980px) {
+      .hero-grid,
+      .features,
+      .why {
+        grid-template-columns: 1fr;
+      }
+
+      .mini-points {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-card,
+      .bonus-card {
+        padding: 26px;
+      }
+
+      .topbar-inner {
+        padding: 10px 0;
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .nav {
+        gap: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a href="/" class="brand">
+        <div class="brand-mark">ᛏ</div>
+        <span>THOR'S HALL</span>
+      </a>
+
+      <nav class="nav">
+        <a href="/guide">Guide</a>
+        <a href="/partners">Partners</a>
+        <a href="/creators">Creators</a>
+        <a href="https://playrainbet.com/tkpmo0r1x" class="nav-cta">Join Rainbet</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="wrap hero-grid">
+        <div class="hero-card">
+          <div class="eyebrow">Play Through Manuel</div>
+          <h1>Thor’s Hall</h1>
+          <p>
+            Casino, sportsbook, live games and crypto-friendly play — all through
+            one premium hub. Join through Manuel’s page and access Rainbet through Thor’s Hall.
+          </p>
+
+          <div class="cta-row">
+            <a href="https://playrainbet.com/tkpmo0r1x" class="btn btn-primary">Join Rainbet</a>
+            <a href="/guide" class="btn btn-secondary">Learn More</a>
+          </div>
+
+          <div class="mini-points">
+            <div class="mini-point">
+              <strong>Fast Access</strong>
+              <span>Quick sign-up and smooth access across devices.</span>
+            </div>
+            <div class="mini-point">
+              <strong>Crypto Friendly</strong>
+              <span>Support for top cryptocurrencies and modern payment flow.</span>
+            </div>
+            <div class="mini-point">
+              <strong>All-In-One Hub</strong>
+              <span>Casino, sportsbook, live games and more in one place.</span>
+            </div>
+          </div>
+        </div>
+
+        <aside class="bonus-card">
+          <div class="bonus-label">Welcome Offer</div>
+          <div class="bonus-value">250%</div>
+          <div class="bonus-sub">First Deposit Bonus</div>
+          <p class="bonus-note">
+            Join through Manuel’s Thor’s Hall page and get started with Rainbet’s current welcome offer.
+          </p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="wrap">
+        <h2>Why Players Use Thor’s Hall</h2>
+        <p class="section-intro">
+          Thor’s Hall is built to make access simple while keeping the experience clean,
+          premium and crypto-friendly.
+        </p>
+
+        <div class="features">
+          <div class="feature">
+            <h3>Trusted & Secure</h3>
+            <p>Modern platform access with a strong focus on smooth usability and secure play.</p>
+          </div>
+          <div class="feature">
+            <h3>Bigger Rewards</h3>
+            <p>Welcome offers, VIP-style incentives and ongoing promotions for active users.</p>
+          </div>
+          <div class="feature">
+            <h3>Live Games</h3>
+            <p>Casino, sportsbook and live content — all accessible through one premium hub.</p>
+          </div>
+          <div class="feature">
+            <h3>Crypto Access</h3>
+            <p>Built for users who prefer modern, crypto-friendly deposits and withdrawals.</p>
+          </div>
+        </div>
+
+        <div class="why">
+          <div class="why-card">
+            <h3>Built for Convenience</h3>
+            <p>Manuel’s page gives users a direct and simple path into Rainbet through Thor’s Hall.</p>
+          </div>
+          <div class="why-card">
+            <h3>Partner Driven</h3>
+            <p>Thor’s Hall is structured around partner campaigns, growth and tracked performance.</p>
+          </div>
+          <div class="why-card">
+            <h3>Clean Experience</h3>
+            <p>A focused landing-page setup designed to be easy to understand and easy to use.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap">
+      18+ only. Gamble responsibly. Ensure online gaming is legal in your jurisdiction.
+    </div>
+  </footer>
+</body>
+</html>
