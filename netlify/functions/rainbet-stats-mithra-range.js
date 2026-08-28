@@ -3,7 +3,7 @@
 const { extractMetrics, jsonResponse, sleep } = require("../lib/rainbet-client");
 
 const API_URL = "https://portal.rainbetpartners.com/api/customer/v1/partner/report";
-const MITHRA_CAMPAIGN_ID = process.env.MITHRA_CAMPAIGN_ID || "89073";
+const MITHRA_CAMPAIGN_ID = "89073";
 const DEFAULT_EXCHANGE_DATE = "2019-01-01";
 const DEFAULT_COLUMNS = [
   "wager",
@@ -12,7 +12,8 @@ const DEFAULT_COLUMNS = [
   "registrations_count",
   "first_deposits_count",
   "ggr",
-  "ngr"
+  "ngr",
+  "sb_ngr"
 ];
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
@@ -46,7 +47,9 @@ function rangeDates(key) {
       from.setUTCDate(from.getUTCDate() - 7);
       break;
     case "30d":
-      from.setUTCDate(from.getUTCDate() - 30);
+      // "Month" = current monthly billing period to date.
+      from.setUTCDate(1);
+      from.setUTCHours(0, 0, 0, 0);
       break;
     case "6m":
       from.setUTCMonth(from.getUTCMonth() - 6);
@@ -64,6 +67,105 @@ function rangeDates(key) {
   }
 
   return { key, from: from.toISOString(), to: now.toISOString() };
+}
+
+function cleanNumber(value) {
+  if (value === null || value === undefined || value === "") return null;
+  if (typeof value === "object") {
+    if (Object.prototype.hasOwnProperty.call(value, "amount")) return cleanNumber(value.amount);
+    if (Object.prototype.hasOwnProperty.call(value, "value")) return cleanNumber(value.value);
+    return null;
+  }
+  const normalized = typeof value === "string" ? value.replace(/,/g, "").trim() : value;
+  const number = Number(normalized);
+  return Number.isFinite(number) ? number : null;
+}
+
+function findMetric(value, wantedKey, depth = 0, seen = new Set()) {
+  if (!value || typeof value !== "object" || depth > 8 || seen.has(value)) return null;
+  seen.add(value);
+
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      if (entry && typeof entry === "object") {
+        const name = entry.name || entry.key || entry.column;
+        if (name === wantedKey) {
+          const found = cleanNumber(
+            Object.prototype.hasOwnProperty.call(entry, "value") ? entry.value : entry.amount
+          );
+          if (found !== null) return found;
+        }
+      }
+    }
+    for (const entry of value) {
+      const found = findMetric(entry, wantedKey, depth + 1, seen);
+      if (found !== null) return found;
+    }
+    return null;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(value, wantedKey)) {
+    const found = cleanNumber(value[wantedKey]);
+    if (found !== null) return found;
+  }
+
+  for (const child of Object.values(value)) {
+    const found = findMetric(child, wantedKey, depth + 1, seen);
+    if (found !== null) return found;
+  }
+
+  return null;
+}
+
+function extractExtraMetrics(data) {
+  const preferred = [
+    data?.totals?.data?.[0],
+    data?.rows?.totals?.data?.[0],
+    data?.data?.totals?.data?.[0],
+    data?.result?.totals?.data?.[0],
+    data?.totals,
+    data?.summary,
+    data?.data?.summary,
+    data
+  ].filter(Boolean);
+
+  function pick(key) {
+    for (const candidate of preferred) {
+      const found = findMetric(candidate, key);
+      if (found !== null) return found;
+    }
+    return null;
+  }
+
+  return {
+    sbNgr: pick("sb_ngr")
+  };
+}
+
+function tierRate(ngr) {
+  const value = Math.max(0, Number(ngr) || 0);
+  if (value >= 200000) return 0.50;
+  if (value >= 100000) return 0.45;
+  if (value >= 40000) return 0.40;
+  if (value >= 10000) return 0.30;
+  return 0.25;
+}
+
+function buildPayout(metrics) {
+  const casinoNgr = Math.max(0, Number(metrics.ngr) || 0);
+  const sbNgr = Math.max(0, Number(metrics.sbNgr) || 0);
+  const casinoRate = tierRate(casinoNgr);
+  const sbRate = tierRate(sbNgr);
+  const tierEstimate = (casinoNgr * casinoRate) + (sbNgr * sbRate);
+
+  return {
+    casinoNgr,
+    sbNgr,
+    casinoRate,
+    sbRate,
+    estimatedRainbetCommission: tierEstimate,
+    basedOn: "tier_estimate"
+  };
 }
 
 async function requestOnce(url, authorization, timeoutMs = 15000) {
@@ -120,7 +222,7 @@ async function fetchMithraReport(token, range) {
   });
 
   DEFAULT_COLUMNS.forEach(column => params.append("columns[]", column));
-  params.append("campaign_ids[]", String(MITHRA_CAMPAIGN_ID));
+  params.append("campaign_ids[]", MITHRA_CAMPAIGN_ID);
 
   const url = `${API_URL}?${params.toString()}`;
   const candidates = authCandidates(token);
@@ -130,7 +232,9 @@ async function fetchMithraReport(token, range) {
 
     if (response.ok) {
       try {
-        return extractMetrics(data);
+        const core = extractMetrics(data);
+        const extra = extractExtraMetrics(data);
+        return { ...core, ...extra };
       } catch (error) {
         if (error instanceof Error && error.message.includes("expected totals were not found")) {
           return {
@@ -140,21 +244,23 @@ async function fetchMithraReport(token, range) {
             registrations: 0,
             ftd: 0,
             ggr: 0,
-            ngr: 0
+            ngr: 0,
+            sbNgr: 0
           };
         }
         throw error;
       }
     }
 
-    if ([401, 403].includes(response.status) && index < candidates.length - 1) {
-      continue;
-    }
+    if ([401, 403].includes(response.status) && index < candidates.length - 1) continue;
 
+    const validation = Array.isArray(data?.errors)
+      ? data.errors.map(item => item?.message || item?.detail || item).filter(Boolean).join(" | ")
+      : "";
     const message =
       data?.message ||
       data?.error ||
-      data?.errors?.[0]?.message ||
+      validation ||
       `Rainbet API request failed with status ${response.status}.`;
     throw new Error(String(message));
   }
@@ -171,6 +277,7 @@ exports.handler = async function (event) {
   const requested = String(event.queryStringParameters?.range || "all").toLowerCase();
   const allowed = new Set(["today", "7d", "30d", "6m", "1y", "all"]);
   const range = rangeDates(allowed.has(requested) ? requested : "all");
+  const billingRange = rangeDates("30d");
 
   const cached = memoryCache.get(range.key);
   if (cached && Date.now() - cached.time < CACHE_TTL_MS) {
@@ -179,19 +286,34 @@ exports.handler = async function (event) {
 
   try {
     const metrics = await fetchMithraReport(token, range);
+    const billingMetrics = range.key === "30d"
+      ? metrics
+      : await fetchMithraReport(token, billingRange);
+
+    const payout = buildPayout(billingMetrics);
+
     const payload = {
       ok: true,
       available: true,
       range: range.key,
       from: range.from,
       to: range.to,
+      campaignId: MITHRA_CAMPAIGN_ID,
       partners: {
         mithra: {
           name: "Mithra",
           connected: true,
           available: true,
-          ...metrics
+          ...metrics,
+          casinoNgr: metrics.ngr,
+          sportsbookNgr: metrics.sbNgr
         }
+      },
+      billing: {
+        range: "month",
+        from: billingRange.from,
+        to: billingRange.to,
+        payout
       },
       updated: new Date().toISOString()
     };

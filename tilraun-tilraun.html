@@ -92,6 +92,32 @@
       color:#e7d8ca;text-align:left;font-size:12px;font-weight:800
     }
     .range-option:hover,.range-option.active{background:rgba(255,126,15,.13);color:#ffd19b;filter:none}
+
+    .payout-single{
+      margin-top:16px;
+      padding:23px 24px;
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:
+        radial-gradient(circle at 50% 0%,rgba(255,126,15,.09),transparent 55%),
+        linear-gradient(180deg,var(--panel2),var(--panel));
+      backdrop-filter:blur(11px);
+      box-shadow:0 22px 60px rgba(0,0,0,.37),inset 0 1px 0 rgba(255,255,255,.035);
+      text-align:center;
+    }
+    .payout-single .label{color:#e2c49f}
+    .payout-single .value{
+      margin-top:14px;
+      font-size:42px;
+      color:#ffd39a;
+      overflow:visible;
+    }
+    .payout-single .sub{
+      max-width:620px;
+      margin:10px auto 0;
+      line-height:1.5;
+    }
+
     footer{text-align:center;color:#827888;font-size:10px;padding:28px 0 0}
     @media(max-width:760px){.grid{grid-template-columns:repeat(2,1fr)}.hero{padding-top:46px}.range-menu{right:auto;left:0}}
     @media(max-width:500px){.grid{grid-template-columns:1fr}.brand span{font-size:17px}.tag{display:none}.wrap{width:min(100% - 20px,1050px)}}
@@ -120,11 +146,21 @@
       <article class="card"><div class="label">First deposits</div><div id="ftd" class="value">—</div><div class="sub">First-time depositors</div></article>
       <article class="card"><div class="label">Deposits</div><div id="deposits" class="value">—</div><div class="sub">Total tracked deposit value</div></article>
       <article class="card"><div class="label">Wagered</div><div id="wager" class="value">—</div><div class="sub">Total tracked wagering</div></article>
-      <article class="card"><div class="label">NGR</div><div id="ngr" class="value">—</div><div class="sub">Net gaming revenue reported by Rainbet</div></article>
+      <article class="card"><div class="label">Casino NGR</div><div id="ngr" class="value">—</div><div class="sub">Casino net gaming revenue reported by Rainbet</div></article>
+    </section>
+
+
+    <section class="payout-single" aria-label="Estimated payout">
+      <div class="label">Estimated Payout</div>
+      <div id="estimatedPayout" class="value">—</div>
+      <div class="sub">
+        Estimated from the current monthly Rainbet billing period and commission tier.
+        Final payout may differ when Rainbet settles the bill.
+      </div>
     </section>
 
     <div class="bottom">
-      <div class="note">This page displays raw Mithra campaign statistics only. It does not calculate Thor's Hall affiliate payout or partner revenue-share payments.</div>
+      <div class="note">Campaign statistics are pulled directly from Rainbet. Estimated payout is calculated from the current monthly billing period and remains an estimate until Rainbet settles the bill.</div>
       <div class="actions">
         <button id="rangeButton" class="range-button" type="button" aria-haspopup="true" aria-expanded="false">All time ▾</button>
         <div id="rangeMenu" class="range-menu" role="menu">
@@ -203,6 +239,11 @@
           $('deposits').textContent = money(mithra.deposits);
           $('wager').textContent = money(mithra.wager);
           $('ngr').textContent = money(mithra.ngr ?? mithra.casinoNgr);
+
+          const payout = data.billing?.payout;
+          $('estimatedPayout').textContent = payout
+            ? money(payout.estimatedRainbetCommission)
+            : '—';
 
           const updated = data.updated ? new Date(data.updated) : null;
           const when = updated && !Number.isNaN(updated.getTime())
