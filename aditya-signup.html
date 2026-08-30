@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="theme-color" content="#080607">
+  <title>Aditya — Join Rainbet | Thor's Hall</title>
+  <style>
+    :root{
+      --bg:#080607;
+      --panel:#100d0d;
+      --panel2:#17110e;
+      --line:rgba(255,142,44,.34);
+      --orange:#ff7a00;
+      --gold:#f0b865;
+      --text:#f8f2ea;
+      --muted:#b9b0aa;
+      --serif:Georgia,"Times New Roman",serif;
+      --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;min-height:100%}
+    body{
+      color:var(--text);
+      font-family:var(--sans);
+      background:
+        linear-gradient(180deg,rgba(5,3,5,.56),rgba(7,5,6,.92)),
+        url("/img/casinobackground.png") center top/cover fixed no-repeat,
+        var(--bg);
+    }
+    a{text-decoration:none;color:inherit}
+    .shell{width:min(760px,calc(100% - 24px));margin:auto;padding:24px 0 46px}
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;gap:14px;
+      padding:12px 14px;border:1px solid var(--line);border-radius:16px;
+      background:rgba(10,7,8,.82);backdrop-filter:blur(10px)
+    }
+    .brand{display:flex;align-items:center;gap:10px}
+    .brand img{width:40px;height:40px;border-radius:9px;object-fit:cover}
+    .brand strong{font:900 19px var(--serif);color:var(--gold)}
+    .nav span{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#bcae9d;font-weight:800}
+    .hero{text-align:center;padding:52px 14px 24px}
+    .eyebrow{color:#ff9b38;font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+    h1{margin:10px 0 10px;font:900 clamp(42px,8vw,68px)/.95 var(--serif);letter-spacing:-.03em}
+    .hero p{max-width:560px;margin:auto;color:#c8beb8;font-size:15px;line-height:1.55}
+    .card{
+      padding:24px;border:1px solid var(--line);border-radius:20px;
+      background:linear-gradient(180deg,rgba(24,16,13,.95),rgba(11,8,8,.97));
+      box-shadow:0 24px 70px rgba(0,0,0,.42)
+    }
+    .why{
+      display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:22px
+    }
+    .why div{
+      padding:13px 11px;border:1px solid rgba(255,255,255,.07);border-radius:12px;
+      background:rgba(255,255,255,.025);text-align:center
+    }
+    .why strong{display:block;color:#f2c98d;font-size:12px;margin-bottom:4px}
+    .why span{display:block;color:#928985;font-size:10px;line-height:1.4}
+    .reward{
+      margin-bottom:22px;padding:15px 16px;border:1px solid rgba(255,174,50,.42);border-radius:13px;
+      background:radial-gradient(circle at 50% 0%,rgba(255,126,15,.12),transparent 58%),rgba(255,255,255,.025);
+      text-align:center
+    }
+    .reward strong{display:block;color:#ffd18a;font:900 18px var(--serif);margin-bottom:5px}
+    .reward span{display:block;color:#c8beb8;font-size:12px;line-height:1.5}
+    .form-head{margin-bottom:15px}
+    .form-head strong{display:block;font:900 22px var(--serif);color:#f4ddbd;margin-bottom:5px}
+    .form-head span{display:block;color:#9f9692;font-size:12px;line-height:1.45}
+    label{display:block;margin-bottom:7px;color:#eadac7;font-size:13px;font-weight:800}
+    input[type="text"]{
+      width:100%;padding:14px 15px;border:1px solid rgba(255,122,0,.44);border-radius:10px;
+      color:#fff;background:#090706;outline:none;font:600 15px var(--sans)
+    }
+    input[type="text"]:focus{border-color:#ff9224;box-shadow:0 0 0 3px rgba(255,122,0,.09)}
+    .note{margin:8px 0 15px;color:#877e7a;font-size:10px;line-height:1.45}
+    .check{
+      display:flex;align-items:flex-start;gap:9px;margin:0 0 16px;padding:11px 12px;
+      border:1px solid rgba(255,255,255,.07);border-radius:10px;background:rgba(255,255,255,.02)
+    }
+    .check input{margin-top:3px;accent-color:#ff7a00}
+    .check label{margin:0;color:#bdb4af;font-size:11px;font-weight:600;line-height:1.45}
+    button,.cta{
+      width:100%;display:block;padding:15px 18px;border:1px solid #ff8b18;border-radius:10px;
+      background:linear-gradient(180deg,#b44c0d,#6c2508);color:#fff3e2;
+      text-align:center;font:900 16px var(--serif);text-transform:uppercase;letter-spacing:.02em;
+      cursor:pointer
+    }
+    button:hover,.cta:hover{filter:brightness(1.08)}
+    .fine{
+      margin-top:16px;color:#7f7672;font-size:9px;line-height:1.55;text-align:center
+    }
+    .success{display:none;text-align:center}
+    .success .tick{
+      width:58px;height:58px;margin:0 auto 14px;border-radius:50%;display:grid;place-items:center;
+      border:1px solid rgba(159,224,173,.55);color:#aee8b8;background:rgba(82,177,100,.08);
+      font-size:28px;font-weight:900
+    }
+    .success h2{margin:0 0 8px;font:900 30px var(--serif);color:#f0cf9b}
+    .success p{margin:0 auto 18px;max-width:520px;color:#c8beb8;font-size:13px;line-height:1.6}
+    .steps{
+      margin:18px 0 20px;display:grid;gap:8px;text-align:left
+    }
+    .steps div{display:flex;gap:10px;align-items:center;color:#b7aea9;font-size:12px}
+    .steps b{
+      width:26px;height:26px;display:grid;place-items:center;border-radius:50%;
+      border:1px solid rgba(255,139,24,.55);color:#ffbe72;background:rgba(255,122,0,.07);flex:0 0 auto
+    }
+    footer{text-align:center;padding-top:24px;color:#776f6c;font-size:9px}
+    @media(max-width:620px){
+      body{background-attachment:scroll}
+      .why{grid-template-columns:1fr}
+      .nav span{display:none}
+      .shell{width:min(100% - 16px,760px)}
+      .card{padding:18px}
+      .hero{padding-top:40px}
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <div class="nav">
+      <div class="brand">
+        <img src="/logo.png" alt="Thor's Hall">
+        <strong>THOR'S HALL</strong>
+      </div>
+      <span>Aditya Referral</span>
+    </div>
+
+    <section class="hero">
+      <div class="eyebrow">Join Through Aditya</div>
+      <h1>Get Started With Rainbet</h1>
+      <p>Create your free Rainbet account through Aditya. No deposit is required to sign up.</p>
+    </section>
+
+    <section class="card">
+      <div id="signupView">
+        <div class="why">
+          <div><strong>Free signup</strong><span>No deposit required</span></div>
+          <div><strong>Quick setup</strong><span>Takes about a minute</span></div>
+          <div><strong>Future perks</strong><span>Rewards may be available for active players</span></div>
+        </div>
+
+        <div class="reward">
+          <strong>Planning to play later?</strong>
+          <span>Players who stay active through Aditya may become eligible for future Thor's Hall rewards, giveaways or player perks when available.</span>
+        </div>
+
+        <div class="form-head">
+          <strong>Choose your Rainbet username</strong>
+          <span>Enter the username you want to use. We'll save it so your signup can be matched to Aditya.</span>
+        </div>
+
+        <form id="signupForm" name="aditya-support-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/aditya-signup?submitted=1">
+          <input type="hidden" name="form-name" value="aditya-support-signup">
+          <input type="hidden" name="partner" value="Aditya">
+          <input type="hidden" name="page" value="/aditya-signup">
+          <input id="source" type="hidden" name="source" value="direct">
+          <input type="hidden" name="destination" value="https://rainbet.com?r=addthor">
+          <input id="submittedAt" type="hidden" name="submitted_at" value="">
+          <input type="hidden" name="status" value="pending">
+          <input type="hidden" name="pilot" value="500">
+
+          <p hidden><label>Do not fill this out: <input name="bot-field"></label></p>
+
+          <label for="username">Rainbet username</label>
+          <input id="username" name="rainbet_username" type="text" maxlength="64" autocomplete="off" required placeholder="Enter your username">
+          <div class="note">Use this exact same username when you create your Rainbet account.</div>
+
+          <div class="check">
+            <input id="confirm" name="signup_rules_confirmation" type="checkbox" value="yes" required>
+            <label for="confirm">I will use this username for one genuine Rainbet account and complete Rainbet's email verification.</label>
+          </div>
+
+          <button type="submit">Continue to Rainbet</button>
+        </form>
+
+        <div class="fine">
+          Only genuine Rainbet referrals that can be verified will count. One real person = one account.
+          Duplicate, fake, bulk-created or suspicious registrations may be rejected. 18+ only.
+        </div>
+      </div>
+
+      <div id="successView" class="success">
+        <div class="tick">✓</div>
+        <h2>Username Saved</h2>
+        <p>Now create your Rainbet account using the same username and verify your email.</p>
+
+        <div class="steps">
+          <div><b>1</b><span>Create your Rainbet account with the username you just entered.</span></div>
+          <div><b>2</b><span>Verify the email address linked to your Rainbet account.</span></div>
+          <div><b>3</b><span>That's it. Your signup can then be checked and matched to Aditya.</span></div>
+        </div>
+
+        <a class="cta" href="https://rainbet.com?r=addthor" rel="nofollow sponsored">Create Rainbet Account</a>
+
+        <div class="fine">
+          Your signup remains pending until the Rainbet referral can be verified.
+        </div>
+      </div>
+    </section>
+
+    <footer>Thor's Hall · Aditya · 18+ only</footer>
+  </main>
+
+  <script>
+    (() => {
+      const params = new URLSearchParams(window.location.search);
+      const raw = (params.get('src') || 'direct').trim();
+      const clean = /^[a-zA-Z0-9_-]{1,40}$/.test(raw) ? raw : 'direct';
+
+      const source = document.getElementById('source');
+      const submittedAt = document.getElementById('submittedAt');
+      const form = document.getElementById('signupForm');
+      const signupView = document.getElementById('signupView');
+      const successView = document.getElementById('successView');
+
+      if(source) source.value = clean;
+
+      if(params.get('submitted') === '1'){
+        signupView.style.display = 'none';
+        successView.style.display = 'block';
+      } else if(form){
+        form.addEventListener('submit', () => {
+          submittedAt.value = new Date().toISOString();
+          form.action = '/aditya-signup?submitted=1&src=' + encodeURIComponent(clean);
+        });
+      }
+    })();
+  </script>
+</body>
+</html>
