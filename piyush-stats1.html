@@ -154,7 +154,7 @@
       <div class="label">Estimated Payout</div>
       <div id="estimatedPayout" class="value">—</div>
       <div class="sub">
-        Estimated from the current monthly Rainbet billing period and commission tier.
+        Estimated from the current monthly Rainbet billing period and commission tier, based on your 50% partner share.
         Final payout may differ when Rainbet settles the bill.
       </div>
     </section>
@@ -242,7 +242,7 @@
 
           const payout = data.billing?.payout;
           $('estimatedPayout').textContent = payout
-            ? money(payout.estimatedRainbetCommission)
+            ? money(payout.estimatedRainbetCommission * 0.5)
             : '—';
 
           const updated = data.updated ? new Date(data.updated) : null;
