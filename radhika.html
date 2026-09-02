@@ -532,7 +532,15 @@
       .support-btn{width:100%}
     }
   </style>
-</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W4HJ6Z9DMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W4HJ6Z9DMR');
+</script></head>
 
 <body>
   <header>
@@ -552,7 +560,7 @@
         <a href="/guide">Guide</a>
         <a href="/partners">Partners</a>
         <a href="/creators">Creators</a>
-        <a class="nav-cta" href="https://playrainbet.com/t0qmfuqvw" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+        <a class="nav-cta" href="/join?src=radhika&amp;campaign=radhika" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
       </nav>
     </div>
   </header>
@@ -577,7 +585,7 @@
         </div>
 
         <div class="hero-actions">
-          <a class="btn btn-primary" href="https://playrainbet.com/t0qmfuqvw" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+          <a class="btn btn-primary" href="/join?src=radhika&amp;campaign=radhika" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
           <a class="btn btn-secondary" href="#features">Learn More</a>
         </div>
       </div>
@@ -710,11 +718,11 @@
         so we can match the registration to Radhika.
       </p>
 
-      <form id="radhikaSupportForm" name="radhika-support-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field">
+      <form id='radhikaSupportForm' method='POST' name='radhika-support-signup'>
         <input type="hidden" name="form-name" value="radhika-support-signup">
         <input type="hidden" name="partner" value="Radhika Amarnath">
         <input type="hidden" name="page" value="/radhika">
-        <input type="hidden" name="destination" value="https://rainbet.com?r=addthor">
+        <input type="hidden" name="destination" value="/join?src=radhika-support&amp;campaign=support">
         <input id="radhikaSubmittedAt" type="hidden" name="submitted_at" value="">
 
         <p hidden>
@@ -748,7 +756,7 @@
 
   <script>
     (function(){
-      const destination = 'https://rainbet.com?r=addthor';
+      const destination = '/join?src=radhika-support&campaign=support';
       const openButton = document.getElementById('radhikaSupportSignup');
       const modal = document.getElementById('radhikaSupportModal');
       const closeButton = document.getElementById('radhikaSupportClose');
@@ -821,5 +829,7 @@
     })();
   </script>
 
+
+<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="01b257c8-6407-46db-b57b-62081488c9dd" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiMDFiMjU3YzgtNjQwNy00NmRiLWI1N2ItNjIwODE0ODhjOWRkIiwiYWNjb3VudF9pZCI6IjY5NzMwZGU0ZWZhMDgwZWE1Y2JkNDU4YyIsImRlcGxveV9pZCI6IjZhOTg2ZTZmODQwNTI3MDAwODE2ZTZmZSIsImlzc3VlciI6Im5mc2VydmVyIn0.Xpt9EcDZ94tSInVI07XPEbG63P4Uv_HjU2oEV70gwiI"></script>
 </body>
 </html>

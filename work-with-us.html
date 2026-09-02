@@ -50,7 +50,15 @@ input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px
 @media(max-width:900px){h1{font-size:44px}.stat-row,.grid3,.split{grid-template-columns:1fr}.hero{padding:42px 24px}}
 @media(max-width:640px){.topbar{position:static;align-items:flex-start;flex-direction:column}.nav{width:100%}.nav .btn,.nav .btn-red,.nav .btn-ledger{flex:1}h1{font-size:36px}.lead{font-size:18px}.section h2{font-size:28px}.actions .btn,.actions .btn-red,.actions .btn-ledger{width:100%}}
 </style>
-</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W4HJ6Z9DMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W4HJ6Z9DMR');
+</script></head>
 <body>
 <div class="wrap">
 <header class="topbar">
@@ -124,7 +132,7 @@ input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px
 <div class="form-box">
 <h2>Start here</h2>
 <p>Short answers are fine.</p>
-<form action="/thanks" data-netlify="true" method="POST" name="work-with-us-creator-apply" netlify-honeypot="bot-field">
+<form action='/thanks' method='POST' name='work-with-us-creator-apply'>
 <input name="form-name" type="hidden" value="work-with-us-creator-apply"/>
 <p class="hidden"><label>Do not fill this out <input name="bot-field"/></label></p>
 <div><label for="name">Name</label><input id="name" name="name" required="" type="text"/></div>
@@ -146,5 +154,7 @@ input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px
 </section>
 </main>
 </div>
+
+<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="01b257c8-6407-46db-b57b-62081488c9dd" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiMDFiMjU3YzgtNjQwNy00NmRiLWI1N2ItNjIwODE0ODhjOWRkIiwiYWNjb3VudF9pZCI6IjY5NzMwZGU0ZWZhMDgwZWE1Y2JkNDU4YyIsImRlcGxveV9pZCI6IjZhOTg2ZTZmODQwNTI3MDAwODE2ZTZmZSIsImlzc3VlciI6Im5mc2VydmVyIn0.Xpt9EcDZ94tSInVI07XPEbG63P4Uv_HjU2oEV70gwiI"></script>
 </body>
 </html>
