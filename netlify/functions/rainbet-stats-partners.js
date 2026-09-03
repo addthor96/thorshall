@@ -1,15 +1,14 @@
 "use strict";
 
 const { fetchReport, jsonResponse, sleep } = require("../lib/rainbet-client");
-const { isAuthorized, unauthorized } = require("../lib/stats-auth");
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
 let memoryCache = null;
 let memoryCacheTime = 0;
 
 const cacheHeaders = {
-  "Cache-Control": "private, no-store",
-  "Netlify-CDN-Cache-Control": "no-store"
+  "Cache-Control": "public, max-age=30, s-maxage=300, stale-while-revalidate=3600",
+  "Netlify-CDN-Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600"
 };
 
 function cachedResponse() {
@@ -17,8 +16,7 @@ function cachedResponse() {
   return jsonResponse(200, { ...memoryCache, cached: true }, cacheHeaders);
 }
 
-exports.handler = async function (event) {
-  if (!isAuthorized(event, "admin")) return unauthorized();
+exports.handler = async function () {
   const cached = cachedResponse();
   if (cached) return cached;
 
@@ -106,6 +104,7 @@ exports.handler = async function (event) {
     available: anyAvailable,
     overall,
     partners,
+    errors: errors.length ? errors : undefined,
     updated: new Date().toISOString()
   };
 

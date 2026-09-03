@@ -1,10 +1,8 @@
 "use strict";
 
 const { fetchReport, jsonResponse } = require("../lib/rainbet-client");
-const { isAuthorized, unauthorized } = require("../lib/stats-auth");
 
-exports.handler = async function (event) {
-  if (!isAuthorized(event, "admin")) return unauthorized();
+exports.handler = async function () {
   const token = process.env.RAINBET_STATISTIC_TOKEN;
 
   if (!token) {
@@ -28,6 +26,7 @@ exports.handler = async function (event) {
       ok: false,
       available: false,
       error: "Rainbet statistics are temporarily unavailable.",
+      details: error instanceof Error ? error.message : String(error),
       updated: new Date().toISOString()
     });
   }

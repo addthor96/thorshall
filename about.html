@@ -1,57 +1,899 @@
-<!doctype html>
+<!DOCTYPE html>
+
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="About Thor's Hall, an independent affiliate guide and creator partnership hub.">
-  <link rel="canonical" href="https://thorshall.gg/about">
-  <meta property="og:title" content="About Thor's Hall">
-  <meta property="og:description" content="Independent guides, creator partnerships, clear affiliate disclosure, and responsible-play reminders.">
-  <meta property="og:url" content="https://thorshall.gg/about">
-  <meta name="theme-color" content="#090604">
-  <title>About Thor's Hall</title>
-  <style>
-    :root{--bg:#090604;--panel:rgba(22,15,10,.94);--panel2:rgba(37,23,13,.92);--line:rgba(226,177,82,.28);--gold:#e2b152;--light:#ffe8aa;--text:#f7efe3;--muted:#c8bba7;--red:#a73531}
-    *{box-sizing:border-box}html{color-scheme:dark}body{margin:0;min-height:100vh;color:var(--text);font-family:Inter,Arial,sans-serif;line-height:1.65;background:linear-gradient(rgba(7,4,2,.82),rgba(7,4,2,.96)),url('/viking-hall-bg.png') center/cover fixed no-repeat}
-    .wrap{width:min(1040px,calc(100% - 32px));margin:auto;padding:28px 0 64px}.topbar{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:15px 18px;border:1px solid var(--line);border-radius:20px;background:rgba(0,0,0,.48);backdrop-filter:blur(9px)}
-    .brand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;font:900 25px Georgia,serif;letter-spacing:.04em}.brand img{width:42px;height:42px;border-radius:10px;object-fit:cover}.nav{display:flex;gap:9px;flex-wrap:wrap;justify-content:flex-end}.nav a,.btn{display:inline-flex;align-items:center;justify-content:center;padding:11px 16px;border-radius:12px;border:1px solid rgba(255,232,170,.32);background:linear-gradient(180deg,var(--light),var(--gold));color:#211407;text-decoration:none;font-weight:900}.nav .manager{background:linear-gradient(180deg,#d45d56,var(--red));color:#fff;border-color:#dc756e}
-    .hero,.section{margin-top:22px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(180deg,var(--panel2),var(--panel));box-shadow:0 24px 65px rgba(0,0,0,.28)}.hero{padding:clamp(30px,6vw,60px)}.eyebrow{color:var(--gold);font-weight:900;text-transform:uppercase;letter-spacing:.15em;font-size:12px}h1{margin:9px 0 17px;font:900 clamp(44px,8vw,76px)/1 Georgia,serif;color:#fff2cb}h2{margin:0 0 12px;font:900 30px/1.1 Georgia,serif;color:#f3d68f}.lead{max-width:790px;font-size:19px;color:#ded1bd}.hero-actions{display:flex;gap:11px;flex-wrap:wrap;margin-top:24px}.section{padding:30px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}.card{padding:20px;border-radius:18px;border:1px solid rgba(255,255,255,.07);background:rgba(255,255,255,.035)}.card strong{display:block;color:#f0cf7b;font-size:19px;margin-bottom:6px}.card p,.section p{color:var(--muted)}.notice{padding:19px;border-radius:17px;border:1px solid rgba(226,177,82,.25);background:rgba(226,177,82,.06)}.contact a{color:#f4d487;font-weight:800}.legal{font-size:13px;color:#9f9382;margin-top:20px;padding-top:16px;border-top:1px solid var(--line)}.legal a{color:#d9bd79}
-    @media(max-width:760px){.topbar{align-items:flex-start;flex-direction:column}.nav,.nav a{width:100%}.grid{grid-template-columns:1fr}.hero,.section{padding:24px}}
-  </style>
-</head>
+<meta content="index,follow,max-image-preview:large" name="robots"/>
+<meta charset="utf-8">
+<meta content="width=device-width,initial-scale=1.0" name="viewport"/>
+<title>About Thor's Hall | Iceland-Based Creator &amp; Rainbet Guide Hub</title>
+<meta content="About Thor's Hall, an Iceland-based Rainbet affiliate guide and creator partnership hub run by Arnar Þór with transparent affiliate disclosure, public partner information, and responsible play reminders." name="description"/>
+<link href="https://thorshall.gg/about" rel="canonical"/>
+<meta content="About Thor's Hall | Iceland-Based Creator Partnership Hub" property="og:title"/>
+<meta content="Thor's Hall is an Iceland-based guide and creator partnership hub founded by Arnar Þór and built around transparency, creator monetization, manager partnerships and responsible play." property="og:description"/>
+<meta content="website" property="og:type"/>
+<meta content="https://thorshall.gg/about" property="og:url"/>
+<script type="application/ld+json">
+{
+"@context":"https://schema.org",
+"@type":"AboutPage",
+"name":"About Thor's Hall",
+"url":"https://thorshall.gg/about",
+"description":"About Thor's Hall, an Iceland-based creator partnership and Rainbet guide hub founded by Arnar Þór in 2026.",
+"publisher":{"@type":"Organization","name":"Thor's Hall"}
+}
+</script>
+<style>
+:root{
+--gold:#d4a74f;
+--gold2:#f0d28b;
+--gold3:#fff0be;
+--text:#f4ede2;
+--muted:#d0c2ab;
+--line:rgba(212,167,79,.24);
+--ice:#8fd6ff;
+--red:#a83232;
+--red2:#d7655c;
+--dark:#080503;
+--panel:#15100c;
+--panel2:#24160f;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+
+body{
+margin:0;
+font-family:Arial,Helvetica,sans-serif;
+color:var(--text);
+line-height:1.65;
+background:
+radial-gradient(circle at 82% 0%,rgba(143,214,255,.14),transparent 30%),
+radial-gradient(circle at 12% 28%,rgba(212,167,79,.11),transparent 28%),
+linear-gradient(rgba(8,5,3,.86),rgba(8,5,3,.97)),
+url('viking-hall-bg.png') center/cover fixed no-repeat;
+}
+
+.wrap{max-width:1160px;margin:auto;padding:26px 18px 72px}
+
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:14px;
+padding:16px 18px;
+border-radius:20px;
+border:1px solid var(--line);
+background:rgba(0,0,0,.45);
+backdrop-filter:blur(8px);
+}
+
+.brand{
+display:flex;
+align-items:center;
+gap:12px;
+text-decoration:none;
+color:white;
+font-size:28px;
+font-weight:900;
+letter-spacing:.04em;
+}
+
+.brand img{width:42px;height:42px;border-radius:10px;object-fit:cover}
+
+.nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+
+.nav a,.btn{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:13px 20px;
+border-radius:14px;
+font-weight:900;
+text-decoration:none;
+border:1px solid rgba(255,230,170,.38);
+background:linear-gradient(180deg,var(--gold3),var(--gold));
+color:#211407!important;
+box-shadow:0 10px 24px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.25);
+}
+
+.nav a.manager-btn,.btn.manager-red{
+color:#fff!important;
+background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424);
+border-color:rgba(255,140,130,.52);
+text-shadow:0 1px 0 rgba(0,0,0,.28);
+}
+
+.btn.alt{
+background:linear-gradient(180deg,rgba(240,210,139,.16),rgba(212,167,79,.08));
+color:var(--text)!important;
+}
+
+.hero{
+margin-top:24px;
+display:grid;
+grid-template-columns:1fr .86fr;
+gap:18px;
+align-items:stretch;
+}
+
+.hero-copy{
+padding:42px;
+border-radius:34px;
+border:1px solid rgba(212,167,79,.30);
+background:
+radial-gradient(circle at top right,rgba(240,210,139,.10),transparent 32%),
+linear-gradient(180deg,rgba(21,16,12,.96),rgba(36,22,15,.96));
+}
+
+.hero-photo{
+border-radius:34px;
+border:1px solid rgba(143,214,255,.25);
+background:
+linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.26)),
+url('thatsme.png') center 44%/cover no-repeat;
+min-height:560px;
+box-shadow:0 26px 70px rgba(0,0,0,.38);
+position:relative;
+overflow:hidden;
+}
+
+.hero-photo:after{
+content:"ARNAR ÞÓR";
+position:absolute;
+left:22px;
+bottom:18px;
+font-size:34px;
+font-weight:900;
+letter-spacing:.08em;
+color:rgba(255,255,255,.20);
+}
+
+.eyebrow,.badge{
+display:inline-block;
+padding:8px 14px;
+border-radius:999px;
+font-size:13px;
+font-weight:900;
+letter-spacing:.08em;
+text-transform:uppercase;
+color:var(--gold2);
+border:1px solid rgba(240,210,139,.22);
+background:rgba(240,210,139,.08);
+margin-bottom:18px;
+}
+
+.badge-row{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-bottom:20px;
+}
+
+.badge{
+margin:0;
+color:var(--ice);
+border-color:rgba(143,214,255,.28);
+background:rgba(143,214,255,.08);
+}
+
+h1{
+font-size:clamp(42px,5.8vw,68px);
+line-height:1;
+margin:0 0 18px;
+}
+
+h2{font-size:clamp(28px,4vw,38px);line-height:1.08;margin:0 0 14px}
+h3{font-size:22px;margin:0 0 9px}
+p,li{color:var(--muted)}
+.lead{font-size:20px;max-width:780px}
+
+.mission{
+margin-top:20px;
+padding:18px;
+border-radius:20px;
+border:1px solid rgba(143,214,255,.22);
+background:rgba(143,214,255,.055);
+font-size:18px;
+color:var(--text);
+}
+
+.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+
+.section{
+margin-top:22px;
+border-radius:28px;
+border:1px solid var(--line);
+background:linear-gradient(180deg,rgba(21,16,12,.96),rgba(36,22,15,.96));
+overflow:hidden;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:14px;
+padding:22px;
+}
+
+.stat{
+padding:22px 18px;
+border-radius:22px;
+border:1px solid rgba(255,220,145,.20);
+background:rgba(255,255,255,.035);
+text-align:center;
+}
+
+.stat strong{
+display:block;
+font-size:30px;
+color:var(--gold2);
+line-height:1;
+margin-bottom:8px;
+}
+
+.image-section{
+display:grid;
+grid-template-columns:.92fr 1.08fr;
+min-height:330px;
+}
+
+.image-section.reverse{grid-template-columns:1.08fr .92fr}
+
+.section-img{
+min-height:330px;
+background-size:cover;
+background-position:center;
+}
+
+.img-guide{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.16)),url('norse6.webp')}
+.img-creator{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.16)),url('norse2.webp')}
+.img-values{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.18)),url('norse4.webp')}
+.img-risk{background-image:linear-gradient(180deg,rgba(0,0,0,.04),rgba(0,0,0,.20)),url('norse1.webp')}
+
+.section-text{
+padding:34px;
+display:flex;
+flex-direction:column;
+justify-content:center;
+}
+
+.tag-row{
+display:flex;
+flex-wrap:wrap;
+gap:10px;
+margin-top:16px;
+}
+
+.tag{
+padding:9px 12px;
+border-radius:999px;
+border:1px solid rgba(255,220,145,.22);
+background:rgba(255,255,255,.04);
+color:var(--gold2);
+font-weight:900;
+font-size:14px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:14px;
+padding:22px;
+}
+
+.card{
+padding:22px;
+border-radius:22px;
+background:rgba(255,255,255,.035);
+border:1px solid rgba(255,255,255,.07);
+}
+
+.card strong{
+display:block;
+font-size:21px;
+color:var(--gold2);
+margin-bottom:7px;
+}
+
+.gallery{
+display:grid;
+grid-template-columns:1.25fr .85fr 1fr;
+gap:14px;
+margin-top:22px;
+}
+
+.photo{
+min-height:230px;
+border-radius:24px;
+border:1px solid rgba(255,220,145,.18);
+background-size:cover;
+background-position:center;
+box-shadow:0 16px 38px rgba(0,0,0,.24);
+}
+
+.photo.one{background-image:url('norse3.webp')}
+.photo.two{background-image:url('norse5.webp')}
+.photo.three{background-image:url('norse2.webp')}
+
+.placeholder{
+padding:22px;
+border-radius:22px;
+border:1px dashed rgba(255,220,145,.30);
+background:rgba(255,255,255,.025);
+}
+
+.placeholder strong{
+display:block;
+color:var(--gold2);
+font-size:20px;
+margin-bottom:7px;
+}
+
+.contact{
+margin-top:22px;
+padding:38px;
+border-radius:30px;
+text-align:center;
+border:1px solid rgba(143,214,255,.32);
+background:
+radial-gradient(circle at 50% 0%,rgba(143,214,255,.13),transparent 32%),
+radial-gradient(circle at 10% 20%,rgba(212,167,79,.11),transparent 28%),
+linear-gradient(180deg,rgba(10,18,19,.96),rgba(25,14,10,.98));
+box-shadow:0 24px 60px rgba(0,0,0,.30);
+}
+
+.contact-grid{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:14px;
+margin-top:22px;
+}
+
+.contact-card{
+padding:20px;
+border-radius:20px;
+background:rgba(255,255,255,.045);
+border:1px solid rgba(143,214,255,.18);
+}
+
+.contact-card strong{
+display:block;
+color:var(--gold2);
+font-size:18px;
+margin-bottom:6px;
+}
+
+.contact a{
+color:var(--ice);
+font-weight:900;
+text-decoration:none;
+font-size:19px;
+word-break:break-word;
+}
+
+.related{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:13px;
+padding:22px;
+}
+
+.related a{
+display:block;
+padding:18px;
+border-radius:18px;
+text-decoration:none;
+background:linear-gradient(180deg,rgba(240,210,139,.12),rgba(212,167,79,.05));
+border:1px solid rgba(255,220,145,.18);
+color:var(--text);
+font-weight:900;
+}
+
+.related span{
+display:block;
+margin-top:5px;
+font-size:14px;
+font-weight:500;
+color:var(--muted);
+}
+
+.quote{
+padding:34px;
+text-align:center;
+border-color:rgba(240,210,139,.30);
+background:
+radial-gradient(circle at top,rgba(240,210,139,.10),transparent 30%),
+linear-gradient(180deg,rgba(21,16,12,.96),rgba(36,22,15,.96));
+}
+
+.quote blockquote{
+margin:0 auto;
+max-width:820px;
+font-size:clamp(24px,4vw,38px);
+line-height:1.15;
+font-weight:900;
+color:var(--gold2);
+}
+
+.quote p{
+margin:16px 0 0;
+}
+
+.footer{
+margin-top:20px;
+padding-top:16px;
+border-top:1px solid var(--line);
+text-align:center;
+font-size:14px;
+color:#c6b08d;
+}
+
+.footer a{
+color:#f0d28b;
+text-decoration:none;
+font-weight:900;
+}
+
+@media(max-width:980px){
+.topbar{align-items:flex-start;flex-direction:column}
+.hero,.image-section,.image-section.reverse{grid-template-columns:1fr}
+.cards,.related,.contact-grid,.stats{grid-template-columns:1fr 1fr}
+.gallery{grid-template-columns:1fr}
+.hero-photo{min-height:520px}
+}
+
+@media(max-width:640px){
+.cards,.related,.contact-grid,.stats{grid-template-columns:1fr}
+.hero-copy,.section-text,.contact,.quote{padding:24px}
+.hero-photo,.section-img{min-height:320px}
+.nav,.nav a,.btn{width:100%}
+}
+
+
+.site-head{
+position:relative;
+z-index:20;
+}
+
+.site-head .topbar{
+width:100%;
+}
+
+.analytics-widget{
+position:absolute;
+top:50%;
+left:calc(100% + 16px);
+transform:translateY(-50%);
+z-index:30;
+}
+
+.analytics-trigger{
+width:64px;
+height:64px;
+display:block;
+text-decoration:none;
+transition:transform .18s ease,filter .18s ease;
+filter:drop-shadow(0 0 14px rgba(255,90,0,.55)) drop-shadow(0 0 28px rgba(255,120,0,.22));
+}
+
+.analytics-trigger:hover{
+transform:translateY(-2px) scale(1.05);
+filter:drop-shadow(0 0 20px rgba(255,90,0,.75)) drop-shadow(0 0 42px rgba(255,120,0,.32));
+}
+
+.analytics-trigger img{
+width:100%;
+height:100%;
+object-fit:contain;
+display:block;
+}
+
+.analytics-panel{
+position:absolute;
+top:calc(100% + 10px);
+left:0;
+right:auto;
+width:315px;
+padding:18px;
+border-radius:20px;
+border:1px solid rgba(212,167,79,.28);
+background:linear-gradient(180deg,rgba(10,7,4,.98),rgba(20,12,7,.96));
+box-shadow:0 22px 48px rgba(0,0,0,.48);
+opacity:0;
+visibility:hidden;
+transform:translateY(8px);
+transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
+pointer-events:none;
+}
+
+.analytics-widget:hover .analytics-panel{
+opacity:1;
+visibility:visible;
+transform:translateY(0);
+pointer-events:auto;
+}
+
+.analytics-title{
+display:flex;
+align-items:center;
+gap:8px;
+font-size:14px;
+font-weight:900;
+letter-spacing:.05em;
+text-transform:uppercase;
+color:var(--gold2, var(--g2, #f0d28b));
+margin-bottom:13px;
+}
+
+.analytics-dot{
+width:8px;
+height:8px;
+border-radius:50%;
+background:#75e0a2;
+box-shadow:0 0 12px rgba(117,224,162,.75);
+}
+
+.analytics-row{
+display:flex;
+justify-content:space-between;
+gap:16px;
+padding:11px 0;
+border-bottom:1px solid rgba(255,255,255,.07);
+font-size:14px;
+color:var(--muted, var(--m, #d0c2ab));
+}
+
+.analytics-row strong{
+color:var(--text, var(--t, #f4ede2));
+font-size:15px;
+white-space:nowrap;
+}
+
+.analytics-note{
+margin:13px 0 0;
+font-size:12px;
+line-height:1.45;
+color:#9f927e;
+}
+
+@media(max-width:1320px){
+.analytics-widget{
+left:auto;
+right:10px;
+}
+.analytics-panel{
+left:auto;
+right:0;
+}
+}
+
+@media(max-width:920px){
+.site-head{
+position:relative;
+}
+.analytics-widget{
+position:static;
+transform:none;
+margin-top:10px;
+display:flex;
+justify-content:flex-end;
+}
+.analytics-panel{
+top:60px;
+left:auto;
+right:0;
+transform:translateY(-6px);
+}
+.analytics-widget:hover .analytics-panel{
+transform:translateY(0);
+}
+}
+
+@media(max-width:640px){
+.analytics-widget{
+align-self:stretch;
+}
+.analytics-trigger{
+margin-left:auto;
+}
+.analytics-panel{
+width:min(315px,calc(100vw - 36px));
+}
+}
+
+
+.analytics-title{
+  font-size:13px!important;
+  letter-spacing:.09em!important;
+  color:#f0d28b!important;
+}
+
+.analytics-row{
+  align-items:center!important;
+  padding:13px 0!important;
+}
+
+.analytics-row span{
+  font-size:12px!important;
+  letter-spacing:.11em!important;
+  text-transform:uppercase!important;
+  color:#bda983!important;
+  font-weight:900!important;
+}
+
+.analytics-row strong{
+  font-size:17px!important;
+  color:#fff0be!important;
+  font-weight:900!important;
+  text-shadow:0 0 12px rgba(240,210,139,.18)!important;
+}
+
+.analytics-note{
+  margin-top:14px!important;
+  color:#9f927e!important;
+  font-size:12px!important;
+  letter-spacing:.02em!important;
+}
+
+
+.footer-note{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:#c9b89c;}
+.footer-note a{color:var(--gold2, var(--g2, #f0d28b));text-decoration:underline;margin-left:6px;}
+</style>
+<style id="thorshall-analytics-overflow-fix">.analytics-panel{left:auto!important;right:0!important;max-width:calc(100vw - 24px)!important}</style><!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W4HJ6Z9DMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W4HJ6Z9DMR');
+</script></head>
 <body>
-<main class="wrap">
-  <header class="topbar">
-    <a class="brand" href="/"><img src="/img/logo.png" alt="Thor's Hall logo"><span>THOR'S HALL</span></a>
-    <nav class="nav" aria-label="Main navigation">
-      <a href="/info">Info</a><a href="/guide">Guide</a><a href="/creators">Creators</a><a class="manager" href="/managers">Managers</a><a href="/join?src=about" rel="nofollow sponsored noopener" target="_blank">Join Rainbet</a>
-    </nav>
-  </header>
+<div class="wrap">
+<div class="site-head">
+<header class="topbar">
+<a class="brand" href="/">
+<img alt="Thor's Hall Logo" src="img/logo.png"/>
+<span>THOR'S HALL</span>
+</a>
+<nav class="nav">
+<a href="/about">About</a>
+<a href="/info">Info</a>
+<a href="/guide">Guide</a>
+<a href="/creators">Creators</a>
+<a class="manager-btn" href="/managers">Managers</a>
+<a href="/join?src=about" rel="nofollow noopener sponsored" target="_blank">Join Rainbet</a>
+</nav>
+</header>
+<div aria-label="PARTNER STATS" class="analytics-widget">
+<a aria-label="View partner statistics" class="analytics-trigger" href="/partners">
+<img alt="Thor\'s Hall live partner analytics" src="img/infernal-diamond.png"/>
+</a>
+<div class="analytics-panel">
+<div class="analytics-title"><span class="analytics-dot"></span>PARTNER STATS</div>
+<div class="analytics-row"><span>WAGERED</span><strong data-rainbet-stat="wager">—</strong></div>
+<div class="analytics-row"><span>DEPOSITS</span><strong data-rainbet-stat="deposits">—</strong></div>
+<div class="analytics-row"><span>VISITS • REGS</span><strong data-rainbet-stat="visits">— / —</strong></div>
+<p class="analytics-note" data-rainbet-stat="updated">Metrics sourced from live activity.</p>
+</div>
+</div>
+</div>
+<section class="hero">
+<div class="hero-copy">
+<div class="badge-row">
+<span class="badge">Founded in 2026</span>
+<span class="badge">Iceland-based</span>
+</div>
+<div class="eyebrow">About Thor's Hall</div>
+<h1>About</h1>
+<p class="lead">
+Thor's Hall is run by Arnar Þór. It connects Rainbet guides, creator partnerships and manager opportunities into one clear hub for people who want to turn real audience attention into a cleaner revenue path.
+</p><div class="mission"><strong>Important clarification:</strong> Thor's Hall is an independent Rainbet affiliate guide, responsible gambling information site, and creator partnership hub. Thor's Hall does not take deposits, manage player accounts, operate games, control withdrawals, run game servers, or operate marketplaces.</div>
+<div class="mission">
+<strong>Mission:</strong> help creators and managers build fair, transparent revenue paths from audiences they already earned.
+</div>
+<p>
+My background is as an adventure guide in Iceland — glaciers, highlands, rough terrain, cliffs and weather where people have to rely on the person leading the way.
+</p>
+<div class="hero-actions">
+<a class="btn" href="/creators">Creator Program</a>
+<a class="btn manager-red" href="/managers">Manager Program</a>
+</div>
+</div>
+<div aria-label="Arnar Þór, founder of Thor's Hall" class="hero-photo"></div>
+</section>
+<section class="section">
+<div class="stats">
+<div class="stat"><strong>Focused</strong>Practical guide library</div>
+<div class="stat"><strong>Iceland</strong>Founder location</div>
+<div class="stat"><strong>Creator</strong>Program live</div>
+<div class="stat"><strong>Manager</strong>Program live</div>
+</div>
+</section>
+<section class="section image-section">
+<div class="section-img img-guide"></div>
+<div class="section-text">
+<h2>Guided by real-world trust</h2>
+<p>
+When people trust you on ice, in storms and across the barren highlands, you learn that words mean nothing unless actions match them.
+</p>
+<p>
+That same standard shapes Thor's Hall: clear terms, direct communication, no fake promises and no hiding the risks.
+</p>
+<div class="tag-row">
+<span class="tag">Adventure guide mindset</span>
+<span class="tag">Clear communication</span>
+<span class="tag">No fake promises</span>
+</div>
+</div>
+</section>
+<section class="section image-section reverse">
+<div class="section-text">
+<h2>Why the site exists</h2>
+<p>
+Thor's Hall was created to give creators and managers another way to earn from audiences they already built.
+</p>
+<p>
+The goal is simple: give qualified partners a clean system they can test without turning their whole brand into gambling content.
+</p>
+</div>
+<div class="section-img img-creator"></div>
+</section>
+<section class="section">
+<div class="cards">
+<div class="card">
+<strong>Creators</strong>
+<p>Custom pages, tracked routes and revenue-share opportunities built around real audience attention.</p>
+</div>
+<div class="card">
+<strong>Managers</strong>
+<p>A second monetization layer for agencies, talent managers and people connected to multiple creators.</p>
+</div>
+<div class="card">
+<strong>Users</strong>
+<p>Guides that explain Rainbet, bonuses, withdrawals, crypto casino topics, risk and responsible play.</p>
+</div>
+</div>
+</section>
+<div class="gallery">
+<div class="photo one"></div>
+<div class="photo two"></div>
+<div class="photo three"></div>
+</div>
+<section class="section image-section">
+<div class="section-img img-values"></div>
+<div class="section-text">
+<h2>What Thor's Hall stands for</h2>
+<p>
+Creators and managers are able to test, stay, leave or return without pressure.
+</p>
+<p>
+Thor's Hall does not condone fake creators, fake traffic, bot accounts, misleading promotion, underage targeting or dishonest claims.
+</p>
+<div class="tag-row">
+<span class="tag">No fake traffic</span>
+<span class="tag">No false loyalty</span>
+<span class="tag">Transparent affiliate model</span>
+</div>
+</div>
+</section>
+<section class="section image-section reverse">
+<div class="section-text">
+<h2>Responsible by default</h2>
+<p>
+Thor's Hall is an affiliate guide project, not a casino. Gambling carries risk and should never be presented as guaranteed income, safety or success.
+</p>
+<p>
+Users should only participate where legal, only if they are 18+, and only with money they can afford to lose.
+</p>
+</div>
+<div class="section-img img-risk"></div>
+</section>
+<section class="section">
+<div class="cards">
+<div class="placeholder">
+<strong>Testimonials</strong>
+<p>Where strong partnerships are built on trust, performance, and transparency.</p>
+</div>
+<div class="placeholder">
+<strong>Business details</strong>
+<p>A privately operated Icelandic business built to connect creators, managers, and monetization opportunities.</p>
+</div>
+<div class="placeholder">
+<strong>Press / media</strong>
+<p>Built at the intersection of creator monetization, affiliate marketing, and real-world business experience.</p>
+</div>
+</div>
+</section>
+<section class="contact">
+<h2>Contact Thor's Hall</h2>
+<p>For creator applications, manager partnerships or serious business inquiries.</p>
+<div class="contact-grid">
+<div class="contact-card">
+<strong>Email</strong>
+<a href="mailto:Arnar@norse.is">Arnar@norse.is</a>
+</div>
+<div class="contact-card">
+<strong>Phone</strong>
+<a href="tel:+3546909822">+354 690-9822</a>
+</div>
+<div class="contact-card">
+<strong>Location</strong>
+<span style="color: var(--ice); font-weight: 900;">Iceland</span>
+</div>
+<div class="contact-card">
+<strong>LinkedIn</strong>
+<span style="color: var(--ice); font-weight: 900;">Arnar Þór</span>
+</div>
+<div class="contact-card">
+<strong>IRL Guiding</strong>
+<a href="https://norse.is" rel="noopener noreferrer" target="_blank">norse.is</a>
+</div>
+<div class="contact-card">
+<strong>Iceland Project</strong>
+<a href="https://heimdall.is" rel="noopener noreferrer" target="_blank">heimdall.is</a>
+</div>
+</div>
+<p style="margin-top:18px;">Business or Iceland-related questions — my inbox is always open.</p>
+</section>
+<section class="section quote">
+<blockquote>
+"Actions create consistency. Consistency builds trust."
+</blockquote>
+<p>— Arnar Þór, Founder of Thor's Hall</p>
+</section>
+<section class="section">
+<div class="related">
+<a href="/info">Info Hub<span>Rainbet and crypto casino guides.</span></a>
+<a href="/guide">Guide Hub<span>Creator and monetization guide cluster.</span></a>
+<a href="/creators">Creator Program<span>Apply as a creator.</span></a>
+<a href="/managers">Manager Program<span>For managers and agencies.</span></a>
+<a href="/rainbet-withdrawal-time">Withdrawal Time<span>Crypto payout timing guide.</span></a>
+<a href="/rainbet-review">Safety Guide<span>Trust and responsible play notes.</span></a>
+</div>
+<div class="hero-actions" style="margin-top:20px;"><a class="btn" href="/work-with-us">Work With Thor's Hall</a></div>
+<div class="footer-note">18+ only. Gamble responsibly. <a href="/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/work-with-us">Creator Partnerships</a> <span class="thorshall-context-link" style="float:right;"><a href="/what-is-thors-hall">What Is Thor's Hall?</a></span></div>
+</section>
+</div>
+<script>
+(async function(){
+  const setStat = (key, value) => {
+    document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach(element => {
+      element.textContent = value;
+    });
+  };
 
-  <section class="hero">
-    <div class="eyebrow">About Thor's Hall</div>
-    <h1>Independent by design.</h1>
-    <p class="lead">Thor's Hall is an independent affiliate guide and creator-partnership hub. It publishes practical information, creates tracked partner routes, and gives creators and managers a clear way to explore commercial partnerships.</p>
-    <div class="notice"><strong>Important:</strong> Thor's Hall is not Rainbet and does not operate a casino or sportsbook, accept deposits, manage player accounts, run games, hold player funds, or control withdrawals.</div>
-    <div class="hero-actions"><a class="btn" href="/creators">Creator Program</a><a class="btn" href="/managers">Manager Program</a></div>
-  </section>
+  const validNumber = value => value !== null && value !== undefined && Number.isFinite(Number(value));
+  const money = value => validNumber(value)
+    ? '$' + Number(value).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+    : '—';
+  const count = value => validNumber(value)
+    ? Number(value).toLocaleString('en-US', {maximumFractionDigits:0})
+    : '—';
 
-  <section class="section">
-    <h2>What the site does</h2>
-    <div class="grid">
-      <article class="card"><strong>Clear information</strong><p>Plain-language explanations, eligibility reminders, and direct links to current operator terms.</p></article>
-      <article class="card"><strong>Creator partnerships</strong><p>Custom landing pages and tracked campaign routes for approved creators and managers.</p></article>
-      <article class="card"><strong>Responsible promotion</strong><p>No guaranteed winnings, fake traffic, underage targeting, or instructions for bypassing location restrictions.</p></article>
-    </div>
-  </section>
+  setStat('updated', 'Loading live activity…');
 
-  <section class="section contact">
-    <h2>Operator and contact</h2>
-    <p><strong>Site operator and data controller:</strong> Thor's Hall</p>
-    <p><strong>Contact:</strong> <a href="mailto:Arnar@norse.is">Arnar@norse.is</a></p>
-    <p>This is the minimum public contact information currently supplied for the site. See the <a href="/privacy">Privacy Notice</a> for how form and attribution data is handled.</p>
-    <p class="legal">18+ only. Gamble responsibly. Only participate where legal. <a href="/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/privacy">Privacy Notice</a></p>
-  </section>
-</main>
+  try{
+    const response = await fetch('/.netlify/functions/rainbet-stats', {cache:'no-store'});
+    const data = await response.json().catch(() => null);
+
+    if(!response.ok || !data || data.available !== true){
+      throw new Error(data?.details || data?.error || 'Stats request failed');
+    }
+
+    setStat('wager', money(data.wager));
+    setStat('deposits', money(data.deposits));
+    setStat('visits', `${count(data.visits)} / ${count(data.registrations)}`);
+    setStat('updated', 'Metrics sourced from live activity.');
+  }catch(error){
+    setStat('wager', '—');
+    setStat('deposits', '—');
+    setStat('visits', '— / —');
+    setStat('updated', 'Live stats temporarily unavailable.');
+    console.error("Thor's Hall live stats error:", error);
+  }
+})();
+</script>
+
+<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="01b257c8-6407-46db-b57b-62081488c9dd" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiMDFiMjU3YzgtNjQwNy00NmRiLWI1N2ItNjIwODE0ODhjOWRkIiwiYWNjb3VudF9pZCI6IjY5NzMwZGU0ZWZhMDgwZWE1Y2JkNDU4YyIsImRlcGxveV9pZCI6IjZhOTg2ZTZmODQwNTI3MDAwODE2ZTZmZSIsImlzc3VlciI6Im5mc2VydmVyIn0.Xpt9EcDZ94tSInVI07XPEbG63P4Uv_HjU2oEV70gwiI"></script>
 </body>
 </html>

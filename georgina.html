@@ -7,7 +7,7 @@
   <title>Rainbet 250% First Deposit Bonus | Thor's Hall</title>
   <meta
     name="description"
-    content="Georgina's tracked Thor's Hall campaign page explaining the confirmed 250% first deposit offer for eligible new players."
+    content="A simple Thor's Hall test landing page explaining Rainbet's 250% first deposit bonus."
   />
   <meta name="robots" content="noindex,follow" />
 
@@ -395,7 +395,7 @@
 
       <a
         class="top-cta"
-        href="/join?src=georgina&amp;campaign=georgina"
+        href="https://playrainbet.com/ts5ttmsbr"
         target="_blank"
         rel="sponsored nofollow noopener"
       >
@@ -419,7 +419,7 @@
 
         <a
           class="main-cta"
-          href="/join?src=georgina&amp;campaign=georgina"
+          href="https://playrainbet.com/ts5ttmsbr"
           target="_blank"
           rel="sponsored nofollow noopener"
         >
@@ -527,7 +527,7 @@
 
         <a
           class="main-cta"
-          href="/join?src=georgina&amp;campaign=georgina"
+          href="https://playrainbet.com/ts5ttmsbr"
           target="_blank"
           rel="sponsored nofollow noopener"
         >
@@ -542,6 +542,58 @@
     </footer>
   </div>
 
-  <div style="margin:22px auto 0;width:min(1100px,calc(100% - 32px));padding:13px 16px;border:1px solid rgba(226,177,82,.24);border-radius:12px;background:rgba(12,9,7,.92);color:#bdae97;font:12px/1.55 Inter,Arial,sans-serif"><strong style="color:#e8c971">Campaign offer:</strong> The 250% first-deposit offer is tied to this approved campaign. Eligibility and the live Rainbet terms shown during signup apply.</div><div style="margin:16px auto 24px;width:min(1100px,calc(100% - 32px));text-align:center;color:#928777;font:12px/1.5 Inter,Arial,sans-serif">18+ only · Gamble responsibly · <a href="/affiliate-disclosure" style="color:#cdb375">Affiliate Disclosure</a> · <a href="/privacy" style="color:#cdb375">Privacy Notice</a></div>
+  <script>
+    (async function () {
+      const money = (value) =>
+        "$" + Number(value || 0).toLocaleString("en-US", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        });
+
+      const setText = (id, value) => {
+        const element = document.getElementById(id);
+        if (element) element.textContent = value;
+      };
+
+      try {
+        const response = await fetch(
+          "/.netlify/functions/rainbet-stats-partners",
+          { cache: "no-store" }
+        );
+
+        if (!response.ok) {
+          throw new Error("Campaign statistics are temporarily unavailable.");
+        }
+
+        const data = await response.json();
+        const georgina = data.partners && data.partners.georgina;
+
+        if (!georgina || georgina.connected !== true) {
+          throw new Error("Georgina campaign has not been connected yet.");
+        }
+
+        if (georgina.available !== true) {
+          throw new Error(georgina.error || "Campaign statistics are temporarily unavailable.");
+        }
+
+        setText("georgina-wager", money(georgina.wager));
+        setText("georgina-deposits", money(georgina.deposits));
+        setText("georgina-visits", Number(georgina.visits ?? 0).toLocaleString("en-US"));
+        setText("georgina-registrations", Number(georgina.registrations ?? 0).toLocaleString("en-US"));
+
+        const updated = data.updated
+          ? new Date(data.updated).toLocaleString()
+          : "just now";
+
+        setText("georgina-stats-status", "Last refreshed: " + updated);
+      } catch (error) {
+        setText(
+          "georgina-stats-status",
+          error.message || "Campaign statistics are temporarily unavailable."
+        );
+      }
+    })();
+  </script>
+
 </body>
 </html>

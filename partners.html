@@ -6,7 +6,7 @@
 <meta charset="utf-8">
 <meta content="width=device-width,initial-scale=1.0" name="viewport"/>
 <title>Partners | Thor's Hall</title>
-<meta content="Thor's Hall partner page showing approved partner slots, creator and manager context, private performance reporting, and responsible-promotion notes." name="description"/>
+<meta content="Thor's Hall partner page showing public partner information, creator/manager tracking context, Rainbet affiliate activity, and transparent responsible-play notes." name="description"/>
 <link href="https://thorshall.gg/partners" rel="canonical"/>
 <style>
 :root{
@@ -434,7 +434,15 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 }
 
 </style>
-</head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-W4HJ6Z9DMR"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-W4HJ6Z9DMR');
+</script></head>
 <body>
 <div class="wrap">
 <header class="topbar">
@@ -456,24 +464,24 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 <div class="wall-ui">
 <div class="live-summary">
 <div class="stat-card engraved-box">
-<span>Performance data</span>
-<strong id="stat-wager">Private</strong>
+<span>Total wagered</span>
+<strong id="stat-wager">—</strong>
 </div>
 <div class="stat-card engraved-box cut-top-right">
-<span>Campaign reports</span>
-<strong id="stat-deposits">Protected</strong>
+<span>Deposits tracked</span>
+<strong id="stat-deposits">—</strong>
 </div>
 <div class="face-gap"></div>
 <div class="stat-card engraved-box cut-top-left">
-<span>Access</span>
-<strong id="stat-visits">Partners</strong>
+<span>Visits</span>
+<strong id="stat-visits">—</strong>
 </div>
 <div class="stat-card engraved-box">
-<span>Status</span>
-<strong id="stat-registrations">Private</strong>
+<span>Registrations</span>
+<strong id="stat-registrations">—</strong>
 </div>
 </div>
-<div class="stats-status-line" id="stats-status" aria-live="polite">Live campaign statistics are private and available only to authorized partners.</div>
+<div class="stats-status-line" id="stats-status" aria-live="polite">Loading live statistics…</div>
 <div class="partner-board">
 <div class="board-title engraved-box">
 <h1>Thor's Hall Partner Ledger</h1>
@@ -493,11 +501,11 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 <tbody>
 <tr>
 <td class="partner-name active">Mithra</td>
-<td id="row-wager">Private</td>
-<td id="row-deposits">Private</td>
-<td id="row-visits">Private</td>
-<td id="row-registrations">Private</td>
-<td id="row-ngr">Private</td>
+<td id="row-wager">—</td>
+<td id="row-deposits">—</td>
+<td id="row-visits">—</td>
+<td id="row-registrations">—</td>
+<td id="row-ngr">—</td>
 </tr>
 <tr>
 <td class="partner-name inactive">Manager Network</td>
@@ -559,7 +567,7 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 </table>
 </div>
 <div class="wall-note engraved-box">
-      Partner names are shown only with permission. Campaign performance and payout data remain private.
+      Public partner rows are only shown for creators or managers who agree to be listed.
     </div>
 <div class="wall-actions">
 <a class="btn" href="/creators">Apply as Creator</a>
@@ -567,20 +575,91 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 <a class="btn manager-red" href="/managers">Manager Program</a>
 </div>
 </div>
-<div class="footer-note">18+ only. Gamble responsibly. <a href="/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/work-with-us">Creator Partnerships</a> <span class="thorshall-context-link" style="float:right;"><a href="/about">What Is Thor's Hall?</a></span></div>
+<div class="footer-note">18+ only. Gamble responsibly. <a href="/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/work-with-us">Creator Partnerships</a> <span class="thorshall-context-link" style="float:right;"><a href="/what-is-thors-hall">What Is Thor's Hall?</a></span></div>
 </section>
 </div>
 <div aria-hidden="true" class="ledger-popup" id="ledgerPopup" role="note">
 <strong>What is this ledger?</strong>
-<p>This ledger lists approved partner slots. Performance data is not published.</p>
-
-
-
-
-
-<p>Authorized partners receive their own password-protected tracker. Estimated payouts use the agreed partner share and remain estimates until settlement.</p>
+<p>This ledger shows tracked Thor's Hall partner activity where public data is available.</p>
+<p><strong>Wagered</strong> = total amount wagered by tracked users.</p>
+<p><strong>Deposits</strong> = total deposits tracked through the partner link.</p>
+<p><strong>Visits</strong> = users who visited through the tracked campaign.</p>
+<p><strong>Registrations</strong> = accounts created through the tracked campaign.</p>
+<p><strong>NGR</strong> = net gaming revenue after wins, bonuses, and adjustments where available.</p>
+<p>This ledger shows tracked all-time activity, not monthly payout amounts. Creator payouts are calculated from Thor's Hall's final received affiliate commission for the payout period, not directly from the public NGR total shown here.</p>
 <p>Some rows may be private, reserved, or waiting for activity. Public partner rows are only shown when the creator or manager agrees to be listed.</p>
 </div>
+<script>
+(async function(){
+  const set = (id, value) => {
+    const element = document.getElementById(id);
+    if(element) element.textContent = value;
+  };
+
+  const status = document.getElementById('stats-status');
+  const setStatus = (message, isError = false) => {
+    if(!status) return;
+    status.textContent = message;
+    status.classList.toggle('error', isError);
+  };
+
+  const validNumber = value => value !== null && value !== undefined && Number.isFinite(Number(value));
+  const money = value => validNumber(value)
+    ? '$' + Number(value).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
+    : '—';
+  const count = value => validNumber(value)
+    ? Number(value).toLocaleString('en-US', {maximumFractionDigits:0})
+    : '—';
+
+  try{
+    const response = await fetch('/.netlify/functions/rainbet-stats-partners');
+    const data = await response.json().catch(() => null);
+
+    if(!response.ok || !data){
+      throw new Error(data?.details || data?.error || 'Live statistics request failed.');
+    }
+
+    const overall = data.overall || {};
+    const mithra = data.partners?.mithra || {};
+    let sectionsLoaded = 0;
+
+    if(overall.available){
+      set('stat-wager', money(overall.wager));
+      set('stat-deposits', money(overall.deposits));
+      set('stat-visits', count(overall.visits));
+      set('stat-registrations', count(overall.registrations));
+      sectionsLoaded += 1;
+    }
+
+    if(mithra.available){
+      set('row-wager', money(mithra.wager));
+      set('row-deposits', money(mithra.deposits));
+      set('row-visits', count(mithra.visits));
+      set('row-registrations', count(mithra.registrations));
+      set('row-ngr', money(mithra.ngr ?? mithra.casinoNgr));
+      sectionsLoaded += 1;
+    }
+
+    if(!sectionsLoaded){
+      throw new Error('Rainbet returned no available statistics.');
+    }
+
+    const refreshed = data.updated ? new Date(data.updated) : null;
+    const timeText = refreshed && !Number.isNaN(refreshed.getTime())
+      ? refreshed.toLocaleString(undefined, {dateStyle:'medium', timeStyle:'short'})
+      : 'just now';
+
+    if(sectionsLoaded === 2){
+      setStatus('Live Rainbet statistics refreshed ' + timeText + '.');
+    }else{
+      setStatus('Live totals refreshed ' + timeText + '. One partner row is temporarily delayed.');
+    }
+  }catch(error){
+    setStatus('Live Rainbet statistics are temporarily unavailable. Please check again shortly.', true);
+    console.error("Thor's Hall partner stats error:", error);
+  }
+})();
+</script>
 <script>
 (function(){
   const btn = document.getElementById('ledgerInfoBtn');
@@ -648,6 +727,6 @@ text-shadow:0 1px 0 rgba(0,0,0,.28);
 })();
 </script>
 
-<div style="margin:16px auto 24px;width:min(1100px,calc(100% - 32px));text-align:center;color:#928777;font:12px/1.5 Inter,Arial,sans-serif">18+ only · Gamble responsibly · <a href="/affiliate-disclosure" style="color:#cdb375">Affiliate Disclosure</a> · <a href="/privacy" style="color:#cdb375">Privacy Notice</a></div>
+<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="01b257c8-6407-46db-b57b-62081488c9dd" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiMDFiMjU3YzgtNjQwNy00NmRiLWI1N2ItNjIwODE0ODhjOWRkIiwiYWNjb3VudF9pZCI6IjY5NzMwZGU0ZWZhMDgwZWE1Y2JkNDU4YyIsImRlcGxveV9pZCI6IjZhOTg2ZTZmODQwNTI3MDAwODE2ZTZmZSIsImlzc3VlciI6Im5mc2VydmVyIn0.Xpt9EcDZ94tSInVI07XPEbG63P4Uv_HjU2oEV70gwiI"></script>
 </body>
 </html>
