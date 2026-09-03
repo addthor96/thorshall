@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
   <meta name="theme-color" content="#08040d">
-  <title>Radhika Amarnath Campaign Tracker | Thor's Hall</title>
+  <title>Arshan Campaign Tracker | Thor's Hall</title>
   <style>
     :root{
       --panel:rgba(11,7,14,.82);
@@ -133,13 +133,13 @@
     </div>
 
     <section class="hero">
-      <div class="eyebrow">Radhika Amarnath campaign statistics</div>
-      <h1>Radhika Tracker</h1>
-      <p>Live Rainbet campaign activity for Radhika Amarnath only. Statistics may update with a short delay.</p>
-      <div id="status" class="status">Loading Radhika statistics…</div>
+      <div class="eyebrow">Arshan campaign statistics</div>
+      <h1>Arshan Tracker</h1>
+      <p>Live Rainbet campaign activity for Arshan only. Statistics may update with a short delay.</p>
+      <div id="status" class="status">Loading Arshan statistics…</div>
     </section>
 
-    <section class="grid" aria-label="Radhika Amarnath campaign statistics">
+    <section class="grid" aria-label="Arshan campaign statistics">
       <article class="card"><div class="label">Visits</div><div id="visits" class="value">—</div><div class="sub">Tracked campaign visits</div></article>
       <article class="card"><div class="label">Registrations</div><div id="registrations" class="value">—</div><div class="sub">Tracked accounts created</div></article>
       <article class="card"><div class="label">First deposits</div><div id="ftd" class="value">—</div><div class="sub">First-time depositors</div></article>
@@ -175,7 +175,7 @@
       </div>
     </div>
 
-    <footer>Thor's Hall · Radhika Amarnath campaign tracker · 18+</footer>
+    <footer>Thor's Hall · Arshan campaign tracker · 18+</footer>
   </main>
 
   <script>
@@ -218,10 +218,10 @@
         button.disabled = true;
         rangeButton.disabled = true;
         status.className = 'status';
-        status.textContent = 'Loading Radhika statistics…';
+        status.textContent = 'Loading Arshan statistics…';
 
         try{
-          const response = await fetch('/.netlify/functions/rainbet-stats-radhika-range?range=' + encodeURIComponent(selectedRange), {cache:'no-store'});
+          const response = await fetch('/.netlify/functions/rainbet-stats-arshan-range?range=' + encodeURIComponent(selectedRange), {cache:'no-store'});
           if(response.status === 401){
             location.replace('/.netlify/functions/stats-session?return=' + encodeURIComponent(location.pathname));
             return;
@@ -229,20 +229,20 @@
           const data = await response.json().catch(() => null);
 
           if(!response.ok || !data){
-            throw new Error(data?.error || 'Radhika statistics are unavailable.');
+            throw new Error(data?.error || 'Arshan statistics are unavailable.');
           }
 
-          const radhika = data.partners?.radhika;
-          if(!radhika || !radhika.available){
-            throw new Error(radhika?.error || 'Radhika statistics are unavailable.');
+          const arshan = data.partners?.arshan;
+          if(!arshan || !arshan.available){
+            throw new Error(arshan?.error || 'Arshan statistics are unavailable.');
           }
 
-          $('visits').textContent = count(radhika.visits);
-          $('registrations').textContent = count(radhika.registrations);
-          $('ftd').textContent = count(radhika.ftd);
-          $('deposits').textContent = money(radhika.deposits);
-          $('wager').textContent = money(radhika.wager);
-          $('ngr').textContent = money(radhika.ngr ?? radhika.casinoNgr);
+          $('visits').textContent = count(arshan.visits);
+          $('registrations').textContent = count(arshan.registrations);
+          $('ftd').textContent = count(arshan.ftd);
+          $('deposits').textContent = money(arshan.deposits);
+          $('wager').textContent = money(arshan.wager);
+          $('ngr').textContent = money(arshan.ngr ?? arshan.casinoNgr);
 
           const payout = data.billing?.payout;
           $('estimatedPayout').textContent = payout
@@ -257,7 +257,7 @@
           status.textContent = labels[selectedRange] + ' · updated ' + when + '.';
           status.className = 'status ok';
         }catch(error){
-          status.textContent = error?.message || 'Radhika statistics are unavailable.';
+          status.textContent = error?.message || 'Arshan statistics are unavailable.';
           status.className = 'status error';
         }finally{
           button.disabled = false;

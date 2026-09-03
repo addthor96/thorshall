@@ -1,6 +1,7 @@
 "use strict";
 
 const { extractMetrics, jsonResponse, sleep } = require("../lib/rainbet-client");
+const { isAuthorized, unauthorized } = require("../lib/stats-auth");
 
 const API_URL = "https://portal.rainbetpartners.com/api/customer/v1/partner/report";
 const ADITYA_CAMPAIGN_ID = "124604";
@@ -20,8 +21,8 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 const memoryCache = new Map();
 
 const cacheHeaders = {
-  "Cache-Control": "public, max-age=30, s-maxage=300, stale-while-revalidate=3600",
-  "Netlify-CDN-Cache-Control": "public, s-maxage=300, stale-while-revalidate=3600"
+  "Cache-Control": "private, no-store",
+  "Netlify-CDN-Cache-Control": "no-store"
 };
 
 function authCandidates(token) {
@@ -271,6 +272,7 @@ async function fetchAdityaReport(token, range) {
 }
 
 exports.handler = async function (event) {
+  if (!isAuthorized(event)) return unauthorized();
   const token = process.env.RAINBET_STATISTIC_TOKEN;
   if (!token) {
     return jsonResponse(500, { ok: false, error: "Missing RAINBET_STATISTIC_TOKEN" });
@@ -327,7 +329,7 @@ exports.handler = async function (event) {
       ok: false,
       available: false,
       range: range.key,
-      error: error instanceof Error ? error.message : "Statistics are temporarily unavailable."
+      error: "Statistics are temporarily unavailable."
     });
   }
 };

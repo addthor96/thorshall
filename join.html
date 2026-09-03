@@ -19,7 +19,7 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
 @keyframes spin{to{transform:rotate(360deg)}}
 .btn{display:block;width:100%;padding:14px 18px;border:1px solid #ff8b18;border-radius:9px;background:linear-gradient(180deg,#ac470d,#672307);color:#fff2df;text-decoration:none;font:900 15px var(--serif);text-transform:uppercase}
 .btn:hover{filter:brightness(1.08)}
-.source{margin-top:12px;color:#6f6764;font-size:9px}.fine{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);color:#77706d;font-size:9px;line-height:1.55}
+.source{margin-top:12px;color:#8e8580;font-size:10px}.fine{margin-top:18px;padding-top:14px;border-top:1px solid rgba(255,255,255,.06);color:#918985;font-size:10px;line-height:1.55}.fine a{color:#c9aa70}
 </style>
 </head>
 <body>
@@ -29,12 +29,12 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
   <h1>Opening Rainbet</h1>
   <p>You're being redirected through Thor's Hall. If nothing happens, use the button below.</p>
   <div class="loader"></div>
-  <a id="continueButton" class="btn" href="https://playrainbet.com/tkpmo0r1x" rel="nofollow sponsored">Continue to Rainbet</a>
+  <a id="continueButton" class="btn" href="https://playrainbet.com/tkpmo0r1x" rel="nofollow sponsored noopener">Continue to Rainbet</a>
   <div id="sourceLabel" class="source"></div>
-  <div class="fine">18+ only. Gamble responsibly. Make sure online gaming is legal in your jurisdiction.</div>
+  <div class="fine">Affiliate link. Thor's Hall records limited campaign-attribution data before redirecting. 18+ only. Gamble responsibly and only participate where legal. <a href="/privacy">Privacy Notice</a> · <a href="/affiliate-disclosure">Affiliate Disclosure</a></div>
 </main>
 
-<form name="thorshall-join-click" method="POST" data-netlify="true" netlify-honeypot="bot-field" hidden>
+<form name="thorshall-join-click" method="POST" data-netlify="true" data-netlify-honeypot="bot-field" hidden>
   <input type="hidden" name="form-name" value="thorshall-join-click">
   <input name="bot-field">
   <input name="source">
@@ -53,6 +53,7 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
     radhika:'https://playrainbet.com/t0qmfuqvw',
     piyush:'https://playrainbet.com/t7ayt4zbl',
     mithra:'https://playrainbet.com/toaehjy8o',
+    georgina:'https://playrainbet.com/ts5ttmsbr',
     techsslaash:'https://playrainbet.com/twf35cati',
     support:'https://rainbet.com?r=addthor'
   });
@@ -69,26 +70,45 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
   button.href=DESTINATION;
   if(source!=='direct') label.textContent='Source: '+source;
 
-  async function trackAndRedirect(){
+  let redirectStarted=false;
+  let redirectTimer;
+
+  function limitedReferrer(){
+    if(!document.referrer) return '';
+    try{
+      const url=new URL(document.referrer);
+      return url.origin+url.pathname;
+    }catch(_){
+      return '';
+    }
+  }
+
+  async function trackAndRedirect(event){
+    if(event) event.preventDefault();
+    if(redirectStarted) return;
+    redirectStarted=true;
+    clearTimeout(redirectTimer);
     const body=new URLSearchParams({
       'form-name':'thorshall-join-click',
       'source':source,
       'campaign':campaign,
       'timestamp':new Date().toISOString(),
-      'referrer':document.referrer||'',
+      'referrer':limitedReferrer(),
       'destination':DESTINATION
     });
     try{
-      await fetch('/',{
+      const submission=fetch('/',{
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body:body.toString(),
         keepalive:true
       });
+      await Promise.race([submission,new Promise(resolve=>setTimeout(resolve,900))]);
     }catch(_){}
     location.replace(DESTINATION);
   }
-  setTimeout(trackAndRedirect,650);
+  button.addEventListener('click',trackAndRedirect);
+  redirectTimer=setTimeout(trackAndRedirect,650);
 })();
 </script>
 </body>

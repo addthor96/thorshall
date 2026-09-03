@@ -222,6 +222,10 @@
 
         try{
           const response = await fetch('/.netlify/functions/rainbet-stats-aditya-range?range=' + encodeURIComponent(selectedRange), {cache:'no-store'});
+          if(response.status === 401){
+            location.replace('/.netlify/functions/stats-session?return=' + encodeURIComponent(location.pathname));
+            return;
+          }
           const data = await response.json().catch(() => null);
 
           if(!response.ok || !data){
