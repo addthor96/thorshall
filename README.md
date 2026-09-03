@@ -12,7 +12,7 @@ This folder is a complete Netlify deploy package. Deploy the folder itself (not 
 - Limited the stored referrer to origin and path. Query strings and fragments are not submitted.
 - Preserved the confirmed 250% campaign pages and added a live-terms/eligibility qualifier.
 - Restored Netlify form-detection and honeypot attributes on all forms.
-- Protected Rainbet partner statistics with an eight-hour HTTP-only session cookie and disabled public/CDN caching for those APIs.
+- Protected Rainbet partner statistics with creator-specific access, an eight-hour HTTP-only session cookie, and disabled public/CDN caching for those APIs.
 - Kept all five requested tracker payouts at 50% of the estimated Rainbet commission.
 - Removed public live-stat widgets and made the partner ledger privacy-safe.
 - Fixed missing background-asset references.
@@ -50,10 +50,15 @@ Stored fields: `source`, `campaign`, `timestamp`, limited `referrer`, and `desti
 Do not put these values in HTML or commit them into the folder.
 
 - `RAINBET_STATISTIC_TOKEN` — existing Rainbet reporting token.
-- `STATS_DASHBOARD_PASSWORD` — strong password shared only with authorized partners/admins.
+- `DASHBOARD_PASSWORD` — existing master/admin password; it can open every tracker. `STATS_ADMIN_PASSWORD` or `STATS_DASHBOARD_PASSWORD` may be used instead and take precedence.
 - `STATS_SESSION_SECRET` — random secret of at least 32 bytes used to sign sessions.
+- `STATS_PASSWORD_MANUEL` — Manuel's individual tracker password.
+- `STATS_PASSWORD_PIYUSH` — Piyush's individual tracker password.
+- `STATS_PASSWORD_RADHIKA` — Radhika's individual tracker password.
+- `STATS_PASSWORD_ADITYA` — Aditya's individual tracker password.
+- `STATS_PASSWORD_ARSHAN` — Arshan's individual tracker password.
 
-The statistics code also accepts the existing `DASHBOARD_PASSWORD` and `DASHBOARD_SESSION_SECRET` names as fallbacks. Dedicated `STATS_*` values are preferred.
+The existing `DASHBOARD_PASSWORD` remains the master credential, and `DASHBOARD_SESSION_SECRET` is accepted as a signing-secret fallback. A creator password only authorizes that creator's tracker and data endpoint; the master credential authorizes all trackers.
 
 Optional campaign-ID variables already supported by the existing functions should remain configured. Google Search Console functions keep their existing environment-variable requirements.
 
@@ -65,7 +70,7 @@ Private tracker paths:
 - `/aditya-stats1`
 - `/arshan-stats1`
 
-Opening a tracker without a valid session sends the visitor to the private statistics login.
+Opening a tracker without a valid session sends the visitor to that creator's private statistics login. Each creator must receive only their own password.
 
 ## Operational privacy tasks
 
@@ -82,6 +87,6 @@ After uploading, verify:
 
 1. `/join?src=deployment-test` creates a `thorshall-join-click` submission and redirects to the main campaign.
 2. Each partner page reaches its intended allowlisted campaign.
-3. A private tracker prompts for the statistics password, then loads after login.
+3. Each creator password opens only its matching tracker; the master password opens every tracker.
 4. All application/support forms appear in Netlify Forms and submit to `/thanks` or their intended support flow.
 5. Removed SEO URLs return 410 and no longer appear in `sitemap.xml`.

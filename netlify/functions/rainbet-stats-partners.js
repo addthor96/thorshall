@@ -18,7 +18,7 @@ function cachedResponse() {
 }
 
 exports.handler = async function (event) {
-  if (!isAuthorized(event)) return unauthorized();
+  if (!isAuthorized(event, "admin")) return unauthorized();
   const cached = cachedResponse();
   if (cached) return cached;
 

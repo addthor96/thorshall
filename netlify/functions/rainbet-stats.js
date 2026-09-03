@@ -4,7 +4,7 @@ const { fetchReport, jsonResponse } = require("../lib/rainbet-client");
 const { isAuthorized, unauthorized } = require("../lib/stats-auth");
 
 exports.handler = async function (event) {
-  if (!isAuthorized(event)) return unauthorized();
+  if (!isAuthorized(event, "admin")) return unauthorized();
   const token = process.env.RAINBET_STATISTIC_TOKEN;
 
   if (!token) {

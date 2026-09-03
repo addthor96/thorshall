@@ -272,7 +272,7 @@ async function fetchAdityaReport(token, range) {
 }
 
 exports.handler = async function (event) {
-  if (!isAuthorized(event)) return unauthorized();
+  if (!isAuthorized(event, "aditya")) return unauthorized();
   const token = process.env.RAINBET_STATISTIC_TOKEN;
   if (!token) {
     return jsonResponse(500, { ok: false, error: "Missing RAINBET_STATISTIC_TOKEN" });

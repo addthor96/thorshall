@@ -4,9 +4,16 @@ const crypto = require("crypto");
 
 const COOKIE_NAME = "th_stats_session";
 const SESSION_SECONDS = 60 * 60 * 8;
+const CREATOR_ACCESS = new Set(["manuel", "piyush", "radhika", "aditya", "arshan"]);
+const VALID_ACCESS = new Set(["admin", ...CREATOR_ACCESS]);
 
-function password() {
-  return process.env.STATS_DASHBOARD_PASSWORD || process.env.DASHBOARD_PASSWORD || "";
+function adminPassword() {
+  return process.env.STATS_ADMIN_PASSWORD || process.env.STATS_DASHBOARD_PASSWORD || process.env.DASHBOARD_PASSWORD || "";
+}
+
+function creatorPassword(creator) {
+  const access = String(creator || "").toLowerCase();
+  return CREATOR_ACCESS.has(access) ? process.env[`STATS_PASSWORD_${access.toUpperCase()}`] || "" : "";
 }
 
 function secret() {
@@ -23,8 +30,11 @@ function sign(value) {
   return crypto.createHmac("sha256", secret()).update(value).digest("base64url");
 }
 
-function createSession() {
+function createSession(access = "admin") {
+  const normalized = String(access).toLowerCase();
+  if (!VALID_ACCESS.has(normalized)) throw new Error("Invalid statistics access scope");
   const payload = Buffer.from(JSON.stringify({
+    access: normalized,
     exp: Math.floor(Date.now() / 1000) + SESSION_SECONDS
   })).toString("base64url");
   return `${payload}.${sign(payload)}`;
@@ -41,21 +51,43 @@ function readCookie(header, name) {
   return "";
 }
 
-function isConfigured() {
-  return Boolean(password() && secret());
+function isConfigured(access = "admin") {
+  const normalized = String(access).toLowerCase();
+  const signingSecret = secret();
+  if (signingSecret.length < 32 || !VALID_ACCESS.has(normalized)) return false;
+  return Boolean(adminPassword() || creatorPassword(normalized));
 }
 
-function isAuthorized(event) {
-  if (!isConfigured()) return false;
+function authenticate(supplied, requestedAccess) {
+  const normalized = String(requestedAccess || "admin").toLowerCase();
+  if (!isConfigured(normalized)) return "";
+  const master = adminPassword();
+  if (master && safeEqual(supplied, master)) return "admin";
+  const individual = creatorPassword(normalized);
+  if (individual && safeEqual(supplied, individual)) return normalized;
+  return "";
+}
+
+function sessionAccess(event) {
+  if (secret().length < 32) return "";
   const token = readCookie(event?.headers?.cookie || event?.headers?.Cookie, COOKIE_NAME);
   const [payload, signature] = String(token).split(".");
-  if (!payload || !signature || !safeEqual(sign(payload), signature)) return false;
+  if (!payload || !signature || !safeEqual(sign(payload), signature)) return "";
   try {
     const decoded = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
-    return Number(decoded.exp) > Math.floor(Date.now() / 1000);
+    const access = String(decoded.access || "").toLowerCase();
+    if (!VALID_ACCESS.has(access) || Number(decoded.exp) <= Math.floor(Date.now() / 1000)) return "";
+    return access;
   } catch {
-    return false;
+    return "";
   }
+}
+
+function isAuthorized(event, requiredAccess = "admin") {
+  const required = String(requiredAccess).toLowerCase();
+  if (!VALID_ACCESS.has(required)) return false;
+  const access = sessionAccess(event);
+  return access === "admin" || access === required;
 }
 
 function unauthorized() {
@@ -78,10 +110,13 @@ function unauthorized() {
 module.exports = {
   COOKIE_NAME,
   SESSION_SECONDS,
+  adminPassword,
+  authenticate,
   createSession,
+  creatorPassword,
   isAuthorized,
   isConfigured,
-  password,
   safeEqual,
+  sessionAccess,
   unauthorized
 };
