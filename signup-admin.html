@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Signup Admin | Thor's Hall</title>
+<style>
+:root{--bg:#090909;--panel:#131313;--line:#2b2b2b;--text:#f5f5f5;--muted:#9d9d9d;--accent:#f28c18}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
+.wrap{width:min(1200px,calc(100% - 28px));margin:28px auto 60px}
+.top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
+h1{margin:0;font-size:28px}.login{display:flex;gap:8px}.login input{background:#111;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 12px}
+button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:pointer}.orange{background:var(--accent);color:#111}.dark{background:#222;color:#fff;border:1px solid #333}
+.stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}.stat b{display:block;font-size:22px}.stat span{color:var(--muted);font-size:12px}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:980px}th,td{padding:12px;border-bottom:1px solid #222;text-align:left;font-size:13px}th{color:#bbb;background:#111;position:sticky;top:0}td{background:#0d0d0d}
+.actions{display:flex;gap:6px;flex-wrap:wrap}.proof{color:#ffb45d;text-decoration:none;cursor:pointer}.muted{color:var(--muted)}.status{font-weight:800}
+.err{margin:12px 0;color:#ff8585}.ok{margin:12px 0;color:#78de99}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><h1>Signup Admin</h1><div class="muted">Thor's Hall verification queue</div></div>
+    <div class="login">
+      <input id="pw" type="password" placeholder="Dashboard password">
+      <button class="orange" id="loadBtn">Load</button>
+    </div>
+  </div>
+
+  <div id="msg"></div>
+
+  <div class="stats">
+    <div class="stat"><b id="submitted">0</b><span>Submitted</span></div>
+    <div class="stat"><b id="pending">0</b><span>Pending</span></div>
+    <div class="stat"><b id="verified">0</b><span>Verified</span></div>
+    <div class="stat"><b id="rejected">0</b><span>Rejected</span></div>
+    <div class="stat"><b id="paid">0</b><span>Paid</span></div>
+    <div class="stat"><b id="owed">$0.00</b><span>Amount owed</span></div>
+    <div class="stat"><b id="paidAmt">$0.00</b><span>Paid</span></div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead><tr>
+        <th>Username</th><th>Source</th><th>Status</th><th>Proof</th><th>Created</th><th>Value</th><th>Actions</th>
+      </tr></thead>
+      <tbody id="rows"><tr><td colspan="7" class="muted">Enter dashboard password and click Load.</td></tr></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const money = n => "$" + Number(n || 0).toFixed(2);
+const dt = v => v ? new Date(v).toLocaleString() : "";
+
+function authHeaders() {
+  return { Authorization: "Bearer " + $("pw").value.trim() };
+}
+
+function msg(text, cls="") {
+  $("msg").className = cls;
+  $("msg").textContent = text;
+}
+
+async function loadData() {
+  msg("Loading...");
+  const res = await fetch("/.netlify/functions/signup-admin-list", { headers: authHeaders() });
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok || !data.ok) {
+    msg(data.error || "Could not load dashboard", "err");
+    return;
+  }
+  msg("");
+  $("submitted").textContent = data.counts.submitted;
+  $("pending").textContent = data.counts.pending;
+  $("verified").textContent = data.counts.verified;
+  $("rejected").textContent = data.counts.rejected;
+  $("paid").textContent = data.counts.paid;
+  $("owed").textContent = money(data.amount_owed);
+  $("paidAmt").textContent = money(data.amount_paid);
+
+  $("rows").innerHTML = data.signups.map(s => `
+    <tr>
+      <td>${escapeHtml(s.rainbet_username)}</td>
+      <td>${escapeHtml(s.source)}</td>
+      <td class="status">${escapeHtml(s.status)}</td>
+      <td>${s.proof_path ? `<a class="proof" onclick="openProof('${s.id}')">Open</a>` : '<span class="muted">None</span>'}</td>
+      <td>${escapeHtml(dt(s.created_at))}</td>
+      <td>${money(s.value_usd)}</td>
+      <td><div class="actions">
+        <button class="dark" onclick="act('${s.id}','verify')">Verify</button>
+        <button class="dark" onclick="act('${s.id}','reject')">Reject</button>
+        <button class="dark" onclick="act('${s.id}','paid')">Mark paid</button>
+      </div></td>
+    </tr>
+  `).join("") || `<tr><td colspan="7" class="muted">No signups yet.</td></tr>`;
+}
+
+async function act(id, action) {
+  const res = await fetch("/.netlify/functions/signup-admin-action", {
+    method:"POST",
+    headers:{...authHeaders(),"Content-Type":"application/json"},
+    body:JSON.stringify({id,action})
+  });
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok || !data.ok) return msg(data.error || "Update failed","err");
+  msg("Updated.","ok");
+  await loadData();
+}
+
+async function openProof(id) {
+  const res = await fetch("/.netlify/functions/signup-admin-proof?id="+encodeURIComponent(id), {headers:authHeaders()});
+  const data = await res.json().catch(()=>({}));
+  if (!res.ok || !data.ok) return msg(data.error || "Could not open proof","err");
+  window.open(data.url,"_blank","noopener");
+}
+
+function escapeHtml(v) {
+  return String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+$("loadBtn").addEventListener("click", loadData);
+$("pw").addEventListener("keydown", e => { if(e.key==="Enter") loadData(); });
+</script>
+</body>
+</html>
