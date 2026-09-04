@@ -1,448 +1,210 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="theme-color" content="#080607">
-  <title>Aditya Rainbet Signup | Thor's Hall</title>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Verify Rainbet Signup | Thor's Hall</title>
   <style>
     :root{
-      --bg:#080607;
-      --panel:rgba(14,10,11,.94);
-      --line:rgba(255,139,34,.32);
-      --gold:#efb968;
-      --orange:#ff7a00;
-      --text:#f7f2eb;
-      --muted:#b9b0aa;
-      --soft:#837a76;
-      --good:#9fe0ad;
-      --serif:Georgia,"Times New Roman",serif;
-      --sans:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      --bg:#090909; --panel:#121212; --panel2:#181818; --text:#f5f5f5;
+      --muted:#aaa; --line:#2a2a2a; --accent:#f28c18; --accent2:#ffad42;
     }
-
     *{box-sizing:border-box}
-    html,body{margin:0;min-height:100%}
-
     body{
-      color:var(--text);
-      font-family:var(--sans);
-      background:
-        linear-gradient(180deg,rgba(4,3,4,.62),rgba(7,5,6,.94)),
-        url("/img/casinobackground.png") center/cover fixed no-repeat,
-        var(--bg);
+      margin:0; min-height:100vh; color:var(--text);
+      font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+      background:radial-gradient(circle at top, rgba(242,140,24,.12), transparent 34rem),var(--bg);
     }
-
-    .wrap{
-      width:min(660px,calc(100% - 20px));
-      margin:auto;
-      padding:26px 0 44px;
-    }
-
-    .top{
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:10px;
-      padding:12px;
-      border:1px solid var(--line);
-      border-radius:15px;
-      background:rgba(9,7,8,.84);
-      backdrop-filter:blur(10px);
-    }
-
-    .top img{
-      width:38px;
-      height:38px;
-      border-radius:9px;
-      object-fit:cover;
-    }
-
-    .top strong{
-      color:var(--gold);
-      font:900 20px var(--serif);
-      letter-spacing:.03em;
-    }
-
-    .hero{
-      text-align:center;
-      padding:46px 14px 24px;
-    }
-
-    .eyebrow{
-      color:#ff9a34;
-      font-size:10px;
-      font-weight:900;
-      letter-spacing:.17em;
-      text-transform:uppercase;
-    }
-
-    h1{
-      margin:9px 0 9px;
-      font:900 clamp(38px,8vw,58px)/.98 var(--serif);
-      letter-spacing:-.03em;
-    }
-
-    .hero p{
-      max-width:510px;
-      margin:auto;
-      color:#c8beb8;
-      font-size:14px;
-      line-height:1.55;
-    }
-
-    .card{
-      padding:22px;
-      border:1px solid var(--line);
-      border-radius:18px;
-      background:var(--panel);
-      box-shadow:0 22px 60px rgba(0,0,0,.40);
-    }
-
-    .steps{
-      display:grid;
-      gap:11px;
-      margin-bottom:22px;
-    }
-
-    .step{
-      display:grid;
-      grid-template-columns:38px 1fr;
-      gap:11px;
-      align-items:start;
-      padding:13px;
-      border:1px solid rgba(255,255,255,.07);
-      border-radius:11px;
-      background:rgba(255,255,255,.022);
-    }
-
-    .num,.done{
-      width:34px;
-      height:34px;
-      display:grid;
-      place-items:center;
-      border-radius:50%;
-      border:1px solid rgba(255,139,34,.55);
-      background:rgba(255,122,0,.06);
-      color:#ffbe73;
-      font-weight:900;
-    }
-
-    .step strong{
-      display:block;
-      margin:1px 0 3px;
-      color:#f0d7b5;
-      font-size:13px;
-    }
-
-    .step span{
-      color:#9f9691;
-      font-size:11px;
-      line-height:1.45;
-    }
-
-    .form-title{
-      margin:2px 0 14px;
-      text-align:center;
-      color:#f0d7b5;
-      font:900 20px var(--serif);
-    }
-
-    label{
-      display:block;
-      margin-bottom:7px;
-      color:#e9d8c6;
-      font-size:12px;
-      font-weight:800;
-    }
-
-    input[type="text"]{
-      width:100%;
-      padding:14px 15px;
-      border:1px solid rgba(255,122,0,.42);
-      border-radius:9px;
-      outline:none;
-      color:#fff;
-      background:#090706;
-      font:600 15px var(--sans);
-    }
-
-    input[type="text"]:focus{
-      border-color:#ff9224;
-      box-shadow:0 0 0 3px rgba(255,122,0,.08);
-    }
-
-    .help{
-      margin:8px 0 14px;
-      color:#867d79;
-      font-size:10px;
-      line-height:1.4;
-    }
-
-    .check{
-      display:flex;
-      gap:9px;
-      align-items:flex-start;
-      margin-bottom:15px;
-      padding:11px 12px;
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:9px;
-      background:rgba(255,255,255,.018);
-    }
-
-    .check input{
-      margin-top:3px;
-      accent-color:var(--orange);
-    }
-
-    .check label{
-      margin:0;
-      color:#b7aeaa;
-      font-size:10px;
-      font-weight:600;
-      line-height:1.45;
-    }
-
-    button,.cta{
-      width:100%;
-      display:block;
-      padding:14px 18px;
-      border:1px solid #ff8b18;
-      border-radius:9px;
-      background:linear-gradient(180deg,#ac470d,#672307);
-      color:#fff2df;
-      text-align:center;
-      text-decoration:none;
-      font:900 15px var(--serif);
-      text-transform:uppercase;
-      letter-spacing:.02em;
-      cursor:pointer;
-    }
-
-    button:hover,.cta:hover{filter:brightness(1.08)}
-
-    .success{
-      display:none;
-      text-align:center;
-      padding:8px 0 2px;
-    }
-
-    .success .done{
-      width:60px;
-      height:60px;
-      margin:0 auto 14px;
-      border-color:rgba(159,224,173,.45);
-      background:rgba(82,177,100,.06);
-      color:var(--good);
-      font-size:28px;
-    }
-
-    .success h2{
-      margin:0 0 8px;
-      color:#f0cf9a;
-      font:900 29px var(--serif);
-    }
-
-    .success p{
-      margin:0 auto 18px;
-      max-width:500px;
-      color:#c3bab5;
-      font-size:12px;
-      line-height:1.55;
-    }
-
-    .success-steps{
-      display:grid;
-      gap:8px;
-      margin:16px 0 18px;
-      text-align:left;
-    }
-
-    .success-steps div{
-      display:flex;
-      gap:9px;
-      align-items:center;
-      padding:10px 11px;
-      border:1px solid rgba(255,255,255,.06);
-      border-radius:9px;
-      background:rgba(255,255,255,.018);
-      color:#b5aca7;
-      font-size:11px;
-      line-height:1.4;
-    }
-
-    .success-steps b{
-      width:24px;
-      height:24px;
-      flex:0 0 auto;
-      display:grid;
-      place-items:center;
-      border-radius:50%;
-      border:1px solid rgba(255,139,34,.5);
-      color:#ffbd70;
-      font-size:10px;
-    }
-
-    .disclaimer{
-      margin-top:16px;
-      padding-top:13px;
-      border-top:1px solid rgba(255,255,255,.06);
-      color:#77706d;
-      font-size:9px;
-      line-height:1.55;
-      text-align:center;
-    }
-
-    footer{
-      padding-top:22px;
-      color:#726a67;
-      font-size:9px;
-      text-align:center;
-    }
-
-    @media(max-width:560px){
-      body{background-attachment:scroll}
-      .wrap{width:min(100% - 14px,660px);padding-top:16px}
-      .hero{padding-top:38px}
-      .card{padding:17px}
-    }
+    .wrap{width:min(760px,calc(100% - 32px));margin:0 auto;padding:34px 0 70px}
+    .brand{font-size:14px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:var(--accent2);margin-bottom:18px}
+    .card{background:linear-gradient(180deg,rgba(24,24,24,.98),rgba(16,16,16,.98));border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 24px 70px rgba(0,0,0,.35)}
+    h1{margin:0 0 10px;font-size:clamp(30px,6vw,46px);line-height:1.05}
+    .lead{color:var(--muted);line-height:1.6;margin:0 0 24px}
+    .rules{display:grid;gap:10px;padding:0;margin:0 0 24px;list-style:none}
+    .rules li{background:var(--panel2);border:1px solid var(--line);border-radius:12px;padding:13px 14px;line-height:1.45}
+    .notice{border-left:3px solid var(--accent);padding:11px 14px;margin:0 0 24px;color:#d9d9d9;background:rgba(242,140,24,.07);border-radius:8px;line-height:1.5}
+    .rainbet{display:inline-flex;align-items:center;justify-content:center;width:100%;text-decoration:none;background:#222;border:1px solid #333;border-radius:12px;padding:13px 16px;font-weight:700;margin-bottom:24px;color:white}
+    .divider{height:1px;background:var(--line);margin:2px 0 24px}
+    label{display:block;font-weight:700;margin:0 0 8px}
+    input[type="text"],input[type="file"]{width:100%;border:1px solid #363636;background:#0d0d0d;color:white;border-radius:12px;padding:14px 15px;outline:none;font-size:16px}
+    input:focus{border-color:var(--accent)}
+    .field{margin-bottom:20px}
+    .hint{margin-top:8px;color:var(--muted);font-size:13px;line-height:1.45}
+    .checkbox{display:flex;gap:10px;align-items:flex-start;color:#d0d0d0;font-size:14px;line-height:1.45;margin:0 0 20px}
+    .checkbox input{margin-top:3px}
+    button{width:100%;border:0;border-radius:12px;padding:15px 18px;font-size:16px;font-weight:900;cursor:pointer;background:linear-gradient(180deg,var(--accent2),var(--accent));color:#111}
+    button:disabled{opacity:.55;cursor:not-allowed}
+    .status{display:none;margin-top:16px;padding:13px 14px;border-radius:12px;line-height:1.45;font-size:14px}
+    .status.show{display:block}
+    .status.ok{color:#d9ffe5;border:1px solid rgba(101,214,140,.35);background:rgba(101,214,140,.08)}
+    .status.err{color:#ffe2e2;border:1px solid rgba(255,107,107,.35);background:rgba(255,107,107,.08)}
+    .source{text-align:center;color:#666;font-size:12px;margin-top:18px}
+    @media (max-width:560px){.card{padding:22px 18px}.wrap{width:min(100% - 20px,760px);padding-top:20px}}
   </style>
 </head>
-
 <body>
   <main class="wrap">
-    <div class="top">
-      <img src="/logo.png" alt="Thor's Hall">
-      <strong>THOR'S HALL</strong>
-    </div>
-
-    <section class="hero">
-      <div class="eyebrow">Join Through Aditya</div>
-      <h1>Free Rainbet Signup</h1>
-      <p>Choose your username, create your Rainbet account with the same username, verify your email on Rainbet, and you're done.</p>
-    </section>
-
+    <div class="brand">Thor's Hall</div>
     <section class="card">
-      <div id="signupView">
+      <h1>Verify your Rainbet signup</h1>
+      <p class="lead">Enter your Rainbet username and upload one screenshot from Rainbet Settings. The submission is reviewed manually before it counts as verified.</p>
 
-        <div class="steps">
-          <div class="step">
-            <div class="num">1</div>
-            <div>
-              <strong>Choose your username</strong>
-              <span>Enter the Rainbet username you want to use.</span>
-            </div>
-          </div>
+      <ul class="rules">
+        <li><strong>1.</strong> The Rainbet username in the screenshot must match the username entered below.</li>
+        <li><strong>2.</strong> The screenshot must show <strong>Verify Email: Verified</strong>.</li>
+        <li><strong>3.</strong> The screenshot must show <strong>Level 1 - Personal Information: Complete</strong>.</li>
+      </ul>
 
-          <div class="step">
-            <div class="num">2</div>
-            <div>
-              <strong>Use the same username on Rainbet</strong>
-              <span>The username here must match the username you create on Rainbet.</span>
-            </div>
-          </div>
+      <div class="notice">
+        Upload only a screenshot of your Rainbet Settings page. <strong>Never upload a passport, ID card, selfie, or other identity document here.</strong>
+        You may crop unrelated personal information from the screenshot.
+      </div>
 
-          <div class="step">
-            <div class="num">3</div>
-            <div>
-              <strong>Verify your email on Rainbet</strong>
-              <span>Complete Rainbet's email verification after creating the account.</span>
-            </div>
-          </div>
+      <a class="rainbet" href="https://rainbet.com?r=addthor" target="_blank" rel="noopener noreferrer">Open Rainbet</a>
 
-          <div class="step">
-            <div class="done">✓</div>
-            <div>
-              <strong>Complete</strong>
-              <span>Once the account is created and the email is verified, you're finished.</span>
-            </div>
-          </div>
-        </div>
+      <div class="divider"></div>
 
-        <div class="form-title">Start here</div>
-
-        <form id="signupForm" name="aditya-support-signup" method="POST" data-netlify="true" netlify-honeypot="bot-field" action="/aditya-signup?submitted=1">
-          <input type="hidden" name="form-name" value="aditya-support-signup">
-          <input type="hidden" name="partner" value="Aditya">
-          <input type="hidden" name="page" value="/aditya-signup">
-          <input id="source" type="hidden" name="source" value="direct">
-          <input type="hidden" name="destination" value="https://rainbet.com?r=addthor">
-          <input id="submittedAt" type="hidden" name="submitted_at" value="">
-          <input type="hidden" name="status" value="pending_rainbet_verification">
-          <input type="hidden" name="pilot" value="500">
-
-          <p hidden><label>Do not fill this out: <input name="bot-field"></label></p>
-
+      <form id="signupForm" novalidate>
+        <div class="field">
           <label for="username">Rainbet username</label>
-          <input id="username" name="rainbet_username" type="text" maxlength="64" autocomplete="off" required placeholder="Enter your username">
-
-          <div class="help">
-            Use this exact same username when creating your Rainbet account.
-          </div>
-
-          <div class="check">
-            <input id="confirm" name="signup_rules_confirmation" type="checkbox" value="yes" required>
-            <label for="confirm">
-              I understand that I must create one genuine Rainbet account with this username and complete Rainbet's email verification.
-            </label>
-          </div>
-
-          <button type="submit">Continue to Rainbet</button>
-        </form>
-
-        <div class="disclaimer">
-          One real person = one account. Only genuine, verifiable Rainbet referrals count.
-          Duplicate, fake, bulk-created, fraudulent or suspicious registrations may be rejected.
-          Submitting a username alone does not qualify the signup. 18+ only. No deposit is required to register.
-        </div>
-      </div>
-
-      <div id="successView" class="success">
-        <div class="done">✓</div>
-        <h2>Username Saved</h2>
-        <p>Now finish the signup on Rainbet using the exact same username.</p>
-
-        <div class="success-steps">
-          <div><b>1</b><span>Create your Rainbet account with the same username.</span></div>
-          <div><b>2</b><span>Verify your email directly on Rainbet.</span></div>
-          <div><b>✓</b><span>Once both are complete, you're done.</span></div>
+          <input id="username" type="text" maxlength="64" autocomplete="off" placeholder="Enter your exact Rainbet username" required />
         </div>
 
-        <a class="cta" href="https://rainbet.com?r=addthor" rel="nofollow sponsored">Create Rainbet Account</a>
-
-        <div class="disclaimer">
-          The signup remains pending until the Rainbet referral can be verified.
+        <div class="field">
+          <label for="proof">Rainbet Settings screenshot</label>
+          <input id="proof" type="file" accept="image/png,image/jpeg,image/webp" required />
+          <div class="hint">PNG, JPG/JPEG or WEBP. Maximum 4 MB.</div>
         </div>
-      </div>
+
+        <label class="checkbox">
+          <input id="adultConfirm" type="checkbox" required />
+          <span>I confirm I am 18 or older and that this submission belongs to a real Rainbet account I control.</span>
+        </label>
+
+        <button id="submitBtn" type="submit">Submit for verification</button>
+        <div id="statusBox" class="status" role="status" aria-live="polite"></div>
+      </form>
+
+      <div class="source" id="sourceLabel"></div>
     </section>
-
-    <footer>Thor's Hall · Aditya · 18+ only</footer>
   </main>
 
   <script>
     (() => {
+      const form = document.getElementById("signupForm");
+      const usernameEl = document.getElementById("username");
+      const proofEl = document.getElementById("proof");
+      const adultEl = document.getElementById("adultConfirm");
+      const button = document.getElementById("submitBtn");
+      const statusBox = document.getElementById("statusBox");
+      const sourceLabel = document.getElementById("sourceLabel");
+
       const params = new URLSearchParams(window.location.search);
-      const raw = (params.get('src') || 'direct').trim();
-      const clean = /^[a-zA-Z0-9_-]{1,40}$/.test(raw) ? raw : 'direct';
+      const rawSource = (params.get("src") || "direct").trim();
+      const source = /^[A-Za-z0-9_.-]{1,60}$/.test(rawSource) ? rawSource : "direct";
+      sourceLabel.textContent = source === "direct" ? "" : "Source: " + source;
 
-      const source = document.getElementById('source');
-      const submittedAt = document.getElementById('submittedAt');
-      const form = document.getElementById('signupForm');
-      const signupView = document.getElementById('signupView');
-      const successView = document.getElementById('successView');
+      function setStatus(message, type) {
+        statusBox.textContent = message;
+        statusBox.className = "status show " + type;
+      }
 
-      if(source) source.value = clean;
+      function setBusy(isBusy) {
+        button.disabled = isBusy;
+        button.textContent = isBusy ? "Submitting..." : "Submit for verification";
+      }
 
-      if(params.get('submitted') === '1'){
-        signupView.style.display = 'none';
-        successView.style.display = 'block';
-      }else if(form){
-        form.addEventListener('submit', () => {
-          submittedAt.value = new Date().toISOString();
-          form.action = '/aditya-signup?submitted=1&src=' + encodeURIComponent(clean);
+      function fileToDataUrl(file) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = () => reject(new Error("Could not read screenshot."));
+          reader.readAsDataURL(file);
         });
       }
+
+      function storageKey(username) {
+        return "thorshall_aditya_signup_" + username.toLowerCase();
+      }
+
+      async function startSignup(username) {
+        const key = storageKey(username);
+        const savedId = localStorage.getItem(key);
+        if (savedId) return savedId;
+
+        const response = await fetch("/.netlify/functions/signup-start", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            rainbet_username: username,
+            source,
+            partner: "Aditya"
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok || !data.ok || !data.signup_id) {
+          if (response.status === 409) {
+            throw new Error("This Rainbet username has already been submitted. If you already started this submission on another device, contact Thor's Hall.");
+          }
+          throw new Error(data.error || "Could not start the submission.");
+        }
+
+        localStorage.setItem(key, data.signup_id);
+        return data.signup_id;
+      }
+
+      async function uploadProof(signupId, file) {
+        const fileBase64 = await fileToDataUrl(file);
+
+        const response = await fetch("/.netlify/functions/signup-proof-upload", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            signup_id: signupId,
+            file_name: file.name,
+            mime_type: file.type,
+            file_base64: fileBase64
+          })
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || !data.ok) throw new Error(data.error || "Could not upload the screenshot.");
+        return data;
+      }
+
+      form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        statusBox.className = "status";
+
+        const username = usernameEl.value.trim();
+        const file = proofEl.files[0];
+
+        if (!username) return setStatus("Enter your Rainbet username.", "err");
+        if (!/^[A-Za-z0-9_.-]+$/.test(username)) return setStatus("The username contains unsupported characters.", "err");
+        if (!file) return setStatus("Choose your Rainbet Settings screenshot.", "err");
+
+        const allowed = ["image/png", "image/jpeg", "image/webp"];
+        if (!allowed.includes(file.type)) return setStatus("Use a PNG, JPG/JPEG or WEBP screenshot.", "err");
+        if (file.size > 4 * 1024 * 1024) return setStatus("The screenshot must be 4 MB or smaller.", "err");
+        if (!adultEl.checked) return setStatus("Confirm that you are 18 or older.", "err");
+
+        setBusy(true);
+
+        try {
+          const signupId = await startSignup(username);
+          await uploadProof(signupId, file);
+          localStorage.removeItem(storageKey(username));
+          form.reset();
+          setStatus("Submitted successfully. Your signup is now waiting for manual verification.", "ok");
+        } catch (error) {
+          setStatus(error.message || "Something went wrong. Please try again.", "err");
+        } finally {
+          setBusy(false);
+        }
+      });
     })();
   </script>
 </body>
