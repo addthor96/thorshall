@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Aditya Signup Dashboard | Thor's Hall</title>
+<style>
+:root{
+  --bg:#090909;--panel:#131313;--line:#2b2b2b;--text:#f5f5f5;
+  --muted:#9d9d9d;--accent:#f28c18
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif}
+.wrap{width:min(1100px,calc(100% - 28px));margin:28px auto 60px}
+.top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
+h1{margin:0;font-size:28px}
+.login{display:flex;gap:8px}
+.login input{background:#111;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 12px}
+button{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer;background:var(--accent);color:#111}
+.muted{color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:22px}
+.stat span{color:var(--muted);font-size:12px}
+.pilot{background:linear-gradient(180deg,#171717,#111);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:18px}
+.bar{height:10px;background:#252525;border-radius:999px;overflow:hidden;margin-top:10px}
+.fill{height:100%;width:0;background:var(--accent);transition:width .25s ease}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse;min-width:760px}
+th,td{padding:12px;border-bottom:1px solid #222;text-align:left;font-size:13px}
+th{color:#bbb;background:#111}
+td{background:#0d0d0d}
+.err{margin:12px 0;color:#ff8585}
+@media(max-width:900px){
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .top{align-items:flex-start;flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div>
+      <h1>Aditya Signup Dashboard</h1>
+      <div class="muted">Read-only pilot performance</div>
+    </div>
+    <div class="login">
+      <input id="pw" type="password" placeholder="Dashboard password">
+      <button id="loadBtn">Load</button>
+    </div>
+  </div>
+
+  <div id="msg"></div>
+
+  <div class="stats">
+    <div class="stat"><b id="pending">0</b><span>Pending</span></div>
+    <div class="stat"><b id="verified">0</b><span>Verified</span></div>
+    <div class="stat"><b id="rejected">0</b><span>Rejected</span></div>
+    <div class="stat"><b id="earnings">$0.00</b><span>Earnings</span></div>
+    <div class="stat"><b id="paid">$0.00</b><span>Paid</span></div>
+    <div class="stat"><b id="owed">$0.00</b><span>Owed</span></div>
+    <div class="stat"><b id="pilotCount">0/500</b><span>Pilot</span></div>
+  </div>
+
+  <div class="pilot">
+    <strong>Pilot progress</strong>
+    <div class="muted" id="pilotText">0 of 500 verified users</div>
+    <div class="bar"><div class="fill" id="pilotBar"></div></div>
+  </div>
+
+  <div class="tablewrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Vendor / Source</th>
+          <th>Submitted</th>
+          <th>Pending</th>
+          <th>Verified</th>
+          <th>Rejected</th>
+          <th>Paid</th>
+          <th>Earnings</th>
+        </tr>
+      </thead>
+      <tbody id="rows">
+        <tr><td colspan="7" class="muted">Enter dashboard password and click Load.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const money = n => "$" + Number(n || 0).toFixed(2);
+
+function headers() {
+  return { Authorization: "Bearer " + $("pw").value.trim() };
+}
+
+function escapeHtml(v) {
+  return String(v ?? "").replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+async function loadDashboard() {
+  $("msg").textContent = "Loading...";
+  $("msg").className = "muted";
+
+  const res = await fetch("/.netlify/functions/signup-aditya-dashboard", {
+    headers: headers()
+  });
+
+  const data = await res.json().catch(() => ({}));
+
+  if (!res.ok || !data.ok) {
+    $("msg").textContent = data.error || "Could not load dashboard";
+    $("msg").className = "err";
+    return;
+  }
+
+  $("msg").textContent = "";
+
+  const m = data.metrics;
+  $("pending").textContent = m.pending;
+  $("verified").textContent = m.verified;
+  $("rejected").textContent = m.rejected;
+  $("earnings").textContent = money(m.earnings);
+  $("paid").textContent = money(m.paid_amount);
+  $("owed").textContent = money(m.owed);
+  $("pilotCount").textContent = m.pilot_verified + "/" + m.pilot_cap;
+  $("pilotText").textContent = m.pilot_verified + " of " + m.pilot_cap + " verified users";
+
+  const pct = Math.max(0, Math.min(100, (m.pilot_verified / m.pilot_cap) * 100));
+  $("pilotBar").style.width = pct + "%";
+
+  $("rows").innerHTML = data.vendors.map(v => `
+    <tr>
+      <td>${escapeHtml(v.source)}</td>
+      <td>${v.submitted}</td>
+      <td>${v.pending}</td>
+      <td>${v.verified}</td>
+      <td>${v.rejected}</td>
+      <td>${v.paid}</td>
+      <td>${money(v.earnings)}</td>
+    </tr>
+  `).join("") || `<tr><td colspan="7" class="muted">No vendor data yet.</td></tr>`;
+}
+
+$("loadBtn").addEventListener("click", loadDashboard);
+$("pw").addEventListener("keydown", e => {
+  if (e.key === "Enter") loadDashboard();
+});
+</script>
+</body>
+</html>
