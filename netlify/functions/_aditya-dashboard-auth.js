@@ -8,10 +8,19 @@ function safeEqual(a, b) {
 }
 
 function authorized(event) {
-  const expected = process.env.ADITYA_DASHBOARD_PASSWORD || "";
   const auth = event.headers.authorization || event.headers.Authorization || "";
   const provided = auth.startsWith("Bearer ") ? auth.slice(7) : "";
-  return expected && safeEqual(provided, expected);
+
+  const partnerPassword = process.env.ADITYA_DASHBOARD_PASSWORD || "";
+  const adminPassword = process.env.DASHBOARD_PASSWORD || "";
+
+  const matchesPartner =
+    partnerPassword && safeEqual(provided, partnerPassword);
+
+  const matchesAdmin =
+    adminPassword && safeEqual(provided, adminPassword);
+
+  return Boolean(matchesPartner || matchesAdmin);
 }
 
 module.exports = { authorized };

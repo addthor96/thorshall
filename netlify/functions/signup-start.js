@@ -39,9 +39,7 @@ exports.handler = async function (event) {
     if (contentType.includes("application/json")) {
       body = JSON.parse(event.body || "{}");
     } else {
-      body = Object.fromEntries(
-        new URLSearchParams(event.body || "").entries()
-      );
+      body = Object.fromEntries(new URLSearchParams(event.body || "").entries());
     }
   } catch {
     return {
@@ -53,16 +51,16 @@ exports.handler = async function (event) {
 
   const username = String(body.rainbet_username || "").trim();
   const source = String(body.source || "direct").trim();
-  const partner = String(body.partner || "Aditya").trim();
+
+  // This endpoint is only for the Aditya signup pilot.
+  // Do not accept a partner name from the browser.
+  const partner = "Aditya";
 
   if (!username || username.length > 64) {
     return {
       statusCode: 400,
       headers,
-      body: JSON.stringify({
-        ok: false,
-        error: "Valid Rainbet username required"
-      })
+      body: JSON.stringify({ ok: false, error: "Valid Rainbet username required" })
     };
   }
 
@@ -70,10 +68,7 @@ exports.handler = async function (event) {
     return {
       statusCode: 400,
       headers,
-      body: JSON.stringify({
-        ok: false,
-        error: "Username contains unsupported characters"
-      })
+      body: JSON.stringify({ ok: false, error: "Username contains unsupported characters" })
     };
   }
 
@@ -98,7 +93,8 @@ exports.handler = async function (event) {
         rainbet_username: username,
         partner,
         source,
-        status: "started"
+        status: "started",
+        value_usd: 0.10
       })
     });
 
@@ -127,10 +123,7 @@ exports.handler = async function (event) {
       return {
         statusCode: 500,
         headers,
-        body: JSON.stringify({
-          ok: false,
-          error: "Could not save signup"
-        })
+        body: JSON.stringify({ ok: false, error: "Could not save signup" })
       };
     }
 
