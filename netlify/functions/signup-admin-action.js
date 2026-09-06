@@ -22,6 +22,14 @@ exports.handler = async function (event) {
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SECRET_KEY;
 
+  if (!url || !key) {
+    return {
+      statusCode: 500,
+      headers,
+      body: JSON.stringify({ ok: false, error: "Server configuration missing" })
+    };
+  }
+
   let body = {};
   try {
     body = JSON.parse(event.body || "{}");
@@ -44,14 +52,18 @@ exports.handler = async function (event) {
     };
   }
 
+  const authHeaders = {
+    apikey: key,
+    Authorization: `Bearer ${key}`
+  };
+
   try {
     if (action === "verify") {
       const res = await fetch(`${url}/rest/v1/rpc/verify_aditya_signup_with_cap`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          apikey: key,
-          Authorization: `Bearer ${key}`
+          ...authHeaders
         },
         body: JSON.stringify({ p_signup_id: id })
       });
@@ -81,6 +93,7 @@ exports.handler = async function (event) {
         }
 
         console.error("Verify RPC failed:", res.status, data);
+
         return {
           statusCode: 500,
           headers,
@@ -96,14 +109,12 @@ exports.handler = async function (event) {
     }
 
     if (action === "delete") {
+      // ADMIN FORCE DELETE:
+      // Works regardless of started / proof_submitted / verified / rejected / paid.
+
       const lookup = await fetch(
         `${url}/rest/v1/signups?id=eq.${encodeURIComponent(id)}&select=id,proof_path`,
-        {
-          headers: {
-            apikey: key,
-            Authorization: `Bearer ${key}`
-          }
-        }
+        { headers: authHeaders }
       );
 
       const rows = await lookup.json().catch(() => []);
@@ -116,42 +127,61 @@ exports.handler = async function (event) {
         };
       }
 
-      const proofPath = rows[0].proof_path;
+      const proofPath = rows[0].proof_path || null;
+      let proofDeleted = false;
 
+      // Try to delete the private proof first.
       if (proofPath) {
-        const deleteProof = await fetch(
-          `${url}/storage/v1/object/verification-proofs/${proofPath}`,
-          {
-            method: "DELETE",
-            headers: {
-              apikey: key,
-              Authorization: `Bearer ${key}`
+        try {
+          // Method 1: direct single-object delete.
+          let proofRes = await fetch(
+            `${url}/storage/v1/object/verification-proofs/${proofPath}`,
+            {
+              method: "DELETE",
+              headers: authHeaders
+            }
+          );
+
+          proofDeleted = proofRes.ok || proofRes.status === 404;
+
+          // Method 2 fallback: Supabase bulk remove endpoint.
+          if (!proofDeleted) {
+            const firstError = await proofRes.text().catch(() => "");
+            console.warn("Direct proof delete failed:", proofRes.status, firstError);
+
+            proofRes = await fetch(
+              `${url}/storage/v1/object/verification-proofs`,
+              {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                  ...authHeaders
+                },
+                body: JSON.stringify({ prefixes: [proofPath] })
+              }
+            );
+
+            proofDeleted = proofRes.ok || proofRes.status === 404;
+
+            if (!proofDeleted) {
+              const secondError = await proofRes.text().catch(() => "");
+              console.warn("Fallback proof delete failed:", proofRes.status, secondError);
             }
           }
-        );
-
-        if (!deleteProof.ok && deleteProof.status !== 404) {
-          const proofError = await deleteProof.text().catch(() => "");
-          console.error("Proof delete failed:", deleteProof.status, proofError);
-
-          return {
-            statusCode: 500,
-            headers,
-            body: JSON.stringify({
-              ok: false,
-              error: "Could not delete verification proof"
-            })
-          };
+        } catch (proofError) {
+          console.warn("Proof cleanup error:", proofError);
         }
+      } else {
+        proofDeleted = true;
       }
 
+      // IMPORTANT: proof cleanup can NEVER block the admin from deleting the signup.
       const deleteRow = await fetch(
         `${url}/rest/v1/signups?id=eq.${encodeURIComponent(id)}`,
         {
           method: "DELETE",
           headers: {
-            apikey: key,
-            Authorization: `Bearer ${key}`,
+            ...authHeaders,
             Prefer: "return=representation"
           }
         }
@@ -172,7 +202,11 @@ exports.handler = async function (event) {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ ok: true, deleted: true })
+        body: JSON.stringify({
+          ok: true,
+          deleted: true,
+          proof_deleted: proofDeleted
+        })
       };
     }
 
@@ -187,12 +221,7 @@ exports.handler = async function (event) {
     } else if (action === "paid") {
       const lookup = await fetch(
         `${url}/rest/v1/signups?id=eq.${encodeURIComponent(id)}&select=id,status`,
-        {
-          headers: {
-            apikey: key,
-            Authorization: `Bearer ${key}`
-          }
-        }
+        { headers: authHeaders }
       );
 
       const rows = await lookup.json().catch(() => []);
@@ -228,16 +257,18 @@ exports.handler = async function (event) {
       };
     }
 
-    const res = await fetch(`${url}/rest/v1/signups?id=eq.${encodeURIComponent(id)}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: key,
-        Authorization: `Bearer ${key}`,
-        Prefer: "return=representation"
-      },
-      body: JSON.stringify(patch)
-    });
+    const res = await fetch(
+      `${url}/rest/v1/signups?id=eq.${encodeURIComponent(id)}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          ...authHeaders,
+          Prefer: "return=representation"
+        },
+        body: JSON.stringify(patch)
+      }
+    );
 
     const data = await res.json().catch(() => null);
 
