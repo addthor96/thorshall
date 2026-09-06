@@ -10,9 +10,9 @@
 .wrap{width:min(1200px,calc(100% - 28px));margin:28px auto 60px}
 .top{display:flex;gap:12px;align-items:center;justify-content:space-between;margin-bottom:20px}
 h1{margin:0;font-size:28px}.login{display:flex;gap:8px}.login input{background:#111;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 12px}
-button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:pointer}.orange{background:var(--accent);color:#111}.dark{background:#222;color:#fff;border:1px solid #333}
+button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:pointer}.orange{background:var(--accent);color:#111}.dark{background:#222;color:#fff;border:1px solid #333}.danger{background:#3a1515;color:#ffb3b3;border:1px solid #6a2525}
 .stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}.stat b{display:block;font-size:22px}.stat span{color:var(--muted);font-size:12px}
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:980px}th,td{padding:12px;border-bottom:1px solid #222;text-align:left;font-size:13px}th{color:#bbb;background:#111;position:sticky;top:0}td{background:#0d0d0d}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:1060px}th,td{padding:12px;border-bottom:1px solid #222;text-align:left;font-size:13px}th{color:#bbb;background:#111;position:sticky;top:0}td{background:#0d0d0d}
 .actions{display:flex;gap:6px;flex-wrap:wrap}.proof{color:#ffb45d;text-decoration:none;cursor:pointer}.muted{color:var(--muted)}.status{font-weight:800}
 .err{margin:12px 0;color:#ff8585}.ok{margin:12px 0;color:#78de99}
 @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;flex-direction:column}}
@@ -43,9 +43,9 @@ button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:point
   <div class="tablewrap">
     <table>
       <thead><tr>
-        <th>Username</th><th>Source</th><th>Status</th><th>Proof</th><th>Created</th><th>Value</th><th>Actions</th>
+        <th>Username</th><th>Partner</th><th>Source</th><th>Status</th><th>Proof</th><th>Created</th><th>Value</th><th>Actions</th>
       </tr></thead>
-      <tbody id="rows"><tr><td colspan="7" class="muted">Enter dashboard password and click Load.</td></tr></tbody>
+      <tbody id="rows"><tr><td colspan="8" class="muted">Enter dashboard password and click Load.</td></tr></tbody>
     </table>
   </div>
 </div>
@@ -54,6 +54,15 @@ button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:point
 const $ = id => document.getElementById(id);
 const money = n => "$" + Number(n || 0).toFixed(2);
 const dt = v => v ? new Date(v).toLocaleString() : "";
+
+function displaySource(raw, partner) {
+  const source = String(raw || "direct");
+  if (String(partner || "").toLowerCase() === "aditya") {
+    const m = source.match(/^vendor(\d+)$/i);
+    if (m) return "Aditya-v" + m[1];
+  }
+  return source;
+}
 
 function authHeaders() {
   return { Authorization: "Bearer " + $("pw").value.trim() };
@@ -68,10 +77,12 @@ async function loadData() {
   msg("Loading...");
   const res = await fetch("/.netlify/functions/signup-admin-list", { headers: authHeaders() });
   const data = await res.json().catch(()=>({}));
+
   if (!res.ok || !data.ok) {
     msg(data.error || "Could not load dashboard", "err");
     return;
   }
+
   msg("");
   $("submitted").textContent = data.counts.submitted;
   $("pending").textContent = data.counts.pending;
@@ -84,7 +95,8 @@ async function loadData() {
   $("rows").innerHTML = data.signups.map(s => `
     <tr>
       <td>${escapeHtml(s.rainbet_username)}</td>
-      <td>${escapeHtml(s.source)}</td>
+      <td>${escapeHtml(s.partner || "")}</td>
+      <td>${escapeHtml(displaySource(s.source, s.partner))}</td>
       <td class="status">${escapeHtml(s.status)}</td>
       <td>${s.proof_path ? `<a class="proof" onclick="openProof('${s.id}')">Open</a>` : '<span class="muted">None</span>'}</td>
       <td>${escapeHtml(dt(s.created_at))}</td>
@@ -93,9 +105,10 @@ async function loadData() {
         <button class="dark" onclick="act('${s.id}','verify')">Verify</button>
         <button class="dark" onclick="act('${s.id}','reject')">Reject</button>
         <button class="dark" onclick="act('${s.id}','paid')">Mark paid</button>
+        <button class="danger" onclick="deleteSignup('${s.id}','${escapeJs(s.rainbet_username)}')">Delete</button>
       </div></td>
     </tr>
-  `).join("") || `<tr><td colspan="7" class="muted">No signups yet.</td></tr>`;
+  `).join("") || `<tr><td colspan="8" class="muted">No signups yet.</td></tr>`;
 }
 
 async function act(id, action) {
@@ -104,21 +117,48 @@ async function act(id, action) {
     headers:{...authHeaders(),"Content-Type":"application/json"},
     body:JSON.stringify({id,action})
   });
+
   const data = await res.json().catch(()=>({}));
+
   if (!res.ok || !data.ok) return msg(data.error || "Update failed","err");
+
   msg("Updated.","ok");
+  await loadData();
+}
+
+async function deleteSignup(id, username) {
+  const ok = confirm(`Delete ${username}? This permanently deletes the signup and its uploaded proof.`);
+  if (!ok) return;
+
+  const res = await fetch("/.netlify/functions/signup-admin-action", {
+    method:"POST",
+    headers:{...authHeaders(),"Content-Type":"application/json"},
+    body:JSON.stringify({id,action:"delete"})
+  });
+
+  const data = await res.json().catch(()=>({}));
+
+  if (!res.ok || !data.ok) return msg(data.error || "Delete failed","err");
+
+  msg("Deleted.","ok");
   await loadData();
 }
 
 async function openProof(id) {
   const res = await fetch("/.netlify/functions/signup-admin-proof?id="+encodeURIComponent(id), {headers:authHeaders()});
   const data = await res.json().catch(()=>({}));
+
   if (!res.ok || !data.ok) return msg(data.error || "Could not open proof","err");
+
   window.open(data.url,"_blank","noopener");
 }
 
 function escapeHtml(v) {
   return String(v ?? "").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function escapeJs(v) {
+  return String(v ?? "").replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
 
 $("loadBtn").addEventListener("click", loadData);

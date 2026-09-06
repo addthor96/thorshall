@@ -45,7 +45,6 @@ exports.handler = async function (event) {
   }
 
   try {
-    // VERIFY uses an atomic Supabase RPC with the hard 500-user cap.
     if (action === "verify") {
       const res = await fetch(`${url}/rest/v1/rpc/verify_aditya_signup_with_cap`, {
         method: "POST",
@@ -96,7 +95,87 @@ exports.handler = async function (event) {
       };
     }
 
-    // Reject and Mark Paid still use normal protected server-side updates.
+    if (action === "delete") {
+      const lookup = await fetch(
+        `${url}/rest/v1/signups?id=eq.${encodeURIComponent(id)}&select=id,proof_path`,
+        {
+          headers: {
+            apikey: key,
+            Authorization: `Bearer ${key}`
+          }
+        }
+      );
+
+      const rows = await lookup.json().catch(() => []);
+
+      if (!lookup.ok || !Array.isArray(rows) || !rows[0]) {
+        return {
+          statusCode: 404,
+          headers,
+          body: JSON.stringify({ ok: false, error: "Signup not found" })
+        };
+      }
+
+      const proofPath = rows[0].proof_path;
+
+      if (proofPath) {
+        const deleteProof = await fetch(
+          `${url}/storage/v1/object/verification-proofs/${proofPath}`,
+          {
+            method: "DELETE",
+            headers: {
+              apikey: key,
+              Authorization: `Bearer ${key}`
+            }
+          }
+        );
+
+        if (!deleteProof.ok && deleteProof.status !== 404) {
+          const proofError = await deleteProof.text().catch(() => "");
+          console.error("Proof delete failed:", deleteProof.status, proofError);
+
+          return {
+            statusCode: 500,
+            headers,
+            body: JSON.stringify({
+              ok: false,
+              error: "Could not delete verification proof"
+            })
+          };
+        }
+      }
+
+      const deleteRow = await fetch(
+        `${url}/rest/v1/signups?id=eq.${encodeURIComponent(id)}`,
+        {
+          method: "DELETE",
+          headers: {
+            apikey: key,
+            Authorization: `Bearer ${key}`,
+            Prefer: "return=representation"
+          }
+        }
+      );
+
+      const deleted = await deleteRow.json().catch(() => null);
+
+      if (!deleteRow.ok) {
+        console.error("Signup delete failed:", deleteRow.status, deleted);
+
+        return {
+          statusCode: 500,
+          headers,
+          body: JSON.stringify({ ok: false, error: "Could not delete signup" })
+        };
+      }
+
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify({ ok: true, deleted: true })
+      };
+    }
+
     let patch;
 
     if (action === "reject") {
@@ -106,7 +185,6 @@ exports.handler = async function (event) {
         verified_at: null
       };
     } else if (action === "paid") {
-      // Only a verified signup should be markable as paid.
       const lookup = await fetch(
         `${url}/rest/v1/signups?id=eq.${encodeURIComponent(id)}&select=id,status`,
         {
@@ -165,6 +243,7 @@ exports.handler = async function (event) {
 
     if (!res.ok) {
       console.error("Admin action failed:", res.status, data);
+
       return {
         statusCode: 500,
         headers,
@@ -182,6 +261,7 @@ exports.handler = async function (event) {
     };
   } catch (error) {
     console.error("signup-admin-action error:", error);
+
     return {
       statusCode: 500,
       headers,

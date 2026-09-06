@@ -1,5 +1,12 @@
 const { authorized } = require("./_aditya-dashboard-auth");
 
+function displaySource(raw) {
+  const source = String(raw || "direct");
+  const oldVendor = source.match(/^vendor(\d+)$/i);
+  if (oldVendor) return `Aditya-v${oldVendor[1]}`;
+  return source;
+}
+
 exports.handler = async function (event) {
   const headers = { "Content-Type": "application/json" };
 
@@ -68,8 +75,10 @@ exports.handler = async function (event) {
   const pilotVerified = verified + paid;
 
   const vendors = {};
+
   for (const row of rows) {
-    const source = String(row.source || "direct");
+    const source = displaySource(row.source);
+
     if (!vendors[source]) {
       vendors[source] = {
         source,
@@ -86,11 +95,14 @@ exports.handler = async function (event) {
     v.submitted++;
 
     if (row.status === "proof_submitted") v.pending++;
+
     if (row.status === "verified") {
       v.verified++;
       v.earnings += Number(row.value_usd || 0);
     }
+
     if (row.status === "rejected") v.rejected++;
+
     if (row.status === "paid") {
       v.paid++;
       v.earnings += Number(row.value_usd || 0);
@@ -98,9 +110,15 @@ exports.handler = async function (event) {
   }
 
   const vendorBreakdown = Object.values(vendors).sort((a, b) => {
+    const aNum = Number((a.source.match(/Aditya-v(\d+)/i) || [])[1] || 999999);
+    const bNum = Number((b.source.match(/Aditya-v(\d+)/i) || [])[1] || 999999);
+
+    if (aNum !== bNum) return aNum - bNum;
+
     if (b.verified + b.paid !== a.verified + a.paid) {
       return (b.verified + b.paid) - (a.verified + a.paid);
     }
+
     return b.submitted - a.submitted;
   });
 
