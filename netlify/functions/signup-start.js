@@ -31,11 +31,7 @@ exports.handler = async function (event) {
 
   let body = {};
   try {
-    const contentType =
-      event.headers["content-type"] ||
-      event.headers["Content-Type"] ||
-      "";
-
+    const contentType = event.headers["content-type"] || event.headers["Content-Type"] || "";
     if (contentType.includes("application/json")) {
       body = JSON.parse(event.body || "{}");
     } else {
@@ -51,10 +47,7 @@ exports.handler = async function (event) {
 
   const username = String(body.rainbet_username || "").trim();
   const source = String(body.source || "direct").trim();
-
-  // This endpoint is only for the Aditya signup pilot.
-  // Do not accept a partner name from the browser.
-  const partner = "Aditya";
+  const partner = String(body.partner || "Aditya").trim();
 
   if (!username || username.length > 64) {
     return {
@@ -85,16 +78,18 @@ exports.handler = async function (event) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        apikey: supabaseSecretKey,
-        Authorization: `Bearer ${supabaseSecretKey}`,
-        Prefer: "return=representation"
+        "apikey": supabaseSecretKey,
+        "Authorization": `Bearer ${supabaseSecretKey}`,
+        "Prefer": "return=representation"
       },
       body: JSON.stringify({
         rainbet_username: username,
         partner,
         source,
         status: "started",
-        value_usd: 0.10
+        // Aditya pilot rate: $0.40 per approved verified signup.
+        // Other future partners keep the previous default unless separately configured.
+        value_usd: partner === "Aditya" ? 0.40 : 0.10
       })
     });
 
@@ -102,7 +97,6 @@ exports.handler = async function (event) {
 
     if (!response.ok) {
       const details = JSON.stringify(data || "");
-
       if (
         response.status === 409 ||
         details.includes("signups_username_unique") ||
@@ -119,7 +113,6 @@ exports.handler = async function (event) {
       }
 
       console.error("Supabase insert failed:", response.status, data);
-
       return {
         statusCode: 500,
         headers,
@@ -141,7 +134,6 @@ exports.handler = async function (event) {
     };
   } catch (error) {
     console.error("signup-start error:", error);
-
     return {
       statusCode: 500,
       headers,
