@@ -1,647 +1,88 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
-<meta content="index,follow,max-image-preview:large" name="robots"/>
 <meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1.0" name="viewport">
-<title>Thor's Hall Info – Crypto Casino Guides, Reviews &amp; Withdrawals</title>
-<meta content="Thor's Hall Rainbet info hub with independent guides about bonuses, withdrawals, safety, supported countries, responsible play, and crypto casino topics." name="description"/>
-<link href="https://thorshall.gg/info" rel="canonical"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="robots" content="index,follow,max-image-preview:large"/>
+<title>Rainbet Help & Guides | Thor's Hall</title>
+<meta name="description" content="Browse Thor's Hall's focused Rainbet guides for supported countries, KYC, deposits, withdrawals, bonuses, reviews, casino math and platform comparisons."/>
+<link rel="canonical" href="https://thorshall.gg/info"/>
+<link rel="icon" href="/favicon.ico"/>
+<meta property="og:title" content="Rainbet Help & Guides | Thor's Hall"/>
+<meta property="og:description" content="A smaller, focused Rainbet help hub: countries, KYC, deposits, withdrawals, bonus terms, reviews and comparisons."/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://thorshall.gg/info"/>
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@type":"CollectionPage",
+  "name":"Rainbet Help & Guides",
+  "url":"https://thorshall.gg/info",
+  "description":"Focused collection of Thor's Hall Rainbet guides.",
+  "dateModified":"2026-09-08",
+  "publisher":{"@type":"Organization","name":"Thor's Hall","url":"https://thorshall.gg/","logo":"https://thorshall.gg/img/logo.png"},
+  "hasPart":[
+    {"@type":"WebPage","name":"Rainbet Supported Countries","url":"https://thorshall.gg/rainbet-supported-countries"},
+    {"@type":"WebPage","name":"Rainbet Review","url":"https://thorshall.gg/rainbet-review"},
+    {"@type":"WebPage","name":"Rainbet Withdrawal Time","url":"https://thorshall.gg/rainbet-withdrawal-time"},
+    {"@type":"WebPage","name":"Rainbet KYC Verification Time","url":"https://thorshall.gg/rainbet-kyc-verification-time"},
+    {"@type":"WebPage","name":"Rainbet BTC Deposit Guide","url":"https://thorshall.gg/rainbet-btc-deposit"},
+    {"@type":"WebPage","name":"Rainbet Solana Deposit Guide","url":"https://thorshall.gg/rainbet-solana-deposit-guide"}
+  ],
+  "inLanguage":"en"
+}
+</script>
 <style>
-:root{
-  --gold:#d4a74f;
-  --gold2:#f0d28b;
-  --gold3:#fff0be;
-  --text:#f4efe6;
-  --muted:#d0c2ab;
-  --line:rgba(212,167,79,.28);
-  --panel:rgba(22,18,13,.82);
-  --panel2:rgba(10,8,6,.92);
-}
-*{box-sizing:border-box}
-body{
-  margin:0;
-  overflow-x:hidden;
-  font-family:Arial,Helvetica,sans-serif;
-  color:var(--text);
-  line-height:1.55;
-  background:
-    radial-gradient(circle at top,rgba(212,167,79,.08),transparent 28%),
-    linear-gradient(rgba(5,5,5,.78),rgba(5,5,5,.96)),
-    url('viking-hall-bg.png') center/cover fixed no-repeat;
-}
-.wrap{max-width:1200px;margin:auto;padding:20px 14px 60px}
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:18px;
-  padding:16px 18px;
-  border-radius:22px;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.62);
-  box-shadow:0 18px 44px rgba(0,0,0,.36);
-}
-.brand{
-  display:flex;
-  align-items:center;
-  gap:14px;
-  text-decoration:none;
-  color:var(--text);
-  font-size:30px;
-  font-weight:900;
-  letter-spacing:.04em;
-}
-.brand img{width:44px;height:44px;border-radius:10px;object-fit:cover}
-.nav{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
-.nav a,.gold-btn{
-  text-decoration:none;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:96px;
-  padding:14px 20px;
-  border-radius:14px;
-  font-weight:900;
-  border:1px solid rgba(255,220,145,.44);
-  background:linear-gradient(180deg,var(--gold3),var(--gold));
-  color:#211407!important;
-  box-shadow:0 10px 22px rgba(0,0,0,.26),inset 0 1px 0 rgba(255,255,255,.26);
-}
-.hero{
-  margin-top:18px;
-  padding:66px 26px 36px;
-  border-radius:22px;
-  text-align:center;
-  border:1px solid var(--line);
-  background:
-    linear-gradient(90deg,rgba(0,0,0,.76),rgba(0,0,0,.34),rgba(0,0,0,.76)),
-    url('wisdom.png') center/cover no-repeat;
-  box-shadow:0 16px 42px rgba(0,0,0,.34);
-}
-.hero h1{
-  margin:0;
-  font-size:clamp(48px,7vw,76px);
-  line-height:.95;
-  letter-spacing:.035em;
-  text-transform:uppercase;
-  text-shadow:0 4px 18px rgba(0,0,0,.55);
-}
-.gold-line{
-  width:300px;
-  max-width:80%;
-  height:1px;
-  margin:24px auto 18px;
-  background:linear-gradient(90deg,transparent,var(--gold),transparent);
-}
-.hero h2{margin:0 0 12px;color:var(--gold2);font-size:24px}
-.hero p{max-width:700px;margin:0 auto;color:#eee1cd;font-size:18px}
-.search-box{
-  max-width:720px;
-  margin:26px auto 22px;
-  display:flex;
-  align-items:center;
-  gap:14px;
-  padding:18px 22px;
-  border-radius:13px;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.48);
-  color:var(--muted);
-  font-weight:800;
-  font-size:18px;
-}
-.search-icon{font-size:24px;color:var(--gold2)}
-.grid{
-  display:grid;
-  grid-template-columns:repeat(4,1fr);
-  gap:16px;
-  margin-top:22px;
-}
-.hub-card{
-  min-height:210px;
-  padding:24px 18px;
-  border-radius:14px;
-  border:1px solid rgba(212,167,79,.25);
-  background:
-    radial-gradient(circle at top,rgba(255,255,255,.05),transparent 58%),
-    linear-gradient(180deg,rgba(28,28,28,.84),rgba(14,14,14,.92));
-  text-align:center;
-  text-decoration:none;
-  color:var(--text);
-  box-shadow:0 12px 26px rgba(0,0,0,.28);
-  transition:.18s ease;
-}
-.hub-card:hover{transform:translateY(-3px);border-color:rgba(240,210,139,.55)}
-.icon{
-  color:var(--gold2);
-  font-size:38px;
-  margin-bottom:14px;
-}
-.hub-card h2{
-  margin:0 0 9px;
-  color:var(--gold2);
-  font-size:19px;
-}
-.hub-card p{
-  margin:0 auto 12px;
-  color:#eee1cd;
-  font-size:15px;
-  max-width:220px;
-}
-.hub-card strong{color:var(--gold);font-size:15px}
-.platform-box{
-  margin-top:22px;
-  display:grid;
-  grid-template-columns:.85fr 1.15fr 1fr;
-  gap:20px;
-  align-items:center;
-  padding:24px;
-  border-radius:16px;
-  border:1px solid var(--line);
-  background:linear-gradient(180deg,rgba(30,30,30,.75),rgba(12,12,12,.88));
-}
-.badge{
-  width:110px;
-  height:110px;
-  border-radius:22px;
-  display:grid;
-  place-items:center;
-  font-size:54px;
-  margin:auto;
-  border:1px solid rgba(255,220,145,.32);
-  background:linear-gradient(180deg,rgba(240,210,139,.18),rgba(212,167,79,.06));
-}
-.platform-box h2{margin:0 0 8px;color:var(--gold2)}
-.checks{display:grid;gap:10px}
-.checks div{color:#f4ead9}
-.checks span{color:var(--gold2);font-weight:900;margin-right:8px}
-.cta-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:16px;
-  margin-top:26px;
-}
-.big-cta{
-  min-height:78px;
-  border-radius:13px;
-  border:1px solid rgba(255,220,145,.48);
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:18px 26px;
-  text-decoration:none;
-  color:#211407!important;
-  background:linear-gradient(180deg,var(--gold3),var(--gold));
-  font-weight:900;
-  box-shadow:0 14px 28px rgba(0,0,0,.26);
-}
-.big-cta.dark{
-  color:var(--gold2)!important;
-  background:linear-gradient(180deg,rgba(28,28,28,.82),rgba(10,10,10,.92));
-}
-.big-cta small{display:block;font-weight:500;color:inherit;opacity:.82;margin-top:3px}
-.arrow{font-size:28px}
-.footer{
-  margin-top:24px;
-  text-align:center;
-  color:#9f9688;
-  font-size:14px;
-}
-.footer a{color:var(--gold2);text-decoration:none;font-weight:800}
-@media(max-width:1000px){
-  .grid{grid-template-columns:repeat(2,1fr)}
-  .platform-box{grid-template-columns:1fr}
-}
-@media(max-width:700px){
-  .topbar{flex-direction:column;align-items:flex-start}
-  .brand{font-size:24px}
-  .nav{width:100%}
-  .nav a{flex:1;min-width:120px}
-  .grid,.cta-row{grid-template-columns:1fr}
-  .hero{padding:46px 18px 28px}
-}
-
-.nav a.manager-btn{
-  color:#fff!important;
-  background:linear-gradient(180deg,#d7655c,#a83232 48%,#7f2424);
-  border-color:rgba(255,140,130,.52);
-  text-shadow:0 1px 0 rgba(0,0,0,.28);
-}
-
-
-
-.site-head{
-position:relative;
-z-index:20;
-}
-
-.site-head .topbar{
-width:100%;
-}
-
-.analytics-widget{
-position:absolute;
-top:50%;
-left:calc(100% + 16px);
-transform:translateY(-50%);
-z-index:30;
-}
-
-.analytics-trigger{
-width:64px;
-height:64px;
-display:block;
-text-decoration:none;
-transition:transform .18s ease,filter .18s ease;
-filter:drop-shadow(0 0 14px rgba(255,90,0,.55)) drop-shadow(0 0 28px rgba(255,120,0,.22));
-}
-
-.analytics-trigger:hover{
-transform:translateY(-2px) scale(1.05);
-filter:drop-shadow(0 0 20px rgba(255,90,0,.75)) drop-shadow(0 0 42px rgba(255,120,0,.32));
-}
-
-.analytics-trigger img{
-width:100%;
-height:100%;
-object-fit:contain;
-display:block;
-}
-
-.analytics-panel{
-position:absolute;
-top:calc(100% + 10px);
-left:0;
-right:auto;
-width:315px;
-padding:18px;
-border-radius:20px;
-border:1px solid rgba(212,167,79,.28);
-background:linear-gradient(180deg,rgba(10,7,4,.98),rgba(20,12,7,.96));
-box-shadow:0 22px 48px rgba(0,0,0,.48);
-opacity:0;
-visibility:hidden;
-transform:translateY(8px);
-transition:opacity .18s ease,transform .18s ease,visibility .18s ease;
-pointer-events:none;
-}
-
-.analytics-widget:hover .analytics-panel{
-opacity:1;
-visibility:visible;
-transform:translateY(0);
-pointer-events:auto;
-}
-
-.analytics-title{
-display:flex;
-align-items:center;
-gap:8px;
-font-size:14px;
-font-weight:900;
-letter-spacing:.05em;
-text-transform:uppercase;
-color:var(--gold2, var(--g2, #f0d28b));
-margin-bottom:13px;
-}
-
-.analytics-dot{
-width:8px;
-height:8px;
-border-radius:50%;
-background:#75e0a2;
-box-shadow:0 0 12px rgba(117,224,162,.75);
-}
-
-.analytics-row{
-display:flex;
-justify-content:space-between;
-gap:16px;
-padding:11px 0;
-border-bottom:1px solid rgba(255,255,255,.07);
-font-size:14px;
-color:var(--muted, var(--m, #d0c2ab));
-}
-
-.analytics-row strong{
-color:var(--text, var(--t, #f4ede2));
-font-size:15px;
-white-space:nowrap;
-}
-
-.analytics-note{
-margin:13px 0 0;
-font-size:12px;
-line-height:1.45;
-color:#9f927e;
-}
-
-@media(max-width:1320px){
-.analytics-widget{
-left:auto;
-right:10px;
-}
-.analytics-panel{
-left:auto;
-right:0;
-}
-}
-
-@media(max-width:920px){
-.site-head{
-position:relative;
-}
-.analytics-widget{
-position:static;
-transform:none;
-margin-top:10px;
-display:flex;
-justify-content:flex-end;
-}
-.analytics-panel{
-top:60px;
-left:auto;
-right:0;
-transform:translateY(-6px);
-}
-.analytics-widget:hover .analytics-panel{
-transform:translateY(0);
-}
-}
-
-@media(max-width:640px){
-.analytics-widget{
-align-self:stretch;
-}
-.analytics-trigger{
-margin-left:auto;
-}
-.analytics-panel{
-width:min(315px,calc(100vw - 36px));
-}
-}
-
-
-.analytics-title{
-  font-size:13px!important;
-  letter-spacing:.09em!important;
-  color:#f0d28b!important;
-}
-
-.analytics-row{
-  align-items:center!important;
-  padding:13px 0!important;
-}
-
-.analytics-row span{
-  font-size:12px!important;
-  letter-spacing:.11em!important;
-  text-transform:uppercase!important;
-  color:#bda983!important;
-  font-weight:900!important;
-}
-
-.analytics-row strong{
-  font-size:17px!important;
-  color:#fff0be!important;
-  font-weight:900!important;
-  text-shadow:0 0 12px rgba(240,210,139,.18)!important;
-}
-
-.analytics-note{
-  margin-top:14px!important;
-  color:#9f927e!important;
-  font-size:12px!important;
-  letter-spacing:.02em!important;
-}
-
-
-.footer-note{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);font-size:14px;color:#c9b89c;}
-.footer-note a{color:var(--gold2, var(--g2, #f0d28b));text-decoration:underline;margin-left:6px;}
+:root{--g:#d4a74f;--g2:#f0d28b;--t:#f4ede2;--m:#d0c2ab;--l:rgba(212,167,79,.24);--p:#17100b;--p2:#25170f}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--t);line-height:1.65;background:radial-gradient(circle at top,rgba(212,167,79,.10),transparent 30%),linear-gradient(rgba(8,5,3,.85),rgba(8,5,3,.97)),url('viking-hall-bg.png') center/cover fixed no-repeat}.wrap{max-width:1180px;margin:auto;padding:26px 18px 72px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:16px 18px;border-radius:20px;border:1px solid var(--l);background:rgba(0,0,0,.48)}.brand{display:flex;align-items:center;gap:12px;color:#fff;text-decoration:none;font-size:28px;font-weight:900}.brand img{width:42px;height:42px;border-radius:10px;object-fit:cover}.nav{display:flex;gap:9px;flex-wrap:wrap}.nav a,.btn{display:inline-flex;align-items:center;justify-content:center;padding:12px 18px;border-radius:13px;text-decoration:none;font-weight:900;border:1px solid rgba(255,230,170,.36);background:linear-gradient(180deg,var(--g2),var(--g));color:#211407}.nav .manager{background:linear-gradient(180deg,#d7655c,#8c2929);color:#fff}.hero{margin-top:24px;padding:58px 36px;border-radius:30px;text-align:center;border:1px solid var(--l);background:linear-gradient(90deg,rgba(0,0,0,.73),rgba(0,0,0,.40),rgba(0,0,0,.73)),url('wisdom.png') center/cover no-repeat}.hero h1{font-size:clamp(42px,6vw,68px);line-height:1;margin:0 0 14px}.hero p{font-size:19px;max-width:780px;margin:0 auto;color:#eee1cd}.search{max-width:720px;margin:22px auto 0;display:flex;gap:12px;align-items:center;padding:16px 18px;border:1px solid var(--l);border-radius:14px;background:rgba(0,0,0,.48)}.search input{width:100%;background:transparent;border:0;outline:0;color:var(--t);font:inherit;font-weight:800}.search input::placeholder{color:var(--m)}.section{margin-top:24px;padding:28px;border-radius:25px;border:1px solid var(--l);background:linear-gradient(180deg,var(--p),var(--p2))}h2{font-size:clamp(28px,4vw,38px);margin:0 0 12px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-top:18px}.card{display:block;min-height:190px;padding:22px;border-radius:19px;text-decoration:none;color:var(--t);border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.035);transition:.18s ease}.card:hover{transform:translateY(-2px);border-color:rgba(240,210,139,.45)}.icon{font-size:30px;margin-bottom:12px}.card h3{margin:0 0 7px;color:var(--g2);font-size:21px}.card p{color:var(--m);margin:0 0 12px}.card strong{color:var(--g);font-size:14px}.card[hidden]{display:none}.no-results{max-width:720px;margin:18px auto 0;padding:16px;border:1px solid var(--l);border-radius:14px;text-align:center;color:var(--g2);background:rgba(0,0,0,.45)}.note{padding:18px 20px;border-left:4px solid var(--g);border-radius:16px;background:rgba(212,167,79,.07)}.actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}.btn.alt{background:rgba(255,255,255,.05);color:var(--g2)}.footer{margin-top:26px;padding-top:18px;border-top:1px solid var(--l);text-align:center;color:#a99b86;font-size:14px}.footer a{color:var(--g2)}@media(max-width:900px){.grid{grid-template-columns:1fr 1fr}.topbar{flex-direction:column;align-items:flex-start}}@media(max-width:640px){.grid{grid-template-columns:1fr}.hero,.section{padding:24px}.nav,.nav a,.btn{width:100%}}
 </style>
-<style>
-.search-box input{
-  width:100%;
-  border:0;
-  outline:0;
-  background:transparent;
-  color:var(--text);
-  font:inherit;
-  font-weight:800;
-}
-.search-box input::placeholder{
-  color:var(--muted);
-  opacity:.95;
-}
-.no-results{
-  max-width:720px;
-  margin:22px auto 0;
-  padding:18px 22px;
-  border-radius:13px;
-  border:1px solid var(--line);
-  background:rgba(0,0,0,.48);
-  color:var(--gold2);
-  text-align:center;
-  font-weight:900;
-}
-.hub-card[hidden]{
-  display:none;
-}
-
-.analytics-title{
-  font-size:13px!important;
-  letter-spacing:.09em!important;
-  color:#f0d28b!important;
-}
-
-.analytics-row{
-  align-items:center!important;
-  padding:13px 0!important;
-}
-
-.analytics-row span{
-  font-size:12px!important;
-  letter-spacing:.11em!important;
-  text-transform:uppercase!important;
-  color:#bda983!important;
-  font-weight:900!important;
-}
-
-.analytics-row strong{
-  font-size:17px!important;
-  color:#fff0be!important;
-  font-weight:900!important;
-  text-shadow:0 0 12px rgba(240,210,139,.18)!important;
-}
-
-.analytics-note{
-  margin-top:14px!important;
-  color:#9f927e!important;
-  font-size:12px!important;
-  letter-spacing:.02em!important;
-}
-
-</style>
-<style id="thorshall-analytics-overflow-fix">.analytics-panel{left:auto!important;right:0!important;max-width:calc(100vw - 24px)!important}</style><!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-W4HJ6Z9DMR"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-W4HJ6Z9DMR');
-</script></head>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','G-W4HJ6Z9DMR');</script>
+</head>
 <body>
 <div class="wrap">
-<div class="site-head">
 <header class="topbar">
-<a class="brand" href="/">
-<img alt="Thor's Hall Logo" src="img/logo.png"/>
-<span>THOR'S HALL</span>
-</a>
-<nav class="nav">
-<a href="/about">About</a>
-<a href="/info">Info</a>
-<a href="/guide">Guide</a>
-<a href="/creators">Creators</a>
-<a class="manager-btn" href="/managers">Managers</a>
-<a href="/join?src=info" rel="nofollow noopener sponsored" target="_blank">Join Rainbet</a>
-</nav>
+<a class="brand" href="/"><img src="img/logo.png" alt="Thor's Hall logo"/><span>THOR'S HALL</span></a>
+<nav class="nav" aria-label="Main navigation"><a href="/about">About</a><a href="/info">Info</a><a href="/guide">Guide</a><a href="/creators">Creators</a><a class="manager" href="/managers">Managers</a><a href="/join?src=info" rel="nofollow sponsored noopener" target="_blank">Join Rainbet</a></nav>
 </header>
-<div aria-label="PARTNER STATS" class="analytics-widget">
-<a aria-label="View partner statistics" class="analytics-trigger" href="/partners">
-<img alt="Thor\'s Hall live partner analytics" src="img/infernal-diamond.png"/>
-</a>
-<div class="analytics-panel">
-<div class="analytics-title"><span class="analytics-dot"></span>PARTNER STATS</div>
-<div class="analytics-row"><span>WAGERED</span><strong data-rainbet-stat="wager">—</strong></div>
-<div class="analytics-row"><span>DEPOSITS</span><strong data-rainbet-stat="deposits">—</strong></div>
-<div class="analytics-row"><span>VISITS • REGS</span><strong data-rainbet-stat="visits">— / —</strong></div>
-<p class="analytics-note" data-rainbet-stat="updated">Metrics sourced from live activity.</p>
-</div>
-</div>
-</div>
+<main>
 <section class="hero">
-<h1>Info</h1>
-<div class="gold-line"></div>
-<h2>Focused Thor's Hall Guides</h2>
-<p>Explore a smaller, focused set of Rainbet guides, withdrawal help, bonus explainers, trust pages and platform comparisons.</p>
+<h1>Rainbet Help & Guides</h1>
+<p>A focused collection of pages with one job each. Search by topic or open the guide that matches your question.</p>
+<div class="search"><span aria-hidden="true">⌕</span><input id="guideSearch" type="search" aria-label="Search Rainbet guides" placeholder="Search: countries, KYC, withdrawal, Bitcoin, bonus, review..."/></div>
 </section>
-<div class="search-box">
-<span class="search-icon">⌕</span>
-<input aria-label="Search guide sections" id="guideSearch" placeholder="Search guides: withdrawals, bonuses, KYC, reviews, slots, crash games..." type="search"/>
+<section class="section">
+<h2>Core Rainbet guides</h2>
+<div class="grid" id="guideGrid">
+<a class="card" data-search="countries legal location restricted vpn canada usa" href="/rainbet-supported-countries"><div class="icon">🌍</div><h3>Supported Countries</h3><p>Restricted jurisdictions, US/Canada answers and the current VPN/location rule.</p><strong>Check location →</strong></a>
+<a class="card" data-search="review legit safe license operator trust terms" href="/rainbet-review"><div class="icon">⚖️</div><h3>Rainbet Review</h3><p>Operator, licence, KYC, withdrawal, account and responsible-play checks.</p><strong>Read review →</strong></a>
+<a class="card" data-search="withdrawal cashout pending payout time" href="/rainbet-withdrawal-time"><div class="icon">⏱️</div><h3>Withdrawal Time</h3><p>What can affect a payout and what to verify when a withdrawal is pending.</p><strong>Read guide →</strong></a>
+<a class="card" data-search="kyc verification identity documents account review" href="/rainbet-kyc-verification-time"><div class="icon">🪪</div><h3>KYC Verification</h3><p>Identity-review timing, account checks and common troubleshooting steps.</p><strong>Read guide →</strong></a>
+<a class="card" data-search="bitcoin btc deposit wallet address network confirmation" href="/rainbet-btc-deposit"><div class="icon">₿</div><h3>BTC Deposit Guide</h3><p>Address, network and confirmation checks before sending Bitcoin.</p><strong>Read guide →</strong></a>
+<a class="card" data-search="solana sol deposit wallet address network" href="/rainbet-solana-deposit-guide"><div class="icon">◎</div><h3>Solana Deposit Guide</h3><p>SOL wallet, network and deposit-address checks before sending funds.</p><strong>Read guide →</strong></a>
+<a class="card" data-search="bonus welcome promotion wagering promo code" href="/rainbet-welcome-bonus-review"><div class="icon">🎁</div><h3>Welcome Bonus</h3><p>Read wagering, eligibility and withdrawal conditions before judging the headline offer.</p><strong>Read guide →</strong></a>
+<a class="card" data-search="house edge rtp variance casino math crash" href="/rainbet-house-edge-explained"><div class="icon">📊</div><h3>House Edge Explained</h3><p>Why short-term streaks do not remove the mathematical edge built into casino games.</p><strong>Read guide →</strong></a>
+<a class="card" data-search="shuffle comparison versus" href="/rainbet-vs-shuffle"><div class="icon">↔</div><h3>Rainbet vs Shuffle</h3><p>A fact-based comparison for users already deciding between the two platforms.</p><strong>Compare →</strong></a>
+<a class="card" data-search="roobet comparison versus" href="/rainbet-vs-roobet-comparison"><div class="icon">↔</div><h3>Rainbet vs Roobet</h3><p>Compare practical platform differences instead of generic affiliate claims.</p><strong>Compare →</strong></a>
+<a class="card" data-search="creator affiliate partner revenue share tracking" href="/creators"><div class="icon">👤</div><h3>Creator Program</h3><p>The separate Thor's Hall performance partnership for creators and communities.</p><strong>Creator details →</strong></a>
+<a class="card" data-search="manager agency creators partner" href="/managers"><div class="icon">🤝</div><h3>Manager Program</h3><p>For managers and agencies that can introduce legitimate creator traffic.</p><strong>Manager details →</strong></a>
 </div>
-<section class="grid">
-<a class="hub-card" data-search="what is thor's hall rainbet creator partners" href="/what-is-thors-hall"><div class="icon">🧭</div><h2>What Is Thor's Hall?</h2><p>How the guide, creator program, tracking and partner pages work.</p><strong>Start Here →</strong></a>
-<a class="hub-card" data-search="rainbet supported countries legal access vpn" href="/rainbet-supported-countries"><div class="icon">🌍</div><h2>Supported Countries</h2><p>Country access, restrictions, local-law checks and VPN notes.</p><strong>Read Guide →</strong></a>
-<a class="hub-card" data-search="rainbet review platform overview" href="/rainbet-review"><div class="icon">⚖️</div><h2>Rainbet Review</h2><p>Focused platform overview covering usability, risk and fit.</p><strong>Read Review →</strong></a>
-<a class="hub-card" data-search="withdrawal payout time pending minimum" href="/rainbet-withdrawal-time"><div class="icon">⏱️</div><h2>Withdrawal Help</h2><p>Payout timing, pending withdrawals and account checks.</p><strong>Read Guide →</strong></a>
-<a class="hub-card" data-search="bonus welcome promo code" href="/rainbet-welcome-bonus-review"><div class="icon">🎁</div><h2>Bonus Guide</h2><p>Welcome bonus terms, wagering checks and promo-code basics.</p><strong>Read Guide →</strong></a>
-<a class="hub-card" data-search="trustpilot reviews scam legit complaints" href="/rainbet-review"><div class="icon">💬</div><h2>Reviews &amp; Trust</h2><p>Trustpilot patterns, complaints and practical trust checks.</p><strong>Review Evidence →</strong></a>
-<a class="hub-card" data-search="rainbet versus shuffle roobet gamdom stake" href="/rainbet-vs-shuffle"><div class="icon">⚔️</div><h2>Rainbet Comparisons</h2><p>Start with the strongest comparison page, then explore related matchups.</p><strong>Compare →</strong></a>
-<a class="hub-card" data-search="crash strategy house edge martingale" href="/rainbet-house-edge-explained"><div class="icon">📈</div><h2>Crash Game Guides</h2><p>House edge, strategy limits and responsible risk reminders.</p><strong>Read Guide →</strong></a>
-<a class="hub-card" data-search="ethereum eth casino" href="/best-ethereum-casinos"><div class="icon">Ξ</div><h2>Ethereum Casinos</h2><p>ETH payments, fees, withdrawals and platform checks.</p><strong>Read Guide →</strong></a>
-<a class="hub-card" data-search="instant payout fast withdrawal casino" href="/best-instant-payout-casinos"><div class="icon">⚡</div><h2>Instant Payouts</h2><p>What fast payout claims mean and what can delay a cashout.</p><strong>Read Guide →</strong></a>
-<a class="hub-card" data-search="crypto casino apps mobile" href="/best-crypto-casino-apps"><div class="icon">📱</div><h2>Crypto Casino Apps</h2><p>Mobile access, wallet usability and app-style casino checks.</p><strong>Read Guide →</strong></a>
-<a class="hub-card" data-search="creator partner manager revenue share" href="/creators"><div class="icon">👤</div><h2>Creator Program</h2><p>Custom pages, tracked links, revenue share and monthly crypto payouts.</p><strong>View Program →</strong></a>
-<a class="hub-card" data-search="identity verification kyc account review" href="/rainbet-kyc-verification-time"><div class="icon">🪪</div><h2>KYC Verification</h2><p>Document checks, account-review status and verification troubleshooting.</p><strong>Read Guide →</strong></a><a class="hub-card" data-search="bitcoin btc deposit wallet address" href="/rainbet-btc-deposit"><div class="icon">₿</div><h2>BTC Deposit Guide</h2><p>Bitcoin address, network, confirmation and transaction-ID checks.</p><strong>Read Guide →</strong></a><a class="hub-card" data-search="solana sol deposit wallet address" href="/rainbet-solana-deposit-guide"><div class="icon">◎</div><h2>Solana Deposit Guide</h2><p>SOL wallet, network and deposit-address checks before sending.</p><strong>Read Guide →</strong></a><a class="hub-card" data-search="rainbet roobet comparison" href="/rainbet-vs-roobet-comparison"><div class="icon">↔</div><h2>Rainbet vs Roobet</h2><p>A practical comparison framework for two crypto casino platforms.</p><strong>Read Guide →</strong></a><a class="hub-card" data-search="esports crypto betting settlement markets" href="/top-esports-gambling-crypto"><div class="icon">🎮</div><h2>Crypto Esports Betting</h2><p>Market coverage, settlement rules and crypto-specific checks.</p><strong>Read Guide →</strong></a></section><p class="no-results" hidden="" id="noResults">No matching section found. Try countries, withdrawals, bonuses, reviews, comparisons, crash, apps, or creators.</p>
-<section class="platform-box">
-<div class="badge">⚜</div>
-<div>
-<h2>Platform Checklist</h2>
-<p>Thor's Hall guide sections are arranged around the checks players usually care about before signing up: payment speed, restrictions, bonus clarity, game type, support and account access.</p>
-</div>
-<div class="checks">
-<div><span>✓</span>Clear guide categories</div>
-<div><span>✓</span>Fast access to payout topics</div>
-<div><span>✓</span>Bonus and account pages separated</div>
-<div><span>✓</span>Crypto casino topics grouped cleanly</div>
-</div>
+<p class="no-results" id="noResults" hidden>No matching guide found. Try countries, KYC, withdrawal, bonus, review, Bitcoin, Solana or creator.</p>
 </section>
-<section class="cta-row">
-<a class="big-cta" href="/join?src=info" rel="nofollow noopener sponsored" target="_blank">
-<span>JOIN RAINBET<small>Open the direct Rainbet route.</small></span>
-<span class="arrow">→</span>
-</a>
-<a class="big-cta dark" href="/creators">
-<span>CREATOR PROGRAM<small>Monetize your content with Thor's Hall.</small></span>
-<span class="arrow">→</span>
-</a>
-<div class="footer-note">18+ only. Gamble responsibly. <a href="/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/work-with-us">Creator Partnerships</a> <span class="thorshall-context-link" style="float:right;"><a href="/what-is-thors-hall">What Is Thor's Hall?</a></span></div>
+<section class="section">
+<h2>What disappeared from this hub?</h2>
+<div class="note"><strong>Generic crypto-casino list pages are being removed from the main internal-link structure.</strong> Pages such as broad “best Ethereum casinos”, “instant payout casinos”, “crypto casino apps” and generic esports lists created overlap without giving Google or readers a clear reason to prefer them. Thor's Hall is concentrating internal authority on the focused pages above.</div>
 </section>
+<section class="section">
+<h2>New to Rainbet?</h2>
+<p>Use the main guide for the recommended order: location → KYC → deposit network → withdrawal rules → bonuses and comparisons.</p>
+<div class="actions"><a class="btn" href="/guide">Open the main Rainbet guide</a><a class="btn alt" href="/about">About Thor's Hall</a></div>
+</section>
+</main>
+<footer class="footer">18+ only. Gamble responsibly. · <a href="/affiliate-disclosure">Affiliate Disclosure</a> · <a href="/about">About</a> · <a href="/creators">Creator Partnerships</a></footer>
 </div>
 <script>
-(function(){
-  const input = document.getElementById('guideSearch');
-  const cards = Array.from(document.querySelectorAll('.hub-card'));
-  const noResults = document.getElementById('noResults');
-
-  function normalize(value){
-    return (value || '').toLowerCase().trim();
-  }
-
-  function filterCards(){
-    const query = normalize(input.value);
-    let visible = 0;
-
-    cards.forEach(card => {
-      const text = normalize(card.dataset.search + ' ' + card.textContent);
-      const match = !query || text.includes(query);
-      card.hidden = !match;
-      if(match) visible++;
-    });
-
-    if(noResults){
-      noResults.hidden = visible !== 0;
-    }
-  }
-
-  if(input){
-    input.addEventListener('input', filterCards);
-  }
-})();
+(function(){const input=document.getElementById('guideSearch');const cards=[...document.querySelectorAll('#guideGrid .card')];const no=document.getElementById('noResults');function run(){const q=(input.value||'').toLowerCase().trim();let n=0;cards.forEach(c=>{const hit=!q||(c.dataset.search+' '+c.textContent).toLowerCase().includes(q);c.hidden=!hit;if(hit)n++});no.hidden=n!==0}input.addEventListener('input',run)})();
 </script>
-<script>
-(async function(){
-  const setStat = (key, value) => {
-    document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach(element => {
-      element.textContent = value;
-    });
-  };
-
-  const validNumber = value => value !== null && value !== undefined && Number.isFinite(Number(value));
-  const money = value => validNumber(value)
-    ? '$' + Number(value).toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2})
-    : '—';
-  const count = value => validNumber(value)
-    ? Number(value).toLocaleString('en-US', {maximumFractionDigits:0})
-    : '—';
-
-  setStat('updated', 'Loading live activity…');
-
-  try{
-    const response = await fetch('/.netlify/functions/rainbet-stats', {cache:'no-store'});
-    const data = await response.json().catch(() => null);
-
-    if(!response.ok || !data || data.available !== true){
-      throw new Error(data?.details || data?.error || 'Stats request failed');
-    }
-
-    setStat('wager', money(data.wager));
-    setStat('deposits', money(data.deposits));
-    setStat('visits', `${count(data.visits)} / ${count(data.registrations)}`);
-    setStat('updated', 'Metrics sourced from live activity.');
-  }catch(error){
-    setStat('wager', '—');
-    setStat('deposits', '—');
-    setStat('visits', '— / —');
-    setStat('updated', 'Live stats temporarily unavailable.');
-    console.error("Thor's Hall live stats error:", error);
-  }
-})();
-</script>
-
-<script async id="netlify-rum-container" src="/.netlify/scripts/rum" data-netlify-rum-site-id="01b257c8-6407-46db-b57b-62081488c9dd" data-netlify-deploy-branch="main" data-netlify-deploy-context="production" data-netlify-cwv-token="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaXRlX2lkIjoiMDFiMjU3YzgtNjQwNy00NmRiLWI1N2ItNjIwODE0ODhjOWRkIiwiYWNjb3VudF9pZCI6IjY5NzMwZGU0ZWZhMDgwZWE1Y2JkNDU4YyIsImRlcGxveV9pZCI6IjZhOTg2ZTZmODQwNTI3MDAwODE2ZTZmZSIsImlzc3VlciI6Im5mc2VydmVyIn0.Xpt9EcDZ94tSInVI07XPEbG63P4Uv_HjU2oEV70gwiI"></script>
 </body>
 </html>
