@@ -64,3 +64,16 @@
 
 /Sharma-stats1
   X-Robots-Tag: noindex, nofollow
+
+# Legacy generic SEO pages: keep accessible for now, but remove from Google's index.
+/best-ethereum-casinos
+  X-Robots-Tag: noindex, follow
+
+/best-instant-payout-casinos
+  X-Robots-Tag: noindex, follow
+
+/best-crypto-casino-apps
+  X-Robots-Tag: noindex, follow
+
+/top-esports-gambling-crypto
+  X-Robots-Tag: noindex, follow
