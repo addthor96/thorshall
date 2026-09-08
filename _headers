@@ -19,3 +19,48 @@
 /404.html
   X-Robots-Tag: noindex, follow
   Cache-Control: no-cache, no-store, must-revalidate
+
+/signup-admin
+  X-Robots-Tag: noindex, nofollow
+
+/aditya-dashboard
+  X-Robots-Tag: noindex, nofollow
+
+/aditya-signup
+  X-Robots-Tag: noindex, nofollow
+
+/aditya
+  X-Robots-Tag: noindex, nofollow
+
+/join
+  X-Robots-Tag: noindex, follow
+
+/training
+  X-Robots-Tag: noindex, nofollow
+
+/calculator
+  X-Robots-Tag: noindex, nofollow
+
+/partners
+  X-Robots-Tag: noindex, follow
+
+/techsslaash
+  X-Robots-Tag: noindex, follow
+
+/manuel-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/piyush-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/radhika-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/aditya-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/arshan-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/Sharma-stats1
+  X-Robots-Tag: noindex, nofollow
