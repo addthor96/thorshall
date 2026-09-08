@@ -1,14 +1,16 @@
-# Thor's Hall canonical redirects — compact 30-page site
+# Thor's Hall canonical redirects — compact site
 /index.html / 301!
 /index / 301!
 /about.html /about 301!
-/what-is-thors-hall.html /what-is-thors-hall 301!
+/what-is-thors-hall /about 301!
+/what-is-thors-hall.html /about 301!
 /guide.html /guide 301!
 /info.html /info 301!
 /creators.html /creators 301!
 /managers.html /managers 301!
 /partners.html /partners 301!
-/work-with-us.html /work-with-us 301!
+/work-with-us /creators 301!
+/work-with-us.html /creators 301!
 /affiliate-disclosure.html /affiliate-disclosure 301!
 /rainbet-supported-countries.html /rainbet-supported-countries 301!
 /rainbet-review.html /rainbet-review 301!
