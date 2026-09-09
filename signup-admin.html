@@ -14,7 +14,7 @@ button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:point
 .stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}.stat b{display:block;font-size:22px}.stat span{color:var(--muted);font-size:12px}
 .bulkbar{display:none;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:10px 12px;border:1px solid #333;border-radius:10px;background:#111}.bulkbar.show{display:flex}.bulk-actions{display:flex;gap:8px;flex-wrap:wrap}.bulk-count{font-size:13px;font-weight:800;color:#ddd}
 .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:12px;border-bottom:1px solid #222;text-align:left;font-size:13px}th{color:#bbb;background:#111;position:sticky;top:0}td{background:#0d0d0d}
-.actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.proof{color:#ffb45d;text-decoration:none;cursor:pointer}.muted{color:var(--muted)}.status{font-weight:800}
+.actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.proof{color:#ffb45d;text-decoration:none;cursor:pointer}.muted{color:var(--muted)}.status{font-weight:800}.status.verified{color:#78de99}.status.rejected{color:#ff6b6b}
 .row-select,.select-all{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;margin-left:2px}
 .err{margin:12px 0;color:#ff8585}.ok{margin:12px 0;color:#78de99}
 @media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;flex-direction:column}.bulkbar{align-items:flex-start;flex-direction:column}}
@@ -65,6 +65,14 @@ button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:point
 const $ = id => document.getElementById(id);
 const money = n => "$" + Number(n || 0).toFixed(2);
 const dt = v => v ? new Date(v).toLocaleString() : "";
+const statusClass = v => {
+  const s = String(v || "").toLowerCase();
+  return s === "verified" ? "verified" : s === "rejected" ? "rejected" : "";
+};
+const statusLabel = v => {
+  const s = String(v || "");
+  return /^(verified|rejected)$/i.test(s) ? s.toUpperCase() : s;
+};
 
 function displaySource(raw, partner) {
   const source = String(raw || "direct");
@@ -126,7 +134,7 @@ async function loadData() {
       <td>${escapeHtml(s.rainbet_username)}</td>
       <td>${escapeHtml(s.partner || "")}</td>
       <td>${escapeHtml(displaySource(s.source, s.partner))}</td>
-      <td class="status">${escapeHtml(s.status)}</td>
+      <td class="status ${statusClass(s.status)}">${escapeHtml(statusLabel(s.status))}</td>
       <td>${s.proof_path ? `<a class="proof" onclick="openProof('${s.id}')">Open</a>` : '<span class="muted">None</span>'}</td>
       <td>${escapeHtml(dt(s.created_at))}</td>
       <td>${money(s.value_usd)}</td>
