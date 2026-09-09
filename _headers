@@ -144,3 +144,10 @@
 
 /top-esports-gambling-crypto
   X-Robots-Tag: noindex, follow
+
+# Long-lived cache for optimized static images.
+/img/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
