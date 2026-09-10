@@ -18,6 +18,7 @@ h1{margin:0;font-size:28px}
 .login{display:flex;gap:8px}
 .login input{background:#111;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 12px}
 button{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer;background:var(--accent);color:#111}
+button.small{padding:7px 9px;font-size:12px}button.secondary{background:#222;color:#fff;border:1px solid #333}
 .muted{color:var(--muted)}
 .stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px}
 .stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
@@ -27,11 +28,12 @@ button{border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:point
 .bar{height:10px;background:#252525;border-radius:999px;overflow:hidden;margin-top:10px}
 .fill{height:100%;width:0;background:var(--accent);transition:width .25s ease}
 .tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}
-table{width:100%;border-collapse:collapse;min-width:760px}
+table{width:100%;border-collapse:collapse;min-width:930px}
 th,td{padding:12px;border-bottom:1px solid #222;text-align:left;font-size:13px}
 th{color:#bbb;background:#111}
 td{background:#0d0d0d}
-.err{margin:12px 0;color:#ff8585}
+.user-actions{display:flex;gap:6px;flex-wrap:wrap}.user-detail{display:none}.user-detail.show{display:table-row}.user-box{padding:4px 0 6px}.user-list{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}.user-chip{display:inline-flex;gap:5px;align-items:center;border:1px solid #333;background:#151515;border-radius:8px;padding:6px 8px}.user-chip b{color:#fff}.user-status{font-size:10px;color:#999;text-transform:uppercase}
+.err{margin:12px 0;color:#ff8585}.ok{margin:12px 0;color:#78de99}
 @media(max-width:900px){
   .stats{grid-template-columns:repeat(2,1fr)}
   .top{align-items:flex-start;flex-direction:column}
@@ -80,10 +82,11 @@ td{background:#0d0d0d}
           <th>Rejected</th>
           <th>Paid</th>
           <th>Earnings</th>
+          <th>Usernames</th>
         </tr>
       </thead>
       <tbody id="rows">
-        <tr><td colspan="7" class="muted">Enter dashboard password and click Load.</td></tr>
+        <tr><td colspan="8" class="muted">Enter dashboard password and click Load.</td></tr>
       </tbody>
     </table>
   </div>
@@ -92,6 +95,7 @@ td{background:#0d0d0d}
 <script>
 const $ = id => document.getElementById(id);
 const money = n => "$" + Number(n || 0).toFixed(2);
+let currentVendors = [];
 
 function headers() {
   return { Authorization: "Bearer " + $("pw").value.trim() };
@@ -101,6 +105,50 @@ function escapeHtml(v) {
   return String(v ?? "").replace(/[&<>"']/g, c => ({
     '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
   }[c]));
+}
+
+function displayStatus(status) {
+  const s = String(status || "");
+  if (s === "proof_submitted") return "PENDING";
+  return s ? s.toUpperCase() : "";
+}
+
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.style.position = "fixed";
+  area.style.opacity = "0";
+  document.body.appendChild(area);
+  area.focus();
+  area.select();
+  document.execCommand("copy");
+  area.remove();
+}
+
+function toggleUsers(index) {
+  const row = $("users-" + index);
+  const btn = $("show-users-" + index);
+  if (!row || !btn) return;
+  const showing = row.classList.toggle("show");
+  btn.textContent = showing ? "Hide" : "Show " + ((currentVendors[index].users || []).length);
+}
+
+async function copyUsers(index) {
+  const vendor = currentVendors[index];
+  if (!vendor) return;
+  const usernames = (vendor.users || []).map(u => u.username).filter(Boolean);
+  try {
+    await copyText(usernames.join("\n"));
+    $("msg").textContent = `Copied ${usernames.length} usernames from ${vendor.source}.`;
+    $("msg").className = "ok";
+  } catch (e) {
+    $("msg").textContent = "Could not copy usernames.";
+    $("msg").className = "err";
+  }
 }
 
 async function loadDashboard() {
@@ -134,17 +182,37 @@ async function loadDashboard() {
   const pct = Math.max(0, Math.min(100, (m.pilot_verified / m.pilot_cap) * 100));
   $("pilotBar").style.width = pct + "%";
 
-  $("rows").innerHTML = data.vendors.map(v => `
-    <tr>
-      <td>${escapeHtml(v.source)}</td>
-      <td>${v.submitted}</td>
-      <td>${v.pending}</td>
-      <td>${v.verified}</td>
-      <td>${v.rejected}</td>
-      <td>${v.paid}</td>
-      <td>${money(v.earnings)}</td>
-    </tr>
-  `).join("") || `<tr><td colspan="7" class="muted">No vendor data yet.</td></tr>`;
+  currentVendors = data.vendors || [];
+  $("rows").innerHTML = currentVendors.map((v, index) => {
+    const users = v.users || [];
+    const userChips = users.map(u => `
+      <span class="user-chip"><b>${escapeHtml(u.username)}</b><span class="user-status">${escapeHtml(displayStatus(u.status))}</span></span>
+    `).join("");
+
+    return `
+      <tr>
+        <td><strong>${escapeHtml(v.source)}</strong></td>
+        <td>${v.submitted}</td>
+        <td>${v.pending}</td>
+        <td>${v.verified}</td>
+        <td>${v.rejected}</td>
+        <td>${v.paid}</td>
+        <td>${money(v.earnings)}</td>
+        <td><div class="user-actions">
+          <button class="small secondary" id="show-users-${index}" onclick="toggleUsers(${index})">Show ${users.length}</button>
+          <button class="small" onclick="copyUsers(${index})">Copy</button>
+        </div></td>
+      </tr>
+      <tr class="user-detail" id="users-${index}">
+        <td colspan="8">
+          <div class="user-box">
+            <strong>${escapeHtml(v.source)} usernames</strong>
+            <div class="user-list">${userChips || '<span class="muted">No usernames yet.</span>'}</div>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join("") || `<tr><td colspan="8" class="muted">No vendor data yet.</td></tr>`;
 }
 
 $("loadBtn").addEventListener("click", loadDashboard);
