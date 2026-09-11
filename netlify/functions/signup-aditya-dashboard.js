@@ -38,7 +38,7 @@ exports.handler = async function (event) {
   }
 
   const res = await fetch(
-    `${url}/rest/v1/signups?partner=eq.Aditya&select=source,status,value_usd,created_at&order=created_at.desc`,
+    `${url}/rest/v1/signups?partner=eq.Aditya&select=source,status,value_usd,created_at,rainbet_username&order=created_at.desc`,
     {
       headers: {
         apikey: key,
@@ -87,12 +87,20 @@ exports.handler = async function (event) {
         verified: 0,
         rejected: 0,
         paid: 0,
-        earnings: 0
+        earnings: 0,
+        users: []
       };
     }
 
     const v = vendors[source];
     v.submitted++;
+
+    if (row.rainbet_username) {
+      v.users.push({
+        username: String(row.rainbet_username),
+        status: String(row.status || "")
+      });
+    }
 
     if (row.status === "proof_submitted") v.pending++;
 

@@ -19,3 +19,135 @@
 /404.html
   X-Robots-Tag: noindex, follow
   Cache-Control: no-cache, no-store, must-revalidate
+
+/signup-admin
+  X-Robots-Tag: noindex, nofollow
+
+/aditya-dashboard
+  X-Robots-Tag: noindex, nofollow
+
+/aditya-signup
+  X-Robots-Tag: noindex, nofollow
+
+/aditya
+  X-Robots-Tag: noindex, nofollow
+
+/join
+  X-Robots-Tag: noindex, follow
+
+/training
+  X-Robots-Tag: noindex, nofollow
+
+/train
+  X-Robots-Tag: noindex, nofollow
+
+/test
+  X-Robots-Tag: noindex, nofollow
+
+/calculator
+  X-Robots-Tag: noindex, nofollow
+
+/partners
+  X-Robots-Tag: noindex, follow
+
+/privacy
+  X-Robots-Tag: noindex, follow
+
+/techsslaash
+  X-Robots-Tag: noindex, follow
+
+/manuel-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/piyush-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/radhika-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/aditya-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/arshan-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/Sharma-stats1
+  X-Robots-Tag: noindex, nofollow
+
+/sharma-stats1
+  X-Robots-Tag: noindex, nofollow
+
+# Partner landing pages: public to users, excluded from search indexing.
+/ecessorios-business
+  X-Robots-Tag: noindex, nofollow
+
+/ecessorios-business.html
+  X-Robots-Tag: noindex, nofollow
+
+/piyush
+  X-Robots-Tag: noindex, nofollow
+
+/piyush.html
+  X-Robots-Tag: noindex, nofollow
+
+/radhika
+  X-Robots-Tag: noindex, nofollow
+
+/radhika.html
+  X-Robots-Tag: noindex, nofollow
+
+/arshan
+  X-Robots-Tag: noindex, nofollow
+
+/arshan.html
+  X-Robots-Tag: noindex, nofollow
+
+/Sharma
+  X-Robots-Tag: noindex, nofollow
+
+/Sharma.html
+  X-Robots-Tag: noindex, nofollow
+
+/sharma
+  X-Robots-Tag: noindex, nofollow
+
+/sharma.html
+  X-Robots-Tag: noindex, nofollow
+
+/mithra
+  X-Robots-Tag: noindex, nofollow
+
+/mithra.html
+  X-Robots-Tag: noindex, nofollow
+
+/shah
+  X-Robots-Tag: noindex, nofollow
+
+/shah.html
+  X-Robots-Tag: noindex, nofollow
+
+/tilraun
+  X-Robots-Tag: noindex, nofollow
+
+/tilraun.html
+  X-Robots-Tag: noindex, nofollow
+
+# Legacy generic SEO pages: keep accessible for now, but remove from Google's index.
+/best-ethereum-casinos
+  X-Robots-Tag: noindex, follow
+
+/best-instant-payout-casinos
+  X-Robots-Tag: noindex, follow
+
+/best-crypto-casino-apps
+  X-Robots-Tag: noindex, follow
+
+/top-esports-gambling-crypto
+  X-Robots-Tag: noindex, follow
+
+# Long-lived cache for optimized static images.
+/img/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable

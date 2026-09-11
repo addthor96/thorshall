@@ -12,10 +12,13 @@
 h1{margin:0;font-size:28px}.login{display:flex;gap:8px}.login input{background:#111;border:1px solid #333;color:#fff;border-radius:10px;padding:10px 12px}
 button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:pointer}.orange{background:var(--accent);color:#111}.dark{background:#222;color:#fff;border:1px solid #333}.danger{background:#3a1515;color:#ffb3b3;border:1px solid #6a2525}
 .stats{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:18px}.stat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}.stat b{display:block;font-size:22px}.stat span{color:var(--muted);font-size:12px}
-.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:1060px}th,td{padding:12px;border-bottom:1px solid #222;text-align:left;font-size:13px}th{color:#bbb;background:#111;position:sticky;top:0}td{background:#0d0d0d}
-.actions{display:flex;gap:6px;flex-wrap:wrap}.proof{color:#ffb45d;text-decoration:none;cursor:pointer}.muted{color:var(--muted)}.status{font-weight:800}
+.bulkbar{display:none;align-items:center;justify-content:space-between;gap:12px;margin:0 0 12px;padding:10px 12px;border:1px solid #333;border-radius:10px;background:#111}.bulkbar.show{display:flex}.bulk-actions{display:flex;gap:8px;flex-wrap:wrap}.bulk-count{font-size:13px;font-weight:800;color:#ddd}
+.tablewrap{overflow:auto;border:1px solid var(--line);border-radius:12px}table{width:100%;border-collapse:collapse;min-width:1100px}th,td{padding:12px;border-bottom:1px solid #222;text-align:left;font-size:13px}th{color:#bbb;background:#111;position:sticky;top:0}td{background:#0d0d0d}
+.copyhead{appearance:none;background:none;border:0;padding:0;color:#bbb;font:inherit;font-weight:800;cursor:pointer}.copyhead:hover{color:#fff}.copyhint{font-size:10px;color:#777;margin-left:4px}
+.actions{display:flex;gap:6px;flex-wrap:wrap;align-items:center}.proof{color:#ffb45d;text-decoration:none;cursor:pointer}.muted{color:var(--muted)}.status{font-weight:800}.status.verified{color:#78de99}.status.rejected{color:#ff6b6b}
+.row-select,.select-all{width:18px;height:18px;accent-color:var(--accent);cursor:pointer;margin-left:2px}
 .err{margin:12px 0;color:#ff8585}.ok{margin:12px 0;color:#78de99}
-@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;flex-direction:column}}
+@media(max-width:900px){.stats{grid-template-columns:repeat(2,1fr)}.top{align-items:flex-start;flex-direction:column}.bulkbar{align-items:flex-start;flex-direction:column}}
 </style>
 </head>
 <body>
@@ -40,10 +43,26 @@ button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:point
     <div class="stat"><b id="paidAmt">$0.00</b><span>Paid</span></div>
   </div>
 
+  <div class="bulkbar" id="bulkbar">
+    <div class="bulk-count" id="bulkCount">0 selected</div>
+    <div class="bulk-actions">
+      <button class="dark" id="verifySelectedBtn">Verify selected</button>
+      <button class="danger" id="deleteSelectedBtn">Delete selected</button>
+      <button class="dark" id="clearSelectedBtn">Clear</button>
+    </div>
+  </div>
+
   <div class="tablewrap">
     <table>
       <thead><tr>
-        <th>Username</th><th>Partner</th><th>Source</th><th>Status</th><th>Proof</th><th>Created</th><th>Value</th><th>Actions</th>
+        <th><button class="copyhead" onclick="copyColumn('username')" title="Copy all usernames">Username<span class="copyhint">COPY</span></button></th>
+        <th><button class="copyhead" onclick="copyColumn('partner')" title="Copy partner column">Partner<span class="copyhint">COPY</span></button></th>
+        <th><button class="copyhead" onclick="copyColumn('source')" title="Copy source column">Source<span class="copyhint">COPY</span></button></th>
+        <th><button class="copyhead" onclick="copyColumn('status')" title="Copy status column">Status<span class="copyhint">COPY</span></button></th>
+        <th>Proof</th>
+        <th><button class="copyhead" onclick="copyColumn('created')" title="Copy created column">Created<span class="copyhint">COPY</span></button></th>
+        <th><button class="copyhead" onclick="copyColumn('value')" title="Copy value column">Value<span class="copyhint">COPY</span></button></th>
+        <th>Actions</th>
       </tr></thead>
       <tbody id="rows"><tr><td colspan="8" class="muted">Enter dashboard password and click Load.</td></tr></tbody>
     </table>
@@ -54,6 +73,15 @@ button{border:0;border-radius:9px;padding:10px 12px;font-weight:800;cursor:point
 const $ = id => document.getElementById(id);
 const money = n => "$" + Number(n || 0).toFixed(2);
 const dt = v => v ? new Date(v).toLocaleString() : "";
+let currentSignups = [];
+const statusClass = v => {
+  const s = String(v || "").toLowerCase();
+  return s === "verified" ? "verified" : s === "rejected" ? "rejected" : "";
+};
+const statusLabel = v => {
+  const s = String(v || "");
+  return /^(verified|rejected)$/i.test(s) ? s.toUpperCase() : s;
+};
 
 function displaySource(raw, partner) {
   const source = String(raw || "direct");
@@ -73,6 +101,65 @@ function msg(text, cls="") {
   $("msg").textContent = text;
 }
 
+async function copyText(text) {
+  if (navigator.clipboard && window.isSecureContext) {
+    await navigator.clipboard.writeText(text);
+    return;
+  }
+  const area = document.createElement("textarea");
+  area.value = text;
+  area.style.position = "fixed";
+  area.style.opacity = "0";
+  document.body.appendChild(area);
+  area.focus();
+  area.select();
+  document.execCommand("copy");
+  area.remove();
+}
+
+async function copyColumn(key) {
+  if (!currentSignups.length) return msg("Load the dashboard first.", "err");
+
+  const getters = {
+    username: s => s.rainbet_username || "",
+    partner: s => s.partner || "",
+    source: s => displaySource(s.source, s.partner),
+    status: s => statusLabel(s.status),
+    created: s => dt(s.created_at),
+    value: s => money(s.value_usd)
+  };
+
+  const getter = getters[key];
+  if (!getter) return;
+
+  const values = currentSignups.map(getter).filter(v => String(v).trim() !== "");
+  try {
+    await copyText(values.join("\n"));
+    const label = key === "username" ? "usernames" : key + " values";
+    msg(`Copied ${values.length} ${label}.`, "ok");
+  } catch (e) {
+    msg("Could not copy column.", "err");
+  }
+}
+
+function selectedRows() {
+  return [...document.querySelectorAll('.row-select:checked')].map(box => ({
+    id: box.dataset.id,
+    username: box.dataset.username || ''
+  }));
+}
+
+function updateBulkBar() {
+  const selected = selectedRows();
+  $("bulkCount").textContent = `${selected.length} selected`;
+  $("bulkbar").classList.toggle("show", selected.length > 0);
+}
+
+function clearSelected() {
+  document.querySelectorAll('.row-select').forEach(box => { box.checked = false; });
+  updateBulkBar();
+}
+
 async function loadData() {
   msg("Loading...");
   const res = await fetch("/.netlify/functions/signup-admin-list", { headers: authHeaders() });
@@ -84,6 +171,7 @@ async function loadData() {
   }
 
   msg("");
+  currentSignups = data.signups || [];
   $("submitted").textContent = data.counts.submitted;
   $("pending").textContent = data.counts.pending;
   $("verified").textContent = data.counts.verified;
@@ -92,12 +180,12 @@ async function loadData() {
   $("owed").textContent = money(data.amount_owed);
   $("paidAmt").textContent = money(data.amount_paid);
 
-  $("rows").innerHTML = data.signups.map(s => `
+  $("rows").innerHTML = currentSignups.map(s => `
     <tr>
       <td>${escapeHtml(s.rainbet_username)}</td>
       <td>${escapeHtml(s.partner || "")}</td>
       <td>${escapeHtml(displaySource(s.source, s.partner))}</td>
-      <td class="status">${escapeHtml(s.status)}</td>
+      <td class="status ${statusClass(s.status)}">${escapeHtml(statusLabel(s.status))}</td>
       <td>${s.proof_path ? `<a class="proof" onclick="openProof('${s.id}')">Open</a>` : '<span class="muted">None</span>'}</td>
       <td>${escapeHtml(dt(s.created_at))}</td>
       <td>${money(s.value_usd)}</td>
@@ -106,12 +194,15 @@ async function loadData() {
         <button class="dark" onclick="act('${s.id}','reject')">Reject</button>
         <button class="dark" onclick="act('${s.id}','paid')">Mark paid</button>
         <button class="danger" onclick="deleteSignup('${s.id}','${escapeJs(s.rainbet_username)}')">Delete</button>
+        <input class="row-select" type="checkbox" aria-label="Select ${escapeHtml(s.rainbet_username)}" data-id="${s.id}" data-username="${escapeHtml(s.rainbet_username)}" onchange="updateBulkBar()">
       </div></td>
     </tr>
   `).join("") || `<tr><td colspan="8" class="muted">No signups yet.</td></tr>`;
+
+  updateBulkBar();
 }
 
-async function act(id, action) {
+async function postAction(id, action) {
   const res = await fetch("/.netlify/functions/signup-admin-action", {
     method:"POST",
     headers:{...authHeaders(),"Content-Type":"application/json"},
@@ -119,26 +210,58 @@ async function act(id, action) {
   });
 
   const data = await res.json().catch(()=>({}));
+  return { ok: res.ok && data.ok, error: data.error || "Update failed" };
+}
 
-  if (!res.ok || !data.ok) return msg(data.error || "Update failed","err");
+async function act(id, action) {
+  const result = await postAction(id, action);
+  if (!result.ok) return msg(result.error,"err");
 
   msg("Updated.","ok");
   await loadData();
+}
+
+async function bulkAction(action) {
+  const selected = selectedRows();
+  if (!selected.length) return;
+
+  const verb = action === "delete" ? "delete" : "verify";
+  const confirmed = confirm(`${verb === "delete" ? "Permanently delete" : "Verify"} ${selected.length} selected signup${selected.length === 1 ? "" : "s"}?${verb === "delete" ? " Uploaded proofs will also be deleted." : ""}`);
+  if (!confirmed) return;
+
+  $("verifySelectedBtn").disabled = true;
+  $("deleteSelectedBtn").disabled = true;
+  $("clearSelectedBtn").disabled = true;
+  msg(`${verb === "delete" ? "Deleting" : "Verifying"} ${selected.length} signup${selected.length === 1 ? "" : "s"}...`);
+
+  let succeeded = 0;
+  const failed = [];
+
+  for (const item of selected) {
+    const result = await postAction(item.id, action);
+    if (result.ok) succeeded += 1;
+    else failed.push(`${item.username || item.id}: ${result.error}`);
+  }
+
+  $("verifySelectedBtn").disabled = false;
+  $("deleteSelectedBtn").disabled = false;
+  $("clearSelectedBtn").disabled = false;
+
+  await loadData();
+
+  if (failed.length) {
+    msg(`${succeeded} succeeded, ${failed.length} failed. ${failed.join(" | ")}`, "err");
+  } else {
+    msg(`${succeeded} signup${succeeded === 1 ? "" : "s"} ${verb === "delete" ? "deleted" : "verified"}.`, "ok");
+  }
 }
 
 async function deleteSignup(id, username) {
   const ok = confirm(`Delete ${username}? This permanently deletes the signup and its uploaded proof.`);
   if (!ok) return;
 
-  const res = await fetch("/.netlify/functions/signup-admin-action", {
-    method:"POST",
-    headers:{...authHeaders(),"Content-Type":"application/json"},
-    body:JSON.stringify({id,action:"delete"})
-  });
-
-  const data = await res.json().catch(()=>({}));
-
-  if (!res.ok || !data.ok) return msg(data.error || "Delete failed","err");
+  const result = await postAction(id, "delete");
+  if (!result.ok) return msg(result.error,"err");
 
   msg("Deleted.","ok");
   await loadData();
@@ -163,6 +286,9 @@ function escapeJs(v) {
 
 $("loadBtn").addEventListener("click", loadData);
 $("pw").addEventListener("keydown", e => { if(e.key==="Enter") loadData(); });
+$("verifySelectedBtn").addEventListener("click", () => bulkAction("verify"));
+$("deleteSelectedBtn").addEventListener("click", () => bulkAction("delete"));
+$("clearSelectedBtn").addEventListener("click", clearSelected);
 </script>
 </body>
 </html>
