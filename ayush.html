@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow">
-  <title>Thor's Hall — Play on Rainbet</title>
+  <title>Ayush | Thor's Hall — Play on Rainbet</title>
   <meta name="theme-color" content="#09030f">
   <style>
     :root{
@@ -122,6 +122,22 @@
       .sub{font-size:16px}.cards{grid-template-columns:1fr}
       .bottom-cta{flex-direction:column;text-align:center}.cta{width:100%}
     }
+
+    .hero-layout{display:grid;grid-template-columns:minmax(0,700px) minmax(260px,1fr);gap:24px;align-items:center}
+    .hero-layout .hero-card{width:100%;min-width:0}
+    .dashboard{padding:24px;border:1px solid var(--line);border-radius:22px;background:rgba(12,6,21,.92);box-shadow:var(--shadow);min-width:0}
+    .dashboard h2{font-size:20px;margin:0 0 6px}
+    .dashboard p{font-size:14px;color:var(--muted);line-height:1.5;margin:0 0 18px}
+    .dashboard dl{margin:0}
+    .dashboard dl>div{display:flex;justify-content:space-between;gap:12px;align-items:baseline;padding:12px 0;border-bottom:1px solid var(--line)}
+    .dashboard dt{font-size:14px;color:var(--muted)}
+    .dashboard dd{margin:0;font-size:18px;font-weight:800;overflow-wrap:anywhere;min-width:0;text-align:right}
+    .dashboard button{font:inherit;font-size:14px;color:#fff;background:rgba(156,77,255,.2);border:1px solid rgba(156,77,255,.6);padding:10px 16px;border-radius:10px;cursor:pointer}
+    .dashboard button:disabled{opacity:.6;cursor:wait}
+    .dashboard button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+    .dashboard #stats-status{margin:16px 0;font-size:13px}
+    @media(max-width:1000px){.hero-layout{grid-template-columns:1fr}.dashboard{width:100%;max-width:700px;margin:auto}}
+    @media(max-width:420px){.brand{font-size:18px}.nav{gap:10px}.navlinks{gap:0}.navbtn{padding:10px}.eyebrow{letter-spacing:.06em}.bonus{gap:8px;padding:12px}.bonus strong{font-size:24px}}
   </style>
 </head>
 <body>
@@ -131,31 +147,39 @@
       <nav class="navlinks">
         <a href="/guide">Guide</a>
         <a href="/info">Info</a>
-        <a class="navbtn" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
+        <a class="navbtn" href="https://playrainbet.com/toaehjy8o" target="_blank" rel="nofollow sponsored noopener">Join Rainbet</a>
       </nav>
     </div>
   </header>
 
   <main>
     <section class="hero">
-      <div class="wrap">
+      <div class="wrap hero-layout">
         <div class="hero-card">
           <div class="eyebrow"><span class="dot"></span> Casino · Sportsbook · Live Games</div>
           <h1>PLAY.<span class="glow">WIN. REPEAT.</span></h1>
           <p class="sub">Explore casino games, live tables and sports markets through Rainbet — with fast access and crypto-friendly play.</p>
 
           <div class="bonus">
-            <strong>250%</strong>
-            <span>First Deposit<br>Bonus</span>
+            <strong>Up to 250%</strong>
+            <span>Welcome Bonus<br>Current terms apply</span>
           </div>
 
           <div class="actions">
-            <a class="cta primary" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">PLAY ON RAINBET</a>
+            <a class="cta primary" href="https://playrainbet.com/toaehjy8o" target="_blank" rel="nofollow sponsored noopener">PLAY ON RAINBET</a>
             <a class="cta secondary" href="#why">SEE MORE</a>
           </div>
 
           <div class="trust">18+ · Gamble responsibly · Availability and terms depend on your jurisdiction.</div>
         </div>
+        <aside class="dashboard" aria-labelledby="dashboard-title">
+          <h2 id="dashboard-title">Ayush’s dashboard</h2>
+          <p>Campaign 84509 · All time · USD</p>
+          <dl><div><dt>Visits</dt><dd id="stats-visits">—</dd></div><div><dt>Registrations</dt><dd id="stats-registrations">—</dd></div><div><dt>First depositors</dt><dd id="stats-ftd">—</dd></div><div><dt>Deposits</dt><dd id="stats-deposits">—</dd></div><div><dt>Wagered</dt><dd id="stats-wager">—</dd></div><div><dt>Casino NGR</dt><dd id="stats-ngr">—</dd></div></dl>
+          <p id="stats-status" role="status" aria-live="polite">Loading campaign statistics…</p>
+          <button id="stats-refresh" type="button">Refresh stats</button>
+          <noscript><p>Enable JavaScript to load campaign statistics.</p></noscript>
+        </aside>
       </div>
     </section>
 
@@ -184,7 +208,7 @@
             <h2>Ready to play?</h2>
             <p>Enter Rainbet through Thor's Hall and start exploring.</p>
           </div>
-          <a class="cta primary" href="https://playrainbet.com/tkpmo0r1x" target="_blank" rel="nofollow sponsored noopener">JOIN RAINBET</a>
+          <a class="cta primary" href="https://playrainbet.com/toaehjy8o" target="_blank" rel="nofollow sponsored noopener">JOIN RAINBET</a>
         </div>
       </div>
     </section>
@@ -193,8 +217,47 @@
   <footer>
     <div class="wrap">
       18+ only. Gamble responsibly. Ensure online gaming is legal in your jurisdiction.
-      Thor's Hall may receive affiliate commission from qualifying activity.
+      Thor's Hall is independent from Rainbet and may receive affiliate commission from qualifying activity.
     </div>
   </footer>
+<script>
+(() => {
+  const fields = ['visits','registrations','ftd','deposits','wager','ngr'];
+  const status = document.getElementById('stats-status');
+  const button = document.getElementById('stats-refresh');
+  const counts = new Intl.NumberFormat('en-US', {maximumFractionDigits:0});
+  const dollars = new Intl.NumberFormat('en-US', {style:'currency',currency:'USD',maximumFractionDigits:2});
+  async function loadStats() {
+    if (button.disabled) return;
+    button.disabled = true;
+    status.textContent = 'Loading campaign statistics…';
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const response = await fetch('/.netlify/functions/rainbet-stats-ayush', {signal:controller.signal});
+      if (!response.ok) throw new Error('Unavailable');
+      const data = await response.json();
+      if (!data.ok || String(data.campaignId) !== '84509' || !data.metrics) throw new Error('Unavailable');
+      for (const key of fields) {
+        const value = data.metrics[key];
+        const valid = typeof value === 'number' && Number.isFinite(value);
+        document.getElementById('stats-' + key).textContent = valid
+          ? (['deposits','wager','ngr'].includes(key) ? dollars : counts).format(value) : '—';
+      }
+      const updated = new Date(data.updated);
+      status.textContent = Number.isNaN(updated.getTime()) ? 'Campaign statistics loaded.'
+        : 'Updated ' + updated.toLocaleString() + '. Reports may be delayed.';
+    } catch (_) {
+      fields.forEach(key => document.getElementById('stats-' + key).textContent = '—');
+      status.textContent = 'Statistics temporarily unavailable. Please try again.';
+    } finally {
+      clearTimeout(timeout);
+      button.disabled = false;
+    }
+  }
+  button.addEventListener('click', loadStats);
+  loadStats();
+})();
+</script>
 </body>
 </html>
