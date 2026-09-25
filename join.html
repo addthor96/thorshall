@@ -39,6 +39,7 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
   <input name="bot-field">
   <input name="source">
   <input name="campaign">
+  <input name="campaign_id">
   <input name="timestamp">
   <input name="referrer">
   <input name="destination">
@@ -48,13 +49,27 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
 (()=>{
   const DESTINATIONS=Object.freeze({
     main:'https://playrainbet.com/tkpmo0r1x',
-    manuel:'https://playrainbet.com/tkpmo0r1x',
+    manuel:'https://playrainbet.com/ts5ttmsbr',
     arshan:'https://playrainbet.com/t2uog2tzs',
+    sharma:'https://playrainbet.com/t2uog2tzs',
     radhika:'https://playrainbet.com/t0qmfuqvw',
     piyush:'https://playrainbet.com/t7ayt4zbl',
-    mithra:'https://playrainbet.com/toaehjy8o',
+    mithra:'https://playrainbet.com/t6a577gnt',
+    ayush:'https://playrainbet.com/toaehjy8o',
     techsslaash:'https://playrainbet.com/twf35cati',
     support:'https://rainbet.com?r=addthor'
+  });
+  const CAMPAIGN_IDS=Object.freeze({
+    main:'74218',
+    manuel:'87881',
+    arshan:'125599',
+    sharma:'125599',
+    radhika:'124465',
+    piyush:'81234',
+    mithra:'89073',
+    ayush:'84509',
+    techsslaash:'89590',
+    support:''
   });
   const params=new URLSearchParams(location.search);
   const raw=(params.get('src')||'direct').trim();
@@ -64,31 +79,55 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
     ? requestedCampaign
     : 'main';
   const DESTINATION=DESTINATIONS[campaign];
+  const CAMPAIGN_ID=CAMPAIGN_IDS[campaign]||'';
   const button=document.getElementById('continueButton');
   const label=document.getElementById('sourceLabel');
   button.href=DESTINATION;
   if(source!=='direct') label.textContent='Source: '+source;
 
-  async function trackAndRedirect(){
+  let redirectStarted=false;
+  let redirectTimer;
+
+  async function trackAndRedirect(event){
+    if(event) event.preventDefault();
+    if(redirectStarted) return;
+    redirectStarted=true;
+    clearTimeout(redirectTimer);
+
+    if(typeof gtag==='function'){
+      gtag('event','rainbet_outbound_click',{
+        source:source,
+        campaign:campaign,
+        campaign_id:CAMPAIGN_ID,
+        transport_type:'beacon'
+      });
+    }
+
     const body=new URLSearchParams({
       'form-name':'thorshall-join-click',
       'source':source,
       'campaign':campaign,
+      'campaign_id':CAMPAIGN_ID,
       'timestamp':new Date().toISOString(),
       'referrer':document.referrer||'',
       'destination':DESTINATION
     });
     try{
-      await fetch('/',{
+      const submission=fetch('/',{
         method:'POST',
         headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body:body.toString(),
         keepalive:true
       });
+      await Promise.race([
+        submission,
+        new Promise(resolve=>setTimeout(resolve,800))
+      ]);
     }catch(_){}
     location.replace(DESTINATION);
   }
-  setTimeout(trackAndRedirect,650);
+  button.addEventListener('click',trackAndRedirect);
+  redirectTimer=setTimeout(trackAndRedirect,650);
 })();
 </script>
 </body>
