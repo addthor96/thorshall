@@ -90,7 +90,7 @@
   color: #fff;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1020px) {
   .topbar {
     align-items: flex-start;
     flex-direction: column;
@@ -126,7 +126,7 @@
     padding-inline: 12px;
   }
 
-  .topbar .nav a:last-child {
+  .topbar .nav a:last-child:nth-child(odd) {
     grid-column: 1 / -1;
   }
 }
