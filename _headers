@@ -53,6 +53,44 @@
 /privacy
   X-Robots-Tag: noindex, follow
 
+# Operator-branded reference pages remain available to direct visitors but are
+# deliberately excluded from organic search.
+/guide
+  X-Robots-Tag: noindex, follow
+
+/info
+  X-Robots-Tag: noindex, follow
+
+/rainbet-supported-countries
+  X-Robots-Tag: noindex, follow
+
+/rainbet-review
+  X-Robots-Tag: noindex, follow
+
+/rainbet-welcome-bonus-review
+  X-Robots-Tag: noindex, follow
+
+/rainbet-withdrawal-time
+  X-Robots-Tag: noindex, follow
+
+/rainbet-kyc-verification-time
+  X-Robots-Tag: noindex, follow
+
+/rainbet-btc-deposit
+  X-Robots-Tag: noindex, follow
+
+/rainbet-solana-deposit-guide
+  X-Robots-Tag: noindex, follow
+
+/rainbet-house-edge-explained
+  X-Robots-Tag: noindex, follow
+
+/rainbet-vs-shuffle
+  X-Robots-Tag: noindex, follow
+
+/rainbet-vs-roobet-comparison
+  X-Robots-Tag: noindex, follow
+
 /techsslaash
   X-Robots-Tag: noindex, follow
 
