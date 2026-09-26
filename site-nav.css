@@ -1,0 +1,132 @@
+/* Shared Thor's Hall header. Keep this as the single source of truth for core pages. */
+.wrap {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 26px 18px 72px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 76px;
+  margin: 0;
+  padding: 16px 18px;
+  border: 1px solid rgba(212, 167, 79, .25);
+  border-radius: 20px;
+  background: rgba(0, 0, 0, .48);
+}
+
+.topbar .brand {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 12px;
+  color: #f3ede2;
+  text-decoration: none;
+  font: 900 28px/1 Georgia, serif;
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+.topbar .brand img {
+  display: block;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
+  border-radius: 10px;
+  object-fit: cover;
+}
+
+.topbar .nav {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 9px;
+  width: auto;
+  margin: 0;
+  flex-wrap: nowrap;
+}
+
+.topbar .nav a,
+.topbar .nav a.join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  padding: 12px 18px;
+  border: 1px solid rgba(255, 230, 170, .38);
+  border-radius: 13px;
+  background: linear-gradient(180deg, #fff0be, #d4a74f);
+  color: #211407;
+  text-decoration: none;
+  font: 900 16px/1 Arial, Helvetica, sans-serif;
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow: none;
+}
+
+.topbar .nav a:hover,
+.topbar .nav a.join:hover {
+  border-color: rgba(255, 240, 190, .72);
+  background: linear-gradient(180deg, #fff5d1, #dfb45d);
+  color: #211407;
+  transform: translateY(-1px);
+}
+
+.topbar .nav a.manager {
+  border-color: rgba(255, 140, 130, .52);
+  background: linear-gradient(180deg, #d7655c, #a83232 48%, #7f2424);
+  color: #fff;
+}
+
+.topbar .nav a.manager:hover {
+  border-color: rgba(255, 170, 160, .72);
+  background: linear-gradient(180deg, #e17268, #b13939 48%, #8b2929);
+  color: #fff;
+}
+
+@media (max-width: 900px) {
+  .topbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .topbar .nav {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 640px) {
+  .wrap {
+    padding: 16px 11px 60px;
+  }
+
+  .topbar {
+    padding: 14px;
+  }
+
+  .topbar .brand {
+    font-size: 24px;
+  }
+
+  .topbar .nav {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .topbar .nav a,
+  .topbar .nav a.join {
+    width: 100%;
+    padding-inline: 12px;
+  }
+
+  .topbar .nav a:last-child {
+    grid-column: 1 / -1;
+  }
+}
