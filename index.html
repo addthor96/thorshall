@@ -47,9 +47,11 @@
     @media(max-width:850px){.grid,.grid.two,.proof{grid-template-columns:1fr}.hero{padding:48px 26px}.topbar{align-items:flex-start;flex-direction:column}.nav{width:100%}}@media(max-width:560px){.wrap{width:min(100% - 22px,1180px)}.nav a{flex:1}.section{padding:23px}.hero{padding:38px 23px}h1{font-size:43px}.actions .btn{width:100%}}
   </style>
   <link rel="stylesheet" href="/site-nav.css"/>
+  <script defer src="/rainbet-stats.js"></script>
 </head>
 <body>
   <div class="wrap">
+    <div class="site-head">
     <header class="topbar">
       <a class="brand" href="/" aria-label="Thor's Hall home"><img src="/img/logo.webp" width="42" height="42" alt=""/><span>THOR'S HALL</span></a>
       <nav class="nav" aria-label="Main navigation">
@@ -61,6 +63,17 @@
         <a class="join" href="/join?src=home" rel="nofollow sponsored noopener" target="_blank">Join Rainbet</a>
       </nav>
     </header>
+      <div aria-label="Partner stats" class="analytics-widget">
+        <a aria-label="View partner statistics" class="analytics-trigger" href="/partners"><img alt="Thor's Hall live partner analytics" src="/img/infernal-diamond.webp"/></a>
+        <div class="analytics-panel">
+          <div class="analytics-title"><span class="analytics-dot"></span>Partner stats</div>
+          <div class="analytics-row"><span>Wagered</span><strong data-rainbet-stat="wager">—</strong></div>
+          <div class="analytics-row"><span>Deposits</span><strong data-rainbet-stat="deposits">—</strong></div>
+          <div class="analytics-row"><span>Visits · Regs</span><strong data-rainbet-stat="visits">— / —</strong></div>
+          <p class="analytics-note" data-rainbet-stat="updated">Loading live activity…</p>
+        </div>
+      </div>
+    </div>
 
     <main>
       <section class="hero">
