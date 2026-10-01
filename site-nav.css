@@ -193,9 +193,15 @@
 }
 
 @media (max-width: 1320px) {
+  /* Give stats its own row so it cannot cover the final navigation button. */
   .analytics-widget {
+    position: relative;
+    top: auto;
     left: auto;
-    right: 10px;
+    right: auto;
+    width: 64px;
+    margin: 10px 0 0 auto;
+    transform: none;
   }
 }
 
@@ -208,19 +214,6 @@
   .topbar .nav {
     width: 100%;
     flex-wrap: wrap;
-  }
-
-  .analytics-widget {
-    position: static;
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-    transform: none;
-  }
-
-  .analytics-panel {
-    top: 60px;
-    right: 0;
   }
 }
 
