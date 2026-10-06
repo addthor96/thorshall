@@ -50,6 +50,8 @@ input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px
 @media(max-width:900px){h1{font-size:44px}.stat-row,.grid3,.split{grid-template-columns:1fr}.hero{padding:42px 24px}}
 @media(max-width:640px){.topbar{position:static;align-items:flex-start;flex-direction:column}.nav{width:100%}.nav .btn,.nav .btn-red,.nav .btn-ledger{flex:1}h1{font-size:36px}.lead{font-size:18px}.section h2{font-size:28px}.actions .btn,.actions .btn-red,.actions .btn-ledger{width:100%}}
 </style>
+<style>form[data-contact-form] [data-contact-details][hidden]{display:none}form[data-contact-form] [data-contact-hint],form[data-contact-form] .application-contact-note{font-size:13px;line-height:1.5;overflow-wrap:anywhere}form[data-contact-form] [data-contact-hint]{margin-top:0}</style>
+<script defer src="/application-contact.js"></script>
 </head>
 <body>
 <div class="wrap">
@@ -124,18 +126,18 @@ input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px
 <div class="form-box">
 <h2>Start here</h2>
 <p>Short answers are fine.</p>
-<form action='/thanks' method='POST' name='work-with-us-creator-apply' data-netlify="true" netlify-honeypot="bot-field">
+<form data-contact-form action='/thanks' method='POST' name='work-with-us-creator-apply' data-netlify="true" netlify-honeypot="bot-field">
 <input name="form-name" type="hidden" value="work-with-us-creator-apply"/>
 <p class="hidden"><label>Do not fill this out <input name="bot-field"/></label></p>
 <div><label for="name">Name</label><input id="name" name="name" required="" type="text"/></div>
-<div><label for="email">Email</label><input id="email" name="email" required="" type="email"/></div>
+<div><label for="email">Email</label><input id="email" name="email" required="" type="email"/></div><div><label for="work-contact-method">Preferred contact</label><select id="work-contact-method" name="preferred_contact" required><option value="Email">Email</option><option value="WhatsApp">WhatsApp</option><option value="Discord">Discord</option></select></div><div data-contact-details><label for="work-contact-handle" data-contact-label>Number or username</label><input id="work-contact-handle" name="contact_handle" type="text" autocomplete="off" aria-describedby="work-contact-hint" placeholder="Required for WhatsApp or Discord"/><p id="work-contact-hint" data-contact-hint>For WhatsApp, include your country code. For Discord, enter your exact username. Leave this blank if you prefer email.</p></div>
 <div><label for="socials">Main socials / channel links</label><input id="socials" name="socials" placeholder="YouTube, Kick, Twitch, TikTok, X, Discord..." required="" type="text"/></div>
 <div><label for="audience">Audience type</label><select id="audience" name="audience" required=""><option value="">Choose one</option><option>Gaming</option><option>Casino / gambling</option><option>Crypto</option><option>Sports betting</option><option>Streamer community</option><option>Other adult audience</option></select></div>
 <div><label for="placement">Where would you place the link?</label><textarea id="placement" name="placement" placeholder="Bio, stream panel, video description, Discord, Telegram, pinned post, etc." required=""></textarea></div>
 <div><label for="notes">Anything important?</label><textarea id="notes" name="notes" placeholder="Audience size, countries, content style, past affiliate experience, etc."></textarea></div>
 <button class="btn" type="submit">Send Creator Application</button>
 <div class="form-note">18+ only. No guaranteed earnings. Gambling-related promotion must follow local laws and platform rules.</div>
-</form>
+<p class="application-contact-note">Replies come from <strong>arnar@thorshall.gg</strong>. Check your inbox and spam folder. We use your contact details only to review and respond to this application.</p></form>
 </div>
 </section>
 <section class="section final">
@@ -148,3 +150,4 @@ input,select,textarea{width:100%;padding:13px 14px;border-radius:12px;border:1px
 </div>
 </body>
 </html>
+

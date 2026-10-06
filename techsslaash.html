@@ -677,6 +677,8 @@
       *{scroll-behavior:auto!important;transition:none!important}
     }
   </style>
+<style>form[data-contact-form] [data-contact-details][hidden]{display:none}form[data-contact-form] [data-contact-hint]{margin-top:8px;line-height:1.5;overflow-wrap:anywhere}</style>
+<script defer src="/application-contact.js"></script>
 </head>
 
 <body>
@@ -732,7 +734,7 @@
             </ul>
           </div>
 
-          <form action='/thanks' class='application-form' method='POST' name='techsslaash-partner-apply' data-netlify="true" netlify-honeypot="bot-field">
+          <form data-contact-form action='/thanks' class='application-form' method='POST' name='techsslaash-partner-apply' data-netlify="true" netlify-honeypot="bot-field">
             <input type="hidden" name="form-name" value="techsslaash-partner-apply">
             <input type="hidden" name="source" value="techsslaash">
             <p hidden>
@@ -771,8 +773,8 @@
               </div>
 
               <div class="field">
-                <label for="quick-contact">Quick contact</label>
-                <select id="quick-contact" name="preferred_contact">
+                <label for="quick-contact">Preferred contact</label>
+                <select id="quick-contact" name="preferred_contact" required>
                   <option value="Email">Email</option>
                   <option value="WhatsApp">WhatsApp</option>
                   <option value="Discord">Discord</option>
@@ -780,9 +782,10 @@
                 </select>
               </div>
 
-              <div class="field">
-                <label for="contact-handle">Number or username</label>
-                <input id="contact-handle" name="contact_handle" type="text" placeholder="Optional">
+              <div class="field" data-contact-details>
+                <label for="contact-handle" data-contact-label>Number or username</label>
+                <input id="contact-handle" name="contact_handle" type="text" autocomplete="off" aria-describedby="partner-contact-hint" placeholder="Required unless you prefer email">
+                <p class="form-note" id="partner-contact-hint" data-contact-hint>For WhatsApp, include your country code. Otherwise, enter your exact username. Leave this blank if you prefer email.</p>
               </div>
 
               <div class="field full">
@@ -797,7 +800,7 @@
             </label>
 
             <button class="cta submit-button" type="submit">Send quick application <span aria-hidden="true">→</span></button>
-            <p class="form-note">Your information is used only to review and respond to this partnership application.</p>
+            <p class="form-note">Replies come from <strong>arnar@thorshall.gg</strong>. Check your inbox and spam folder. We use your contact details only to review and respond to this application.</p>
           </form>
         </div>
       </section>
@@ -927,3 +930,4 @@
   </script>
 </body>
 </html>
+
