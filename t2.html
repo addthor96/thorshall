@@ -347,7 +347,7 @@
     }
 
 
-    /* SUPPORT SIGN-UP */
+    /* REFERRAL LINK */
     .support-strip{
       margin:0 auto 42px;
       padding:26px 30px;
@@ -383,6 +383,8 @@
       font-size:11px;
     }
     .support-btn{
+      display:inline-block;
+      text-align:center;
       flex:0 0 auto;
       padding:14px 20px;
       border:1px solid #ff8b18;
@@ -396,99 +398,6 @@
       transition:.18s ease;
     }
     .support-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
-
-    .support-modal{
-      position:fixed;
-      inset:0;
-      z-index:100;
-      display:none;
-      align-items:center;
-      justify-content:center;
-      padding:20px;
-      background:rgba(3,3,4,.84);
-      backdrop-filter:blur(8px);
-    }
-    .support-modal.open{display:flex}
-    .support-modal-card{
-      width:min(470px,100%);
-      position:relative;
-      padding:30px;
-      border:1px solid rgba(255,122,0,.55);
-      border-radius:12px;
-      background:
-        radial-gradient(circle at 50% 0%,rgba(255,122,0,.10),transparent 52%),
-        linear-gradient(180deg,#16110e,#0b0908);
-      box-shadow:0 22px 70px rgba(0,0,0,.68),0 0 34px rgba(255,91,0,.10);
-    }
-    .support-modal-card h3{
-      margin:0 34px 8px 0;
-      color:#e6b463;
-      font:900 25px/1.1 var(--serif);
-      text-transform:uppercase;
-    }
-    .support-modal-card p{
-      margin:0 0 18px;
-      color:#c9c3bc;
-      font-size:14px;
-      line-height:1.55;
-    }
-    .support-modal-card label{
-      display:block;
-      margin-bottom:7px;
-      color:#f3e5d3;
-      font-size:13px;
-      font-weight:800;
-    }
-    .support-modal-card input[type="text"]{
-      width:100%;
-      padding:13px 14px;
-      border:1px solid rgba(255,122,0,.46);
-      border-radius:7px;
-      outline:none;
-      color:#fff;
-      background:#090706;
-      font:600 15px var(--sans);
-    }
-    .support-modal-card input[type="text"]:focus{
-      border-color:#ff8b18;
-      box-shadow:0 0 0 3px rgba(255,122,0,.10);
-    }
-    .support-help{
-      display:block;
-      margin:8px 0 18px;
-      color:#8f8a85;
-      font-size:11px;
-      line-height:1.45;
-    }
-    .support-form-actions{display:flex;gap:10px;align-items:center}
-    .support-form-actions .support-btn{flex:1}
-    .support-cancel{
-      padding:12px 14px;
-      border:0;
-      color:#aaa39d;
-      background:transparent;
-      font-weight:700;
-      cursor:pointer;
-    }
-    .support-close{
-      position:absolute;
-      top:14px;
-      right:15px;
-      width:34px;
-      height:34px;
-      border:1px solid rgba(255,255,255,.10);
-      border-radius:50%;
-      color:#ddd4ca;
-      background:rgba(255,255,255,.04);
-      font-size:20px;
-      cursor:pointer;
-    }
-    .support-status{
-      min-height:17px;
-      margin-top:10px;
-      color:#ffb65c;
-      font-size:12px;
-    }
 
     footer{
       padding:27px 0 34px;
@@ -582,13 +491,11 @@
         </p>
 
         <div class="bonus-box">
-          <div class="bonus-number">100%</div>
-          <div class="bonus-label">First Deposit<br>Match</div>
+          <div class="bonus-number">250%</div>
+          <div class="bonus-label">Bonus</div>
         </div>
         <p class="bonus-terms">
-          <strong>40× wagering on deposit + bonus.</strong> Withdrawals are restricted while rollover applies.
-          The standard bonus bet limit is 1% of your deposit; game restrictions apply.
-          18+ and eligible first deposits only. Check the
+          18+; eligibility, wagering requirements, bet limits and withdrawal restrictions apply. Check the
           <a class="text-link" href="https://help.rainbet.com/en/articles/15268657-first-deposit-promotion" target="_blank" rel="noopener noreferrer">current offer</a>
           and <a class="text-link" href="https://help.rainbet.com/en/articles/9831951-deposit-bonus-terms-and-conditions" target="_blank" rel="noopener noreferrer">full bonus terms</a>
           with Rainbet before depositing.
@@ -707,10 +614,10 @@
     <section class="shell support-strip">
       <div>
         <strong>Thor's Hall × Rainbet</strong>
-        <span>Optional: share your planned Rainbet username with Thor's Hall to help match your referral. You'll then continue to Rainbet to register.</span>
-        <small>Submitting here does not create or reserve an account. 18+; eligible locations only.</small>
+        <span>Use our referral link to create your account on Rainbet.</span>
+        <small>18+ only. Availability depends on your jurisdiction.</small>
       </div>
-      <button id="t2SupportSignup" class="support-btn" type="button">Add Referral Details</button>
+      <a class="support-btn" href="https://playrainbet.com/tggbn1yfr" rel="nofollow sponsored noopener" data-rainbet-link data-button-location="bottom">Join Rainbet</a>
     </section>
 
   </main>
@@ -735,72 +642,11 @@
     <p hidden><label>Do not fill this out: <input name="bot-field"></label></p>
   </form>
 
-  <div id="t2SupportModal" class="support-modal" aria-hidden="true">
-    <div class="support-modal-card" role="dialog" aria-modal="true" aria-labelledby="t2SupportTitle">
-      <button id="t2SupportClose" class="support-close" type="button" aria-label="Close">×</button>
-
-      <h3 id="t2SupportTitle">Share your planned username</h3>
-      <p>
-        These details go to Thor's Hall to help match your referral to this campaign.
-        This form does not create or reserve a Rainbet account. You'll register on Rainbet after continuing.
-      </p>
-
-      <form id='t2SupportForm' method='POST' name='t2-support-signup' data-netlify='true' netlify-honeypot='bot-field'>
-        <input type="hidden" name="form-name" value="t2-support-signup">
-        <input type="hidden" name="partner" value="T2">
-        <input type="hidden" name="page" value="/t2">
-        <input type="hidden" name="campaign_name" value="T2">
-        <input type="hidden" name="campaign_id" value="150649">
-        <input type="hidden" name="traffic_source" value="media">
-        <input type="hidden" name="destination" value="https://playrainbet.com/tggbn1yfr">
-        <input id="t2SubmittedAt" type="hidden" name="submitted_at" value="">
-
-        <p hidden>
-          <label>Do not fill this out: <input name="bot-field"></label>
-        </p>
-
-        <label for="t2RainbetUsername">Planned Rainbet username</label>
-        <input
-          id="t2RainbetUsername"
-          type="text"
-          name="rainbet_username"
-          maxlength="64"
-          required
-          autocomplete="off"
-          placeholder="Enter the username you'll use"
-        >
-
-        <span class="support-help">
-          Use the same username on Rainbet if it is available. Sharing it here is optional;
-          the Join Rainbet buttons above take you directly to Rainbet.
-        </span>
-
-        <div class="support-form-actions">
-          <button id="t2ContinueButton" class="support-btn" type="submit">Save &amp; Continue to Rainbet</button>
-          <button id="t2SupportCancel" class="support-cancel" type="button">Cancel</button>
-        </div>
-
-        <div id="t2SupportStatus" class="support-status" aria-live="polite"></div>
-      </form>
-    </div>
-  </div>
-
   <script>
     (function(){
       const promoDestination = 'https://playrainbet.com/tggbn1yfr';
-      const referralDestination = 'https://playrainbet.com/tggbn1yfr';
       const clickForm = document.getElementById('t2RainbetClickForm');
       const promoLinks = document.querySelectorAll('[data-rainbet-link]');
-      const openButton = document.getElementById('t2SupportSignup');
-      const modal = document.getElementById('t2SupportModal');
-      const closeButton = document.getElementById('t2SupportClose');
-      const cancelButton = document.getElementById('t2SupportCancel');
-      const form = document.getElementById('t2SupportForm');
-      const username = document.getElementById('t2RainbetUsername');
-      const submittedAt = document.getElementById('t2SubmittedAt');
-      const status = document.getElementById('t2SupportStatus');
-      const continueButton = document.getElementById('t2ContinueButton');
-
       async function postNetlifyForm(formData){
         const response = await fetch('/', {
           method: 'POST',
@@ -839,56 +685,6 @@
         });
       });
 
-      if (!openButton || !modal || !form) return;
-
-      function openModal(){
-        modal.classList.add('open');
-        modal.setAttribute('aria-hidden', 'false');
-        status.textContent = '';
-        setTimeout(function(){ username.focus(); }, 30);
-      }
-
-      function closeModal(){
-        modal.classList.remove('open');
-        modal.setAttribute('aria-hidden', 'true');
-      }
-
-      openButton.addEventListener('click', openModal);
-      closeButton.addEventListener('click', closeModal);
-      cancelButton.addEventListener('click', closeModal);
-
-      modal.addEventListener('click', function(event){
-        if (event.target === modal) closeModal();
-      });
-
-      document.addEventListener('keydown', function(event){
-        if (event.key === 'Escape' && modal.classList.contains('open')) closeModal();
-      });
-
-      form.addEventListener('submit', async function(event){
-        event.preventDefault();
-
-        const chosenUsername = username.value.trim();
-        if (!chosenUsername) {
-          username.focus();
-          return;
-        }
-
-        submittedAt.value = new Date().toISOString();
-        continueButton.disabled = true;
-        continueButton.textContent = 'Saving...';
-        status.textContent = 'Saving your referral details...';
-
-        try {
-          await postNetlifyForm(new FormData(form));
-          status.textContent = 'Saved. Opening Rainbet...';
-          window.location.href = referralDestination;
-        } catch (error) {
-          status.textContent = 'Could not save right now. Please try again.';
-          continueButton.disabled = false;
-          continueButton.textContent = 'Save & Continue to Rainbet';
-        }
-      });
     })();
   </script>
 
