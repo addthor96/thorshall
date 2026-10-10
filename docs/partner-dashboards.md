@@ -24,7 +24,7 @@ Variables must be available to production Functions. A new production deploy is 
 
 1. Confirm the permanent T code, partner name, campaign ID and campaign URL.
 2. Add it to `netlify/lib/partner-campaigns.js`.
-3. Add explicit `/tN-dashboard` rewrite and `.html`/trailing-slash canonical redirects to `_redirects`; add corresponding noindex entries to `_headers`.
+3. Add an explicit `/tN-dashboard` rewrite and `.html` canonical redirect to `_redirects`; add corresponding noindex entries to `_headers`. Do not add a `/tN-dashboard/` → `/tN-dashboard` redirect: Netlify normalizes trailing slashes during matching and that rule can loop.
 4. Set `STATS_PASSWORD_TN` in Netlify. Login scope and return URL are automatically derived from the registry.
 5. Deploy and verify both the page and stats endpoint reject anonymous and other-partner sessions.
 
