@@ -23,6 +23,14 @@
 /signup-admin
   X-Robots-Tag: noindex, nofollow
 
+/admin
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: private, no-store
+
+/admin.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: private, no-store
+
 /aditya-dashboard
   X-Robots-Tag: noindex, nofollow
 

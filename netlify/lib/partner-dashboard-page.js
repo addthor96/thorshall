@@ -21,7 +21,7 @@ function renderDashboard(partner, options = {}) {
   const loginUrl = `/.netlify/functions/stats-session?return=${encodeURIComponent(`/${code}-dashboard`)}`;
   const isAdmin = options.isAdmin === true;
   const adminPartners = Array.isArray(options.partners) ? options.partners : [];
-  const adminNavigation = isAdmin ? `<nav class="admin-navigation" aria-label="Partner dashboards"><span>Admin access</span>${adminPartners.map(item => {
+  const adminNavigation = isAdmin ? `<nav class="admin-navigation" aria-label="Partner dashboards"><span>Admin access</span><a href="/admin">Admin home</a>${adminPartners.map(item => {
     const itemCode = String(item.code || "");
     if (!/^t[1-9][0-9]*$/.test(itemCode) || item.dashboardPath !== `/${itemCode}-dashboard`) return "";
     return `<a href="${escapeHtml(item.dashboardPath)}"${itemCode === code ? ' aria-current="page"' : ""}>${escapeHtml(itemCode.toUpperCase())}<span>${escapeHtml(item.name)}</span></a>`;

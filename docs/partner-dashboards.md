@@ -10,6 +10,16 @@ All dashboards share one template, stats endpoint, and login. Campaign codes sta
 
 T1 and T2 use the same protected dashboard. T3 onward are unassigned. Public landing pages are independent and are not changed by dashboard updates.
 
+## Owner admin hub
+
+`/admin` is the owner's central workspace. It uses the existing master statistics password and signed session. Partner passwords and partner sessions cannot open the hub or its private data endpoint. An owner session can move between the hub and any numbered dashboard without signing in again. Owner-only **Admin home** links return from individual dashboards to the hub. The separate existing Search Console and signup-review tools retain their own sign-in behavior.
+
+The hub lists every partner in the server campaign registry, supports name/code/campaign-ID search, and provides landing-page, tracked-link, dashboard and payment-history access. It shows whether each individual partner password is configured without returning any credential. Current-month Rainbet activity and recorded payments load from the existing protected endpoints; unavailable sources are labeled instead of replaced with zero or an empty ledger.
+
+Private workflow labels and notes help organize follow-ups. These are stored in the separate site-wide `thorshall-admin-partners-v1` Blobs store and survive deployments. Changes use a checked revision and conditional writes. A workflow label such as **On hold** is organizational only: it does not disable a campaign, stop tracking, hide a landing page, alter partner access or change payment terms. Notes never appear in partner views.
+
+Future registered T campaigns appear automatically in the hub once their page, registry entry, route and credential are set up. This release does not edit public-page content, create Rainbet campaigns, or set passwords through the hub. Use the setup links for existing hosting controls; never place provider tokens or passwords in notes.
+
 ## Configuration
 
 Keep credentials in Netlify environment variables, never in GitHub or frontend code:
@@ -52,6 +62,6 @@ Production credentials are managed in Netlify; do not add storage credentials to
 
 ## Validation
 
-Run `node --test tests/partner-*.test.js` from the repository root. Tests use local fixture credentials and mocked reports; they do not contact Rainbet or create real activity. Verify Netlify deployment logs apply the login rate-limit configuration.
+Run `node --test tests/partner-*.test.js tests/admin-*.test.js` from the repository root. Tests use local fixture credentials and mocked reports; they do not contact Rainbet or create real activity. Verify Netlify deployment logs apply the login rate-limit configuration.
 
 This addition does not migrate or secure legacy stats pages; it gates the new numbered dashboard and its data endpoint.

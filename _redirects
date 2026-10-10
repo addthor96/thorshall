@@ -3,6 +3,8 @@ https://gentle-mandazi-f0e944.netlify.app/* https://thorshall.gg/:splat 301!
 http://gentle-mandazi-f0e944.netlify.app/* https://thorshall.gg/:splat 301!
 
 # Thor's Hall canonical redirects — compact site
+/admin.html /admin 301!
+/admin /.netlify/functions/admin-dashboard 200!
 # Numbered partner dashboards use one protected template; add an explicit route per assigned code.
 /t1-dashboard.html /t1-dashboard 301!
 /t1-dashboard /.netlify/functions/partner-dashboard?partner=t1 200!
