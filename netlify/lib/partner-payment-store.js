@@ -137,10 +137,12 @@ function findOperation(ledger, operation) {
   return null;
 }
 
-async function openStore() {
+async function openStore(getStore) {
   // The modern Netlify Function entry supplies its Blobs context automatically.
   // No fallback to local disk, browser storage, public git, or deploy stores.
-  const { getStore } = require("@netlify/blobs");
+  // The entry statically imports this dependency so Netlify's ESM bundler can
+  // trace it. Avoid a nested CommonJS require left unresolved in production.
+  if (typeof getStore !== "function") throw new Error("Storage provider not configured");
   return getStore({ name: STORE_NAME, consistency: "strong" });
 }
 

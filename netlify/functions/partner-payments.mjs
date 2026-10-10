@@ -1,9 +1,14 @@
+import { getStore } from "@netlify/blobs";
 import handlerModule from "../lib/partner-payment-handler.js";
+import storeModule from "../lib/partner-payment-store.js";
 
 // Modern Netlify Functions automatically receive the Blobs context, including
 // the uncached endpoint required for strongly consistent reads.
 const { createHandler, MAX_BODY_BYTES } = handlerModule;
-const handle = createHandler();
+const { openStore } = storeModule;
+// An explicit static import ensures the modern Function bundle contains the
+// SDK. Opening its store still happens only after the handler authorizes access.
+const handle = createHandler({ connectStore: () => openStore(getStore) });
 
 export default async function partnerPayments(request, context) {
   const url = new URL(request.url);

@@ -234,7 +234,10 @@ test("missing native Blobs configuration fails closed with no filesystem fallbac
   const old = process.env.NETLIFY_BLOBS_CONTEXT;
   const global = globalThis.netlifyBlobsContext;
   delete process.env.NETLIFY_BLOBS_CONTEXT; delete globalThis.netlifyBlobsContext;
-  try { await assert.rejects(openStore()); }
+  try {
+    await assert.rejects(openStore(require("@netlify/blobs").getStore));
+    await assert.rejects(openStore());
+  }
   finally {
     if (old !== undefined) process.env.NETLIFY_BLOBS_CONTEXT = old;
     if (global !== undefined) globalThis.netlifyBlobsContext = global;
@@ -291,4 +294,12 @@ test("logging failures do not change sanitized storage response", async () => {
   const response = await handler(event());
   assert.equal(response.statusCode, 503);
   assert.doesNotMatch(response.body, /storage detail|logger detail/);
+});
+
+test("the injected SDK opens the durable site-wide store with strong consistency", async () => {
+  const calls = [];
+  const store = memoryStore();
+  const result = await openStore(options => { calls.push(options); return store; });
+  assert.equal(result, store);
+  assert.deepEqual(calls, [{ name: "thorshall-partner-payments-v1", consistency: "strong" }]);
 });
