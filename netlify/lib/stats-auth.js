@@ -1,10 +1,11 @@
 "use strict";
 
 const crypto = require("crypto");
+const { partners } = require("./partner-campaigns");
 
 const COOKIE_NAME = "th_stats_session";
 const SESSION_SECONDS = 60 * 60 * 8;
-const CREATOR_ACCESS = new Set(["manuel", "piyush", "radhika", "aditya", "arshan"]);
+const CREATOR_ACCESS = new Set(["manuel", "piyush", "radhika", "aditya", "arshan", ...Object.keys(partners)]);
 const VALID_ACCESS = new Set(["admin", ...CREATOR_ACCESS]);
 
 function adminPassword() {
@@ -45,7 +46,8 @@ function readCookie(header, name) {
     const index = item.indexOf("=");
     if (index < 0) continue;
     if (item.slice(0, index).trim() === name) {
-      return decodeURIComponent(item.slice(index + 1).trim());
+      try { return decodeURIComponent(item.slice(index + 1).trim()); }
+      catch { return ""; }
     }
   }
   return "";
@@ -71,12 +73,14 @@ function authenticate(supplied, requestedAccess) {
 function sessionAccess(event) {
   if (secret().length < 32) return "";
   const token = readCookie(event?.headers?.cookie || event?.headers?.Cookie, COOKIE_NAME);
-  const [payload, signature] = String(token).split(".");
+  const parts = String(token).split(".");
+  if (parts.length !== 2) return "";
+  const [payload, signature] = parts;
   if (!payload || !signature || !safeEqual(sign(payload), signature)) return "";
   try {
     const decoded = JSON.parse(Buffer.from(payload, "base64url").toString("utf8"));
     const access = String(decoded.access || "").toLowerCase();
-    if (!VALID_ACCESS.has(access) || Number(decoded.exp) <= Math.floor(Date.now() / 1000)) return "";
+    if (!VALID_ACCESS.has(access) || !Number.isFinite(decoded.exp) || decoded.exp <= Math.floor(Date.now() / 1000)) return "";
     return access;
   } catch {
     return "";

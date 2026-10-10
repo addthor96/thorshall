@@ -8,13 +8,15 @@ const {
   isAuthorized,
   isConfigured
 } = require("../lib/stats-auth");
+const { partners, getPartner } = require("../lib/partner-campaigns");
 
 const RETURN_ACCESS = new Map([
   ["/manuel-stats1", "manuel"],
   ["/piyush-stats1", "piyush"],
   ["/radhika-stats1", "radhika"],
   ["/aditya-stats1", "aditya"],
-  ["/arshan-stats1", "arshan"]
+  ["/arshan-stats1", "arshan"],
+  ...Object.values(partners).map(partner => [partner.dashboardPath, partner.code])
 ]);
 
 function safeReturn(value) {
@@ -27,6 +29,8 @@ function requestedAccess(returnTo) {
 }
 
 function displayName(access) {
+  const partner = getPartner(access);
+  if (partner) return `${partner.code.toUpperCase()} · ${partner.name}`;
   return access === "admin" ? "Partner" : `${access.charAt(0).toUpperCase()}${access.slice(1)}`;
 }
 
@@ -38,6 +42,8 @@ function headers(extra = {}) {
   return {
     "Content-Type": "text/html; charset=utf-8",
     "Cache-Control": "private, no-store",
+    "Netlify-CDN-Cache-Control": "no-store",
+    "CDN-Cache-Control": "no-store",
     "X-Robots-Tag": "noindex, nofollow, noarchive",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "no-referrer",
@@ -62,6 +68,21 @@ exports.handler = async function (event) {
   const query = event.queryStringParameters || {};
   const method = String(event.httpMethod || "GET").toUpperCase();
 
+  if (!["GET", "POST"].includes(method)) {
+    return { statusCode: 405, headers: headers({ Allow: "GET, POST" }), body: "Method not allowed." };
+  }
+  if (method === "POST") {
+    const origin = event.headers?.origin || event.headers?.Origin;
+    const host = event.headers?.host || event.headers?.Host;
+    // HTML form posts are same-origin. Reject a supplied cross-site Origin.
+    if (origin && (!host || origin !== `https://${host}`)) {
+      return { statusCode: 403, headers: headers(), body: "Please sign in from this website." };
+    }
+    if (String(event.body || "").length > 8192) {
+      return { statusCode: 413, headers: headers(), body: "Request too large." };
+    }
+  }
+
   if (query.logout === "1") {
     return {
       statusCode: 303,
@@ -73,7 +94,7 @@ exports.handler = async function (event) {
     };
   }
 
-  const form = method === "POST" ? parseForm(event.body) : null;
+  const form = method === "POST" ? parseForm(event.isBase64Encoded ? Buffer.from(event.body || "", "base64").toString("utf8") : event.body) : null;
   const returnTo = safeReturn(form?.get("return") || query.return);
   const access = requestedAccess(returnTo);
 
@@ -105,4 +126,9 @@ exports.handler = async function (event) {
   }
 
   return { statusCode: 200, headers: headers(), body: loginPage(returnTo, access) };
+};
+
+exports.config = {
+  path: "/.netlify/functions/stats-session",
+  rateLimit: { windowLimit: 30, windowSize: 60, aggregateBy: ["ip", "domain"] }
 };
