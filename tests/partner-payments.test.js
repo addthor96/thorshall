@@ -240,3 +240,55 @@ test("missing native Blobs configuration fails closed with no filesystem fallbac
     if (global !== undefined) globalThis.netlifyBlobsContext = global;
   }
 });
+
+test("storage diagnostics expose only constant stage and error category", async () => {
+  const secret = "PRIVATE-TOKEN-AND-ACCOUNT-DATA";
+  const cases = [
+    [{ name: "MissingBlobsEnvironmentError", message: secret }, "missing_environment"],
+    [{ name: "BlobsConsistencyError", message: secret }, "strong_consistency_unavailable"],
+    [{ name: "BlobsInternalError", message: secret }, "provider_failure"],
+    [{ code: "MODULE_NOT_FOUND", message: secret }, "dependency_unavailable"],
+    [{ message: "Invalid stored payment ledger" }, "invalid_stored_data"],
+    [{ name: "TypeError", message: secret }, "type_error"],
+    [{ name: secret, message: secret }, "other"]
+  ];
+  for (const [error, category] of cases) {
+    const records = [];
+    const handler = createHandler({ accessFor: () => "admin", now, connectStore: async () => { throw error; }, logDiagnostic: record => records.push(record) });
+    const response = await handler(event());
+    assert.equal(response.statusCode, 503);
+    assert.deepEqual(records, [{ event: "partner_payment_storage_failure", stage: "connect", category }]);
+    assert.doesNotMatch(response.body + JSON.stringify(records), new RegExp(secret));
+    assert.deepEqual(Object.keys(json(response)).sort(), ["error", "ok"]);
+  }
+  const records = [];
+  const handler = createHandler({ accessFor: () => "admin", now, connectStore: async () => ({ getWithMetadata: async () => { throw new Error(secret); } }), logDiagnostic: record => records.push(record) });
+  assert.equal((await handler(event())).statusCode, 503);
+  assert.equal(records[0].stage, "read");
+  const store = memoryStore(); store.setJSON = async () => { throw new Error(secret); };
+  const writeHandler = createHandler({ accessFor: () => "admin", now, connectStore: async () => store, logDiagnostic: record => records.push(record) });
+  assert.equal((await writeHandler(event("POST", payload()))).statusCode, 503);
+  assert.equal(records.at(-1).stage, "write");
+});
+
+test("production diagnostics contain only an enumerated rejection reason", async () => {
+  const cases = [
+    [{ deployContext: "deploy-preview" }, "deploy_context"],
+    [{ rawUrl: "https://private-other-host.example/?secret=PRIVATE" }, "url_origin"],
+    [{ headers: { host: "private-mismatched-host.example" } }, "host_mismatch"],
+    [{ rawUrl: "PRIVATE malformed URL" }, "malformed_url"]
+  ];
+  for (const [overrides, reason] of cases) {
+    const records = [];
+    const handler = createHandler({ accessFor: () => "admin", now, connectStore: async () => assert.fail("must not connect"), logDiagnostic: record => records.push(record) });
+    assert.equal((await handler(event("GET", undefined, "t2", overrides))).statusCode, 503);
+    assert.deepEqual(records, [{ event: "partner_payment_production_rejected", reason }]);
+  }
+});
+
+test("logging failures do not change sanitized storage response", async () => {
+  const handler = createHandler({ accessFor: () => "admin", now, connectStore: async () => { throw new Error("storage detail"); }, logDiagnostic: () => { throw new Error("logger detail"); } });
+  const response = await handler(event());
+  assert.equal(response.statusCode, 503);
+  assert.doesNotMatch(response.body, /storage detail|logger detail/);
+});
