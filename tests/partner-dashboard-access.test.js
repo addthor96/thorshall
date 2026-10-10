@@ -10,6 +10,7 @@ process.env.STATS_ADMIN_PASSWORD = "test-only-admin-password";
 process.env.STATS_PASSWORD_T2 = "test-only-t2-password";
 process.env.STATS_PASSWORD_T1 = "test-only-t1-password";
 process.env.STATS_PASSWORD_ADITYA = "test-only-aditya-password";
+process.env.STATS_PASSWORD_MANUEL = "test-only-manuel-password";
 
 const auth = require("../netlify/lib/stats-auth");
 const { handler: login } = require("../netlify/functions/stats-session");
@@ -32,13 +33,37 @@ test("T2 password creates only T2 access; admin and legacy logins retain their s
   assert.equal(auth.authenticate("test-only-t2-password", "aditya"), "");
   assert.equal(auth.authenticate("test-only-t2-password", "admin"), "");
   assert.equal(auth.authenticate("test-only-aditya-password", "t2"), "");
-  assert.equal(auth.authenticate("test-only-aditya-password", "aditya"), "aditya");
+  assert.equal(auth.authenticate("test-only-aditya-password", "aditya"), "");
+  assert.equal(auth.authenticate("test-only-manuel-password", "manuel"), "manuel");
   assert.equal(auth.authenticate("test-only-admin-password", "t2"), "admin");
+});
+
+test("retired partner credentials and already-issued signed sessions are rejected", async () => {
+  assert.equal(auth.creatorPassword("aditya"), "");
+  assert.equal(auth.isConfigured("aditya"), false);
+  assert.equal(auth.authenticate("test-only-admin-password", "aditya"), "");
+  assert.throws(() => auth.createSession("aditya"), /Invalid statistics access scope/);
+
+  // Reproduce a previously issued, correctly signed session without minting a
+  // newly allowed access scope. Retirement must invalidate old cookies too.
+  const payload = Buffer.from(JSON.stringify({ access: "aditya", exp: Math.floor(Date.now() / 1000) + 3600 })).toString("base64url");
+  const signature = crypto.createHmac("sha256", process.env.STATS_SESSION_SECRET).update(payload).digest("base64url");
+  const headers = { cookie: `${auth.COOKIE_NAME}=${payload}.${signature}` };
+  assert.equal(auth.sessionAccess({ headers }), "");
+  for (const scope of ["admin", "t1", "t2", "manuel", "aditya"]) assert.equal(auth.isAuthorized({ headers }, scope), false);
+  assert.equal((await dashboard(event(null, { headers }))).statusCode, 303);
+
+  const oldReturn = await login({ httpMethod: "POST", headers: {}, body: new URLSearchParams({ return: "/aditya-stats1", password: "test-only-admin-password" }).toString() });
+  assert.equal(oldReturn.statusCode, 303);
+  assert.equal(oldReturn.headers.Location, "/");
+  const oldPassword = await login({ httpMethod: "POST", headers: {}, body: new URLSearchParams({ return: "/aditya-stats1", password: "test-only-aditya-password" }).toString() });
+  assert.equal(oldPassword.statusCode, 401);
+  assert.equal(oldPassword.headers["Set-Cookie"], undefined);
 });
 
 test("T1 dashboard isolates campaign 130933 and permits master access", async () => {
   const extra = { path: "/t1-dashboard", queryStringParameters: { partner: "t1" } };
-  for (const access of [null, "t2", "aditya"]) {
+  for (const access of [null, "t2", "manuel"]) {
     const result = await dashboard(event(access, extra));
     assert.equal(result.statusCode, 303);
     assert.equal(result.headers.Location, "/.netlify/functions/stats-session?return=%2Ft1-dashboard");
@@ -53,7 +78,7 @@ test("T1 dashboard isolates campaign 130933 and permits master access", async ()
 });
 
 test("anonymous and other partner requests cannot read dashboard HTML", async () => {
-  for (const access of [null, "aditya", "manuel"]) {
+  for (const access of [null, "radhika", "manuel"]) {
     const result = await dashboard(event(access));
     assert.equal(result.statusCode, 303);
     assert.equal(result.headers.Location, "/.netlify/functions/stats-session?return=%2Ft2-dashboard");

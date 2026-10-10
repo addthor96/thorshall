@@ -57,7 +57,7 @@ async function start({ directory = () => ({ ok: true, partners: structuredClone(
 
 test("admin HTML and direct function require the master session with private headers", async () => {
   for (const path of ["/admin", "/.netlify/functions/admin-dashboard"]) {
-    for (const access of [null, "t1", "t2", "aditya"]) {
+    for (const access of [null, "t1", "t2", "manuel"]) {
       const response = await handler({ httpMethod: "GET", path, headers: access ? { cookie: `${auth.COOKIE_NAME}=${auth.createSession(access)}` } : {} });
       assert.equal(response.statusCode, 303);
       assert.equal(response.headers.Location, "/.netlify/functions/stats-session?return=%2Fadmin");

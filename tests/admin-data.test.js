@@ -47,7 +47,7 @@ function setup(access = "admin", store = memoryStore()) {
 function json(response) { return JSON.parse(response.body); }
 
 test("admin metadata rejects anonymous and every partner role before touching storage", async () => {
-  for (const access of ["", "t1", "t2", "aditya", "unknown"]) {
+  for (const access of ["", "t1", "t2", "manuel", "unknown"]) {
     for (const method of ["GET", "PATCH"]) {
       const app = setup(access);
       assert.equal((await app.handler(event(method, input()))).statusCode, access ? 403 : 401);

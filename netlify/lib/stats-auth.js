@@ -5,7 +5,7 @@ const { partners } = require("./partner-campaigns");
 
 const COOKIE_NAME = "th_stats_session";
 const SESSION_SECONDS = 60 * 60 * 8;
-const CREATOR_ACCESS = new Set(["manuel", "piyush", "radhika", "aditya", "arshan", ...Object.keys(partners)]);
+const CREATOR_ACCESS = new Set(["manuel", "piyush", "radhika", "arshan", ...Object.keys(partners)]);
 const VALID_ACCESS = new Set(["admin", ...CREATOR_ACCESS]);
 
 function adminPassword() {

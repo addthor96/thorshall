@@ -57,7 +57,6 @@ function renderAdminPage() {
         <a class="tool-card" href="https://app.netlify.com/projects/gentle-mandazi-f0e944/configuration/env" target="_blank" rel="noopener noreferrer"><span class="tool-icon" aria-hidden="true">02</span><div><strong>Access &amp; configuration</strong><p>Manage partner passwords and deployment settings.</p></div><span aria-hidden="true">↗</span></a>
         <a class="tool-card" href="https://github.com/addthor96/thorshall" target="_blank" rel="noopener noreferrer"><span class="tool-icon" aria-hidden="true">03</span><div><strong>Website repository</strong><p>Open the source and campaign registry on GitHub.</p></div><span aria-hidden="true">↗</span></a>
         <a class="tool-card" href="/gsc-dashboard"><span class="tool-icon" aria-hidden="true">04</span><div><strong>Search performance</strong><p>Open the Google Search Console dashboard. Separate sign-in.</p></div><span aria-hidden="true">↗</span></a>
-        <a class="tool-card" href="/signup-admin"><span class="tool-icon" aria-hidden="true">05</span><div><strong>Signup management</strong><p>Open the existing signup admin. Separate sign-in.</p></div><span aria-hidden="true">↗</span></a>
       </div>
     </section>
     <footer class="dashboard-footer"><span>THOR'S HALL <span class="footer-separator">/</span> ADMIN</span><p>Campaign activity is not affiliate commission or partner earnings. Reporting periods use UTC.</p></footer>

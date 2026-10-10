@@ -20,9 +20,6 @@
   X-Robots-Tag: noindex, follow
   Cache-Control: no-cache, no-store, must-revalidate
 
-/signup-admin
-  X-Robots-Tag: noindex, nofollow
-
 /admin
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store
@@ -30,15 +27,6 @@
 /admin.html
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store
-
-/aditya-dashboard
-  X-Robots-Tag: noindex, nofollow
-
-/aditya-signup
-  X-Robots-Tag: noindex, nofollow
-
-/aditya
-  X-Robots-Tag: noindex, nofollow
 
 /join
   X-Robots-Tag: noindex, follow
@@ -87,9 +75,6 @@
   X-Robots-Tag: noindex, nofollow
 
 /radhika-stats1
-  X-Robots-Tag: noindex, nofollow
-
-/aditya-stats1
   X-Robots-Tag: noindex, nofollow
 
 /arshan-stats1

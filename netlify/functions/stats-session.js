@@ -15,7 +15,6 @@ const RETURN_ACCESS = new Map([
   ["/manuel-stats1", "manuel"],
   ["/piyush-stats1", "piyush"],
   ["/radhika-stats1", "radhika"],
-  ["/aditya-stats1", "aditya"],
   ["/arshan-stats1", "arshan"],
   ...Object.values(partners).map(partner => [partner.dashboardPath, partner.code])
 ]);

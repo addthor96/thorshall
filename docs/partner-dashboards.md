@@ -12,7 +12,7 @@ T1 and T2 use the same protected dashboard. T3 onward are unassigned. Public lan
 
 ## Owner admin hub
 
-`/admin` is the owner's central workspace. It uses the existing master statistics password and signed session. Partner passwords and partner sessions cannot open the hub or its private data endpoint. An owner session can move between the hub and any numbered dashboard without signing in again. Owner-only **Admin home** links return from individual dashboards to the hub. The separate existing Search Console and signup-review tools retain their own sign-in behavior.
+`/admin` is the owner's central workspace. It uses the existing master statistics password and signed session. Partner passwords and partner sessions cannot open the hub or its private data endpoint. An owner session can move between the hub and any numbered dashboard without signing in again. Owner-only **Admin home** links return from individual dashboards to the hub. The existing Search Console tool retains its own sign-in behavior.
 
 The hub lists every partner in the server campaign registry, supports name/code/campaign-ID search, and provides landing-page, tracked-link, dashboard and payment-history access. It shows whether each individual partner password is configured without returning any credential. Current-month Rainbet activity and recorded payments load from the existing protected endpoints; unavailable sources are labeled instead of replaced with zero or an empty ledger.
 
