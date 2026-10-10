@@ -1,7 +1,7 @@
 "use strict";
 
-const { getPartner } = require("../lib/partner-campaigns");
-const { isAuthorized } = require("../lib/stats-auth");
+const { getPartner, partners } = require("../lib/partner-campaigns");
+const { sessionAccess } = require("../lib/stats-auth");
 const { renderDashboard } = require("../lib/partner-dashboard-page");
 
 const headers = {
@@ -24,12 +24,13 @@ exports.handler = async function (event) {
   const routeCode = /^\/(t[1-9]\d*)-dashboard\/?$/.exec(event.path || "")?.[1];
   const partner = getPartner(routeCode || event.queryStringParameters?.partner);
   if (!partner) return { statusCode: 404, headers, body: "Dashboard not found." };
-  if (!isAuthorized(event, partner.code)) {
+  const access = sessionAccess(event);
+  if (access !== "admin" && access !== partner.code) {
     return {
       statusCode: 303,
       headers: { ...headers, Location: `/.netlify/functions/stats-session?return=${encodeURIComponent(partner.dashboardPath)}` },
       body: ""
     };
   }
-  return { statusCode: 200, headers, body: renderDashboard(partner) };
+  return { statusCode: 200, headers, body: renderDashboard(partner, { isAdmin: access === "admin", partners: Object.values(partners) }) };
 };

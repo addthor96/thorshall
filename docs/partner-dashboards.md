@@ -5,9 +5,10 @@ All dashboards share one template, stats endpoint, and login. Campaign codes sta
 
 | Code | Partner | Rainbet campaign | Landing | Dashboard |
 |---|---|---|---|---|
+| T1 | Motion review Agency | 130933 | /t1 | /t1-dashboard |
 | T2 | Swagat Nayak | 150649 | /t2 | /t2-dashboard |
 
-T1 remains the existing Motion review Agency landing page (campaign 130933). Its dashboard is not provisioned by this change. T3 onward are unassigned.
+T1 and T2 use the same protected dashboard. T3 onward are unassigned. Public landing pages are independent and are not changed by dashboard updates.
 
 ## Configuration
 
@@ -15,7 +16,8 @@ Keep credentials in Netlify environment variables, never in GitHub or frontend c
 
 - `RAINBET_STATISTIC_TOKEN`: the existing reporting token, used only by server functions.
 - `STATS_SESSION_SECRET`: existing signing secret of at least 32 characters (the existing `DASHBOARD_SESSION_SECRET` fallback is supported). Do not replace a working secret unnecessarily.
-- `STATS_PASSWORD_T2`: a unique, strong password for Swagat's dashboard. Share privately with Swagat after confirming login.
+- `STATS_PASSWORD_T1`: the individual password for Motion review Agency's dashboard.
+- `STATS_PASSWORD_T2`: the individual password for Swagat's dashboard. Share partner passwords privately after confirming login.
 - Existing `STATS_ADMIN_PASSWORD`, `STATS_DASHBOARD_PASSWORD`, or `DASHBOARD_PASSWORD`: owner access; never share the owner password with partners.
 
 Variables must be available to production Functions. A new production deploy is needed after variable changes. Without configured authentication the page stays closed. Owner authentication may work before the individual partner password has been set.
@@ -34,9 +36,19 @@ Do not duplicate the dashboard template or allow visitors to provide arbitrary R
 
 The default period is the current UTC month. Other filters are today, the last seven UTC calendar days including today, and all time. Totals come only from the assigned Rainbet campaign. In-memory report caching may delay visible updates by up to five minutes; every request is authorized before cache access. HTML and API responses use private/no-store headers.
 
-Unavailable report values are not replaced with zero. Payable earnings are not inferred from NGR: they require the final affiliate commission actually received and the partner agreement. This release does not contain a payout ledger or confirmed commission data source.
+Unavailable report values are not replaced with zero. Payable earnings are not inferred from NGR: they require the final affiliate commission actually received and the partner agreement. The payment history records payments the owner has already sent; it does not calculate commission or transfer money.
 
 T2's bottom `addthor` personal referral is outside campaign 150649 reporting. Netlify click forms remain separate from operator registrations/deposits. No usernames or individual player records are requested or exposed here.
+
+## Record monthly payments
+
+Use the same password field for partner and owner access. A partner password grants read-only access to that partner's report and payment history. The configured owner password grants master access across T1 and T2, with payment controls and a partner switcher rendered only for the owner. If already signed in as a partner, sign out before entering the owner password.
+
+After sending a payment, open that partner's dashboard as owner, choose **Record payment**, enter the reporting month, amount paid, currency, payment date and optional transaction reference, then save. Saved entries appear in that partner's read-only history. Corrections retain previous revisions. No existing earnings or payment amounts are seeded, estimated or inferred from campaign NGR.
+
+Payment records are stored in a private site-wide Netlify Blobs store, outside GitHub and outside individual deploys. A redeploy does not reset the ledger. Only the authenticated owner can create or correct records; partner sessions cannot mutate them even by calling the endpoint directly. Concurrent corrections are checked against the entry revision, and retries of a payment save use the same request identifier to avoid duplicate entries. Payment history loads independently from Rainbet reports.
+
+Production credentials are managed in Netlify; do not add storage credentials to the repository. The payment function uses Netlify's runtime-provided storage context. Do not test payment writes against real partner ledgers with fictitious amounts. Use local fixtures for write/conflict tests and verify the live ledger with a read-only request.
 
 ## Validation
 

@@ -6,7 +6,7 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function renderDashboard(partner) {
+function renderDashboard(partner, options = {}) {
   const code = String(partner.code || "").toLowerCase();
   if (!/^t[1-9][0-9]*$/.test(code)) throw new Error("Invalid partner code");
   const campaignUrl = new URL(partner.campaignUrl);
@@ -19,6 +19,31 @@ function renderDashboard(partner) {
   const landingUrl = escapeHtml(`https://thorshall.gg${landingPath}`);
   const link = escapeHtml(campaignUrl.href);
   const loginUrl = `/.netlify/functions/stats-session?return=${encodeURIComponent(`/${code}-dashboard`)}`;
+  const isAdmin = options.isAdmin === true;
+  const adminPartners = Array.isArray(options.partners) ? options.partners : [];
+  const adminNavigation = isAdmin ? `<nav class="admin-navigation" aria-label="Partner dashboards"><span>Admin access</span>${adminPartners.map(item => {
+    const itemCode = String(item.code || "");
+    if (!/^t[1-9][0-9]*$/.test(itemCode) || item.dashboardPath !== `/${itemCode}-dashboard`) return "";
+    return `<a href="${escapeHtml(item.dashboardPath)}"${itemCode === code ? ' aria-current="page"' : ""}>${escapeHtml(itemCode.toUpperCase())}<span>${escapeHtml(item.name)}</span></a>`;
+  }).join("")}</nav>` : "";
+  const paymentEditor = isAdmin ? `
+      <button type="button" class="button" id="new-payment" disabled>Record payment</button>
+      <section class="payment-editor" id="payment-editor" aria-labelledby="payment-editor-title" hidden>
+        <h3 id="payment-editor-title">Record payment</h3>
+        <p id="payment-editor-note">Record a payment you have already sent. This does not transfer money.</p>
+        <form id="payment-form" method="post" action="/.netlify/functions/partner-payments">
+          <div class="payment-fields">
+            <label>Reporting month<input type="month" id="payment-month" name="reportingMonth" required></label>
+            <label>Amount paid<input type="number" id="payment-amount" name="amountPaid" min="0.01" max="1000000000" step="0.01" inputmode="decimal" placeholder="0.00" required></label>
+            <label>Currency<select id="payment-currency" name="currency"><option value="USD">USD</option><option value="EUR">EUR</option><option value="GBP">GBP</option><option value="ISK">ISK</option><option value="USDT">USDT</option><option value="USDC">USDC</option></select></label>
+            <label>Payment date<input type="date" id="payment-date" name="paidAt" required></label>
+            <label class="payment-reference-field">Transaction reference <span>(optional)</span><input type="text" id="payment-reference" name="reference" maxlength="200" autocomplete="off" placeholder="Transfer or transaction reference"></label>
+            <label class="payment-reference-field" id="correction-reason-label" hidden>Reason for correction<input type="text" id="payment-correction-reason" name="correctionReason" maxlength="200" autocomplete="off" placeholder="Briefly explain the correction"></label>
+          </div>
+          <p class="payment-form-message" id="payment-form-message" role="status" aria-live="polite"></p>
+          <div class="payment-form-actions"><button class="button" type="submit" id="save-payment" disabled>Save payment</button><button class="button button-secondary" type="button" id="cancel-payment">Cancel</button></div>
+        </form>
+      </section>` : "";
   const metrics = [
     ["visits", "Visits", "Rainbet-tracked campaign visits", "count"],
     ["registrations", "Registrations", "Accounts attributed to your campaign", "count"],
@@ -60,6 +85,7 @@ function renderDashboard(partner) {
     </div>
   </header>
   <main class="shell" id="main">
+    ${adminNavigation}
     <section class="intro" aria-labelledby="page-title">
       <div>
         <p class="eyebrow">YOUR CAMPAIGN. AT A GLANCE.</p>
@@ -101,12 +127,21 @@ function renderDashboard(partner) {
         <p class="attribution-note"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 11v6M12 7v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Results cover campaign ${campaignId}. Personal <strong>addthor</strong> referrals are excluded.</span></p>
       </section>
       <section class="panel settlement-panel" aria-labelledby="settlement-title">
-        <div class="panel-header"><span class="panel-kicker">EARNINGS &amp; PAYOUTS</span><h2 id="settlement-title">Monthly reconciliation</h2><p>Your campaign activity and your final payout are different figures.</p></div>
-        <div class="settlement-status"><span class="statement-icon" aria-hidden="true">≡</span><div><strong>No payout statement available here yet</strong><p>Confirmed earnings are reconciled against the affiliate commission Thor’s Hall actually receives, under your agreed terms.</p></div></div>
+        <div class="panel-header"><span class="panel-kicker">REVENUE CONTEXT</span><h2 id="settlement-title">Understanding your figures</h2><p>Your campaign activity and your final payout are different figures.</p></div>
+        <div class="settlement-status"><span class="statement-icon" aria-hidden="true">≡</span><div><strong>Campaign revenue is not your payout</strong><p>Payments are reconciled against the affiliate commission Thor’s Hall actually receives, under your agreed terms. Payments recorded by Thor’s Hall appear below.</p></div></div>
         <div class="revenue-details"><div><span>Casino gross gaming revenue</span><strong data-metric="ggr" data-format="money">—</strong></div><div><span>Sportsbook net gaming revenue</span><strong data-metric="sbNgr" data-format="money">—</strong></div></div>
         <p class="settlement-note">Revenue totals are reported in USD and are not amounts payable to you.</p>
       </section>
     </div>
+    <section class="panel payments-panel" aria-labelledby="payments-title">
+      <div class="payments-heading"><div class="panel-header"><span class="panel-kicker">PAYMENT HISTORY</span><h2 id="payments-title">Recorded payments</h2><p>Payments recorded for ${label}. This history is separate from the statistics date range.</p></div><button type="button" class="refresh-button" id="refresh-payments">Refresh payments</button></div>
+      <p class="payments-status" id="payments-status" role="status" aria-live="polite">Loading payment history…</p>
+      <div class="error-panel" id="payments-error" hidden><p id="payments-error-message"></p><button class="button button-small" id="retry-payments" type="button">Try again</button><a class="button button-small" id="payments-login" href="${escapeHtml(loginUrl)}" hidden>Sign in again</a></div>
+      ${paymentEditor}
+      <div class="payment-list" id="payment-list" aria-busy="true"></div>
+      <p class="payment-empty" id="payment-empty" hidden>No payments have been recorded yet.</p>
+      <p class="settlement-note">A recorded payment is an entry maintained by Thor’s Hall, not a payment confirmation from Rainbet or a payment provider.</p>
+    </section>
     <footer class="dashboard-footer"><span>THOR'S HALL <span class="footer-separator">/</span> ${label} PARTNER DASHBOARD</span><p>Reporting periods use UTC. Rainbet reporting may take time to update.</p><a href="mailto:arnar@thorshall.gg">Need help?</a></footer>
   </main>
 </body>

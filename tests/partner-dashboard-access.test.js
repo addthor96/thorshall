@@ -8,6 +8,7 @@ const crypto = require("node:crypto");
 process.env.STATS_SESSION_SECRET = "test-only-session-secret-not-for-production";
 process.env.STATS_ADMIN_PASSWORD = "test-only-admin-password";
 process.env.STATS_PASSWORD_T2 = "test-only-t2-password";
+process.env.STATS_PASSWORD_T1 = "test-only-t1-password";
 process.env.STATS_PASSWORD_ADITYA = "test-only-aditya-password";
 
 const auth = require("../netlify/lib/stats-auth");
@@ -23,12 +24,32 @@ function event(access, extra = {}) {
 }
 
 test("T2 password creates only T2 access; admin and legacy logins retain their scopes", () => {
+  assert.equal(auth.authenticate("test-only-t1-password", "t1"), "t1");
+  assert.equal(auth.authenticate("test-only-t1-password", "t2"), "");
+  assert.equal(auth.authenticate("test-only-t2-password", "t1"), "");
+  assert.equal(auth.authenticate("test-only-admin-password", "t1"), "admin");
   assert.equal(auth.authenticate("test-only-t2-password", "t2"), "t2");
   assert.equal(auth.authenticate("test-only-t2-password", "aditya"), "");
   assert.equal(auth.authenticate("test-only-t2-password", "admin"), "");
   assert.equal(auth.authenticate("test-only-aditya-password", "t2"), "");
   assert.equal(auth.authenticate("test-only-aditya-password", "aditya"), "aditya");
   assert.equal(auth.authenticate("test-only-admin-password", "t2"), "admin");
+});
+
+test("T1 dashboard isolates campaign 130933 and permits master access", async () => {
+  const extra = { path: "/t1-dashboard", queryStringParameters: { partner: "t1" } };
+  for (const access of [null, "t2", "aditya"]) {
+    const result = await dashboard(event(access, extra));
+    assert.equal(result.statusCode, 303);
+    assert.equal(result.headers.Location, "/.netlify/functions/stats-session?return=%2Ft1-dashboard");
+  }
+  for (const access of ["t1", "admin"]) {
+    const result = await dashboard(event(access, extra));
+    assert.equal(result.statusCode, 200);
+    assert.match(result.body, /Motion review Agency/);
+    assert.match(result.body, /130933/);
+    assert.match(result.body, /https:\/\/playrainbet.com\/t5cni9vfb/);
+  }
 });
 
 test("anonymous and other partner requests cannot read dashboard HTML", async () => {

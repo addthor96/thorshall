@@ -50,6 +50,14 @@
 /partners
   X-Robots-Tag: noindex, follow
 
+/t1-dashboard
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: private, no-store
+
+/t1-dashboard.html
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: private, no-store
+
 /t2-dashboard
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store

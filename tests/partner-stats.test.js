@@ -19,11 +19,14 @@ const options = (changes = {}) => ({
   getToken: () => "test-token", fetchImpl: async () => response(report()), wait: async () => {}, ...changes
 });
 
-test("registry owns fixed T2 identity and rejects inherited or unregistered codes", () => {
+test("registry owns fixed T1/T2 identities and rejects inherited or unregistered codes", () => {
+  assert.equal(getPartner("T1"), partners.t1);
+  assert.equal(getPartner("t1").campaignId, "130933");
+  assert.equal(getPartner("t1").dashboardPath, "/t1-dashboard");
   assert.equal(getPartner("T2"), partners.t2);
   assert.equal(getPartner("t2").campaignId, "150649");
   assert.equal(getPartner("t2").dashboardPath, "/t2-dashboard");
-  for (const key of ["t1", "t3", "constructor", "__proto__", "150649", ""]) assert.equal(getPartner(key), null);
+  for (const key of ["t3", "constructor", "__proto__", "150649", ""]) assert.equal(getPartner(key), null);
   assert.ok(Object.isFrozen(partners));
   assert.ok(Object.isFrozen(partners.t2));
 });
@@ -156,6 +159,21 @@ test("outgoing report always has the registry campaign and the chosen range; no 
   assert.equal(payload.payout, undefined);
 });
 
+test("T1 and T2 use their own campaign filters and cache entries", async () => {
+  const requested = [];
+  const handler = createHandler(options({ authorize: () => true, fetchImpl: async url => {
+    requested.push(new URL(url).searchParams.getAll("campaign_ids[]"));
+    return response(report());
+  } }));
+  const t1 = bodyOf(await handler(event({ partner: "t1" })));
+  const t2 = bodyOf(await handler(event({ partner: "t2" })));
+  assert.equal(t1.partner.campaignId, "130933");
+  assert.equal(t2.partner.campaignId, "150649");
+  assert.deepEqual(requested, [["130933"], ["150649"]]);
+  assert.equal(bodyOf(await handler(event({ partner: "t1" }))).cached, true);
+  assert.equal(requested.length, 2);
+});
+
 test("different ranges have separate cache entries and month rollover fetches new totals", async () => {
   let now = new Date(NOW);
   let calls = 0;
@@ -175,7 +193,8 @@ test("generic campaign overrides and unregistered partners never reach upstream"
   for (const query of [{ campaignId: "89073" }, { campaign_id: "89073" }, { "campaign_ids[]": "89073" }, { range: "invalid" }]) {
     assert.equal((await handler(event(query))).statusCode, 400);
   }
-  assert.equal((await handler(event({ partner: "t1" }))).statusCode, 404);
+  assert.equal((await handler(event({ partner: "t3" }))).statusCode, 404);
+  assert.equal((await handler(event({ partner: "t1" }))).statusCode, 401);
   assert.equal((await handler(event({ partner: "admin" }))).statusCode, 404);
   assert.equal((await handler(event({}, { httpMethod: "POST" }))).statusCode, 405);
   assert.equal(calls, 0);
