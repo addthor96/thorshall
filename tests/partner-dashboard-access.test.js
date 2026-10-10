@@ -94,6 +94,17 @@ test("T2 login returns scoped secure cookie and the intended route", async () =>
   assert.equal(auth.isAuthorized({ headers: { cookie } }, "admin"), false);
 });
 
+test("login page preserves same-origin form Origin without allowing null or foreign origins", async () => {
+  const page = await login({ httpMethod: "GET", headers: {}, queryStringParameters: { return: "/t2-dashboard" } });
+  assert.equal(page.headers["Referrer-Policy"], "same-origin");
+  const body = new URLSearchParams({ return: "/t2-dashboard", password: "test-only-t2-password" }).toString();
+  for (const origin of ["null", "https://elsewhere.invalid", "https://thorshall.gg.elsewhere.invalid"]) {
+    const response = await login({ httpMethod: "POST", headers: { origin, host: "thorshall.gg" }, body });
+    assert.equal(response.statusCode, 403);
+    assert.equal(response.headers["Set-Cookie"], undefined);
+  }
+});
+
 test("login handles base64 form posts and rejects cross-origin forms", async () => {
   const body = new URLSearchParams({ return: "/t2-dashboard", password: "test-only-t2-password" }).toString();
   const good = await login({ httpMethod: "POST", headers: {}, isBase64Encoded: true, body: Buffer.from(body).toString("base64") });

@@ -46,7 +46,8 @@ function headers(extra = {}) {
     "CDN-Cache-Control": "no-store",
     "X-Robots-Tag": "noindex, nofollow, noarchive",
     "X-Frame-Options": "DENY",
-    "Referrer-Policy": "no-referrer",
+    // Native same-origin form POSTs need their Origin; no-referrer makes it null.
+    "Referrer-Policy": "same-origin",
     "Content-Security-Policy": "default-src 'self'; script-src 'none'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'",
     ...extra
   };
