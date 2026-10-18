@@ -48,7 +48,7 @@ The default period is the current UTC month. Other filters are today, the last s
 
 Unavailable report values are not replaced with zero. Payable earnings are not inferred from NGR: they require the final affiliate commission actually received and the partner agreement. The payment history records payments the owner has already sent; it does not calculate commission or transfer money.
 
-T2's bottom `addthor` personal referral is outside campaign 150649 reporting. Netlify click forms remain separate from operator registrations/deposits. No usernames or individual player records are requested or exposed here.
+T2's bottom `thorshall` personal referral is outside campaign 150649 reporting. Netlify click forms remain separate from operator registrations/deposits. No usernames or individual player records are requested or exposed here.
 
 ## Record monthly payments
 
