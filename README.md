@@ -8,4 +8,4 @@ If you choose to join Rainbet, enter **THORSHALL** in the Affiliate Code field d
 
 THORSHALL is an affiliate code. Thor's Hall may earn a commission from qualifying activity. No winnings are guaranteed. For adults of legal gambling age in permitted locations only. Play within your limits.
 
-[Open Rainbet with THORSHALL](https://rainbet.com/?r=thorshall) · [Visit Thor's Hall](https://thorshall.gg/) · [How to use THORSHALL](https://thorshall.gg/guide) · [Á íslensku](https://thorshall.gg/is)
+[Open Rainbet with THORSHALL](https://rainbet.com?r=thorshall) · [Visit Thor's Hall](https://thorshall.gg/) · [How to use THORSHALL](https://thorshall.gg/guide) · [Á íslensku](https://thorshall.gg/is)
