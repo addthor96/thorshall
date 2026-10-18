@@ -124,7 +124,7 @@ function renderDashboard(partner, options = {}) {
         <label class="link-label" for="campaign-url">Direct Rainbet campaign link</label>
         <div class="copy-field"><input id="campaign-url" type="url" value="${link}" readonly spellcheck="false"><button type="button" data-copy="campaign-url" aria-label="Copy your Rainbet campaign link">Copy</button></div>
         <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
-        <p class="attribution-note"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 11v6M12 7v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Results cover campaign ${campaignId}. Personal <strong>addthor</strong> referrals are excluded.</span></p>
+        <p class="attribution-note"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 11v6M12 7v1" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg><span>Results cover campaign ${campaignId}. Personal <strong>THORSHALL</strong> referrals are excluded.</span></p>
       </section>
       <section class="panel settlement-panel" aria-labelledby="settlement-title">
         <div class="panel-header"><span class="panel-kicker">REVENUE CONTEXT</span><h2 id="settlement-title">Understanding your figures</h2><p>Your campaign activity and your final payout are different figures.</p></div>
