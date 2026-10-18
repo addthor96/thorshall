@@ -56,9 +56,9 @@
     .stone::after { content:''; position:absolute; inset:12px; border:1px solid rgba(201,169,109,.08); pointer-events:none; }
     .rune-band { margin:0 0 21px; padding-bottom:16px; border-bottom:1px solid rgba(201,169,109,.34); color:#b09a71; font:20px/1.2 Georgia,serif; letter-spacing:.12em; text-align:center; text-shadow:0 1px #080807,0 -1px rgba(245,223,174,.16); overflow-wrap:anywhere; }
     .hammer { display:block; width:53px; height:53px; margin:0 auto 8px; fill:none; stroke:#c9a66d; stroke-width:2; stroke-linejoin:round; filter:drop-shadow(0 2px 1px #070908); }
-    .eyebrow { margin:0 0 8px; color:var(--bronze); font:700 12px/1.3 Cinzel,Georgia,serif; letter-spacing:.12em; text-transform:uppercase; }
+    .eyebrow { margin:0 0 8px; color:var(--bronze); font:700 12px/1.3 Cinzel,Georgia,serif; letter-spacing:.12em; text-align:center; text-transform:uppercase; }
     h1,h2 { color:#eee3cc; font-family:Cinzel,Georgia,serif; font-weight:700; text-shadow:0 2px 1px #080807,0 -1px rgba(255,248,220,.2); }
-    h1 { max-width:19ch; margin:0; font-size:clamp(32px,5.5vw,48px); line-height:1.17; overflow-wrap:break-word; }
+    h1 { max-width:19ch; margin:0 auto; font-size:clamp(32px,5.5vw,48px); line-height:1.17; text-align:center; overflow-wrap:break-word; }
     .intro { max-width:59ch; margin:14px 0 25px; color:var(--muted); font-size:17px; }
     .plaque {
       min-width:0; padding:24px 18px 22px; border:1px solid #95784c;
@@ -67,14 +67,9 @@
         inset 0 8px 25px rgba(0,0,0,.44),0 7px 20px rgba(0,0,0,.2);
       text-align:center;
     }
-    .plaque-label { display:block; color:#a99573; font:700 11px/1.4 Cinzel,Georgia,serif; letter-spacing:.17em; }
-    .code { display:block; max-width:100%; margin:11px auto 14px; color:var(--bright); font:800 clamp(28px,7.5vw,58px)/1.12 Cinzel,Georgia,serif; letter-spacing:.045em; text-shadow:0 2px 1px #050504,0 -1px rgba(255,251,226,.3); overflow-wrap:anywhere; }
-    .copy { min-width:150px; padding:10px 17px; border:1px solid #8c734b; border-radius:3px; background:linear-gradient(#43392a,#29251e); color:var(--bright); font:700 13px Arial,sans-serif; cursor:pointer; }
-    .copy:hover { background:#4b3e2c; }
-    .copy-status { min-height:19px; margin:8px 0 0; color:var(--muted); font-size:12px; }
     .join { display:inline-flex; align-items:center; justify-content:center; max-width:100%; min-height:52px; margin-top:22px; padding:12px 22px; border:1px solid #f5daa3; border-radius:4px; background:linear-gradient(#e5c786,#b9873d); box-shadow:inset 0 1px rgba(255,255,255,.3),0 6px 16px rgba(0,0,0,.22); color:#1b150e; font-weight:800; text-align:center; text-decoration:none; }
     .join:hover { filter:brightness(1.09); }
-    .rainbet-highlight { width:min(260px,100%); margin:12px auto 0; }
+    .rainbet-highlight { width:min(260px,100%); margin:0 auto; }
     .rainbet-highlight a { display:block; border-radius:8px; }
     .rainbet-highlight img { display:block; width:100%; height:auto; filter:drop-shadow(0 0 18px rgba(181,124,255,.7)); transition:transform .3s ease,filter .3s ease; }
     .rainbet-highlight a:hover img,.rainbet-highlight a:focus-visible img { transform:scale(1.06); filter:drop-shadow(0 0 24px rgba(181,124,255,1)); }
@@ -102,10 +97,9 @@
       h1 { font-size:clamp(30px,8vw,40px); }
       .intro { font-size:16px; }
       .plaque { padding:21px 12px 17px; }
-      .code { font-size:clamp(27px,8.3vw,43px); letter-spacing:0; }
       .join { display:flex; width:100%; }
     }
-    @media(max-width:350px) { .header-runes { display:none; } .code { font-size:27px; } }
+    @media(max-width:350px) { .header-runes { display:none; } }
   </style>
 </head>
 <body>
@@ -125,13 +119,9 @@
         </div>
         <p class="eyebrow">Höll Þórs · Rainbet</p>
         <h1>Kóði Höll Þórs á Rainbet</h1>
-        <p class="intro">Velkomin í Höll Þórs! Hér finnurðu THORSHALL-kóðann og hlekkinn á Rainbet. Smelltu á Rainbet-merkið eða afritaðu kóðann og notaðu hann við skráningu.</p>
+        <p class="intro">Velkomin í Höll Þórs! Smelltu á Rainbet-merkið hér fyrir neðan til að skoða Rainbet í gegnum Höll Þórs.</p>
 
         <div class="plaque">
-          <span class="plaque-label">Rainbet-kóði</span>
-          <strong class="code" id="code">THORSHALL</strong>
-          <button class="copy" id="copy-code" type="button">Afrita kóða</button>
-          <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
           <div class="rainbet-highlight">
             <a href="https://rainbet.com?r=thorshall" rel="nofollow sponsored" aria-label="Opna Rainbet með kóðanum THORSHALL"><img src="/img/rainbet-logo.png" width="260" height="117" alt="Rainbet"></a>
           </div>
@@ -160,22 +150,6 @@
   </div>
   <script>
     (() => {
-      const button = document.getElementById('copy-code');
-      const status = document.getElementById('copy-status');
-      button.addEventListener('click', async () => {
-        try {
-          await navigator.clipboard.writeText('THORSHALL');
-          status.textContent = 'Afritað.';
-        } catch (_) {
-          const selection = window.getSelection();
-          const range = document.createRange();
-          range.selectNodeContents(document.getElementById('code'));
-          selection.removeAllRanges();
-          selection.addRange(range);
-          status.textContent = 'Kóðinn er valinn. Afritaðu hann handvirkt.';
-        }
-      });
-
       const raw = new URLSearchParams(location.search).get('src') || '';
       const source = /^[a-z0-9._-]{1,45}$/i.test(raw) ? 'is-' + raw : 'is-page';
       document.querySelectorAll('a.join, .rainbet-highlight a').forEach(link => {
