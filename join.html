@@ -29,7 +29,7 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
   <h1>Opening Rainbet</h1>
   <p>You're being redirected through Thor's Hall. If nothing happens, use the button below.</p>
   <div class="loader"></div>
-  <a id="continueButton" class="btn" href="https://playrainbet.com/tkpmo0r1x" rel="nofollow sponsored">Continue to Rainbet</a>
+  <a id="continueButton" class="btn" href="https://rainbet.com?r=addthor" rel="nofollow sponsored">Continue to Rainbet</a>
   <div id="sourceLabel" class="source"></div>
   <div class="fine">18+ only. Gamble responsibly. Make sure online gaming is legal in your jurisdiction.</div>
 </main>
@@ -48,7 +48,7 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
 <script>
 (()=>{
   const DESTINATIONS=Object.freeze({
-    main:'https://playrainbet.com/tkpmo0r1x',
+    main:'https://rainbet.com?r=addthor',
     manuel:'https://playrainbet.com/ts5ttmsbr',
     arshan:'https://playrainbet.com/t2uog2tzs',
     sharma:'https://playrainbet.com/t2uog2tzs',
@@ -60,7 +60,7 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
     support:'https://rainbet.com?r=addthor'
   });
   const CAMPAIGN_IDS=Object.freeze({
-    main:'74218',
+    main:'',
     manuel:'87881',
     arshan:'125599',
     sharma:'125599',
@@ -74,10 +74,10 @@ p{margin:0 auto 22px;max-width:440px;color:#bfb6b1;font-size:13px;line-height:1.
   const params=new URLSearchParams(location.search);
   const raw=(params.get('src')||'direct').trim();
   const source=/^[a-zA-Z0-9._-]{1,60}$/.test(raw)?raw:'direct';
-  const requestedCampaign=(params.get('campaign')||'main').trim().toLowerCase();
+  const requestedCampaign=(params.get('campaign')||'support').trim().toLowerCase();
   const campaign=Object.prototype.hasOwnProperty.call(DESTINATIONS,requestedCampaign)
     ? requestedCampaign
-    : 'main';
+    : 'support';
   const DESTINATION=DESTINATIONS[campaign];
   const CAMPAIGN_ID=CAMPAIGN_IDS[campaign]||'';
   const button=document.getElementById('continueButton');
