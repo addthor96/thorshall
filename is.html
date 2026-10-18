@@ -74,7 +74,11 @@
     .copy-status { min-height:19px; margin:8px 0 0; color:var(--muted); font-size:12px; }
     .join { display:inline-flex; align-items:center; justify-content:center; max-width:100%; min-height:52px; margin-top:22px; padding:12px 22px; border:1px solid #f5daa3; border-radius:4px; background:linear-gradient(#e5c786,#b9873d); box-shadow:inset 0 1px rgba(255,255,255,.3),0 6px 16px rgba(0,0,0,.22); color:#1b150e; font-weight:800; text-align:center; text-decoration:none; }
     .join:hover { filter:brightness(1.09); }
-    .destination { margin:8px 0 0; color:#aa9b86; font-size:12px; overflow-wrap:anywhere; }
+    .join-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:22px; }
+    .join-row .join { margin-top:0; }
+    .rainbet-logo-link { display:inline-flex; align-items:center; justify-content:center; width:178px; min-height:52px; padding:0 9px; border:1px solid #7489b0; border-radius:4px; background:linear-gradient(#233352,#121a2b); box-shadow:0 6px 16px rgba(0,0,0,.22); transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
+    .rainbet-logo-link img { display:block; width:158px; height:auto; }
+    .rainbet-logo-link:hover { transform:translateY(-2px); border-color:#dce9ff; box-shadow:0 0 0 2px rgba(185,207,255,.2),0 10px 24px rgba(0,0,0,.35); }
     .benefit { margin:28px 0 0; padding:20px 0; border-top:1px solid rgba(201,169,109,.31); border-bottom:1px solid rgba(201,169,109,.31); }
     .benefit strong { color:var(--bright); font:700 20px Cinzel,Georgia,serif; text-shadow:0 1px #080807; }
     .benefit p { margin:5px 0 0; color:var(--muted); }
@@ -82,7 +86,6 @@
     ol { margin:0; padding-left:24px; color:var(--muted); }
     li { padding-left:5px; margin:8px 0; }
     li::marker { color:var(--bright); font-weight:bold; }
-    .after { margin:17px 0 0; color:var(--muted); font-size:14px; }
     .again { margin-top:18px; }
     .notice { max-width:65ch; margin:20px 0 0; color:#b0a28e; font-size:12px; }
     footer { display:flex; flex-wrap:wrap; justify-content:space-between; gap:10px; padding:19px 3px 32px; color:#a99a82; font-size:12px; }
@@ -102,6 +105,8 @@
       .plaque { padding:21px 12px 17px; }
       .code { font-size:clamp(27px,8.3vw,43px); letter-spacing:0; }
       .join { display:flex; width:100%; }
+      .join-row { flex-direction:column; align-items:stretch; }
+      .rainbet-logo-link { width:100%; }
     }
     @media(max-width:350px) { .header-runes { display:none; } .code { font-size:27px; } }
   </style>
@@ -123,7 +128,7 @@
         </div>
         <p class="eyebrow">Höll Þórs · Rainbet</p>
         <h1>Kóði Höll Þórs á Rainbet</h1>
-        <p class="intro">Ertu að skoða Rainbet? Skráðu þig í gegnum Höll Þórs með hlekknum eða kóðanum THORSHALL. Athugaðu að kóðinn sé skráður áður en þú leggur inn.</p>
+        <p class="intro">Velkomin í Höll Þórs! Hér finnurðu THORSHALL-kóðann og hlekkinn á Rainbet. Smelltu á hnappinn eða afritaðu kóðann og notaðu hann við skráningu.</p>
 
         <div class="plaque">
           <span class="plaque-label">Rainbet-kóði</span>
@@ -132,21 +137,22 @@
           <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
         </div>
 
-        <a class="join" href="https://rainbet.com?r=thorshall" rel="nofollow sponsored">Skráðu þig í gegnum Höll Þórs</a>
-        <p class="destination">Hlekkurinn opnar rainbet.com?r=thorshall</p>
+        <div class="join-row">
+          <a class="join" href="https://rainbet.com?r=thorshall" rel="nofollow sponsored">Skráðu þig í gegnum Höll Þórs</a>
+          <a class="rainbet-logo-link" href="https://rainbet.com?r=thorshall" rel="nofollow sponsored" aria-label="Opna Rainbet með kóðanum THORSHALL"><img src="/img/rainbet-logo.png" width="158" height="71" alt="Rainbet"></a>
+        </div>
 
         <div class="benefit">
           <strong>+20% RakeBoost í 72 klst.</strong>
-          <p>Rainbet býður þessa hækkun á umbunum þegar affiliate-kóði er innleystur. Þetta er ekki 20% innborgunarbónus.</p>
+          <p>Rainbet býður þessa tímabundnu hækkun á umbunum þegar affiliate-kóði er innleystur.</p>
         </div>
 
         <h2>Svona notarðu kóðann</h2>
         <ol>
           <li>Opnaðu Rainbet með hlekknum.</li>
           <li>Við skráningu skaltu athuga affiliate-kóðareitinn. Ef THORSHALL birtist ekki, sláðu hann inn.</li>
-          <li>Staðfestu hjá Rainbet að kóðinn sé skráður áður en þú leggur inn.</li>
+          <li>Staðfestu hjá Rainbet að kóðinn sé skráður á aðganginn þinn.</li>
         </ol>
-        <p class="after">Ef þú stofnaðir aðgang fyrir minna en sólarhring og hefur ekki lagt inn, segir Rainbet að þú getir enn bætt kóðanum við í veskinu.</p>
         <a class="join again" href="https://rainbet.com?r=thorshall" rel="nofollow sponsored">Skráðu þig í gegnum Höll Þórs</a>
 
         <p class="notice">Aðeins fyrir 18 ára og eldri. Staðfestu að þjónustan sé heimil þar sem þú ert. Fjárhættuspil geta leitt til taps. Höll Þórs getur fengið þóknun vegna gjaldgengrar virkni í gegnum hlekkinn eða kóðann. <a href="https://help.rainbet.com/en/articles/9171035-rewards-overview" target="_blank" rel="nofollow noopener">Umbunarreglur Rainbet</a>.</p>
@@ -177,7 +183,7 @@
 
       const raw = new URLSearchParams(location.search).get('src') || '';
       const source = /^[a-z0-9._-]{1,45}$/i.test(raw) ? 'is-' + raw : 'is-page';
-      document.querySelectorAll('a.join').forEach(link => {
+      document.querySelectorAll('a.join, a.rainbet-logo-link').forEach(link => {
         link.addEventListener('click', () => {
           const body = new URLSearchParams({
             'form-name':'thorshall-join-click',
