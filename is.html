@@ -18,8 +18,8 @@
     html { min-width:280px; }
     body {
       margin:0; color:var(--text); font:16px/1.6 Arial,Helvetica,sans-serif;
-      background:linear-gradient(180deg,rgba(5,5,5,.83),rgba(5,5,5,.97)),
-        url('https://thorshall.gg/viking-hall-bg.webp') center/cover fixed no-repeat,#0a0908;
+      background:linear-gradient(90deg,rgba(3,6,10,.51),rgba(3,6,10,.58) 52%,rgba(3,6,10,.42)),
+        url('/img/is-thor-storm.webp') center/cover fixed no-repeat,#0a1118;
     }
     a { color:var(--bright); text-underline-offset:3px; }
     a:focus-visible,button:focus-visible { outline:3px solid #fff; outline-offset:3px; }
@@ -34,21 +34,22 @@
       padding:clamp(22px,5vw,48px);
       border:2px solid var(--edge); border-radius:8px;
       background:
-        radial-gradient(circle at 80% 2%,rgba(214,170,95,.075),transparent 40%),
+        radial-gradient(circle at 78% 0,rgba(142,181,199,.1),transparent 38%),
         repeating-linear-gradient(110deg,rgba(255,255,255,.013) 0 1px,transparent 1px 7px),
-        linear-gradient(145deg,#302b24,#1a1916 55%,#24221d);
+        linear-gradient(145deg,rgba(43,45,43,.96),rgba(20,23,24,.97) 55%,rgba(32,34,34,.97));
       box-shadow:inset 0 0 0 5px #161512,inset 0 0 0 6px rgba(180,147,92,.31),
         inset 0 15px 36px rgba(0,0,0,.38),0 20px 65px rgba(0,0,0,.45);
     }
     .stone::after { content:''; position:absolute; inset:12px; border:1px solid rgba(201,169,109,.08); pointer-events:none; }
-    .rune-band { margin:0 0 21px; padding-bottom:13px; border-bottom:1px solid rgba(201,169,109,.3); color:#a58d63; font:23px/1.2 Georgia,serif; letter-spacing:.18em; text-align:center; text-shadow:0 1px #080807,0 -1px rgba(245,223,174,.13); overflow-wrap:anywhere; }
+    .rune-band { margin:0 0 21px; padding-bottom:16px; border-bottom:1px solid rgba(201,169,109,.34); color:#b09a71; font:20px/1.2 Georgia,serif; letter-spacing:.12em; text-align:center; text-shadow:0 1px #080807,0 -1px rgba(245,223,174,.16); overflow-wrap:anywhere; }
+    .hammer { display:block; width:53px; height:53px; margin:0 auto 8px; fill:none; stroke:#c9a66d; stroke-width:2; stroke-linejoin:round; filter:drop-shadow(0 2px 1px #070908); }
     .eyebrow { margin:0 0 8px; color:var(--bronze); font:700 12px/1.3 Cinzel,Georgia,serif; letter-spacing:.12em; text-transform:uppercase; }
     h1,h2 { color:#eee3cc; font-family:Cinzel,Georgia,serif; font-weight:700; text-shadow:0 2px 1px #080807,0 -1px rgba(255,248,220,.2); }
     h1 { max-width:19ch; margin:0; font-size:clamp(32px,5.5vw,48px); line-height:1.17; overflow-wrap:break-word; }
     .intro { max-width:59ch; margin:14px 0 25px; color:var(--muted); font-size:17px; }
     .plaque {
       min-width:0; padding:24px 18px 22px; border:1px solid #95784c;
-      background:linear-gradient(145deg,#151613,#24221a 55%,#10110f);
+      background:linear-gradient(145deg,#171d1d,#252824 55%,#101514);
       box-shadow:inset 0 0 0 3px #11120f,inset 0 0 0 4px rgba(198,160,94,.27),
         inset 0 8px 25px rgba(0,0,0,.44),0 7px 20px rgba(0,0,0,.2);
       text-align:center;
@@ -81,7 +82,8 @@
       .header-runes { font-size:15px; }
       main { padding-top:3px; }
       .stone { padding:24px 18px; }
-      .rune-band { font-size:17px; letter-spacing:.12em; }
+      .rune-band { font-size:clamp(13px,4vw,17px); letter-spacing:.06em; }
+      .hammer { width:45px; height:45px; }
       h1 { font-size:clamp(30px,8vw,40px); }
       .intro { font-size:16px; }
       .plaque { padding:21px 12px 17px; }
@@ -99,7 +101,13 @@
     </header>
     <main>
       <article class="stone">
-        <div class="rune-band" aria-hidden="true">ᚦ ᛟ ᚱ ᛋ · ᚺ ᚨ ᛚ ᛚ</div>
+        <div class="rune-band" aria-hidden="true">
+          <svg class="hammer" viewBox="0 0 64 64" role="presentation" focusable="false">
+            <path d="M9 15 17 10h30l8 5v17l-8 5H38v17l-6 5-6-5V37h-9l-8-5Z"/>
+            <path d="M17 10v16l8 5h14l8-5V10M26 37h12M32 37v18M20 18h24"/>
+          </svg>
+          ᚦᛟᚱᛋ · ᚺᚨᛚᛚ
+        </div>
         <p class="eyebrow">Thor's Hall · Rainbet</p>
         <h1>Minn kóði á Rainbet</h1>
         <p class="intro">Ég er Arnar og rek Thor's Hall. Ef þú ætlar að nota Rainbet geturðu farið þangað í gegnum hlekkinn minn og notað kóðann hér að neðan.</p>
