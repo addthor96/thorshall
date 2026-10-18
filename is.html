@@ -74,11 +74,10 @@
     .copy-status { min-height:19px; margin:8px 0 0; color:var(--muted); font-size:12px; }
     .join { display:inline-flex; align-items:center; justify-content:center; max-width:100%; min-height:52px; margin-top:22px; padding:12px 22px; border:1px solid #f5daa3; border-radius:4px; background:linear-gradient(#e5c786,#b9873d); box-shadow:inset 0 1px rgba(255,255,255,.3),0 6px 16px rgba(0,0,0,.22); color:#1b150e; font-weight:800; text-align:center; text-decoration:none; }
     .join:hover { filter:brightness(1.09); }
-    .join-row { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:22px; }
-    .join-row .join { margin-top:0; }
-    .rainbet-logo-link { display:inline-flex; align-items:center; justify-content:center; width:178px; min-height:52px; padding:0 9px; border:1px solid #7489b0; border-radius:4px; background:linear-gradient(#233352,#121a2b); box-shadow:0 6px 16px rgba(0,0,0,.22); transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease; }
-    .rainbet-logo-link img { display:block; width:158px; height:auto; }
-    .rainbet-logo-link:hover { transform:translateY(-2px); border-color:#dce9ff; box-shadow:0 0 0 2px rgba(185,207,255,.2),0 10px 24px rgba(0,0,0,.35); }
+    .rainbet-highlight { width:min(260px,100%); margin:12px auto 0; }
+    .rainbet-highlight a { display:block; border-radius:8px; }
+    .rainbet-highlight img { display:block; width:100%; height:auto; filter:drop-shadow(0 0 18px rgba(181,124,255,.7)); transition:transform .3s ease,filter .3s ease; }
+    .rainbet-highlight a:hover img,.rainbet-highlight a:focus-visible img { transform:scale(1.06); filter:drop-shadow(0 0 24px rgba(181,124,255,1)); }
     .benefit { margin:28px 0 0; padding:20px 0; border-top:1px solid rgba(201,169,109,.31); border-bottom:1px solid rgba(201,169,109,.31); }
     .benefit strong { color:var(--bright); font:700 20px Cinzel,Georgia,serif; text-shadow:0 1px #080807; }
     .benefit p { margin:5px 0 0; color:var(--muted); }
@@ -105,8 +104,6 @@
       .plaque { padding:21px 12px 17px; }
       .code { font-size:clamp(27px,8.3vw,43px); letter-spacing:0; }
       .join { display:flex; width:100%; }
-      .join-row { flex-direction:column; align-items:stretch; }
-      .rainbet-logo-link { width:100%; }
     }
     @media(max-width:350px) { .header-runes { display:none; } .code { font-size:27px; } }
   </style>
@@ -128,18 +125,16 @@
         </div>
         <p class="eyebrow">Höll Þórs · Rainbet</p>
         <h1>Kóði Höll Þórs á Rainbet</h1>
-        <p class="intro">Velkomin í Höll Þórs! Hér finnurðu THORSHALL-kóðann og hlekkinn á Rainbet. Smelltu á hnappinn eða afritaðu kóðann og notaðu hann við skráningu.</p>
+        <p class="intro">Velkomin í Höll Þórs! Hér finnurðu THORSHALL-kóðann og hlekkinn á Rainbet. Smelltu á Rainbet-merkið eða afritaðu kóðann og notaðu hann við skráningu.</p>
 
         <div class="plaque">
           <span class="plaque-label">Rainbet-kóði</span>
           <strong class="code" id="code">THORSHALL</strong>
           <button class="copy" id="copy-code" type="button">Afrita kóða</button>
           <p class="copy-status" id="copy-status" role="status" aria-live="polite"></p>
-        </div>
-
-        <div class="join-row">
-          <a class="join" href="https://rainbet.com?r=thorshall" rel="nofollow sponsored">Skráðu þig í gegnum Höll Þórs</a>
-          <a class="rainbet-logo-link" href="https://rainbet.com?r=thorshall" rel="nofollow sponsored" aria-label="Opna Rainbet með kóðanum THORSHALL"><img src="/img/rainbet-logo.png" width="158" height="71" alt="Rainbet"></a>
+          <div class="rainbet-highlight">
+            <a href="https://rainbet.com?r=thorshall" rel="nofollow sponsored" aria-label="Opna Rainbet með kóðanum THORSHALL"><img src="/img/rainbet-logo.png" width="260" height="117" alt="Rainbet"></a>
+          </div>
         </div>
 
         <div class="benefit">
@@ -183,7 +178,7 @@
 
       const raw = new URLSearchParams(location.search).get('src') || '';
       const source = /^[a-z0-9._-]{1,45}$/i.test(raw) ? 'is-' + raw : 'is-page';
-      document.querySelectorAll('a.join, a.rainbet-logo-link').forEach(link => {
+      document.querySelectorAll('a.join, .rainbet-highlight a').forEach(link => {
         link.addEventListener('click', () => {
           const body = new URLSearchParams({
             'form-name':'thorshall-join-click',
