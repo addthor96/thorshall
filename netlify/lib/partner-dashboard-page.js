@@ -142,7 +142,7 @@ function renderDashboard(partner, options = {}) {
       <p class="payment-empty" id="payment-empty" hidden>No payments have been recorded yet.</p>
       <p class="settlement-note">A recorded payment is an entry maintained by Thor’s Hall, not a payment confirmation from Rainbet or a payment provider.</p>
     </section>
-    <footer class="dashboard-footer"><span>THOR'S HALL <span class="footer-separator">/</span> ${label} PARTNER DASHBOARD</span><p>Reporting periods use UTC. Rainbet reporting may take time to update.</p><a href="mailto:arnar@thorshall.gg">Need help?</a></footer>
+    <footer class="dashboard-footer"><span>THOR'S HALL <span class="footer-separator">/</span> ${label} PARTNER DASHBOARD</span><p>Reporting periods use UTC. Rainbet reporting may take time to update.</p><a href="/contact">Need help?</a></footer>
   </main>
 </body>
 </html>`;

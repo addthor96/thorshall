@@ -22,7 +22,7 @@
       if (method === 'WhatsApp') {
         label.textContent = 'WhatsApp number (required)';
         contact.placeholder = '+354 1234567';
-        hint.textContent = 'Include your country code so Arnar can reach you on WhatsApp.';
+        hint.textContent = 'Include your country code so Thor\'s Hall can reach you on WhatsApp.';
       } else {
         label.textContent = method + ' username (required)';
         contact.placeholder = 'Your ' + method + ' username';

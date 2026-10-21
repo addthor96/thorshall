@@ -2,11 +2,19 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://thorshall.gg/</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://thorshall.gg/about</loc>
-    <lastmod>2026-09-26</lastmod>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://thorshall.gg/contact</loc>
+    <lastmod>2026-10-21</lastmod>
+  </url>
+  <url>
+    <loc>https://thorshall.gg/privacy</loc>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://thorshall.gg/creators</loc>
@@ -25,7 +33,7 @@
   </url>
   <url>
     <loc>https://thorshall.gg/rainbet-referral-code</loc>
-    <lastmod>2026-10-18</lastmod>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://thorshall.gg/is</loc>
@@ -46,6 +54,7 @@
   </url>
   <url>
     <loc>https://thorshall.gg/rainbet-welcome-bonus-review</loc>
+    <lastmod>2026-10-21</lastmod>
   </url>
   <url>
     <loc>https://thorshall.gg/rainbet-withdrawal-time</loc>
