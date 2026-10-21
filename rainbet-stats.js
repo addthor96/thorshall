@@ -1,6 +1,7 @@
 (function () {
   const statNodes = document.querySelectorAll('[data-rainbet-stat]');
   if (!statNodes.length) return;
+  const widgets = document.querySelectorAll('.analytics-widget');
 
   const setStat = (key, value) => {
     document.querySelectorAll(`[data-rainbet-stat="${key}"]`).forEach((node) => {
@@ -24,8 +25,6 @@
       ? Number(value).toLocaleString('en-US', { maximumFractionDigits: 0 })
       : '—';
 
-  setStat('updated', 'Loading live activity…');
-
   fetch('/.netlify/functions/rainbet-stats', { cache: 'no-store' })
     .then((response) =>
       response.json().then((data) => {
@@ -36,12 +35,16 @@
       }),
     )
     .then((data) => {
+      if (![data.wager, data.deposits, data.visits, data.registrations].some(isNumber)) {
+        throw new Error('No metrics available');
+      }
       setStat('wager', money(data.wager));
       setStat('deposits', money(data.deposits));
       setStat('visits', `${count(data.visits)} / ${count(data.registrations)}`);
       setStat('updated', 'Metrics sourced from live activity.');
+      widgets.forEach((widget) => { widget.hidden = false; });
     })
     .catch(() => {
-      setStat('updated', 'Live stats temporarily unavailable.');
+      // Keep the widget hidden when the report is unavailable.
     });
 })();

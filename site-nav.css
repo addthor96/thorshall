@@ -103,6 +103,10 @@
   transform: translateY(-50%);
 }
 
+.analytics-widget[hidden] {
+  display: none !important;
+}
+
 .analytics-trigger {
   display: block;
   width: 64px;

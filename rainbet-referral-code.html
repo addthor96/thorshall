@@ -40,4 +40,15 @@
 <section class="section"><h2>Before joining</h2><p>Rainbet has location and age restrictions. Check your eligibility and the current terms before registering. If you need a broader walkthrough, read our <a href="/guide">Rainbet guide</a> or <a href="/rainbet-review">Rainbet review</a>.</p><div class="actions"><a class="btn" href="/join?src=referral-code-bottom&amp;campaign=thorshall" rel="nofollow sponsored noopener" target="_blank">Join with THORSHALL</a><a class="btn alt" href="/rainbet-supported-countries">Check supported countries</a></div></section>
 </main>
 <footer><span>© 2026 Thor's Hall · 18+ · Gamble responsibly.</span><span><a href="/affiliate-disclosure">Affiliate disclosure</a> · <a href="/privacy">Privacy</a></span></footer>
-</div><script>document.getElementById('copyCode').addEventListener('click',async function(){const status=document.getElementById('copyStatus');try{await navigator.clipboard.writeText('THORSHALL');status.textContent='Copied: THORSHALL';}catch(e){status.textContent='Select the code above to copy it.';}});</script></body></html>
+</div><script>
+document.getElementById('copyCode').addEventListener('click',async function(){const status=document.getElementById('copyStatus');try{await navigator.clipboard.writeText('THORSHALL');status.textContent='Copied: THORSHALL';}catch(e){status.textContent='Select the code above to copy it.';}});
+const sourceFromPage = new URLSearchParams(location.search).get('from');
+const referralSources = {home: 'home-referral-code', 'home-nav': 'home-nav-referral-code', about: 'about-referral-code'};
+if (Object.prototype.hasOwnProperty.call(referralSources, sourceFromPage)) {
+  document.querySelectorAll('a[href^="/join?"]').forEach((link) => {
+    const outbound = new URL(link.getAttribute('href'), location.origin);
+    outbound.searchParams.set('src', referralSources[sourceFromPage]);
+    link.setAttribute('href', outbound.pathname + outbound.search);
+  });
+}
+</script></body></html>
