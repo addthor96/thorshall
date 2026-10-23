@@ -19,15 +19,20 @@
     body{margin:0;color:var(--white);background:#07100d;font:16px/1.5 Arial,Helvetica,sans-serif}
     a{color:inherit}a:focus-visible{outline:3px solid var(--gold);outline-offset:5px}
     .page{min-height:100svh;display:flex;flex-direction:column;isolation:isolate;position:relative;overflow:hidden;background:#07100d}
-    .page:before{content:'';position:absolute;z-index:-2;inset:0;background:url('/img/sports-multisport.webp') 50% 52%/cover no-repeat}
-    .page:after{content:'';position:absolute;z-index:-1;inset:0;background:linear-gradient(90deg,rgba(3,9,9,.35),rgba(3,9,9,.5) 39%,rgba(3,9,9,.14) 72%,rgba(3,9,9,.16)),linear-gradient(0deg,rgba(3,9,9,.91),transparent 43%,rgba(3,9,9,.25))}
+    .art{position:absolute;z-index:-2;inset:0;display:grid;grid-template-columns:43% 57%;overflow:hidden}
+    .fight-art{display:grid;grid-template-rows:1fr 1fr;min-height:0;border-right:1px solid rgba(237,195,110,.53)}
+    .boxing,.mma,.stadium{min-height:0;background-repeat:no-repeat;background-size:100% 100%}
+    .boxing{background-image:url('/img/sports-boxing.webp');border-bottom:2px solid rgba(237,195,110,.67)}
+    .mma{background-image:url('/img/sports-mma.webp')}
+    .stadium{background-image:url('/img/sports-stadium.webp')}
+    .page:after{content:'';position:absolute;z-index:-1;inset:0;pointer-events:none;background:linear-gradient(90deg,rgba(3,9,9,.13) 0%,rgba(3,9,9,.22) 36%,rgba(3,9,9,.42) 47%,rgba(3,9,9,.22) 77%,rgba(3,9,9,.2)),linear-gradient(0deg,rgba(3,9,9,.87),transparent 42%,rgba(3,9,9,.18))}
     .wrap{width:min(1260px,calc(100% - 64px));margin-inline:auto}
     header{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:25px 0;border-bottom:1px solid rgba(255,255,255,.2)}
     .brand{display:inline-flex;align-items:center;gap:11px;text-decoration:none;font:900 20px/1 Georgia,'Times New Roman',serif;letter-spacing:.045em;white-space:nowrap}
     .brand img{display:block;width:42px;height:42px;object-fit:cover;border-radius:8px}
     .header-tag{color:#e4e7e2;font-size:11px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
     main{flex:1;display:flex;align-items:center;padding:67px 0 84px}
-    .hero{max-width:760px;margin-left:clamp(300px,30vw,435px);padding:30px 34px 30px 38px;border-left:2px solid rgba(237,195,110,.7);background:linear-gradient(90deg,rgba(2,8,10,.84),rgba(2,8,10,.6) 68%,rgba(2,8,10,.08))}
+    .hero{max-width:630px;margin-left:clamp(435px,43vw,555px);padding:30px 34px 30px 38px;border-left:2px solid rgba(237,195,110,.7);background:linear-gradient(90deg,rgba(2,8,10,.86),rgba(2,8,10,.58) 72%,rgba(2,8,10,.08))}
     .eyebrow{display:flex;align-items:center;gap:11px;margin:0 0 25px;color:var(--gold);font-size:12px;font-weight:900;letter-spacing:.23em;text-transform:uppercase}
     .eyebrow:before{content:'';width:9px;height:9px;border-radius:50%;background:#a6d582;box-shadow:0 0 0 5px rgba(166,213,130,.14)}
     h1{margin:0;color:var(--white);font:900 clamp(64px,7.4vw,108px)/.9 Impact,'Arial Narrow','Franklin Gothic Medium',Arial,sans-serif;letter-spacing:.012em;text-transform:uppercase}
@@ -44,15 +49,15 @@
     .bottom{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 0 22px;border-top:1px solid rgba(255,255,255,.2);color:#bac3bb;font-size:12px}
     .bottom p{margin:0;max-width:560px}
     .bottom a{text-underline-offset:3px;color:#d8ddd5}
-    @media(max-width:980px){.hero{margin-left:0}}
-    @media(max-width:700px){.wrap{width:min(100% - 36px,1260px)}.page:before{background-position:42% center}.page:after{background:linear-gradient(90deg,rgba(3,9,9,.83),rgba(3,9,9,.59)),linear-gradient(0deg,#030909,transparent 72%,rgba(3,9,9,.4))}header{padding:15px 0}.brand{font-size:17px}.brand img{width:38px;height:38px}.header-tag{font-size:9px;letter-spacing:.12em}main{align-items:flex-start;padding:90px 0 56px}.hero{padding:0;border:0;background:none}.eyebrow{font-size:10px;margin-bottom:20px}h1{font-size:clamp(62px,15.5vw,91px)}.intro{max-width:430px;margin-top:21px;font-size:17px}.cta{margin-top:27px}.bottom{align-items:flex-start;flex-direction:column;gap:6px;font-size:11px}}
-    @media(max-width:560px){.page:before{background-size:100% auto;background-position:center 69px;background-repeat:no-repeat}.page:after{background:linear-gradient(0deg,#030909 0%,#030909 39%,rgba(3,9,9,.63) 72%,rgba(3,9,9,.22) 100%)}main{padding-top:240px}}
-    @media(max-width:390px){.header-tag{display:none}main{padding-top:230px}h1{font-size:clamp(57px,15vw,62px)}.intro{font-size:16px}}
+    @media(max-width:1050px){.art{top:72px;bottom:auto;height:320px}.page:after{top:72px;bottom:auto;height:320px;background:linear-gradient(0deg,#07100d,transparent 50%)}main{align-items:flex-start;padding-top:354px}.hero{margin-left:0}}
+    @media(max-width:700px){.wrap{width:min(100% - 36px,1260px)}header{padding:15px 0}.brand{font-size:17px}.brand img{width:38px;height:38px}.header-tag{font-size:9px;letter-spacing:.12em}.art{top:69px;height:250px;grid-template-areas:'stadium' 'fights';grid-template-columns:1fr;grid-template-rows:148px 102px}.fight-art{grid-area:fights;grid-template-columns:1fr 1fr;grid-template-rows:1fr;border-top:2px solid rgba(237,195,110,.67);border-right:0}.boxing{border-bottom:0;border-right:1px solid rgba(237,195,110,.5)}.stadium{grid-area:stadium}.page:after{top:69px;height:250px;background:linear-gradient(0deg,#07100d,transparent 36%)}main{padding:276px 0 56px}.hero{padding:0;border:0;background:none}.eyebrow{font-size:10px;margin-bottom:20px}h1{font-size:clamp(62px,15.5vw,91px)}.intro{max-width:430px;margin-top:21px;font-size:17px}.cta{margin-top:27px}.bottom{align-items:flex-start;flex-direction:column;gap:6px;font-size:11px}}
+    @media(max-width:390px){.header-tag{display:none}main{padding-top:266px}h1{font-size:clamp(57px,15vw,62px)}.intro{font-size:16px}}
     @media(prefers-reduced-motion:reduce){.cta{transition:none}.cta:hover{transform:none}}
   </style>
 </head>
 <body>
   <div class="page">
+    <div class="art" aria-hidden="true"><div class="fight-art"><div class="boxing"></div><div class="mma"></div></div><div class="stadium"></div></div>
     <header class="wrap">
       <a class="brand" href="/" aria-label="Thor's Hall home"><img src="/img/logo.webp" alt="" width="42" height="42"><span>THOR'S HALL</span></a>
       <span class="header-tag">Sports betting / Live</span>
