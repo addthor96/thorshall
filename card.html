@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<meta http-equiv="refresh" content="1;url=https://rainbet.com?r=thorshall">
+<title>Redirecting | Thor's Hall</title>
+<style>html,body{margin:0;min-height:100%;background:#080b0c}</style>
+</head>
+<body>
+<noscript><a href="https://rainbet.com?r=thorshall" rel="nofollow sponsored">Continue</a></noscript>
+
+<form name="thorshall-join-click" method="POST" data-netlify="true" hidden>
+  <input type="hidden" name="form-name" value="thorshall-join-click">
+  <input name="source">
+  <input name="campaign">
+  <input name="campaign_id">
+  <input name="timestamp">
+  <input name="referrer">
+  <input name="destination">
+</form>
+
+<script>
+(()=>{
+  const destination='https://rainbet.com?r=thorshall';
+  const details={
+    'form-name':'thorshall-join-click',
+    'source':'qr-card',
+    'campaign':'thorshall-card',
+    'campaign_id':'',
+    'timestamp':new Date().toISOString(),
+    'referrer':document.referrer||'',
+    'destination':destination
+  };
+
+  if(typeof gtag==='function'){
+    gtag('event','qr_card_scan',{
+      source:'qr-card',
+      campaign:'thorshall-card',
+      transport_type:'beacon'
+    });
+  }
+
+  const body=new URLSearchParams(details).toString();
+  try{
+    let queued=false;
+    if(navigator.sendBeacon){
+      const payload=new Blob([body],{type:'application/x-www-form-urlencoded;charset=UTF-8'});
+      queued=navigator.sendBeacon('/',payload);
+    }
+    if(!queued){
+      fetch('/',{
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:body,
+        keepalive:true
+      }).catch(()=>{});
+    }
+  }catch(_){}
+
+  location.replace(destination);
+})();
+</script>
+</body>
+</html>
