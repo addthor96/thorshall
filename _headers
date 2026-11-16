@@ -43,6 +43,9 @@
 /hunt-overlay.css
   Cache-Control: no-cache, must-revalidate
 
+/hunt-manager.css
+  Cache-Control: no-cache, must-revalidate
+
 /join
   X-Robots-Tag: noindex, follow
 

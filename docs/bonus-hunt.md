@@ -4,7 +4,13 @@ The public display is `/bonus-hunt`. The existing owner workspace remains `/admi
 
 The manager uses the existing owner session. Creator sessions cannot open or edit hunts. It saves hunts in the site-scoped Netlify Blobs store `thorshall-bonus-hunts-v2`, independently of partner and payment records. Preview and unpublished deploys use separate stores. No new environment variables are required beyond the existing owner master password and signing secret.
 
-Enter a starting balance and unspent cash balance, then add the slot name and bet for each bonus. When a bonus opens, enter its payout or X. Empty payout means unopened; `0` means opened with no return. Wait for **All changes saved** before relying on an update. End balance is unspent cash plus opened payouts. Required X is the remaining break-even amount divided by the unopened bonuses' total bet base. Average X is the mean multiplier of opened bonuses with a positive bet.
+The manager follows three steps:
+
+1. **Collect bonuses.** Enter the starting balance and currency, then type a slot name and bet beside **Add bonus**. Each bonus becomes a compact entry below. The slot field clears and keeps the last bet ready for the next bonus. Title, date and any unspent cash are available under the optional hunt details.
+2. **Open bonuses.** Once collection is finished, choose **Start opening bonuses**. The manager saves first, then replaces the collection fields with one focused payout card. Type the payout and choose **Save payout & next**, or press Enter. Empty payout means unopened; `0` means opened with no return. The next unopened bonus appears only after the payout saves. Previous/next buttons and the compact results list let you select a bonus to correct. **Edit bonus list** returns to collection without clearing any recorded payouts.
+3. **Finish hunt.** When every bonus has a saved payout, **Finish hunt** becomes available. It saves the completed hunt and shows the final balance and profit/loss. Choose **Start a new hunt** for the next session.
+
+Wait for **All changes saved** before relying on an update. A failed save keeps the current bonus and draft in place; choose **Retry save** before continuing. Conflicting saves require loading the latest version, with a draft export available first. End balance is unspent cash plus opened payouts. Required X is the remaining break-even amount divided by the unopened bonuses' total bet base. Average X is the mean multiplier of opened bonuses with a positive bet.
 
 The selected hunt appears on the page and stream. Other completed hunts appear in page history. Inactive unfinished hunts remain private. The page launches public as requested; the owner can make its data private with the visibility button. Existing public navigation has not been changed.
 

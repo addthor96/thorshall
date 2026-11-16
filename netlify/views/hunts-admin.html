@@ -8,6 +8,7 @@
   <title>Hunt Manager · Thor's Hall</title>
   <link rel="icon" href="/favicon.ico">
   <link rel="stylesheet" href="/hunt.css">
+  <link rel="stylesheet" href="/hunt-manager.css">
   <script src="/hunt-shared.js" defer></script>
   <script src="/hunt-admin.js" defer></script>
 </head>
@@ -30,28 +31,58 @@
     <div class="notice hidden" id="recoveryNotice"><span>A draft from your previous session is available.</span><div class="header-actions"><button class="button small primary" id="restoreDraft" type="button">Restore draft</button><button class="button small subtle" id="discardDraft" type="button">Keep saved version</button></div></div>
     <div class="admin-grid" id="manager" hidden>
       <div class="admin-main stack">
-        <section class="panel" aria-labelledby="huntDetailsTitle">
-          <div class="panel-head"><div><span class="eyebrow">CURRENT HUNT</span><h2 id="huntDetailsTitle">Hunt details</h2></div><span class="badge" id="activeBadge">Collecting</span></div>
-          <div class="field-grid three">
-            <div class="field"><label for="huntTitle">Title</label><input id="huntTitle" maxlength="80" placeholder="Friday night hunt" autocomplete="off"></div>
-            <div class="field"><label for="huntDate">Hunt date</label><input id="huntDate" type="date"></div>
-            <div class="field"><label for="huntStatus">Stage</label><select id="huntStatus"><option value="collecting">Collecting bonuses</option><option value="opening">Opening bonuses</option><option value="complete">Complete</option></select></div>
-          </div>
-          <div class="field-grid three">
-            <div class="field"><label for="huntStart">Starting balance</label><input id="huntStart" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00"><p class="help">The total you want the hunt to return.</p></div>
-            <div class="field"><label for="huntBalance">Balance left</label><input id="huntBalance" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00"><p class="help">Unspent balance, added to bonus payouts.</p></div>
+        <nav class="hunt-steps" aria-label="Hunt stages"><span id="stepCollect"><b>1</b> Collect bonuses</span><span id="stepOpen"><b>2</b> Open bonuses</span><span id="stepFinish"><b>3</b> Finish hunt</span></nav>
+        <section class="panel hunt-setup" id="huntSetup" aria-labelledby="huntDetailsTitle">
+          <div class="panel-head"><div><span class="eyebrow">CURRENT HUNT</span><h2 id="huntDetailsTitle">Set up your hunt</h2></div><span class="badge" id="activeBadge">Collecting</span></div>
+          <div class="field-grid">
+            <div class="field"><label for="huntStart">Starting balance</label><input id="huntStart" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00"></div>
             <div class="field"><label for="huntCurrency">Currency</label><select id="huntCurrency"><option value="USD">USD · US dollar</option><option value="EUR">EUR · Euro</option><option value="GBP">GBP · British pound</option><option value="CAD">CAD · Canadian dollar</option><option value="AUD">AUD · Australian dollar</option></select></div>
           </div>
+          <details class="hunt-options"><summary>Hunt name, date &amp; remaining balance</summary><div class="field-grid three">
+            <div class="field"><label for="huntTitle">Hunt name</label><input id="huntTitle" maxlength="80" placeholder="Friday night hunt" autocomplete="off"></div>
+            <div class="field"><label for="huntDate">Hunt date</label><input id="huntDate" type="date"></div>
+            <div class="field"><label for="huntBalance">Unspent balance</label><input id="huntBalance" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00"><p class="help">Cash left after collecting; payouts are added automatically.</p></div>
+          </div></details>
         </section>
 
         <section class="metrics compact" id="liveMetrics" aria-label="Hunt calculation summary" aria-live="polite"></section>
 
-        <section class="panel" aria-labelledby="bonusListTitle">
-          <div class="panel-head"><div><h2 id="bonusListTitle">Bonus list</h2><p class="muted" id="bonusCount">0 bonuses</p></div><div class="header-actions"><button class="button subtle small" id="addFive" type="button">+ 5 rows</button><button class="button primary small" id="addBonus" type="button">+ Add bonus</button></div></div>
-          <p class="help">Enter the payout or X when a bonus opens. Leave both empty for unopened bonuses; enter 0 for a bust.</p>
-          <div class="editor-table-wrap"><table class="editor-table"><thead><tr><th scope="col">#</th><th scope="col">Slot</th><th scope="col">Bet</th><th scope="col">Payout</th><th scope="col">X</th><th scope="col"><span class="sr-only">Row actions</span></th></tr></thead><tbody id="bonusRows"></tbody></table></div>
-          <div class="empty-state" id="emptyRows"><strong>Your first bonus goes here.</strong><p>Add a slot and its bet. Enter the result when you open it.</p><button class="button primary" id="addFirst" type="button">+ Add first bonus</button></div>
-          <div class="panel-foot"><button class="button subtle" id="addBottom" type="button">+ Add another bonus</button><span class="help">Changes save automatically.</span></div>
+        <section class="panel collection-phase" id="collectionPhase" aria-labelledby="collectionTitle">
+          <div class="panel-head"><div><span class="eyebrow">STEP 1</span><h2 id="collectionTitle">Collect your bonuses</h2><p>Add the slot and bet, then move straight to the next one.</p></div><span class="collection-count" id="collectionCount">0 collected</span></div>
+          <form class="bonus-entry-form" id="slotEntryForm">
+            <div class="field slot-entry-name"><label for="newSlotName">Slot name</label><input id="newSlotName" maxlength="80" placeholder="Which slot did you collect?" autocomplete="off" required></div>
+            <div class="field slot-entry-bet"><label for="newSlotBet">Bet</label><input id="newSlotBet" type="number" min="0.01" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00" required></div>
+            <button class="button primary" id="addBonus" type="submit">+ Add bonus</button>
+            <button class="button subtle small" id="cancelBonusEdit" type="button" hidden>Cancel edit</button>
+          </form>
+          <p class="entry-error" id="entryError" role="alert" hidden></p>
+          <div class="collected-bonuses" id="collectedBonuses" aria-label="Collected bonuses"></div>
+          <div class="empty-state" id="emptyRows"><strong>Your first bonus goes here.</strong><p>Enter its slot name and bet above.</p></div>
+          <div class="phase-action"><div><strong>Finished collecting?</strong><p>When your balance is spent, switch to opening.</p></div><button class="button primary phase-button" id="startOpening" type="button">Start opening bonuses →</button></div>
+        </section>
+
+        <section class="panel opening-phase" id="openingPhase" aria-labelledby="openingTitle" hidden>
+          <div class="panel-head"><div><span class="eyebrow">STEP 2</span><h2 id="openingTitle">Open your bonuses</h2></div><button class="button subtle small" id="editCollection" type="button">Edit bonus list</button></div>
+          <div class="opening-progress-head"><span id="openingProgressText">0 of 0 opened</span><span id="openingProgressPercent">0%</span></div>
+          <div class="opening-progress-track"><div id="openingProgressFill"></div></div>
+          <div id="payoutEditor">
+            <div class="payout-slot-card"><span class="payout-position" id="payoutPosition"></span><h3 id="payoutSlotName"></h3><p id="payoutSlotBet"></p></div>
+            <form id="payoutForm" class="payout-form">
+              <div class="field"><label for="payoutAmount">Amount won</label><input id="payoutAmount" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="Enter the payout" required><p class="help">Enter 0 for a bonus that paid nothing.</p></div>
+              <button class="button primary phase-button" id="savePayout" type="submit">Save payout &amp; next →</button>
+            </form>
+            <p class="entry-error" id="payoutError" role="alert" hidden></p>
+            <div class="payout-navigation"><button class="button subtle small" id="previousBonus" type="button">← Previous bonus</button><button class="button subtle small" id="nextBonus" type="button">Next bonus →</button></div>
+          </div>
+          <div class="opening-done" id="allOpened" hidden><span class="done-symbol" aria-hidden="true">✓</span><h3>Every bonus is open.</h3><p>Review the results below, then finish your hunt.</p></div>
+          <div class="finish-action"><button class="button primary phase-button" id="finishHunt" type="button" disabled>Finish hunt ✓</button><span id="finishHint" class="help">Open every bonus to finish.</span></div>
+          <details class="results-disclosure" open><summary>All bonus results <span id="bonusCount"></span></summary><div class="opening-results" id="openingResults"></div></details>
+        </section>
+
+        <section class="panel completed-phase" id="completedPhase" aria-labelledby="completedTitle" hidden>
+          <span class="done-symbol" aria-hidden="true">✓</span><span class="eyebrow">HUNT COMPLETE</span><h2 id="completedTitle">Hunt finished.</h2><p id="completedSummary"></p>
+          <div class="complete-result" id="completedProfit"></div>
+          <div class="header-actions"><button class="button primary phase-button" id="newHuntAfterFinish" type="button">+ Start a new hunt</button><button class="button subtle" id="reviewHunt" type="button">Review payouts</button></div>
         </section>
       </div>
 
