@@ -15,7 +15,9 @@ The selected hunt appears on the page and stream. Other completed hunts appear i
 3. Set the source to **520 × 960**. Its outer background is transparent.
 4. Save a payout in the manager. The overlay refreshes about every three seconds; the page refreshes about every five seconds.
 
-The overlay shows up to eight slots at once. While collecting, a longer list slowly scrolls down, pauses, and returns to the top. Once you start entering payouts, it returns to the top and follows each slot as you enter or correct its result. A payout of `0` counts as an opened bonus.
+The overlay shows up to eight slots at once. While collecting, a longer list only scrolls downward. At the end it instantly resets to the top, pauses for two seconds, and scrolls down again. Once you start entering payouts, it returns to the top and follows each slot as you enter or correct its result. A payout of `0` counts as an opened bonus.
+
+The bar below THOR'S HALL replaces the hunt-title line. It shows the total collected and the count opened. Each opened bonus fills an equal share: 5 opened out of 40 bonuses fills 12.5%. Unopened bonuses have an empty payout; a zero payout still advances the bar.
 
 For a compact overlay, insert `?layout=compact` before `#token` and use 520 × 900. The overlay link permits viewing the active hunt only. It cannot edit hunts. **Replace overlay link** revokes the old token and requires updating the OBS source URL.
 

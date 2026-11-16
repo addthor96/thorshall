@@ -23,31 +23,36 @@
   function renderOverlay(state){
     var h=activeHunt(state);
     if(!h){showError('Waiting for a hunt','Create your first hunt in the admin area.');return;}
-    var m=C.calculate(h),c=h.currency,progress=m.total?Math.round(m.opened/m.total*100):0;
+    var m=C.calculate(h),c=h.currency,progress=m.total?m.opened/m.total*100:0;
     if(!container.querySelector('[data-overlay-panel]')){
       if(overlayMotion)overlayMotion.destroy();
       container.innerHTML='<section class="overlay-card" data-overlay-panel>'+
         '<div class="overlay-stage" id="overlay-stage"></div>'+
-        '<header class="overlay-heading"><h1 class="overlay-wordmark">THOR’S HALL</h1><p class="overlay-hunt-name" id="overlay-title"></p></header>'+
+        '<header class="overlay-heading"><h1 class="overlay-wordmark">THOR’S HALL</h1>'+
+        '<div class="overlay-bonus-progress"><div class="overlay-bonus-progress-labels"><span id="overlay-bonus-total"></span><strong id="overlay-bonus-opened"></strong></div>'+
+        '<div class="overlay-bonus-progress-track" id="overlay-bonus-progress" role="progressbar" aria-label="Bonuses opened" aria-valuemin="0"><div class="overlay-bonus-progress-fill" id="overlay-progress-bar"></div></div></div></header>'+
         '<div class="overlay-total"><div class="overlay-total-label">End balance</div><div class="overlay-balance" id="overlay-balance"></div>'+
         '<div class="overlay-total-line"><strong id="overlay-profit"></strong><i class="overlay-divider"></i><span id="overlay-start"></span></div></div>'+
         '<section class="overlay-stats" aria-label="Hunt totals">'+
         '<div class="overlay-stat"><span>Required X</span><strong id="overlay-required"></strong></div>'+
-        '<div class="overlay-stat"><span>Average X</span><strong id="overlay-average"></strong></div>'+
-        '<div class="overlay-stat"><span>Bonuses</span><strong id="overlay-count"></strong></div></section>'+
+        '<div class="overlay-stat"><span>Average X</span><strong id="overlay-average"></strong></div></section>'+
         '<section class="overlay-slot-section" aria-label="Collected slots">'+
         '<div class="overlay-list-caption"><span>The bonus hunt</span><span class="overlay-list-mode" id="overlay-list-mode"></span></div>'+
         '<div class="overlay-slot-columns" aria-hidden="true"><span>#</span><span>Slot</span><span>Bet</span><span>Win</span><span>X</span></div>'+
         '<div class="overlay-slots-viewport" id="overlay-slots-viewport" role="list" aria-label="Collected bonuses"><div id="overlay-slot-rows"></div></div></section>'+
         '<footer class="overlay-foot"><div class="overlay-foot-line"><span class="sync-status" id="sync-label">Live updates</span><span id="overlay-progress"></span></div>'+
-        '<div class="progress-track"><div class="progress-fill" id="overlay-progress-bar"></div></div><div class="overlay-footer-mark">The hall of legends</div></footer></section>';
-      overlayMotion=window.HuntOverlayMotion.create({viewport:document.getElementById('overlay-slots-viewport'),rowHeight:44,visibleRows:8,pixelsPerSecond:12,pauseMs:2500});
+        '<div class="overlay-footer-mark">The hall of legends</div></footer></section>';
+      overlayMotion=window.HuntOverlayMotion.create({viewport:document.getElementById('overlay-slots-viewport'),rowHeight:44,visibleRows:8,pixelsPerSecond:12,pauseMs:2000});
     }
     function text(id,value){document.getElementById(id).textContent=value;}
-    text('overlay-stage',status(h));text('overlay-title',h.title);text('overlay-balance',C.money(m.endBalance,c));text('overlay-start','Start '+C.money(h.start,c));
+    text('overlay-stage',status(h));text('overlay-balance',C.money(m.endBalance,c));text('overlay-start','Start '+C.money(h.start,c));
     text('overlay-profit',signed(m.profit,c)+' P/L');document.getElementById('overlay-profit').classList.toggle('negative',m.profit<0);
-    text('overlay-required',C.x(m.requiredX));text('overlay-average',C.x(m.averageX));text('overlay-count',m.opened+' / '+m.total);
-    text('overlay-progress',progress+'%');document.getElementById('overlay-progress-bar').style.width=progress+'%';
+    text('overlay-required',C.x(m.requiredX));text('overlay-average',C.x(m.averageX));
+    text('overlay-bonus-total',m.total+' '+(m.total===1?'bonus':'bonuses'));text('overlay-bonus-opened',m.opened+' opened');
+    var bonusProgress=document.getElementById('overlay-bonus-progress');
+    bonusProgress.setAttribute('aria-valuemax',Math.max(1,m.total));bonusProgress.setAttribute('aria-valuenow',m.opened);
+    bonusProgress.setAttribute('aria-valuetext',m.opened+' of '+m.total+' bonuses opened');
+    text('overlay-progress',Math.round(progress)+'%');document.getElementById('overlay-progress-bar').style.width=progress+'%';
     var viewport=document.getElementById('overlay-slots-viewport'),priorScroll=viewport.scrollTop;
     viewport.style.setProperty('--slot-count',Math.max(2,Math.min(8,h.rows.length)));
     document.getElementById('overlay-slot-rows').innerHTML=h.rows.length?h.rows.map(function(row,i){

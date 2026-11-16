@@ -13,7 +13,7 @@
     var rowHeight=positive(options.rowHeight,44);
     var visibleRows=Math.max(1,Math.floor(positive(options.visibleRows,8)));
     var speed=positive(options.pixelsPerSecond,12);
-    var pauseMs=typeof options.pauseMs==='number'?Math.max(0,options.pauseMs):2500;
+    var pauseMs=typeof options.pauseMs==='number'?Math.max(0,options.pauseMs):2000;
     var requestFrame=options.requestFrame||(typeof requestAnimationFrame==='function'?requestAnimationFrame.bind(window):null);
     var cancelFrame=options.cancelFrame||(typeof cancelAnimationFrame==='function'?cancelAnimationFrame.bind(window):function(){});
     var now=options.now||function(){return typeof performance!=='undefined'?performance.now():Date.now();};
@@ -51,9 +51,13 @@
           // Preserve sub-pixel travel even when a browser rounds scrollTop.
           // Reading the rounded DOM value each frame can otherwise discard
           // every slow-scroll increment and leave the list permanently still.
-          var next=browsePosition+direction*speed*elapsed/1000;
-          if(next>=maxScroll()){next=maxScroll();direction=-1;pauseUntil=t+pauseMs;}
-          else if(next<=0){next=0;direction=1;pauseUntil=t+pauseMs;}
+          // Only time after the pause deadline contributes to travel. A frame
+          // straddling the deadline must not shorten the two-second freeze.
+          var activeElapsed=Math.min(elapsed,Math.max(0,t-pauseUntil));
+          var next=browsePosition+speed*activeElapsed/1000;
+          // Collection loops are one-way: jump directly to the top, pause,
+          // then continue down. Upward motion is reserved for result focus.
+          if(next>=maxScroll()){next=0;pauseUntil=t+pauseMs;}
           browsePosition=next;
           setPosition(next);
         }

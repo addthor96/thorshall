@@ -18,11 +18,25 @@ function fixture(count=12,options={}){
 test('eight or fewer slots stay at the top without scheduling animation',()=>{
   for(const count of [0,1,8]){const f=fixture(count);assert.equal(f.update().mode,'idle');f.advance(10000);assert.equal(f.viewport.scrollTop,0);assert.equal(f.callbacks.size,0);}
 });
-test('long collecting list pauses, travels down slowly, then returns toward top',()=>{
+test('long collecting list travels down and instantly resets instead of animating upward',()=>{
   const f=fixture();f.update();f.advance(80);assert.equal(f.viewport.scrollTop,0);
   f.advance(2000);assert.ok(f.viewport.scrollTop>80&&f.viewport.scrollTop<100);
-  f.advance(2500);assert.equal(f.motion.getState().direction,-1);assert.ok(f.viewport.scrollTop<176);
-  f.advance(5000);assert.equal(f.motion.getState().direction,1);assert.ok(f.viewport.scrollTop<60);
+  let resets=0,previous=f.viewport.scrollTop;
+  for(let t=0;t<12000;t+=20){f.advance(20);const current=f.viewport.scrollTop;if(current<previous){assert.equal(current,0);resets++;}assert.equal(f.motion.getState().direction,1);previous=current;}
+  assert.ok(resets>=2);
+});
+test('default collection loop freezes at the top for the full two seconds after every reset',()=>{
+  const f=fixture(12,{pauseMs:undefined});f.update();f.advance(1999);assert.equal(f.viewport.scrollTop,0);f.advance(1);assert.equal(f.viewport.scrollTop,0);f.advance(1);assert.ok(f.viewport.scrollTop>0);
+  let previous=f.viewport.scrollTop,reset=false;
+  for(let t=0;t<5000;t+=20){f.advance(20);const current=f.viewport.scrollTop;if(previous>0&&current===0){reset=true;break;}previous=current;}
+  assert.equal(reset,true);
+  f.advance(999);f.update();f.advance(1000);assert.equal(f.viewport.scrollTop,0);
+  f.advance(1);assert.equal(f.viewport.scrollTop,0);f.advance(1);assert.ok(f.viewport.scrollTop>0);
+});
+test('entering a payout during the top freeze cancels collection and follows that result',()=>{
+  const f=fixture(20,{pauseMs:2000});f.update();f.advance(1000);assert.equal(f.viewport.scrollTop,0);
+  f.hunt.rows[12].payout=0;const state=f.update();assert.equal(state.mode,'following');assert.equal(state.focusIndex,12);
+  f.advance(2500);assert.equal(f.viewport.scrollTop,11*44);assert.equal(f.callbacks.size,0);
 });
 test('identical polling and added collecting rows preserve browsing progress',()=>{
   const f=fixture();f.update();f.advance(1800);const position=f.viewport.scrollTop;f.update();assert.equal(f.viewport.scrollTop,position);
@@ -33,7 +47,7 @@ test('slow collection scrolling accumulates fractions when the browser rounds sc
   Object.defineProperty(f.viewport,'scrollTop',{get:()=>roundedPosition,set:value=>{roundedPosition=Math.round(value);}});
   f.update();f.advance(2000);assert.ok(f.viewport.scrollTop>=22&&f.viewport.scrollTop<=24);
   const before=f.viewport.scrollTop;f.update();f.advance(1000);assert.ok(f.viewport.scrollTop>=before+11);
-  f.advance(13000);assert.equal(f.motion.getState().direction,-1);assert.ok(f.viewport.scrollTop<176);
+  f.advance(13000);assert.equal(f.motion.getState().direction,1);assert.ok(f.viewport.scrollTop>0&&f.viewport.scrollTop<30);
 });
 test('following converges fully and stops frames when scrollTop rounds each write',()=>{
   const f=fixture(20);let roundedPosition=0;
