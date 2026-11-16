@@ -1,0 +1,63 @@
+/* Stream-only art and layout. The surrounding OBS canvas stays transparent. */
+.overlay-body{background:transparent!important;color:#f8efda;overflow:hidden}
+.overlay-frame{width:520px;padding:8px;transform-origin:top left}
+.overlay-card{position:relative;isolation:isolate;padding:176px 30px 26px;border:1px solid #bc985553;border-radius:17px;background:#080e12 url('/img/bonus-hunt-storm-v2.jpg') center top/100% 100% no-repeat;box-shadow:0 6px 20px #0005;overflow:hidden}
+.overlay-card:before{content:"";position:absolute;inset:165px 24px 20px;background:linear-gradient(180deg,#05090d00,#05090d68 13%,#05090d54 88%,#05090d00);z-index:-1;pointer-events:none}
+.overlay-card:after{content:"";position:absolute;inset:7px;border:1px solid #e5bc5717;border-radius:12px;pointer-events:none}
+.overlay-heading{text-align:center;margin:0 0 15px}
+.overlay-wordmark{color:#f4d78f;font:700 25px/1.15 Georgia,'Times New Roman',serif;letter-spacing:.13em;text-shadow:0 2px 12px #000;margin:0}
+.overlay-hunt-name{margin:7px 0 0;color:#cfbf9f;font-size:12px;font-weight:500;letter-spacing:.025em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.overlay-stage{position:absolute;top:15px;right:18px;border:1px solid #d1b77942;border-radius:5px;padding:4px 7px;background:#06131cbd;color:#e8c77a;font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;backdrop-filter:blur(5px)}
+.overlay-total{text-align:center;position:relative}
+.overlay-total-label{color:#bc9a5d;font-size:9px;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+.overlay-balance{color:#fff5d9;font-size:43px;line-height:1.04;font-weight:800;letter-spacing:-.045em;margin:7px 0 8px;text-shadow:0 2px 12px #000;font-variant-numeric:tabular-nums}
+.overlay-total-line{display:flex;align-items:center;justify-content:center;gap:14px;font-size:11px;color:#a99d86;font-variant-numeric:tabular-nums}
+.overlay-total-line strong{font-size:11px;font-weight:700;color:#8ce3b1}
+.overlay-total-line strong.negative{color:#f4a398!important}
+.overlay-divider{display:inline-block;width:3px;height:3px;background:#a58043;border-radius:50%}
+.overlay-stats{margin:17px 0 16px;display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #d7b26b30;border-radius:9px;background:linear-gradient(180deg,#c5a55d12,#07151a44);overflow:hidden}
+.overlay-stat{padding:10px 6px;text-align:center;background:none}
+.overlay-stat+.overlay-stat{border-color:#d7b26b24}
+.overlay-stat span{color:#b39e76;font-size:8px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.overlay-stat strong{color:#f4e6c7;font-size:21px;font-weight:800;letter-spacing:-.035em;line-height:1.15;margin-top:5px;font-variant-numeric:tabular-nums}
+.overlay-slot-section{margin-top:3px}
+.overlay-list-caption{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:#cdb172;font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.15em}
+.overlay-list-mode{color:#76969e;font-size:8px;letter-spacing:.08em;font-weight:700}
+.overlay-slot-columns,.overlay-slot-row{display:grid;grid-template-columns:23px minmax(0,1fr) 58px 76px 47px;align-items:center;gap:6px}
+.overlay-slot-columns{height:25px;border-bottom:1px solid #b7955938;color:#937f58;font-size:8px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.overlay-slot-columns span:nth-child(n+3){text-align:right}
+.overlay-slots-viewport{height:calc(var(--slot-count,8)*44px);max-height:352px;overflow:hidden;overscroll-behavior:none;scrollbar-width:none;position:relative;scroll-behavior:auto}
+.overlay-slots-viewport::-webkit-scrollbar{display:none}
+.overlay-slot-row{height:44px;min-height:44px;border-bottom:1px solid #bf9e5820;color:#c8c4b9;font-variant-numeric:tabular-nums;font-size:11px;position:relative;padding:0 2px}
+.overlay-slot-row:nth-child(even){background:#517b8e08}
+.overlay-slot-number{color:#7a6f57;font-size:9px;letter-spacing:.05em}
+.overlay-slot-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;line-height:1.1;font-weight:700;color:#e9e2cf}
+.overlay-slot-bet{color:#9b9588;text-align:right;font-size:10px}
+.overlay-slot-payout{text-align:right;color:#6f7e7e;font-weight:800;font-size:11px}
+.overlay-slot-x{text-align:right;color:#82989a;font-size:9px}
+.overlay-slot-row.is-opened .overlay-slot-payout{color:#a7dbb5}
+.overlay-slot-row.is-opened.is-bust .overlay-slot-payout{color:#b6a18b}
+.overlay-slot-row.is-next .overlay-slot-name{color:#f1ce81}
+.overlay-slot-row.is-focused{background:linear-gradient(90deg,#c9a45827,#b8904a0d);box-shadow:inset 2px 0 #e3bf75}
+.overlay-slot-row.is-focused .overlay-slot-name{color:#ffe6a7}
+.overlay-slot-row.is-focused .overlay-slot-number{color:#dec182}
+.overlay-slot-row.is-focused .overlay-slot-payout{color:#c2f0c8;text-shadow:0 0 12px #74c09535}
+.overlay-list-empty{height:88px;display:grid;place-items:center;color:#917f5b;font-size:12px;font-style:italic}
+.overlay-foot{margin-top:14px}
+.overlay-foot-line{display:flex;justify-content:space-between;align-items:center;font-size:8px;color:#8a9a98;letter-spacing:.07em;margin-bottom:8px;text-transform:uppercase}
+.overlay-foot-line .sync-status{font-size:8px;color:#80988b;letter-spacing:.04em}
+.overlay-foot-line .sync-status:before{width:4px;height:4px;margin-right:5px;background:#a4c8a6}
+.overlay-foot-line .sync-status.offline:before{background:#d1ac64}
+.overlay-foot .progress-track{height:3px;border-radius:2px;background:#84724722}
+.overlay-foot .progress-fill{background:linear-gradient(90deg,#745b32,#f2d79c);box-shadow:0 0 8px #cfa85555}
+.overlay-footer-mark{text-align:center;color:#8e7344;font-size:8px;letter-spacing:.22em;margin-top:12px;text-transform:uppercase}
+.overlay-body.compact .overlay-card{padding:170px 30px 22px}
+.overlay-body.compact .overlay-heading{margin-bottom:10px}
+.overlay-body.compact .overlay-wordmark{font-size:21px}
+.overlay-body.compact .overlay-hunt-name{display:none}
+.overlay-body.compact .overlay-balance{font-size:35px;margin-top:5px}
+.overlay-body.compact .overlay-stats{margin:12px 0}
+.overlay-body.compact .overlay-stat{padding:8px 5px}
+.overlay-body.compact .overlay-stat strong{font-size:18px}
+.overlay-body.compact .overlay-card:before{top:165px}
+.overlay-body.compact .overlay-footer-mark{display:none}

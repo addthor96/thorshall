@@ -49,7 +49,7 @@
         <section class="panel" aria-labelledby="bonusListTitle">
           <div class="panel-head"><div><h2 id="bonusListTitle">Bonus list</h2><p class="muted" id="bonusCount">0 bonuses</p></div><div class="header-actions"><button class="button subtle small" id="addFive" type="button">+ 5 rows</button><button class="button primary small" id="addBonus" type="button">+ Add bonus</button></div></div>
           <p class="help">Enter the payout or X when a bonus opens. Leave both empty for unopened bonuses; enter 0 for a bust.</p>
-          <div class="editor-table-wrap"><table class="editor-table"><thead><tr><th scope="col">#</th><th scope="col">Slot / provider</th><th scope="col">Bet</th><th scope="col">Payout</th><th scope="col">X</th><th scope="col"><span class="sr-only">Row actions</span></th></tr></thead><tbody id="bonusRows"></tbody></table></div>
+          <div class="editor-table-wrap"><table class="editor-table"><thead><tr><th scope="col">#</th><th scope="col">Slot</th><th scope="col">Bet</th><th scope="col">Payout</th><th scope="col">X</th><th scope="col"><span class="sr-only">Row actions</span></th></tr></thead><tbody id="bonusRows"></tbody></table></div>
           <div class="empty-state" id="emptyRows"><strong>Your first bonus goes here.</strong><p>Add a slot and its bet. Enter the result when you open it.</p><button class="button primary" id="addFirst" type="button">+ Add first bonus</button></div>
           <div class="panel-foot"><button class="button subtle" id="addBottom" type="button">+ Add another bonus</button><span class="help">Changes save automatically.</span></div>
         </section>
@@ -74,7 +74,7 @@
           <label class="sr-only" for="overlayUrl">Stream overlay URL</label><input id="overlayUrl" type="password" readonly autocomplete="off">
           <div class="header-actions"><button class="button primary small" id="copyOverlay" type="button">Copy overlay URL</button><button class="button subtle small" id="showOverlayUrl" type="button" aria-pressed="false">Show</button></div>
           <div class="stream-preview"><iframe id="overlayPreview" title="Live stream overlay preview" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
-          <p class="help">Browser Source size: 520 × 620. The background is transparent. Saved changes appear within a few seconds.</p>
+          <p class="help">Browser Source size: 520 × 960. The outer background is transparent. Saved changes appear within a few seconds.</p>
           <details><summary>Overlay link settings</summary><p class="help">Anyone with this link can view the overlay. It cannot edit hunts.</p><button class="button danger small" id="rotateToken" type="button">Replace overlay link</button><p class="help">Replacing the link disconnects your current OBS source until you paste the new one.</p></details>
         </section>
         <section class="panel" aria-labelledby="backupTitle">

@@ -12,10 +12,14 @@ The selected hunt appears on the page and stream. Other completed hunts appear i
 
 1. Open the hunt manager and select **Copy overlay URL**.
 2. Add a Browser Source in OBS or Streamlabs and paste the complete copied URL, including the `#token=` part.
-3. Set the source to **520 × 620**. Its outer background is transparent.
+3. Set the source to **520 × 960**. Its outer background is transparent.
 4. Save a payout in the manager. The overlay refreshes about every three seconds; the page refreshes about every five seconds.
 
-For a compact overlay, insert `?layout=compact` before `#token` and use 520 × 400. The overlay link permits viewing the active hunt only. It cannot edit hunts. **Replace overlay link** revokes the old token and requires updating the OBS source URL.
+The overlay shows up to eight slots at once. While collecting, a longer list slowly scrolls down, pauses, and returns to the top. Once you start entering payouts, it returns to the top and follows each slot as you enter or correct its result. A payout of `0` counts as an opened bonus.
+
+For a compact overlay, insert `?layout=compact` before `#token` and use 520 × 900. The overlay link permits viewing the active hunt only. It cannot edit hunts. **Replace overlay link** revokes the old token and requires updating the OBS source URL.
+
+The overlay automatically fits smaller Browser Source canvases, but the recommended dimensions preserve full text size. After a website overlay update, refresh the OBS Browser Source once. The viewing URL and token remain the same.
 
 Use Export hunts for JSON backups. Unsaved edits have browser-tab recovery. Conflicting saves from another tab are rejected rather than silently overwriting data. New empty storage shows an empty hunt to visitors without storing anything until the owner first opens the manager.
 
