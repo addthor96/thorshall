@@ -46,6 +46,9 @@
 /hunt-manager.css
   Cache-Control: no-cache, must-revalidate
 
+/hunt-viewer.css
+  Cache-Control: no-cache, must-revalidate
+
 /join
   X-Robots-Tag: noindex, follow
 

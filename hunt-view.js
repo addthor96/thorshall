@@ -9,17 +9,60 @@
   function stateBadge(hunt){return'<span class="status-pill '+(hunt.status==='complete'?'complete':'')+'">'+status(hunt)+'</span>';}
   function metric(label,value,note){return'<div class="metric"><div class="metric-label">'+label+'</div><div class="metric-value">'+esc(value)+'</div>'+(note?'<div class="metric-note">'+esc(note)+'</div>':'')+'</div>';}
   function activeHunt(state){return state.hunts.find(function(h){return h.id===state.activeId;})||state.hunts[0];}
-  function renderViewer(state){
-    var hunt=activeHunt(state);if(!hunt){showError('No hunt yet','The next hunt will appear here when it is ready.');return;}
-    var m=C.calculate(hunt),currency=hunt.currency,percentage=m.total?Math.round(m.opened/m.total*100):0;
-    var rows=hunt.rows.map(function(r,i){var opened=r.payout!==null,mult=opened&&r.bet>0?r.payout/r.bet:null,next=m.next&&m.next.id===r.id;return'<tr class="'+(next?'next-row':'')+'"><td>'+String(i+1).padStart(2,'0')+'</td><td><span class="slot-name">'+esc(r.slot||'Unnamed slot')+'</span>'+(next?'<span class="next-label">Up next</span>':'')+'</td><td>'+esc(C.money(r.bet,currency))+'</td><td class="'+(opened?'':'unopened')+'">'+(opened?esc(C.x(mult)):'—')+'</td><td class="'+(opened?'positive':'unopened')+'">'+(opened?esc(C.money(r.payout,currency)):'Waiting')+'</td></tr>';}).join('');
-    var history=state.hunts.filter(function(h){return h.id!==hunt.id&&h.status==='complete';}).sort(function(a,b){return b.date.localeCompare(a.date);}).map(function(h){var s=C.calculate(h);return'<article class="history-card"><span class="eyebrow">'+esc(dateText(h.date))+'</span><h3>'+esc(h.title)+'</h3><span class="profit-badge '+(s.profit<0?'negative':'')+'">'+esc(signed(s.profit,h.currency))+'</span><div class="history-values"><div>Start<strong>'+esc(C.money(h.start,h.currency))+'</strong></div><div>End balance<strong>'+esc(C.money(s.endBalance,h.currency))+'</strong></div><div>Avg X<strong>'+esc(C.x(s.averageX))+'</strong></div></div></article>';}).join('');
-    container.innerHTML='<div class="intro" style="margin-bottom:22px"><div><div class="kicker-row">'+stateBadge(hunt)+'<span class="muted" style="font-size:12px">'+esc(dateText(hunt.date))+'</span></div><h1>'+esc(hunt.title)+'</h1></div><span class="sync-status" id="sync-label">Live updates</span></div>'+
-      '<section class="hunt-hero" aria-label="Hunt balance"><div><div class="metric-label">End balance</div><div class="hero-number">'+esc(C.money(m.endBalance,currency))+'</div><div class="hero-result"><span class="profit-badge '+(m.profit<0?'negative':'')+'">'+esc(signed(m.profit,currency))+'</span><span class="muted" style="font-size:12px">profit / loss</span></div></div><div class="hero-target"><div><div class="metric-label">Starting balance</div><strong>'+esc(C.money(hunt.start,currency))+'</strong></div><p>Unspent balance '+esc(C.money(hunt.balance,currency))+'</p></div></section>'+
-      '<section class="metrics viewer-metrics" aria-label="Hunt statistics">'+metric('Required X',C.x(m.requiredX))+metric('Average X',C.x(m.averageX))+metric('Bonuses',m.opened+' / '+m.total)+metric('Highest X',C.x(m.highestX))+'</section>'+
-      '<div class="viewer-content"><section class="panel"><div class="panel-head"><h2>The bonus list</h2><span class="muted" style="font-size:12px">'+m.remaining+' remaining</span></div><div class="progress-head"><span>'+m.opened+' bonuses opened</span><span>'+percentage+'%</span></div><div class="progress-track" role="progressbar" aria-label="Bonuses opened" aria-valuemin="0" aria-valuemax="100" aria-valuenow="'+percentage+'"><div class="progress-fill" style="width:'+percentage+'%"></div></div>'+(rows?'<table class="viewer-table"><thead><tr><th>#</th><th>Slot</th><th>Bet</th><th>X</th><th>Payout</th></tr></thead><tbody>'+rows+'</tbody></table>':'<div class="empty-state">Bonuses will appear as they are added to this hunt.</div>')+'</section><aside class="stack viewer-aside"><div class="spotlight"><span class="eyebrow">Up next</span><h3>'+esc(m.next?m.next.slot||'Unnamed slot':m.total?'All bonuses opened':'Waiting for bonuses')+'</h3>'+(m.next?'<div class="spot-value" style="margin-top:12px">'+esc(C.money(m.next.bet,currency))+' <small class="muted">bet</small></div>':'')+'</div><div class="spotlight"><span class="eyebrow">Best payout</span><h3>'+esc(m.best?m.best.slot:'—')+'</h3><div class="spot-value positive">'+(m.best?esc(C.money(m.best.payout,currency)):'—')+'</div><span class="muted" style="font-size:12px">'+(m.best?esc(C.x(m.best.x)):'No opened bonuses')+'</span></div></aside></div>'+
-      (history?'<section class="history-section"><h2>Past hunts</h2><div class="history-list">'+history+'</div></section>':'');
+  function viewerHunts(state){
+    return state.hunts.filter(function(h){return h.id===state.activeId||h.status==='complete';}).map(function(h,i){return {hunt:h,index:i};}).sort(function(a,b){
+      if(a.hunt.id===state.activeId)return -1;if(b.hunt.id===state.activeId)return 1;
+      return b.hunt.date.localeCompare(a.hunt.date)||a.index-b.index;
+    }).map(function(item){return item.hunt;});
   }
+  function cardNavigation(){
+    var track=document.getElementById('hunt-cards');if(!track)return;
+    var back=document.getElementById('hunts-back'),next=document.getElementById('hunts-next');
+    back.disabled=track.scrollLeft<=2;next.disabled=track.scrollLeft+track.clientWidth>=track.scrollWidth-2;
+    document.getElementById('hunt-card-controls').hidden=track.scrollWidth<=track.clientWidth+2;
+  }
+  function focusHuntDetail(){
+    var title=document.getElementById('hunt-detail-title');if(title)title.focus({preventScroll:true});
+    var detail=document.getElementById('hunt-detail');if(detail)detail.scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
+  }
+  function renderViewer(state){
+    var hunts=viewerHunts(state),requested=new URLSearchParams(location.hash.slice(1)).get('hunt');
+    var hunt=hunts.find(function(h){return h.id===requested;})||hunts.find(function(h){return h.id===state.activeId;})||hunts[0];
+    if(!hunt){showError('No hunts yet','The next hunt will appear here when it is ready.');return;}
+    var oldTrack=document.getElementById('hunt-cards'),oldScroll=oldTrack?oldTrack.scrollLeft:0;
+    var focused=document.activeElement,focusId=focused&&focused.getAttribute?focused.getAttribute('data-view-hunt'):null;
+    var m=C.calculate(hunt),c=hunt.currency,complete=hunt.status==='complete',progress=m.total?m.opened/m.total*100:0;
+    var cards=hunts.map(function(h){
+      var s=C.calculate(h),done=h.status==='complete',selected=h.id===hunt.id,pct=s.total?s.opened/s.total*100:0;
+      var direction=s.profit>0?'profit':s.profit<0?'loss':'even';
+      return '<a class="hunt-card '+direction+(selected?' selected':'')+'" href="#hunt='+encodeURIComponent(h.id)+'" data-view-hunt="'+esc(h.id)+'"'+(selected?' aria-current="true"':'')+' aria-controls="hunt-detail">'+
+        '<div class="hunt-card-top"><span class="hunt-card-state '+(done?'is-complete':'')+'">'+(done?'Completed':h.status==='opening'?'Opening bonuses':'Collecting bonuses')+'</span>'+(h.id===state.activeId?'<span class="current-hunt-tag">Current hunt</span>':'')+'</div>'+
+        '<div class="hunt-card-name"><h2>'+esc(h.title)+'</h2><time datetime="'+esc(h.date)+'">'+esc(dateText(h.date))+'</time></div>'+
+        '<div class="hunt-card-result"><span>'+(done?'Profit / loss':'P/L so far')+'</span><strong>'+esc(signed(s.profit,h.currency))+'</strong></div>'+
+        '<div class="hunt-card-balances"><div><span>Start</span><strong>'+esc(C.money(h.start,h.currency))+'</strong></div><div><span>'+(done?'End balance':'Balance so far')+'</span><strong>'+esc(C.money(s.endBalance,h.currency))+'</strong></div></div>'+
+        '<div class="hunt-card-progress"><div><span>'+s.total+' '+(s.total===1?'bonus':'bonuses')+'</span><span>'+s.opened+' / '+s.total+' opened</span></div><span class="card-progress-track"><span style="width:'+pct+'%"></span></span></div>'+
+        '<div class="hunt-card-link"><span>'+(selected?'Viewing this hunt':'View bonuses')+'</span><span aria-hidden="true">↗</span></div></a>';
+    }).join('');
+    var rows=hunt.rows.map(function(r,i){
+      var opened=r.payout!==null&&r.payout!==undefined,mult=opened&&r.bet>0?r.payout/r.bet:null,next=m.next&&m.next.id===r.id;
+      return '<tr class="'+(next?'next-row':'')+(opened&&r.payout===0?' zero-payout':'')+'"><td>'+String(i+1).padStart(2,'0')+'</td><td><span class="slot-name">'+esc(r.slot||'Unnamed slot')+'</span>'+(next?'<span class="next-label">Next to open</span>':'')+'</td><td>'+esc(C.money(r.bet,c))+'</td><td class="'+(opened?'':'unopened')+'">'+(opened?esc(C.x(mult)):'—')+'</td><td class="'+(opened?(r.payout>0?'positive':'zero-return'):'unopened')+'">'+(opened?esc(C.money(r.payout,c)):'Unopened')+'</td></tr>';
+    }).join('');
+    var highest=hunt.rows.filter(function(r){return r.payout!==null&&r.payout!==undefined&&r.bet>0;}).sort(function(a,b){return b.payout/b.bet-a.payout/a.bet;})[0];
+    var percentReturn=hunt.start>0?(m.profit/hunt.start*100):null;
+    container.innerHTML='<div class="hunt-page-heading"><div><span class="eyebrow">THOR’S HALL · BONUS HUNTS</span><h1>Bonus hunts.</h1><p>Choose a hunt to explore its bonuses, payouts and results.</p></div><div class="archive-count"><strong>'+String(hunts.length).padStart(2,'0')+'</strong><span>'+ (hunts.length===1?'hunt in the hall':'hunts in the hall')+'</span></div></div>'+
+      '<section class="hunt-picker" aria-labelledby="hunt-picker-title"><div class="hunt-picker-heading"><div><h2 id="hunt-picker-title">Choose your hunt</h2><span>'+hunts.filter(function(h){return h.status==='complete';}).length+' completed'+(state.hunts.some(function(h){return h.id===state.activeId&&h.status!=='complete';})?' · 1 in progress':'')+'</span></div><div class="hunt-card-controls" id="hunt-card-controls"><button type="button" id="hunts-back" aria-label="Previous hunts">←</button><button type="button" id="hunts-next" aria-label="More hunts">→</button></div></div><nav class="hunt-cards" id="hunt-cards" aria-label="Select a hunt">'+cards+'</nav></section>'+
+      '<p id="sync-label" class="viewer-sync" role="status"'+(failures>0?'>Reconnecting. Showing the last saved results.':' hidden>')+'</p>'+
+      '<section class="hunt-detail" id="hunt-detail" aria-labelledby="hunt-detail-title"><div class="hunt-detail-heading"><div><div class="hunt-detail-kicker"><span class="eyebrow">HUNT BREAKDOWN</span><time datetime="'+esc(hunt.date)+'">'+esc(dateText(hunt.date))+'</time></div><h2 id="hunt-detail-title" tabindex="-1">'+esc(hunt.title)+'</h2></div>'+stateBadge(hunt)+'</div>'+
+      '<div class="hunt-result-panel"><div class="hunt-balance-pair"><div><span>Starting balance</span><strong>'+esc(C.money(hunt.start,c))+'</strong></div><span class="balance-direction" aria-hidden="true">→</span><div><span>'+(complete?'End balance':'Balance so far')+'</span><strong>'+esc(C.money(m.endBalance,c))+'</strong></div></div><div class="hunt-result-total '+(m.profit<0?'is-loss':m.profit>0?'is-profit':'is-even')+'"><span>'+(complete?'Final profit / loss':'Profit / loss so far')+'</span><strong>'+esc(signed(m.profit,c))+'</strong><small>'+(percentReturn!==null?esc((percentReturn>0?'+':'')+percentReturn.toFixed(1)+'%')+' on starting balance':complete?'Hunt completed':'Hunt in progress')+'</small></div></div>'+
+      '<div class="hunt-detail-metrics">'+metric('Bonuses opened',m.opened+' / '+m.total)+metric('Average X',C.x(m.averageX))+metric('Highest X',C.x(m.highestX))+metric('Required X',C.x(m.requiredX))+'</div>'+
+      '<div class="hunt-breakdown-grid"><section class="bonus-ledger" aria-labelledby="bonus-list-title"><div class="bonus-ledger-heading"><div><span class="eyebrow">THE COLLECTED BONUSES</span><h3 id="bonus-list-title">The bonus list <span>'+m.total+'</span></h3></div><span class="opened-count">'+m.opened+' of '+m.total+' opened</span></div><div class="ledger-progress" role="progressbar" aria-label="Bonuses opened" aria-valuemin="0" aria-valuemax="'+Math.max(1,m.total)+'" aria-valuenow="'+m.opened+'"><div style="width:'+progress+'%"></div></div>'+
+      (rows?'<div class="bonus-table-wrap"><table class="viewer-table"><caption class="sr-only">'+esc(hunt.title)+' bonus results</caption><thead><tr><th scope="col">#</th><th scope="col">Slot</th><th scope="col">Bet</th><th scope="col">X</th><th scope="col">Payout</th></tr></thead><tbody>'+rows+'</tbody></table></div>':'<div class="hunt-empty"><span aria-hidden="true">◇</span><h3>The list is just getting started.</h3><p>Collected bonuses will appear here as they are added.</p></div>')+'</section>'+
+      '<aside class="hunt-highlights" aria-label="Hunt highlights"><div class="hunt-highlight best-win"><div class="highlight-icon" aria-hidden="true">↗</div><span class="eyebrow">BIGGEST PAYOUT</span><strong class="highlight-amount">'+(m.best?esc(C.money(m.best.payout,c)):'—')+'</strong><h3>'+esc(m.best?m.best.slot:'No payouts yet')+'</h3><span class="highlight-note">'+(m.best?esc(C.x(m.best.x))+' multiplier':'The best win will appear here.')+'</span></div>'+
+      (complete?'<div class="hunt-highlight"><span class="eyebrow">HIGHEST MULTIPLIER</span><strong class="highlight-amount">'+esc(C.x(m.highestX))+'</strong><h3>'+esc(highest?highest.slot||'Unnamed slot':'No opened bonuses')+'</h3><span class="highlight-note">'+(highest?'From a '+esc(C.money(highest.bet,c))+' bet':'No result recorded.')+'</span></div>':'<div class="hunt-highlight"><span class="eyebrow">'+(m.next?'NEXT TO OPEN':'ALL BONUSES OPENED')+'</span><h3 class="next-slot-name">'+esc(m.next?m.next.slot||'Unnamed slot':m.total?'Ready to finish':'Waiting for the first bonus')+'</h3><span class="highlight-note">'+(m.next?esc(C.money(m.next.bet,c))+' bet':m.total?'Every payout has been recorded.':'The next slot will appear here.')+'</span></div>')+'</aside></div></section>';
+    var track=document.getElementById('hunt-cards');track.scrollLeft=oldScroll;track.addEventListener('scroll',cardNavigation,{passive:true});cardNavigation();
+    if(focusId){var link=Array.from(track.querySelectorAll('[data-view-hunt]')).find(function(a){return a.getAttribute('data-view-hunt')===focusId;});if(link)link.focus({preventScroll:true});}
+  }
+
   function renderOverlay(state){
     var h=activeHunt(state);
     if(!h){showError('Waiting for a hunt','Create your first hunt in the admin area.');return;}
@@ -85,10 +128,19 @@
       if(response.status===401||response.status===403){lastState=null;revision='';showError(overlay?'Stream link unavailable':'This hunt is private',overlay?'Copy the current OBS link from your admin area.':'Sign in as the owner to preview the hunt.',!overlay);interval=15000;return;}
       var data=await response.json();if(!response.ok||!data.ok)throw new Error('Unable to load hunt');
       if(data.revision!==revision||!lastState){lastState=data.state;revision=data.revision;if(overlay)renderOverlay(data.state);else renderViewer(data.state);}
-      failures=0;var label=document.getElementById('sync-label');if(label){label.textContent='Live updates';label.classList.remove('offline');}
-    }catch(error){failures++;if(!lastState)showError('Connecting to the hunt…','The tracker will retry automatically.');else{var label=document.getElementById('sync-label');if(label){label.textContent='Reconnecting…';label.classList.add('offline');}}interval=Math.min(30000,interval*Math.pow(2,Math.min(failures,3)));}
+      failures=0;var label=document.getElementById('sync-label');if(label){label.textContent='';label.hidden=true;}
+    }catch(error){failures++;if(!lastState)showError('Connecting to the hunt…','The tracker will retry automatically.');else{var label=document.getElementById('sync-label');if(label){label.textContent='Reconnecting. Showing the last saved results.';label.hidden=false;}}interval=Math.min(30000,interval*Math.pow(2,Math.min(failures,3)));}
     finally{clearTimeout(abortTimer);inFlight=false;timer=setTimeout(poll,interval);}
   }
-  window.addEventListener('resize',fitOverlay);window.addEventListener('online',poll);document.addEventListener('visibilitychange',function(){if(!document.hidden)poll();});poll();
+  if(!overlay){
+    container.addEventListener('click',function(event){
+      var button=event.target.closest('#hunts-back, #hunts-next');
+      if(button){var track=document.getElementById('hunt-cards');track.scrollBy({left:track.clientWidth*(button.id==='hunts-back'?-1:1),behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'});return;}
+      var card=event.target.closest('[data-view-hunt]');
+      if(card&&new URLSearchParams(location.hash.slice(1)).get('hunt')===card.getAttribute('data-view-hunt'))focusHuntDetail();
+    });
+    window.addEventListener('hashchange',function(){if(lastState){renderViewer(lastState);focusHuntDetail();}});
+  }
+  window.addEventListener('resize',function(){fitOverlay();if(!overlay)cardNavigation();});window.addEventListener('online',poll);document.addEventListener('visibilitychange',function(){if(!document.hidden)poll();});poll();
 })();
 

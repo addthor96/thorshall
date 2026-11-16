@@ -98,7 +98,7 @@
   }
   function renderPhase(){
     const h=current(),phase=h.status;
-    $('collectionPhase').hidden=phase!=='collecting';$('openingPhase').hidden=phase!=='opening';$('completedPhase').hidden=phase!=='complete';$('huntSetup').hidden=phase!=='collecting';
+    $('collectionPhase').hidden=phase!=='collecting';$('openingPhase').hidden=phase!=='opening';$('completedPhase').hidden=phase!=='complete';$('huntSetup').hidden=phase!=='collecting';$('startOpening').hidden=phase!=='collecting';
     ['Collect','Open','Finish'].forEach((name,i)=>{const order={collecting:0,opening:1,complete:2}[phase]||0;const node=$('step'+name);node.classList.toggle('active',i===order);node.classList.toggle('done',i<order);});
     if(phase==='collecting')renderCollected();
     if(phase==='opening')renderOpening();

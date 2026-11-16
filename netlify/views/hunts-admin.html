@@ -26,7 +26,7 @@
   </header>
 
   <main>
-    <div class="page-heading"><div><span class="eyebrow">OWNER ACCESS</span><h1>Run the hunt.</h1><p class="muted">Add bonuses here. Your hunt page and stream update as you save.</p></div><button class="button subtle" id="newHunt" type="button" disabled>+ New hunt</button></div>
+    <div class="page-heading"><div><span class="eyebrow">OWNER ACCESS</span><h1>Run the hunt.</h1><p class="muted">Add bonuses here. Your hunt page and stream update as you save.</p></div><div class="header-actions hunt-top-actions"><button class="button primary phase-button" id="startOpening" type="button" disabled hidden>Start opening bonuses →</button><button class="button subtle" id="newHunt" type="button" disabled>+ New hunt</button></div></div>
     <div class="notice hidden" id="errorNotice" role="alert"><span id="errorText"></span><div class="header-actions"><button class="button small subtle hidden" id="retrySave" type="button">Try saving again</button><button class="button small subtle hidden" id="reloadRemote" type="button">Load latest saved version</button><a class="button small primary hidden" id="loginAgain" href="/.netlify/functions/stats-session?return=%2Fadmin%3Fview%3Dhunts">Sign in again</a><button class="button small subtle" id="exportDraft" type="button">Download my draft</button></div></div>
     <div class="notice hidden" id="recoveryNotice"><span>A draft from your previous session is available.</span><div class="header-actions"><button class="button small primary" id="restoreDraft" type="button">Restore draft</button><button class="button small subtle" id="discardDraft" type="button">Keep saved version</button></div></div>
     <div class="admin-grid" id="manager" hidden>
@@ -58,7 +58,6 @@
           <p class="entry-error" id="entryError" role="alert" hidden></p>
           <div class="collected-bonuses" id="collectedBonuses" aria-label="Collected bonuses"></div>
           <div class="empty-state" id="emptyRows"><strong>Your first bonus goes here.</strong><p>Enter its slot name and bet above.</p></div>
-          <div class="phase-action"><div><strong>Finished collecting?</strong><p>When your balance is spent, switch to opening.</p></div><button class="button primary phase-button" id="startOpening" type="button">Start opening bonuses →</button></div>
         </section>
 
         <section class="panel opening-phase" id="openingPhase" aria-labelledby="openingTitle" hidden>
