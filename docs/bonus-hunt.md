@@ -6,7 +6,9 @@ The manager uses the existing owner session. Creator sessions cannot open or edi
 
 The manager follows three steps:
 
-1. **Collect bonuses.** Enter the starting balance and currency, then type a slot name and bet beside **Add bonus**. Each bonus becomes a compact entry below. The slot field clears and keeps the last bet ready for the next bonus. Title, date and any unspent cash are available under the optional hunt details.
+The hunt name is an editable field at the top in every phase. Renaming uses the same automatic save as other edits and updates the public hunt card. The manager omits the introductory heading and numbered stage strip.
+
+1. **Collect bonuses.** Enter the starting balance and currency, then type a slot name and bet beside **Add bonus**. Each bonus becomes a compact entry below. The slot field clears and keeps the last bet ready for the next bonus. Date and any unspent cash are available under the optional hunt details.
 2. **Open bonuses.** Once collection is finished, choose **Start opening bonuses** at the top beside **New hunt**. The manager saves first, then replaces the collection fields with one focused payout card. Type the payout and choose **Save payout & next**, or press Enter. Empty payout means unopened; `0` means opened with no return. The next unopened bonus appears only after the payout saves. Previous/next buttons and the compact results list let you select a bonus to correct. **Edit bonus list** returns to collection without clearing any recorded payouts.
 3. **Finish hunt.** When every bonus has a saved payout, **Finish hunt** becomes available. It saves the completed hunt and shows the final balance and profit/loss. Choose **Start a new hunt** for the next session.
 

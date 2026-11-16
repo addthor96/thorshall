@@ -66,7 +66,6 @@
   }
   function fillDetails(){
     const h=current();$('huntTitle').value=h.title;$('huntDate').value=h.date;$('huntStart').value=h.start||'';$('huntBalance').value=h.balance||'';$('huntCurrency').value=h.currency;
-    $('activeBadge').textContent={collecting:'Collecting',opening:'Opening',complete:'Complete'}[h.status]||'Collecting';
   }
   function renderLibrary(){
     $('huntSelect').innerHTML=state.hunts.map(h=>'<option value="'+esc(h.id)+'">'+esc(h.title||'Untitled hunt')+' · '+esc(h.date)+'</option>').join('');
@@ -99,7 +98,6 @@
   function renderPhase(){
     const h=current(),phase=h.status;
     $('collectionPhase').hidden=phase!=='collecting';$('openingPhase').hidden=phase!=='opening';$('completedPhase').hidden=phase!=='complete';$('huntSetup').hidden=phase!=='collecting';$('startOpening').hidden=phase!=='collecting';
-    ['Collect','Open','Finish'].forEach((name,i)=>{const order={collecting:0,opening:1,complete:2}[phase]||0;const node=$('step'+name);node.classList.toggle('active',i===order);node.classList.toggle('done',i<order);});
     if(phase==='collecting')renderCollected();
     if(phase==='opening')renderOpening();
     if(phase==='complete'){const m=Core.calculate(h);$('completedSummary').textContent=h.rows.length+' bonuses · '+Core.money(m.endBalance,h.currency)+' end balance';$('completedProfit').textContent=(m.profit>0?'+':'')+Core.money(m.profit,h.currency)+' P/L';$('completedProfit').classList.toggle('positive',m.profit>=0);$('completedProfit').classList.toggle('negative',m.profit<0);}

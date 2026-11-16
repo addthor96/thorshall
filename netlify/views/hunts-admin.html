@@ -26,20 +26,18 @@
   </header>
 
   <main>
-    <div class="page-heading"><div><span class="eyebrow">OWNER ACCESS</span><h1>Run the hunt.</h1><p class="muted">Add bonuses here. Your hunt page and stream update as you save.</p></div><div class="header-actions hunt-top-actions"><button class="button primary phase-button" id="startOpening" type="button" disabled hidden>Start opening bonuses →</button><button class="button subtle" id="newHunt" type="button" disabled>+ New hunt</button></div></div>
+    <h1 class="sr-only">Hunt manager</h1>
+    <div class="hunt-toolbar"><div class="field hunt-name-field"><label for="huntTitle">Hunt name</label><input id="huntTitle" maxlength="80" placeholder="Hunt name" autocomplete="off" required disabled></div><div class="header-actions hunt-top-actions"><button class="button primary phase-button" id="startOpening" type="button" disabled hidden>Start opening bonuses →</button><button class="button subtle" id="newHunt" type="button" disabled>+ New hunt</button></div></div>
     <div class="notice hidden" id="errorNotice" role="alert"><span id="errorText"></span><div class="header-actions"><button class="button small subtle hidden" id="retrySave" type="button">Try saving again</button><button class="button small subtle hidden" id="reloadRemote" type="button">Load latest saved version</button><a class="button small primary hidden" id="loginAgain" href="/.netlify/functions/stats-session?return=%2Fadmin%3Fview%3Dhunts">Sign in again</a><button class="button small subtle" id="exportDraft" type="button">Download my draft</button></div></div>
     <div class="notice hidden" id="recoveryNotice"><span>A draft from your previous session is available.</span><div class="header-actions"><button class="button small primary" id="restoreDraft" type="button">Restore draft</button><button class="button small subtle" id="discardDraft" type="button">Keep saved version</button></div></div>
     <div class="admin-grid" id="manager" hidden>
       <div class="admin-main stack">
-        <nav class="hunt-steps" aria-label="Hunt stages"><span id="stepCollect"><b>1</b> Collect bonuses</span><span id="stepOpen"><b>2</b> Open bonuses</span><span id="stepFinish"><b>3</b> Finish hunt</span></nav>
-        <section class="panel hunt-setup" id="huntSetup" aria-labelledby="huntDetailsTitle">
-          <div class="panel-head"><div><span class="eyebrow">CURRENT HUNT</span><h2 id="huntDetailsTitle">Set up your hunt</h2></div><span class="badge" id="activeBadge">Collecting</span></div>
+        <section class="panel hunt-setup" id="huntSetup" aria-label="Hunt settings">
           <div class="field-grid">
             <div class="field"><label for="huntStart">Starting balance</label><input id="huntStart" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00"></div>
             <div class="field"><label for="huntCurrency">Currency</label><select id="huntCurrency"><option value="USD">USD · US dollar</option><option value="EUR">EUR · Euro</option><option value="GBP">GBP · British pound</option><option value="CAD">CAD · Canadian dollar</option><option value="AUD">AUD · Australian dollar</option></select></div>
           </div>
-          <details class="hunt-options"><summary>Hunt name, date &amp; remaining balance</summary><div class="field-grid three">
-            <div class="field"><label for="huntTitle">Hunt name</label><input id="huntTitle" maxlength="80" placeholder="Friday night hunt" autocomplete="off"></div>
+          <details class="hunt-options"><summary>Date &amp; unspent balance</summary><div class="field-grid">
             <div class="field"><label for="huntDate">Hunt date</label><input id="huntDate" type="date"></div>
             <div class="field"><label for="huntBalance">Unspent balance</label><input id="huntBalance" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00"><p class="help">Cash left after collecting; payouts are added automatically.</p></div>
           </div></details>
@@ -48,20 +46,20 @@
         <section class="metrics compact" id="liveMetrics" aria-label="Hunt calculation summary" aria-live="polite"></section>
 
         <section class="panel collection-phase" id="collectionPhase" aria-labelledby="collectionTitle">
-          <div class="panel-head"><div><span class="eyebrow">STEP 1</span><h2 id="collectionTitle">Collect your bonuses</h2><p>Add the slot and bet, then move straight to the next one.</p></div><span class="collection-count" id="collectionCount">0 collected</span></div>
+          <div class="panel-head"><h2 id="collectionTitle">Bonuses</h2><span class="collection-count" id="collectionCount">0 collected</span></div>
           <form class="bonus-entry-form" id="slotEntryForm">
-            <div class="field slot-entry-name"><label for="newSlotName">Slot name</label><input id="newSlotName" maxlength="80" placeholder="Which slot did you collect?" autocomplete="off" required></div>
+            <div class="field slot-entry-name"><label for="newSlotName">Slot name</label><input id="newSlotName" maxlength="80" placeholder="Slot name" autocomplete="off" required></div>
             <div class="field slot-entry-bet"><label for="newSlotBet">Bet</label><input id="newSlotBet" type="number" min="0.01" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00" required></div>
             <button class="button primary" id="addBonus" type="submit">+ Add bonus</button>
             <button class="button subtle small" id="cancelBonusEdit" type="button" hidden>Cancel edit</button>
           </form>
           <p class="entry-error" id="entryError" role="alert" hidden></p>
           <div class="collected-bonuses" id="collectedBonuses" aria-label="Collected bonuses"></div>
-          <div class="empty-state" id="emptyRows"><strong>Your first bonus goes here.</strong><p>Enter its slot name and bet above.</p></div>
+          <div class="empty-state" id="emptyRows">No bonuses yet.</div>
         </section>
 
         <section class="panel opening-phase" id="openingPhase" aria-labelledby="openingTitle" hidden>
-          <div class="panel-head"><div><span class="eyebrow">STEP 2</span><h2 id="openingTitle">Open your bonuses</h2></div><button class="button subtle small" id="editCollection" type="button">Edit bonus list</button></div>
+          <div class="panel-head"><h2 id="openingTitle">Payouts</h2><button class="button subtle small" id="editCollection" type="button">Edit bonus list</button></div>
           <div class="opening-progress-head"><span id="openingProgressText">0 of 0 opened</span><span id="openingProgressPercent">0%</span></div>
           <div class="opening-progress-track"><div id="openingProgressFill"></div></div>
           <div id="payoutEditor">
@@ -73,13 +71,13 @@
             <p class="entry-error" id="payoutError" role="alert" hidden></p>
             <div class="payout-navigation"><button class="button subtle small" id="previousBonus" type="button">← Previous bonus</button><button class="button subtle small" id="nextBonus" type="button">Next bonus →</button></div>
           </div>
-          <div class="opening-done" id="allOpened" hidden><span class="done-symbol" aria-hidden="true">✓</span><h3>Every bonus is open.</h3><p>Review the results below, then finish your hunt.</p></div>
+          <div class="opening-done" id="allOpened" hidden><span class="done-symbol" aria-hidden="true">✓</span><h3>All bonuses opened.</h3></div>
           <div class="finish-action"><button class="button primary phase-button" id="finishHunt" type="button" disabled>Finish hunt ✓</button><span id="finishHint" class="help">Open every bonus to finish.</span></div>
           <details class="results-disclosure" open><summary>All bonus results <span id="bonusCount"></span></summary><div class="opening-results" id="openingResults"></div></details>
         </section>
 
         <section class="panel completed-phase" id="completedPhase" aria-labelledby="completedTitle" hidden>
-          <span class="done-symbol" aria-hidden="true">✓</span><span class="eyebrow">HUNT COMPLETE</span><h2 id="completedTitle">Hunt finished.</h2><p id="completedSummary"></p>
+          <span class="done-symbol" aria-hidden="true">✓</span><h2 id="completedTitle">Hunt complete.</h2><p id="completedSummary"></p>
           <div class="complete-result" id="completedProfit"></div>
           <div class="header-actions"><button class="button primary phase-button" id="newHuntAfterFinish" type="button">+ Start a new hunt</button><button class="button subtle" id="reviewHunt" type="button">Review payouts</button></div>
         </section>
@@ -89,7 +87,7 @@
         <section class="panel" aria-labelledby="libraryTitle">
           <div class="panel-head"><h2 id="libraryTitle">Hunt library</h2><span class="muted" id="huntCount"></span></div>
           <label for="huntSelect" class="sr-only">Choose a hunt</label><select id="huntSelect"></select>
-          <p class="help">The selected hunt is shown on your page and stream.</p>
+          <p class="help">Active on your page and stream.</p>
           <div class="header-actions"><button class="button subtle small" id="duplicateHunt" type="button">Duplicate</button><button class="button danger small" id="deleteHunt" type="button">Delete</button></div>
         </section>
         <section class="panel" aria-labelledby="visibilityTitle">
@@ -112,11 +110,10 @@
           <div class="header-actions"><button class="button subtle small" id="exportData" type="button">Export hunts</button><button class="button subtle small" id="importData" type="button">Import backup</button></div>
           <input id="importFile" class="hidden" type="file" accept="application/json,.json">
           <button class="button subtle small hidden" id="importLegacy" type="button">Import earlier tracker</button>
-          <p class="help">Download a copy of your hunts whenever you need it.</p>
         </section>
       </aside>
     </div>
-    <div class="empty-state" id="loadingState"><span class="eyebrow">THOR'S HALL</span><h2>Opening your hunt manager…</h2><p>Connecting to your saved hunts.</p></div>
+    <div class="empty-state" id="loadingState">Loading hunts…</div>
   </main>
   <div class="toast hidden" id="toast" role="status"></div>
 </div>
