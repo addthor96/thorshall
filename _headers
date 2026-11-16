@@ -28,6 +28,18 @@
   X-Robots-Tag: noindex, nofollow, noarchive
   Cache-Control: private, no-store
 
+/bonus-hunt*
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-store
+  Referrer-Policy: no-referrer
+
+/hunt-*.js
+  X-Robots-Tag: noindex, nofollow, noarchive
+  Cache-Control: no-cache, must-revalidate
+
+/hunt.css
+  Cache-Control: no-cache, must-revalidate
+
 /join
   X-Robots-Tag: noindex, follow
 

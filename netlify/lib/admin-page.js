@@ -28,7 +28,7 @@ function renderAdminPage() {
       <div><p class="eyebrow">THOR'S HALL / PRIVATE ADMIN</p><h1 id="page-title">Everything in one place<span class="title-dot">.</span></h1><p class="intro-description">Your partners, campaign results and recorded payments.</p></div>
       <div class="admin-access"><span class="access-dot" aria-hidden="true"></span>Owner access<span>Visible only with your master login</span></div>
     </section>
-    <nav class="workspace-nav" aria-label="Workspace sections"><a href="#campaigns-title">Campaigns</a><a href="#payments-title">Payments</a><a href="#tools-title">Site tools</a></nav>
+    <nav class="workspace-nav" aria-label="Workspace sections"><a href="#campaigns-title">Campaigns</a><a href="#payments-title">Payments</a><a href="/admin?view=hunts">Bonus hunts</a><a href="#tools-title">Site tools</a></nav>
     <div class="error-panel" id="session-error" hidden><div><strong>Admin access required</strong><p>Your private workspace has been cleared. Sign in with your master password to continue.</p></div><a class="button button-small" href="/.netlify/functions/stats-session?return=%2Fadmin">Sign in</a></div>
     <noscript><div class="error-panel"><p>Enable JavaScript to load and manage your partner workspace.</p></div></noscript>
     <section class="admin-summary" aria-label="Partner overview">
@@ -53,6 +53,7 @@ function renderAdminPage() {
     <section class="tools-section" aria-labelledby="tools-title">
       <div class="section-toolbar"><div><p class="panel-kicker">QUICK ACCESS</p><h2 id="tools-title">Site tools</h2><p>Your existing tools, a click away.</p></div></div>
       <div class="tools-grid">
+        <a class="tool-card" href="/admin?view=hunts"><span class="tool-icon" aria-hidden="true">03</span><div><strong>Bonus hunt manager</strong><p>Enter hunt results and control your website tracker and stream overlay.</p></div><span aria-hidden="true">↗</span></a>
         <a class="tool-card" href="https://app.netlify.com/projects/gentle-mandazi-f0e944/forms" target="_blank" rel="noopener noreferrer"><span class="tool-icon" aria-hidden="true">01</span><div><strong>Forms &amp; applications</strong><p>Review submissions and tracked clicks in Netlify.</p></div><span aria-hidden="true">↗</span></a>
         <a class="tool-card" href="https://app.netlify.com/projects/gentle-mandazi-f0e944/configuration/env" target="_blank" rel="noopener noreferrer"><span class="tool-icon" aria-hidden="true">02</span><div><strong>Access &amp; configuration</strong><p>Manage partner passwords and deployment settings.</p></div><span aria-hidden="true">↗</span></a>
         <a class="tool-card" href="/gsc-dashboard"><span class="tool-icon" aria-hidden="true">04</span><div><strong>Search performance</strong><p>Open the Google Search Console dashboard. Separate sign-in.</p></div><span aria-hidden="true">↗</span></a>

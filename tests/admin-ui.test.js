@@ -84,6 +84,19 @@ test("directory storage failure blocks editing and is not represented as zero pa
   assert.match(app.nodes.get("payments-status").textContent, /could not be loaded/);
 });
 
+test("existing admin links the hunt manager and keeps unauthorized hunt requests behind owner login", async () => {
+  const page = renderAdminPage();
+  assert.match(page, /href="\/admin\?view=hunts">Bonus hunts/);
+  assert.match(page, /Bonus hunt manager/);
+  assert.match(page, /id="partner-list"/);
+  assert.match(page, /id="recent-payments"/);
+  for (const access of [null,"t1","t2","manuel"]) {
+    const response = await handler({ httpMethod:"GET", queryStringParameters:{view:"hunts"}, headers:access?{cookie:`${auth.COOKIE_NAME}=${auth.createSession(access)}`}:{}});
+    assert.equal(response.statusCode,303);
+    assert.equal(response.headers.Location,"/.netlify/functions/stats-session?return=%2Fadmin%3Fview%3Dhunts");
+  }
+});
+
 test("independent report and payment failures preserve useful data without inventing zero", async () => {
   const app = await start({ stats: code => code === "t1" ? { status: 503 } : { ok: true, metrics: { visits: 9, ngr: 20 }, range: { key: "month" } }, payments: code => code === "t2" ? { status: 503 } : { ok: true, canManage: true, payments: [{ amountPaid: "10.50", currency: "USD", paidAt: "2026-10-01", reportingMonth: "2026-09", reference: "<img src=x>" }] } });
   assert.equal(app.nodes.get("summary-total").textContent, "2");

@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <title>Hunt Manager · Thor's Hall</title>
+  <link rel="icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/hunt.css">
+  <script src="/hunt-shared.js" defer></script>
+  <script src="/hunt-admin.js" defer></script>
+</head>
+<body class="admin">
+<div class="app-shell">
+  <header class="app-header">
+    <a class="brand-lockup" href="/"><img src="/logo.png" alt=""><span>THOR'S HALL<small>HUNT MANAGER</small></span></a>
+    <div class="header-actions">
+      <span class="save-status" id="saveStatus" data-state="loading" role="status">Connecting…</span>
+      <button class="button primary" id="saveNow" type="button" disabled>Save changes</button>
+      <a class="button subtle" href="/bonus-hunt" target="_blank" rel="noopener">View hunt ↗</a>
+      <a class="button subtle" href="/admin">Back to admin</a>
+      <a class="button subtle" href="/.netlify/functions/stats-session?logout=1">Sign out</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-heading"><div><span class="eyebrow">OWNER ACCESS</span><h1>Run the hunt.</h1><p class="muted">Add bonuses here. Your hunt page and stream update as you save.</p></div><button class="button subtle" id="newHunt" type="button" disabled>+ New hunt</button></div>
+    <div class="notice hidden" id="errorNotice" role="alert"><span id="errorText"></span><div class="header-actions"><button class="button small subtle hidden" id="retrySave" type="button">Try saving again</button><button class="button small subtle hidden" id="reloadRemote" type="button">Load latest saved version</button><a class="button small primary hidden" id="loginAgain" href="/.netlify/functions/stats-session?return=%2Fadmin%3Fview%3Dhunts">Sign in again</a><button class="button small subtle" id="exportDraft" type="button">Download my draft</button></div></div>
+    <div class="notice hidden" id="recoveryNotice"><span>A draft from your previous session is available.</span><div class="header-actions"><button class="button small primary" id="restoreDraft" type="button">Restore draft</button><button class="button small subtle" id="discardDraft" type="button">Keep saved version</button></div></div>
+    <div class="admin-grid" id="manager" hidden>
+      <div class="admin-main stack">
+        <section class="panel" aria-labelledby="huntDetailsTitle">
+          <div class="panel-head"><div><span class="eyebrow">CURRENT HUNT</span><h2 id="huntDetailsTitle">Hunt details</h2></div><span class="badge" id="activeBadge">Collecting</span></div>
+          <div class="field-grid three">
+            <div class="field"><label for="huntTitle">Title</label><input id="huntTitle" maxlength="80" placeholder="Friday night hunt" autocomplete="off"></div>
+            <div class="field"><label for="huntDate">Hunt date</label><input id="huntDate" type="date"></div>
+            <div class="field"><label for="huntStatus">Stage</label><select id="huntStatus"><option value="collecting">Collecting bonuses</option><option value="opening">Opening bonuses</option><option value="complete">Complete</option></select></div>
+          </div>
+          <div class="field-grid three">
+            <div class="field"><label for="huntStart">Starting balance</label><input id="huntStart" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00"><p class="help">The total you want the hunt to return.</p></div>
+            <div class="field"><label for="huntBalance">Balance left</label><input id="huntBalance" type="number" min="0" max="100000000" step="0.01" inputmode="decimal" placeholder="0.00"><p class="help">Unspent balance, added to bonus payouts.</p></div>
+            <div class="field"><label for="huntCurrency">Currency</label><select id="huntCurrency"><option value="USD">USD · US dollar</option><option value="EUR">EUR · Euro</option><option value="GBP">GBP · British pound</option><option value="CAD">CAD · Canadian dollar</option><option value="AUD">AUD · Australian dollar</option></select></div>
+          </div>
+        </section>
+
+        <section class="metrics compact" id="liveMetrics" aria-label="Hunt calculation summary" aria-live="polite"></section>
+
+        <section class="panel" aria-labelledby="bonusListTitle">
+          <div class="panel-head"><div><h2 id="bonusListTitle">Bonus list</h2><p class="muted" id="bonusCount">0 bonuses</p></div><div class="header-actions"><button class="button subtle small" id="addFive" type="button">+ 5 rows</button><button class="button primary small" id="addBonus" type="button">+ Add bonus</button></div></div>
+          <p class="help">Enter the payout or X when a bonus opens. Leave both empty for unopened bonuses; enter 0 for a bust.</p>
+          <div class="editor-table-wrap"><table class="editor-table"><thead><tr><th scope="col">#</th><th scope="col">Slot / provider</th><th scope="col">Bet</th><th scope="col">Payout</th><th scope="col">X</th><th scope="col"><span class="sr-only">Row actions</span></th></tr></thead><tbody id="bonusRows"></tbody></table></div>
+          <div class="empty-state" id="emptyRows"><strong>Your first bonus goes here.</strong><p>Add a slot and its bet. Enter the result when you open it.</p><button class="button primary" id="addFirst" type="button">+ Add first bonus</button></div>
+          <div class="panel-foot"><button class="button subtle" id="addBottom" type="button">+ Add another bonus</button><span class="help">Changes save automatically.</span></div>
+        </section>
+      </div>
+
+      <aside class="admin-sidebar stack">
+        <section class="panel" aria-labelledby="libraryTitle">
+          <div class="panel-head"><h2 id="libraryTitle">Hunt library</h2><span class="muted" id="huntCount"></span></div>
+          <label for="huntSelect" class="sr-only">Choose a hunt</label><select id="huntSelect"></select>
+          <p class="help">The selected hunt is shown on your page and stream.</p>
+          <div class="header-actions"><button class="button subtle small" id="duplicateHunt" type="button">Duplicate</button><button class="button danger small" id="deleteHunt" type="button">Delete</button></div>
+        </section>
+        <section class="panel" aria-labelledby="visibilityTitle">
+          <div class="panel-head"><h2 id="visibilityTitle">Website visibility</h2><span class="badge" id="visibilityBadge">Private</span></div>
+          <p class="muted" id="visibilityText">Only you can preview the hunt page.</p>
+          <button class="button subtle" id="togglePublic" type="button">Make hunt page public</button>
+          <p class="help">Your stream overlay works while the website page is private.</p>
+        </section>
+        <section class="panel" aria-labelledby="streamTitle">
+          <div class="panel-head"><div><span class="eyebrow">OBS / STREAMLABS</span><h2 id="streamTitle">Stream overlay</h2></div><span class="badge live">Live sync</span></div>
+          <p class="muted">Add a Browser Source and paste this private viewing link.</p>
+          <label class="sr-only" for="overlayUrl">Stream overlay URL</label><input id="overlayUrl" type="password" readonly autocomplete="off">
+          <div class="header-actions"><button class="button primary small" id="copyOverlay" type="button">Copy overlay URL</button><button class="button subtle small" id="showOverlayUrl" type="button" aria-pressed="false">Show</button></div>
+          <div class="stream-preview"><iframe id="overlayPreview" title="Live stream overlay preview" loading="lazy" referrerpolicy="no-referrer"></iframe></div>
+          <p class="help">Browser Source size: 520 × 620. The background is transparent. Saved changes appear within a few seconds.</p>
+          <details><summary>Overlay link settings</summary><p class="help">Anyone with this link can view the overlay. It cannot edit hunts.</p><button class="button danger small" id="rotateToken" type="button">Replace overlay link</button><p class="help">Replacing the link disconnects your current OBS source until you paste the new one.</p></details>
+        </section>
+        <section class="panel" aria-labelledby="backupTitle">
+          <div class="panel-head"><h2 id="backupTitle">Backups</h2></div>
+          <div class="header-actions"><button class="button subtle small" id="exportData" type="button">Export hunts</button><button class="button subtle small" id="importData" type="button">Import backup</button></div>
+          <input id="importFile" class="hidden" type="file" accept="application/json,.json">
+          <button class="button subtle small hidden" id="importLegacy" type="button">Import earlier tracker</button>
+          <p class="help">Download a copy of your hunts whenever you need it.</p>
+        </section>
+      </aside>
+    </div>
+    <div class="empty-state" id="loadingState"><span class="eyebrow">THOR'S HALL</span><h2>Opening your hunt manager…</h2><p>Connecting to your saved hunts.</p></div>
+  </main>
+  <div class="toast hidden" id="toast" role="status"></div>
+</div>
+</body>
+</html>
+

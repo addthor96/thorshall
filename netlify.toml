@@ -1,0 +1,12 @@
+[build.environment]
+  NODE_VERSION = "22.14.0"
+
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
+
+[functions."bonus-hunts-admin"]
+  included_files = ["netlify/views/hunts-admin.html"]
+
+[functions."admin-dashboard"]
+  included_files = ["netlify/views/hunts-admin.html"]

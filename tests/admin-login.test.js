@@ -57,3 +57,15 @@ test("partner dashboards show an admin home link only for the owner", () => {
   assert.match(renderDashboard(partners.t1, { isAdmin: true, partners: Object.values(partners) }), /href="\/admin">Admin home/);
   assert.doesNotMatch(renderDashboard(partners.t1), /href="\/admin"/);
 });
+
+test("hunt manager return stays on /admin and requires owner access", async () => {
+  const returnTo = "/admin?view=hunts";
+  const page = await login({ httpMethod: "GET", headers: signed("t1"), queryStringParameters: { return: returnTo } });
+  assert.equal(page.statusCode, 200);
+  assert.match(page.body, /Admin sign-in/);
+  assert.match(page.body, /name="return" value="\/admin\?view=hunts"/);
+  const rejected = await login(post("test-only-t1-password", "t1", returnTo));
+  assert.equal(rejected.statusCode, 401);
+  const accepted = await login(post("test-only-owner-password", "t1", returnTo));
+  assert.equal(accepted.headers.Location, returnTo);
+});

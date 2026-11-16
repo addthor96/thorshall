@@ -21,7 +21,11 @@ exports.handler = async function (event) {
     return { statusCode: 405, headers: { ...headers, Allow: "GET" }, body: "Method not allowed." };
   }
   if (sessionAccess(event) !== "admin") {
-    return { statusCode: 303, headers: { ...headers, Location: "/.netlify/functions/stats-session?return=%2Fadmin" }, body: "" };
+    const returnTo = event.queryStringParameters?.view === "hunts" ? "/admin?view=hunts" : "/admin";
+    return { statusCode: 303, headers: { ...headers, Location: "/.netlify/functions/stats-session?return=" + encodeURIComponent(returnTo) }, body: "" };
+  }
+  if (event.queryStringParameters?.view === "hunts") {
+    return require("./bonus-hunts-admin").handler(event);
   }
   return { statusCode: 200, headers, body: renderAdminPage() };
 };
