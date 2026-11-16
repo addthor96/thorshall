@@ -1,6 +1,11 @@
 import backend from "../lib/bonus-hunts.js";
+import { getStore } from "@netlify/blobs";
 
-const handle = backend.createHandler();
+// Import the SDK in this modern entry, as the existing site data functions do,
+// so Netlify recognizes the integration and supplies the native Blobs context.
+const handle = backend.createHandler(event => getStore({
+  name: backend.storeName(event), consistency: "strong"
+}));
 
 // The modern Functions API supplies the complete Blobs context, including the
 // uncached endpoint needed for strong reads. Do not convert this to a Lambda handler.
@@ -16,4 +21,5 @@ export default async function(request, context) {
   });
   return new Response(result.body, { status: result.statusCode, headers: result.headers });
 }
+
 
