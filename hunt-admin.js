@@ -26,7 +26,7 @@
   function controls(){
     if(!state)return;
     const locked=blocked||actionBusy||rotationBusy||!!pendingAction,h=current(),all=h.rows.length>0&&h.rows.every(opened);
-    ['newSlotName','newSlotBet','addBonus','cancelBonusEdit','payoutAmount','savePayout','previousBonus','nextBonus','startOpening','editCollection','reviewHunt','huntSelect','duplicateHunt','deleteHunt','huntStart','huntCurrency','huntTitle','huntDate','huntBalance','importData','importFile','importLegacy','restoreDraft','togglePublic','rotateToken'].forEach(id=>$(id).disabled=locked);
+    ['newSlotName','newSlotBet','addBonus','cancelBonusEdit','payoutAmount','savePayout','previousBonus','nextBonus','startOpening','editCollection','reviewHunt','huntSelect','renameHunt','duplicateHunt','deleteHunt','huntStart','huntCurrency','huntTitle','huntDate','huntBalance','importData','importFile','importLegacy','restoreDraft','togglePublic','rotateToken'].forEach(id=>$(id).disabled=locked);
     $('startOpening').disabled=locked||h.rows.length===0;
     $('finishHunt').disabled=locked||!all;
     $('newHunt').disabled=locked||state.hunts.length>=50;$('newHuntAfterFinish').disabled=locked||state.hunts.length>=50;
@@ -175,6 +175,7 @@
   $('finishHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const h=current();if(!h.rows.length||h.rows.some(r=>!opened(r)))return;h.status='complete';beginAction({kind:'finish',huntId:h.id});});
   $('reviewHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const h=current();h.status='opening';beginAction({kind:'review',huntId:h.id});});
   $('huntSelect').addEventListener('change',()=>{if(pendingAction||rotationBusy||blocked)return;state.activeId=$('huntSelect').value;payoutRowId=null;resetEntry();renderAll();change();});
+  $('renameHunt').addEventListener('click',()=>{if(!state||pendingAction||actionBusy||rotationBusy||blocked)return;const input=$('huntTitle');input.scrollIntoView({block:'center'});input.focus({preventScroll:true});input.select();});
   $('newHunt').addEventListener('click',newHunt);$('newHuntAfterFinish').addEventListener('click',newHunt);
   $('duplicateHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked||state.hunts.length>=50)return;const h=copy(current());h.id=Core.id();h.title=(h.title+' copy').slice(0,80);h.rows.forEach(r=>r.id=Core.id());state.hunts.unshift(h);state.activeId=h.id;payoutRowId=null;resetEntry();renderAll();change();});
   $('deleteHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked||!confirm('Delete “'+current().title+'” and its bonuses?'))return;state.hunts=state.hunts.filter(h=>h.id!==state.activeId);if(!state.hunts.length)state.hunts.push(Core.createHunt());state.activeId=state.hunts[0].id;payoutRowId=null;resetEntry();renderAll();change();});

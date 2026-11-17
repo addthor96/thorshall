@@ -14,7 +14,8 @@ async function start({data=initial(),mutate}={}){
     addEventListener(name,fn){this.listeners[name]=fn;}
     setAttribute(key,value){this.attributes[key]=String(value);}
     focus(){if(!this.disabled)document.activeElement=this;}
-    select(){}
+    select(){this.selectionStart=0;this.selectionEnd=this.value.length;}
+    scrollIntoView(options){this.scrolledIntoView=options;}
     click(){return this.fire('click');}
     fire(type,target=this){return this.listeners[type]?.({target,preventDefault(){}});}
   }
@@ -77,4 +78,22 @@ test('token rotation and guided actions cannot issue concurrent revision writes'
   let release;const gate=new Promise(resolve=>release=resolve);const app=await start({data:initial([bonus('a','First')],'opening'),mutate:async(body,count,options)=>{if(options.method==='POST')await gate;}});
   app.fire('rotateToken');await app.settle();assert.equal(app.nodes.get('payoutAmount').disabled,true);assert.equal(app.nodes.get('importData').disabled,true);
   app.field('payoutAmount','100');app.fire('payoutForm','submit');await app.settle();assert.equal(app.calls.filter(c=>c.method==='PUT').length,0);release();await app.settle();assert.equal(app.nodes.get('payoutAmount').disabled,false);app.fire('payoutForm','submit');await app.settle();assert.equal(app.saved().hunts[0].rows[0].payout,100);assert.equal(app.calls.filter(c=>c.method==='PUT')[0].body.revision,'v2');
+});
+
+test('Rename focuses and selects the name, and renaming saves in every hunt phase',async()=>{
+  for(const phase of ['collecting','opening','complete']){
+    const app=await start({data:initial([bonus('a','Only slot',phase==='complete'?0:null)],phase)});
+    assert.equal(app.nodes.get('renameHunt').disabled,false);app.fire('renameHunt');
+    const title=app.nodes.get('huntTitle');assert.equal(app.activeElement(),title);assert.equal(title.selectionStart,0);assert.equal(title.selectionEnd,'Test hunt'.length);assert.equal(title.scrolledIntoView.block,'center');assert.equal(app.calls.filter(call=>call.method!=='GET').length,0);
+    app.field('huntTitle','Renamed '+phase);await app.fire('saveNow');await app.settle();
+    assert.equal(app.saved().hunts[0].title,'Renamed '+phase);assert.equal(app.saved().hunts[0].status,phase);assert.equal(app.saved().hunts[0].rows[0].payout,phase==='complete'?0:null);assert.match(app.nodes.get('huntSelect').innerHTML,new RegExp('Renamed '+phase));assert.equal(app.nodes.get('renameHunt').disabled,false);
+  }
+});
+
+test('Rename stays blocked during an unsaved payout and session or revision errors',async()=>{
+  const pending=await start({data:initial([bonus('a','Only slot')],'opening'),mutate:async()=>new Error('Offline')});
+  pending.field('payoutAmount','0');pending.fire('payoutForm','submit');await pending.settle();assert.equal(pending.nodes.get('renameHunt').disabled,true);pending.fire('renameHunt');assert.notEqual(pending.activeElement(),pending.nodes.get('huntTitle'));assert.equal(pending.nodes.get('huntTitle').selectionStart,undefined);assert.equal(pending.saved().hunts[0].rows[0].payout,null);
+  for(const status of [401,409]){
+    const app=await start({mutate:async()=>({status})});app.field('huntTitle','Unsaved title');await app.fire('saveNow');await app.settle();assert.equal(app.nodes.get('renameHunt').disabled,true);app.fire('renameHunt');assert.notEqual(app.activeElement(),app.nodes.get('huntTitle'));assert.equal(app.nodes.get('huntTitle').selectionStart,undefined);assert.equal(app.saved().hunts[0].title,'Test hunt');assert.equal(app.nodes.get('errorNotice').classList.contains('hidden'),false);
+  }
 });

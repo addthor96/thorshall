@@ -8,9 +8,9 @@
   <title>Hunt Manager · Thor's Hall</title>
   <link rel="icon" href="/favicon.ico">
   <link rel="stylesheet" href="/hunt.css">
-  <link rel="stylesheet" href="/hunt-manager.css">
+  <link rel="stylesheet" href="/hunt-manager.css?v=20261117-rename">
   <script src="/hunt-shared.js" defer></script>
-  <script src="/hunt-admin.js" defer></script>
+  <script src="/hunt-admin.js?v=20261117-rename" defer></script>
 </head>
 <body class="admin">
 <div class="app-shell">
@@ -86,7 +86,7 @@
       <aside class="admin-sidebar stack">
         <section class="panel" aria-labelledby="libraryTitle">
           <div class="panel-head"><h2 id="libraryTitle">Hunt library</h2><span class="muted" id="huntCount"></span></div>
-          <label for="huntSelect" class="sr-only">Choose a hunt</label><select id="huntSelect"></select>
+          <label for="huntSelect" class="sr-only">Active hunt</label><div class="hunt-select-row"><select id="huntSelect"></select><button class="button subtle small" id="renameHunt" type="button" aria-controls="huntTitle" disabled>Rename</button></div>
           <p class="help">Active on your page and stream.</p>
           <div class="header-actions"><button class="button subtle small" id="duplicateHunt" type="button">Duplicate</button><button class="button danger small" id="deleteHunt" type="button">Delete</button></div>
         </section>
