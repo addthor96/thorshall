@@ -96,6 +96,7 @@
   }
 
   function lock() {
+    if (locked) return;
     locked = true;
     clearPrivate();
     byId("session-error").hidden = false;
@@ -103,6 +104,8 @@
     message(byId("directory-status"), "Admin session unavailable. Sign in again to continue.", true);
     message(byId("payments-status"), "Payment history cleared.");
     controls();
+    window.__thorshallAdminExpired = true;
+    if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("thorshall:admin-session-expired"));
   }
 
   async function request(url, options = {}) {
@@ -405,6 +408,7 @@
   byId("retry-directory").addEventListener("click", loadAll);
   window.addEventListener("beforeunload", event => { if (hasUnsavedChanges()) { event.preventDefault(); event.returnValue = ""; } });
   window.addEventListener("pagehide", () => { leaving = true; clearPrivate(); refresh.disabled = true; });
-  window.addEventListener("pageshow", event => { if (event.persisted) { leaving = false; locked = false; byId("session-error").hidden = true; loadAll(); } });
-  loadAll();
+  window.addEventListener("pageshow", event => { if (event.persisted) { leaving = false; locked = false; window.__thorshallAdminExpired = false; byId("session-error").hidden = true; loadAll(); } });
+  window.addEventListener("thorshall:admin-session-expired", lock);
+  if (window.__thorshallAdminExpired) lock(); else loadAll();
 })();

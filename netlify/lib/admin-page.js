@@ -7,14 +7,15 @@ function renderAdminPage() {
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="robots" content="noindex,nofollow,noarchive">
-  <meta name="theme-color" content="#0a0908">
+  <meta name="theme-color" content="#0e1219">
   <title>Admin | Thor's Hall</title>
   <link rel="icon" href="/favicon.ico">
   <link rel="stylesheet" href="/assets/partner-dashboard.css">
-  <link rel="stylesheet" href="/assets/admin.css">
-  <script src="/assets/admin.js" defer></script>
+  <link rel="stylesheet" href="/assets/admin.css?v=20261118-workspace">
+  <script src="/assets/admin.js?v=20261118-session" defer></script>
+  <script src="/assets/admin-giveaways.js?v=20261118-giveaways" defer></script>
 </head>
-<body>
+<body class="admin-workspace">
   <a class="skip-link" href="#main">Skip to admin</a>
   <header class="site-header"><div class="shell header-inner">
     <a class="brand" href="/admin" aria-label="Thor's Hall admin home">
@@ -25,12 +26,35 @@ function renderAdminPage() {
   </div></header>
   <main class="shell admin-shell" id="main">
     <section class="admin-intro" aria-labelledby="page-title">
-      <div><p class="eyebrow">THOR'S HALL / PRIVATE ADMIN</p><h1 id="page-title">Everything in one place<span class="title-dot">.</span></h1><p class="intro-description">Your partners, campaign results and recorded payments.</p></div>
-      <div class="admin-access"><span class="access-dot" aria-hidden="true"></span>Owner access<span>Visible only with your master login</span></div>
+      <div><p class="eyebrow">WORKSPACE</p><h1 id="page-title">Admin</h1></div>
+      <div class="admin-access"><span class="access-dot" aria-hidden="true"></span>Private workspace</div>
     </section>
-    <nav class="workspace-nav" aria-label="Workspace sections"><a href="#campaigns-title">Campaigns</a><a href="#payments-title">Payments</a><a href="/admin?view=hunts">Bonus hunts</a><a href="#tools-title">Site tools</a></nav>
+    <nav class="workspace-nav" aria-label="Workspace sections"><a href="#tools-title">Tools</a><a href="#giveaways-title">Giveaways</a><a href="#campaigns-title">Partners</a><a href="#payments-title">Payments</a><a href="/admin?view=hunts">Bonus hunts <span aria-hidden="true">↗</span></a></nav>
     <div class="error-panel" id="session-error" hidden><div><strong>Admin access required</strong><p>Your private workspace has been cleared. Sign in with your master password to continue.</p></div><a class="button button-small" href="/.netlify/functions/stats-session?return=%2Fadmin">Sign in</a></div>
     <noscript><div class="error-panel"><p>Enable JavaScript to load and manage your partner workspace.</p></div></noscript>
+    <section class="tools-section" aria-labelledby="tools-title">
+      <div class="section-toolbar"><div><h2 id="tools-title">Tools</h2></div><span class="section-meta">Quick access</span></div>
+      <div class="tools-grid">
+        <a class="tool-card" href="/admin?view=hunts"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M7 15l3-4 3 2 4-6M7 7h2"/></svg></span><div><strong>Bonus hunts</strong><p>Hunts &amp; stream overlay</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
+        <a class="tool-card" href="#giveaways-title"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v9h14v-9M12 8v13M12 8H8a3 3 0 1 1 3-3l1 3Zm0 0h4a3 3 0 1 0-3-3l-1 3Z"/></svg></span><div><strong>Giveaways</strong><p>Record &amp; view totals</p></div><span class="tool-arrow" aria-hidden="true">↓</span></a>
+        <a class="tool-card" href="https://app.netlify.com/projects/gentle-mandazi-f0e944/forms" target="_blank" rel="noopener noreferrer"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h3"/></svg></span><div><strong>Forms</strong><p>Applications &amp; clicks</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
+        <a class="tool-card" href="https://app.netlify.com/projects/gentle-mandazi-f0e944/configuration/env" target="_blank" rel="noopener noreferrer"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V6a4 4 0 0 1 8 0v4M12 14v3"/></svg></span><div><strong>Access &amp; settings</strong><p>Passwords &amp; configuration</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
+        <a class="tool-card" href="/gsc-dashboard"><span class="tool-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><circle cx="10" cy="10" r="6"/><path d="m15 15 6 6M7 11l2-3 3 2"/></svg></span><div><strong>Search performance</strong><p>Google Search Console</p></div><span class="tool-arrow" aria-hidden="true">↗</span></a>
+      </div>
+    </section>
+    <section class="panel giveaways-panel" id="giveaways-panel" aria-labelledby="giveaways-title">
+      <div class="section-toolbar"><div><p class="panel-kicker">GIVEAWAYS</p><h2 id="giveaways-title">Giveaway tracker</h2><p>Record completed giveaways.</p></div><span class="section-meta">USD</span></div>
+      <div class="giveaway-workspace">
+        <div class="giveaway-counter" aria-label="Recorded giveaway totals"><span class="giveaway-counter-label">Total given away</span><strong id="giveaway-total">—</strong><p><span id="giveaway-count">—</span></p></div>
+        <div class="giveaway-entry-panel">
+          <form id="giveaway-form" class="giveaway-form"><label for="giveaway-amount">Amount (USD)</label><div class="giveaway-amount-row"><div class="giveaway-input-wrap"><span aria-hidden="true">$</span><input id="giveaway-amount" name="amount" type="text" inputmode="decimal" autocomplete="off" placeholder="0.00" required disabled></div><button type="submit" class="button" id="giveaway-submit" disabled>Record giveaway</button></div></form>
+          <p id="giveaway-status" class="giveaway-status" role="status">Loading giveaway records…</p>
+          <div id="giveaway-error" class="error-panel giveaway-error" role="alert" hidden></div><button id="giveaway-retry" type="button" class="quiet-button" hidden disabled>Try again</button>
+        </div>
+      </div>
+      <div class="giveaway-history-heading"><h3>Recent giveaways</h3><span class="section-meta">Recorded history</span></div>
+      <div id="giveaway-history" class="giveaway-history" aria-busy="true"></div><p id="giveaway-empty" class="giveaway-empty" hidden>No giveaways recorded yet.</p>
+    </section>
     <section class="admin-summary" aria-label="Partner overview">
       <article class="summary-card"><span>Partner campaigns</span><strong id="summary-total">—</strong><p>Your numbered partner pages</p></article>
       <article class="summary-card"><span>Partner login ready</span><strong id="summary-ready">—</strong><p>Password configured for their dashboard</p></article>
@@ -49,15 +73,6 @@ function renderAdminPage() {
       <div class="section-toolbar"><div><p class="panel-kicker">ACROSS YOUR PARTNERS</p><h2 id="payments-title">Recent recorded payments</h2><p>The latest 12 entries, with each payment shown in its own currency.</p></div></div>
       <p id="payments-status" class="directory-status" role="status" aria-live="polite">Loading payment history…</p><div id="recent-payments" class="recent-payments" aria-busy="true"></div>
       <p class="admin-footnote">Record or correct a payment from the partner’s dashboard. Entries document payments you have already sent; they do not transfer funds.</p>
-    </section>
-    <section class="tools-section" aria-labelledby="tools-title">
-      <div class="section-toolbar"><div><p class="panel-kicker">QUICK ACCESS</p><h2 id="tools-title">Site tools</h2><p>Your existing tools, a click away.</p></div></div>
-      <div class="tools-grid">
-        <a class="tool-card" href="/admin?view=hunts"><span class="tool-icon" aria-hidden="true">03</span><div><strong>Bonus hunt manager</strong><p>Enter hunt results and control your website tracker and stream overlay.</p></div><span aria-hidden="true">↗</span></a>
-        <a class="tool-card" href="https://app.netlify.com/projects/gentle-mandazi-f0e944/forms" target="_blank" rel="noopener noreferrer"><span class="tool-icon" aria-hidden="true">01</span><div><strong>Forms &amp; applications</strong><p>Review submissions and tracked clicks in Netlify.</p></div><span aria-hidden="true">↗</span></a>
-        <a class="tool-card" href="https://app.netlify.com/projects/gentle-mandazi-f0e944/configuration/env" target="_blank" rel="noopener noreferrer"><span class="tool-icon" aria-hidden="true">02</span><div><strong>Access &amp; configuration</strong><p>Manage partner passwords and deployment settings.</p></div><span aria-hidden="true">↗</span></a>
-        <a class="tool-card" href="/gsc-dashboard"><span class="tool-icon" aria-hidden="true">04</span><div><strong>Search performance</strong><p>Open the Google Search Console dashboard. Separate sign-in.</p></div><span aria-hidden="true">↗</span></a>
-      </div>
     </section>
     <footer class="dashboard-footer"><span>THOR'S HALL <span class="footer-separator">/</span> ADMIN</span><p>Campaign activity is not affiliate commission or partner earnings. Reporting periods use UTC.</p></footer>
   </main>

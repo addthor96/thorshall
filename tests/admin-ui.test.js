@@ -87,7 +87,7 @@ test("directory storage failure blocks editing and is not represented as zero pa
 test("existing admin links the hunt manager and keeps unauthorized hunt requests behind owner login", async () => {
   const page = renderAdminPage();
   assert.match(page, /href="\/admin\?view=hunts">Bonus hunts/);
-  assert.match(page, /Bonus hunt manager/);
+  assert.match(page, /class="tool-card" href="\/admin\?view=hunts"/);
   assert.match(page, /id="partner-list"/);
   assert.match(page, /id="recent-payments"/);
   for (const access of [null,"t1","t2","manuel"]) {
