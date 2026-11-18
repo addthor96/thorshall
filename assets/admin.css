@@ -11,7 +11,7 @@ body.admin-workspace {
   --line:#293341;
   --red:#f1b6ab;
   --green:#afd0b6;
-  background:radial-gradient(ellipse at 86% 0,#22324740,transparent 46%),var(--bg);
+  background:linear-gradient(180deg,#0c1724bb 0%,#0d1724d9 45%,#0e1520f5 100%),url('/img/bonus-hunt-fjord-v1.jpg') center top/cover fixed no-repeat,var(--bg);
   color:var(--text);
   font-size:14px;
 }
@@ -30,54 +30,51 @@ body.admin-workspace::before{display:none}
 .admin-intro h1{font:650 32px/1.1 var(--sans);letter-spacing:-1.1px;margin:0;color:#eef1f7}
 .admin-access{display:flex;align-items:center;gap:8px;flex-shrink:0;border:1px solid #344033;border-radius:999px;background:#202d222e;padding:7px 11px;color:#b6cbb8;font-size:10px;font-weight:500}
 .access-dot{width:5px;height:5px;background:#a5c6aa;border-radius:50%}
-.workspace-nav{position:sticky;top:0;z-index:10;display:flex;flex-wrap:wrap;align-items:center;gap:5px;border:1px solid #2d3847;border-radius:11px;margin-bottom:25px;padding:7px;background:#131b26f5;box-shadow:0 6px 20px #060b1433;backdrop-filter:blur(16px)}
-.workspace-nav a{display:flex;align-items:center;gap:7px;color:#aebacc;text-decoration:none;font-size:12px;font-weight:550;padding:9px 15px;border:1px solid transparent;border-radius:6px;line-height:1.3;transition:background .15s,color .15s}
-.workspace-nav a:hover,.workspace-nav a:focus-visible{background:#263140;color:#f0dbac}
-.workspace-nav a:first-child{background:#2e2c25;border-color:#5a4f38;color:#e6cea1}
-.admin-workspace:has(#giveaways-title:target,#campaigns-title:target,#payments-title:target) .workspace-nav a:first-child{background:transparent;border-color:transparent;color:#aebacc}
-.admin-workspace:has(#giveaways-title:target) .workspace-nav a[href="#giveaways-title"],.admin-workspace:has(#campaigns-title:target) .workspace-nav a[href="#campaigns-title"],.admin-workspace:has(#payments-title:target) .workspace-nav a[href="#payments-title"]{background:#2e2c25;border-color:#5a4f38;color:#e6cea1}
-.workspace-nav a>span{font-size:10px;color:#8b9ab0}
-.admin-shell h2{scroll-margin-top:82px}
+.admin-shell h2{scroll-margin-top:24px}
 .admin-shell h2,.admin-shell .panel h2{font:600 18px/1.3 var(--sans);letter-spacing:-.3px;margin:0;color:#e9edf5}
 .admin-shell .panel-kicker{color:#98a5b8;font-size:9px;margin:0 0 6px;letter-spacing:.15em}
 .admin-shell .section-toolbar{gap:20px;align-items:center}
 .admin-shell .section-toolbar>div>p:last-child{font-size:12px;line-height:1.5;color:#8f9db1;margin:7px 0 0}
 .section-meta{font-size:10px;line-height:1.4;color:#8090a7;white-space:nowrap}
-.tools-section{margin-bottom:25px}
-.tools-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}
-.tool-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:16px;min-width:0;padding:17px 16px 16px;border:1px solid #2e3948;border-radius:11px;background:linear-gradient(135deg,#1b2431,#151c27);text-decoration:none;color:#dfe6f0;transition:border-color .15s,background .15s;box-shadow:0 4px 10px #080d1520}
+.workspace-top{display:grid;grid-template-columns:300px minmax(0,1fr);align-items:start;gap:20px;margin-bottom:25px}
+.tools-section{min-width:0;margin:0}
+.tools-section>.section-toolbar{min-height:24px;margin-bottom:14px}
+.tools-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:0}
+.tool-card{position:relative;display:flex;flex-direction:column;align-items:flex-start;gap:17px;min-width:0;min-height:128px;padding:19px 18px 18px;border:1px solid #344354;border-radius:11px;background:linear-gradient(135deg,#1b2634f5,#151e2bf5);text-decoration:none;color:#dfe6f0;transition:border-color .15s,background .15s;box-shadow:0 4px 16px #070f1c33}
 .tool-card:hover{border-color:#8a7750;background:linear-gradient(135deg,#232c37,#1a212b)}
 .tool-icon{display:grid;place-items:center;width:29px;height:29px;border:1px solid #584e39;border-radius:8px;color:#d4bc8c;background:#28291f44;flex-shrink:0}
 .tool-icon svg{width:16px;height:16px;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.tool-card strong{display:block;font-size:12px;line-height:1.4;font-weight:600;letter-spacing:-.05px}
-.tool-card p{font-size:10px;line-height:1.5;color:#8f9db2;margin:4px 0 0}
+.tool-card strong{display:block;font-size:13px;line-height:1.4;font-weight:600;letter-spacing:-.05px}
+.tool-card p{font-size:11px;line-height:1.5;color:#8f9db2;margin:4px 0 0}
 .tool-arrow{position:absolute;top:16px;right:15px;color:#728299;font-size:13px}
 .admin-shell .panel{border:1px solid #2d3847;border-radius:13px;background:linear-gradient(130deg,#19222e,#151c27);box-shadow:0 8px 22px #060b141a}
-.giveaways-panel{margin-bottom:26px;padding:24px 26px}
-.giveaway-workspace{display:grid;grid-template-columns:minmax(200px,.85fr) minmax(300px,1.3fr);gap:35px;align-items:center;padding:24px 0 26px}
-.giveaway-counter{border-right:1px solid #313b49;padding:0 24px 0 0}
+.admin-shell .giveaways-panel{padding:20px 18px;margin:0;background:linear-gradient(145deg,#1c2634fa,#151f2bfa)}
+.giveaways-panel .section-toolbar h2{font-size:15px}
+.giveaway-workspace{display:block;padding:18px 0 0}
+.giveaway-counter{padding:0 0 17px}
 .giveaway-counter-label{font-size:11px;color:#9aa8bb}
-.giveaway-counter>strong{display:block;font-size:clamp(32px,4vw,45px);font-weight:550;letter-spacing:-1.8px;font-variant-numeric:tabular-nums;color:#ead4a3;line-height:1.15;margin:10px 0 8px;overflow-wrap:anywhere}
+.giveaway-counter>strong{display:block;font-size:35px;font-weight:550;letter-spacing:-1.2px;font-variant-numeric:tabular-nums;color:#ead4a3;line-height:1.15;margin:7px 0;overflow-wrap:anywhere}
 .giveaway-counter>p{font-size:11px;color:#8595ac;margin:0}
 .giveaway-counter>p>span{color:#bdc8d7;font-variant-numeric:tabular-nums}
 .giveaway-entry-panel{min-width:0}
 .giveaway-form>label{display:block;font-size:11px;font-weight:550;color:#bdc9d9;margin-bottom:8px}
-.giveaway-amount-row{display:flex;align-items:stretch;gap:10px}
+.giveaway-amount-row{display:flex;align-items:stretch;gap:7px}
 .giveaway-input-wrap{display:flex;align-items:center;min-width:0;flex:1;border:1px solid #3a4657;border-radius:8px;background:#101722;transition:border-color .15s,box-shadow .15s}
 .giveaway-input-wrap:focus-within{border-color:#c3a771;box-shadow:0 0 0 3px #c3a77118}
 .giveaway-input-wrap>span{flex-shrink:0;padding-left:13px;color:#9aa8ba;font-size:15px}
-.giveaway-input-wrap>input{width:100%;min-width:0;border:0;outline:0!important;box-shadow:none;background:transparent;color:#edf1f7;font:500 16px/1.3 var(--sans);font-variant-numeric:tabular-nums;padding:12px 13px 12px 9px;min-height:46px}
+.giveaway-input-wrap>input{width:100%;min-width:0;border:0;outline:0!important;box-shadow:none;background:transparent;color:#edf1f7;font:500 15px/1.3 var(--sans);font-variant-numeric:tabular-nums;padding:10px 8px 10px 7px;min-height:40px}
 .giveaway-input-wrap>input::placeholder{color:#5e6d83;opacity:1}
 .giveaway-input-wrap:has(input[aria-invalid=true]){border-color:#aa7566}
 .giveaway-input-wrap:has(input:disabled){opacity:.6}
-.giveaway-amount-row>.button{font-size:12px;min-height:46px;padding:10px 18px}
-.giveaway-status{font-size:11px;color:#8c9db3;line-height:1.6;margin:10px 0 0;min-height:18px}
+.giveaway-amount-row>.button{font-size:10px;min-height:40px;padding:9px 11px}
+.giveaway-status{font-size:10px;color:#8c9db3;line-height:1.6;margin:8px 0 0;min-height:16px}
 .giveaway-status[data-state=error]{color:#f1b6ab}
 .giveaway-status[data-state=success]{color:#afd0b6}
 .giveaway-error{margin-top:12px;margin-bottom:10px}
-.giveaway-history-heading{display:flex;justify-content:space-between;align-items:center;gap:18px;border-top:1px solid #303a49;padding:17px 0 8px}
-.giveaway-history-heading h3{font-size:11px;font-weight:600;color:#afbdd0;margin:0}
-.giveaway-history{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:5px}
+.giveaway-history-details{margin-top:12px;border-top:1px solid #354153;padding-top:11px}
+.giveaway-history-details>summary{font-size:10px;font-weight:550;color:#a3b2c7;cursor:pointer;list-style-position:inside}
+.giveaway-history-details[open]>summary{color:#d8c6a1}
+.giveaway-history{display:grid;grid-template-columns:1fr;gap:7px;margin-top:11px;max-height:320px;overflow:auto;scrollbar-width:thin;scrollbar-color:#46556a transparent}
 .giveaway-entry,.giveaway-record,.giveaway-row{display:flex;align-items:center;justify-content:space-between;gap:14px;border:1px solid #2c3747;border-radius:8px;padding:13px 14px;background:#10182266;min-width:0}
 .giveaway-entry strong,.giveaway-record strong,.giveaway-row strong,.giveaway-entry-amount{font-size:13px;color:#dcc89e;font-weight:550;font-variant-numeric:tabular-nums;white-space:nowrap}
 .giveaway-entry time,.giveaway-record time,.giveaway-row time,.giveaway-entry-date{color:#8292aa;font-size:10px;line-height:1.5;text-align:right}
@@ -147,13 +144,6 @@ body.admin-workspace::before{display:none}
 .notes-message[data-state=error]{color:#edb3a8}
 .empty-panel{padding:28px;text-align:center;border:1px dashed #3e4c62;border-radius:10px;color:#92a3ba;font-size:12px}
 .admin-footnote{font-size:10px;color:#7e90aa;line-height:1.8;margin:17px 0 0}
-.admin-payments{margin-bottom:27px;padding:25px 26px}
-.recent-payment{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:22px;align-items:center;padding:16px 0;border-top:1px solid #2b384a}
-.recent-payment h3{font-size:12px;margin:0 0 6px;font-weight:550;overflow-wrap:anywhere;color:#d5dfec}
-.recent-payment p{font-size:10px;color:#8093ae;margin:0;line-height:1.7;overflow-wrap:anywhere}
-.recent-payment-amount{font-size:14px;font-weight:550;color:#dcc79d;white-space:nowrap;font-variant-numeric:tabular-nums}
-.recent-payment a{font-size:11px;color:#c9b78f;text-decoration:none}
-.recent-payment a:hover{color:#eedbb2}
 .admin-workspace .refresh-button{color:#acbcd2;border:1px solid #3d4b60;border-radius:7px;padding:8px 12px;background:#1c2736;font-size:10px}
 .admin-workspace .refresh-button:hover{color:#e6d2a9;border-color:#8b7856}
 .admin-shell .error-panel{border-color:#714e43;background:#3a272a;color:#f0c2b6;border-radius:9px}
@@ -167,12 +157,16 @@ body.admin-workspace::before{display:none}
 .admin-shell .dashboard-footer .footer-separator{color:#52657e}
 @media(max-width:1100px){
   .admin-workspace .shell{width:calc(100% - 44px)}
-  .tools-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
-  .tool-card{flex-direction:row;align-items:center;gap:12px;padding:17px 15px}
-  .tool-arrow{position:static;margin-left:auto;font-size:12px}
-  .giveaway-history{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .tool-card{padding:17px 15px}
   .partner-card-header{flex-wrap:wrap}
   .partner-workflow{margin-left:56px;margin-top:-5px}
+}
+@media(max-width:950px){
+  .workspace-top{grid-template-columns:280px minmax(0,1fr);gap:17px}
+  .tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .tool-card{min-height:105px;gap:12px;padding:15px}
+  .tool-card:last-child{grid-column:1/-1;flex-direction:row;align-items:center;min-height:77px}
+  .tool-card:last-child .tool-arrow{position:static;margin-left:auto}
 }
 @media(max-width:800px){
   .admin-workspace .shell{width:calc(100% - 36px)}
@@ -180,19 +174,22 @@ body.admin-workspace::before{display:none}
   .admin-workspace .brand{font-size:17px}
   .admin-shell{padding-top:23px}
   .tool-card{padding:15px 12px;gap:10px}
-  .tool-card p{font-size:9px}
-  .tool-card strong{font-size:11px}
+  .tool-card p{font-size:10px}
+  .tool-card strong{font-size:12px}
   .tool-icon{width:26px;height:26px;border-radius:7px}
   .tool-arrow{display:none}
-  .giveaways-panel{padding:22px}
-  .giveaway-workspace{gap:24px;grid-template-columns:minmax(170px,.8fr) minmax(280px,1.3fr)}
-  .giveaway-counter>strong{font-size:36px}
-  .giveaway-amount-row{gap:7px}
-  .giveaway-amount-row>.button{font-size:11px;padding:10px 12px}
   .partner-card{padding:20px}
   .partner-name{font-size:16px}
   .partner-metric>strong{font-size:20px}
   .summary-card{padding:17px 19px}
+}
+@media(max-width:760px){
+  .workspace-top{grid-template-columns:1fr;gap:22px;margin-bottom:23px}
+  .giveaway-workspace{display:grid;grid-template-columns:minmax(160px,.7fr) minmax(240px,1fr);gap:22px;align-items:center}
+  .giveaway-counter{padding:0}
+  .giveaway-history-details{margin-top:15px}
+  .tools-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .tool-card:last-child{grid-column:auto;flex-direction:column;align-items:flex-start;min-height:105px}
 }
 @media(max-width:650px){
   .admin-workspace .shell{width:calc(100% - 28px)}
@@ -206,26 +203,20 @@ body.admin-workspace::before{display:none}
   .admin-intro{margin-bottom:18px;gap:12px}
   .admin-intro h1{font-size:29px}
   .admin-access{font-size:9px;padding:6px 9px;gap:6px}
-  .workspace-nav{padding:5px;gap:3px;margin-bottom:21px;border-radius:9px}
-  .workspace-nav a{font-size:11px;padding:8px 10px}
-  .workspace-nav a>span{display:none}
-  .admin-shell h2{scroll-margin-top:112px}
+  .admin-shell h2{scroll-margin-top:20px}
   .admin-shell h2,.admin-shell .panel h2{font-size:17px}
-  .tools-section{margin-bottom:20px}
-  .tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px}
+  .tools-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:0}
   .tool-card{border-radius:9px;padding:14px 11px;gap:10px}
-  .tool-card:last-child{grid-column:1/-1}
-  .tool-card strong{font-size:11px}
-  .tool-card p{font-size:9px;line-height:1.5}
+  .tool-card:last-child{grid-column:1/-1;flex-direction:row;align-items:center;min-height:77px}
+  .tool-card strong{font-size:12px}
+  .tool-card p{font-size:10px;line-height:1.5}
   .tool-icon{width:27px;height:27px}
-  .giveaways-panel{padding:20px 18px;margin-bottom:20px}
-  .giveaway-workspace{grid-template-columns:1fr;gap:22px;padding:21px 0}
-  .giveaway-counter{border-right:0;border-bottom:1px solid #303c4e;padding:0 0 20px}
-  .giveaway-counter>strong{font-size:39px;letter-spacing:-1.4px;margin:7px 0}
-  .giveaway-history{grid-template-columns:1fr;gap:7px}
+  .giveaway-workspace{display:block;padding:15px 0 0}
+  .giveaway-counter{padding:0 0 15px}
+  .giveaway-counter>strong{font-size:35px;letter-spacing:-1.2px;margin:7px 0}
   .giveaway-entry,.giveaway-record,.giveaway-row{padding:12px 13px}
-  .giveaway-input-wrap>input{font-size:16px;min-height:45px}
-  .giveaway-amount-row>.button{min-height:45px;padding:10px 12px;font-size:11px}
+  .giveaway-input-wrap>input{font-size:16px;min-height:42px}
+  .giveaway-amount-row>.button{min-height:42px;padding:10px 13px;font-size:11px}
   .admin-summary{grid-template-columns:1fr;gap:8px;margin-bottom:25px}
   .summary-card{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:center;padding:14px 18px;border-radius:9px}
   .summary-card strong{grid-column:2;grid-row:1/3;margin:0;font-size:27px}
@@ -244,18 +235,12 @@ body.admin-workspace::before{display:none}
   .campaigns-section>.section-toolbar{align-items:flex-start;flex-direction:column}
   .admin-shell .section-toolbar>div>p:last-child{font-size:11px}
   .admin-workspace .refresh-button{font-size:10px;padding:8px 11px}
-  .admin-payments{padding:21px 18px}
-  .recent-payment{grid-template-columns:minmax(0,1fr) auto;gap:10px}
-  .recent-payment a{grid-column:1/-1}
-  .recent-payment-amount{font-size:13px}
 }
 @media(max-width:360px){
-  .workspace-nav a{font-size:10px;padding:8px 9px}
   .tool-card{gap:8px}
   .tool-card strong{font-size:10px}
   .tool-card p{font-size:8px}
-  .giveaway-amount-row{flex-direction:column}
   .partner-card-header{flex-wrap:wrap}
   .partner-workflow{margin-left:56px;margin-top:-5px}
 }
-@media(prefers-reduced-motion:reduce){.tool-card,.workspace-nav a,.admin-shell .button,.giveaway-input-wrap{transition:none}}
+@media(prefers-reduced-motion:reduce){.tool-card,.admin-shell .button,.giveaway-input-wrap{transition:none}}

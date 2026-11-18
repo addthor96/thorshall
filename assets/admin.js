@@ -3,7 +3,6 @@
 (() => {
   const byId = id => document.getElementById(id);
   const directory = byId("partner-list");
-  const recentPayments = byId("recent-payments");
   const search = byId("partner-search");
   const filter = byId("workflow-filter");
   const refresh = byId("refresh-all");
@@ -13,7 +12,6 @@
   const controllers = new Set();
   let entries = [];
   let cards = new Map();
-  let paymentResults = new Map();
   let generation = 0;
   let locked = false;
   let leaving = false;
@@ -79,12 +77,10 @@
     if (editor) { editor.notes.value = ""; editor.workflow.value = ""; }
     entries = [];
     cards.clear();
-    paymentResults.clear();
     editor = null;
     pendingSave = null;
     saving = false;
     directory.replaceChildren();
-    recentPayments.replaceChildren();
     search.value = "";
     filter.value = "all";
     search.disabled = true;
@@ -92,7 +88,6 @@
     ["summary-total", "summary-ready", "summary-review"].forEach(id => { byId(id).textContent = "—"; });
     byId("no-matches").hidden = true;
     directory.setAttribute("aria-busy", "false");
-    recentPayments.setAttribute("aria-busy", "false");
   }
 
   function lock() {
@@ -102,7 +97,6 @@
     byId("session-error").hidden = false;
     byId("directory-error").hidden = true;
     message(byId("directory-status"), "Admin session unavailable. Sign in again to continue.", true);
-    message(byId("payments-status"), "Payment history cleared.");
     controls();
     window.__thorshallAdminExpired = true;
     if (typeof window.dispatchEvent === "function") window.dispatchEvent(new Event("thorshall:admin-session-expired"));
@@ -319,49 +313,6 @@
     }
   }
 
-  function amount(record) {
-    const places = { USD: 2, EUR: 2, GBP: 2, ISK: 0, USDT: 6, USDC: 6 };
-    if (!Object.hasOwn(places, record.currency) || !Number.isFinite(Number(record.amountPaid))) return "Amount unavailable";
-    return `${new Intl.NumberFormat("en-US", { minimumFractionDigits: places[record.currency] === 0 ? 0 : 2, maximumFractionDigits: places[record.currency] }).format(Number(record.amountPaid))} ${record.currency}`;
-  }
-
-  function renderPayments() {
-    recentPayments.replaceChildren();
-    const pending = entries.filter(entry => !paymentResults.has(entry.code));
-    const failed = entries.filter(entry => paymentResults.get(entry.code)?.error);
-    const rows = entries.flatMap(entry => (paymentResults.get(entry.code)?.payments || []).map(payment => ({ entry, payment })));
-    rows.sort((a, b) => String(b.payment.paidAt).localeCompare(String(a.payment.paidAt)) || String(b.payment.createdAt).localeCompare(String(a.payment.createdAt)));
-    for (const { entry, payment } of rows.slice(0, 12)) {
-      const row = element("article", null, "recent-payment");
-      const detail = element("div");
-      detail.append(element("h3", `${entry.code.toUpperCase()} · ${entry.name}`), element("p", `Paid ${payment.paidAt} · Reporting month ${payment.reportingMonth}`));
-      if (payment.reference) detail.append(element("p", payment.reference));
-      row.append(detail, element("strong", amount(payment), "recent-payment-amount"), link("View / manage →", `${entry.dashboardPath}#payments-title`));
-      recentPayments.append(row);
-    }
-    const parts = [];
-    if (rows.length) parts.push(`Showing ${Math.min(12, rows.length)} of ${rows.length} recorded payments.`);
-    else if (!pending.length && !failed.length) parts.push("No payments have been recorded yet.");
-    else parts.push("No payment entries available from the histories loaded so far.");
-    if (pending.length) parts.push(`Loading ${pending.length} partner ${pending.length === 1 ? "history" : "histories"}…`);
-    if (failed.length) parts.push(`History unavailable for ${failed.map(entry => entry.code.toUpperCase()).join(", ")}. Refresh to retry; this is not confirmation of an empty history.`);
-    message(byId("payments-status"), parts.join(" "), failed.length > 0);
-    recentPayments.setAttribute("aria-busy", String(pending.length > 0));
-  }
-
-  async function loadPayments(entry, sequence) {
-    try {
-      const data = await request(`/.netlify/functions/partner-payments?partner=${encodeURIComponent(entry.code)}`);
-      if (sequence !== generation || locked) return;
-      if (data.partner?.code !== entry.code || data.canManage !== true || !Array.isArray(data.payments)) throw new Error("Invalid history");
-      paymentResults.set(entry.code, { payments: data.payments });
-    } catch {
-      if (sequence !== generation || locked || leaving) return;
-      paymentResults.set(entry.code, { error: true });
-    }
-    renderPayments();
-  }
-
   async function runJobs(jobs, sequence) {
     let next = 0;
     await Promise.all(Array.from({ length: Math.min(4, jobs.length) }, async () => {
@@ -377,9 +328,7 @@
     leaving = false;
     byId("directory-error").hidden = true;
     message(byId("directory-status"), "Loading your partner directory…");
-    message(byId("payments-status"), "Loading payment history…");
     directory.setAttribute("aria-busy", "true");
-    recentPayments.setAttribute("aria-busy", "true");
     try {
       const data = await request("/.netlify/functions/admin-data");
       if (sequence !== generation || locked) return;
@@ -390,15 +339,13 @@
       totals(); applyFilter();
       directory.setAttribute("aria-busy", "false");
       controls();
-      renderPayments();
-      await runJobs(entries.flatMap(entry => [() => loadStats(entry, sequence), () => loadPayments(entry, sequence)]), sequence);
+      await runJobs(entries.map(entry => () => loadStats(entry, sequence)), sequence);
     } catch {
       if (sequence !== generation || locked || leaving) return;
       message(byId("directory-status"), "Partner directory unavailable. Editing is disabled.", true);
       byId("directory-error").hidden = false;
-      message(byId("payments-status"), "Payment history could not be loaded without the partner directory.", true);
     } finally {
-      if (sequence === generation && !locked) { directory.setAttribute("aria-busy", "false"); recentPayments.setAttribute("aria-busy", "false"); controls(); }
+      if (sequence === generation && !locked) { directory.setAttribute("aria-busy", "false"); controls(); }
     }
   }
 

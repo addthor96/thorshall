@@ -29,7 +29,7 @@ class Element {
   find(className) { return this.descendants().find(child => child.className === className); }
 }
 
-async function start({ directory = () => ({ ok: true, partners: structuredClone(fixture) }), stats = () => ({ ok: true, metrics: { visits: 12, registrations: 3, ftd: 1, ngr: 17.2 }, range: { key: "month" } }), payments = () => ({ ok: true, canManage: true, payments: [] }), mutate = async (url, payload) => ({ ok: true, partner: { ...structuredClone(fixture.find(entry => url.endsWith(entry.code))), management: { workflow: payload.workflow, notes: payload.notes, revision: payload.expectedRevision + 1 } } }) } = {}) {
+async function start({ directory = () => ({ ok: true, partners: structuredClone(fixture) }), stats = () => ({ ok: true, metrics: { visits: 12, registrations: 3, ftd: 1, ngr: 17.2 }, range: { key: "month" } }), mutate = async (url, payload) => ({ ok: true, partner: { ...structuredClone(fixture.find(entry => url.endsWith(entry.code))), management: { workflow: payload.workflow, notes: payload.notes, revision: payload.expectedRevision + 1 } } }) } = {}) {
   const nodes = new Map();
   for (const [, tag, attributes, id] of renderAdminPage().matchAll(/<([a-z]+)([^>]*\bid="([^"]+)"[^>]*)>/g)) { const node = new Element(id, tag); node.hidden = /\bhidden\b/.test(attributes); node.disabled = /\bdisabled\b/.test(attributes); nodes.set(id, node); }
   const calls = [];
@@ -43,7 +43,8 @@ async function start({ directory = () => ({ ok: true, partners: structuredClone(
       let value;
       if (options.method) value = await mutate(url, JSON.parse(options.body));
       else if (url.includes("admin-data")) value = await directory();
-      else { const code = new URL(url, "https://thorshall.gg").searchParams.get("partner"); value = { partner: { code }, ...(url.includes("partner-stats") ? await stats(code) : await payments(code)) }; }
+      else if (url.includes("partner-stats")) { const code = new URL(url, "https://thorshall.gg").searchParams.get("partner"); value = { partner: { code }, ...await stats(code) }; }
+      else throw new Error(`Unexpected admin request: ${url}`);
       if (value instanceof Error) throw value;
       return { ok: !value.status || value.status < 400, status: value.status || 200, json: async () => value };
     }
@@ -81,15 +82,16 @@ test("directory storage failure blocks editing and is not represented as zero pa
   assert.equal(app.nodes.get("directory-error").hidden, false);
   assert.equal(app.nodes.get("partner-list").children.length, 0);
   assert.equal(app.calls.some(call => call.url.includes("partner-stats")), false);
-  assert.match(app.nodes.get("payments-status").textContent, /could not be loaded/);
+  assert.match(app.nodes.get("directory-status").textContent, /unavailable/);
+  assert.equal(app.nodes.get("partner-search").disabled, true);
+  assert.equal(app.calls.some(call => call.url.includes("partner-payments")), false);
 });
 
 test("existing admin links the hunt manager and keeps unauthorized hunt requests behind owner login", async () => {
   const page = renderAdminPage();
-  assert.match(page, /href="\/admin\?view=hunts">Bonus hunts/);
   assert.match(page, /class="tool-card" href="\/admin\?view=hunts"/);
   assert.match(page, /id="partner-list"/);
-  assert.match(page, /id="recent-payments"/);
+  assert.doesNotMatch(page, /id="recent-payments"|id="payments-status"|id="payments-title"/);
   for (const access of [null,"t1","t2","manuel"]) {
     const response = await handler({ httpMethod:"GET", queryStringParameters:{view:"hunts"}, headers:access?{cookie:`${auth.COOKIE_NAME}=${auth.createSession(access)}`}:{}});
     assert.equal(response.statusCode,303);
@@ -97,17 +99,18 @@ test("existing admin links the hunt manager and keeps unauthorized hunt requests
   }
 });
 
-test("independent report and payment failures preserve useful data without inventing zero", async () => {
-  const app = await start({ stats: code => code === "t1" ? { status: 503 } : { ok: true, metrics: { visits: 9, ngr: 20 }, range: { key: "month" } }, payments: code => code === "t2" ? { status: 503 } : { ok: true, canManage: true, payments: [{ amountPaid: "10.50", currency: "USD", paidAt: "2026-10-01", reportingMonth: "2026-09", reference: "<img src=x>" }] } });
+test("independent report failures preserve useful data without inventing zero or fetching dashboard payment ledgers", async () => {
+  const records = structuredClone(fixture); records[1].name = "<img src=x>";
+  const app = await start({ directory: () => ({ ok: true, partners: records }), stats: code => code === "t1" ? { status: 503 } : { ok: true, metrics: { visits: 9, ngr: 20 }, range: { key: "month" } } });
   assert.equal(app.nodes.get("summary-total").textContent, "2");
   assert.equal(app.nodes.get("summary-ready").textContent, "1");
   assert.match(app.card("t1").find("partner-source").textContent, /unavailable/);
   assert.match(app.card("t1").find("partner-metrics").textContent, /—/);
   assert.match(app.card("t2").find("partner-metrics").textContent, /9/);
-  assert.match(app.nodes.get("recent-payments").textContent, /10.50 USD/);
-  assert.match(app.nodes.get("recent-payments").textContent, /<img src=x>/);
-  assert.equal(app.nodes.get("recent-payments").descendants().some(node => node.tagName === "img"), false);
-  assert.match(app.nodes.get("payments-status").textContent, /History unavailable for T2/);
+  assert.match(app.card("t2").find("partner-name").textContent, /<img src=x>/);
+  assert.equal(app.card("t2").descendants().some(node => node.tagName === "img"), false);
+  assert.equal(app.calls.filter(call => call.url.includes("partner-stats")).length, 2);
+  assert.equal(app.calls.some(call => call.url.includes("partner-payments")), false);
 });
 
 test("search and private workflow filtering use registry data", async () => {
@@ -162,12 +165,14 @@ test("revision conflict reload failure blocks another write until workspace refr
 });
 
 test("expired session clears all private data and stops queued requests", async () => {
-  const app = await start({ payments: () => ({ status: 401 }) });
+  const partners = Array.from({ length: 6 }, (_, index) => ({ ...structuredClone(fixture[0]), code: `t${index + 1}`, landingPath: `/t${index + 1}`, dashboardPath: `/t${index + 1}-dashboard` }));
+  const app = await start({ directory: () => ({ ok: true, partners }), stats: () => ({ status: 401 }) });
   assert.equal(app.nodes.get("session-error").hidden, false);
   assert.equal(app.nodes.get("partner-list").children.length, 0);
-  assert.equal(app.nodes.get("recent-payments").children.length, 0);
   assert.equal(app.nodes.get("summary-total").textContent, "—");
   assert.equal(app.nodes.get("refresh-all").disabled, true);
+  assert.ok(app.calls.filter(call => call.url.includes("partner-stats")).length < partners.length);
+  assert.equal(app.calls.some(call => call.url.includes("partner-payments")), false);
 });
 
 test("bfcache leaving clears notes and restore refetches authorized directory", async () => {

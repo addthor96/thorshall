@@ -31,7 +31,6 @@ async function start({giveaways=()=>ledger(),directory=()=>({ok:true,partners:[c
     if(url==="/.netlify/functions/giveaways")result=await giveaways(call,calls.filter(item=>item.url===url).length);
     else if(url==="/.netlify/functions/admin-data")result=await directory(call);
     else if(url.includes("partner-stats"))result={ok:true,partner:{code:"t1"},range:{key:"month"},metrics:{visits:2,registrations:1,ftd:0,ngr:5}};
-    else if(url.includes("partner-payments"))result={ok:true,partner:{code:"t1"},canManage:true,payments:[{amountPaid:"12.50",currency:"USD",paidAt:"2026-11-18",reportingMonth:"2026-11",reference:"Private payment"}]};
     else throw new Error("Unexpected request "+url);
     if(result instanceof Error)throw result;
     const value=clone(result);return{ok:!value.status||value.status<400,status:value.status||200,json:async()=>value};
@@ -82,7 +81,7 @@ test("refresh failure clears an earlier confirmed empty state instead of claimin
 });
 
 test("giveaway session expiry clears its ledger and the existing private partner workspace",async()=>{
-  const app=await start({both:true,giveaways:call=>call.method==="GET"?ledger([entry("private",5000)],1):{status:401}});assert.equal(app.nodes.get("partner-list").children.length,1);assert.equal(app.nodes.get("giveaway-total").textContent,"$50.00");await app.record("20");assert.equal(app.nodes.get("session-error").hidden,false);assert.equal(app.nodes.get("partner-list").children.length,0);assert.equal(app.nodes.get("recent-payments").children.length,0);assert.equal(app.nodes.get("giveaway-history").children.length,0);assert.equal(app.nodes.get("giveaway-total").textContent,"—");assert.equal(app.nodes.get("giveaway-amount").value,"");assert.equal(app.nodes.get("giveaway-submit").disabled,true);assert.equal(app.window.__thorshallAdminExpired,true);
+  const app=await start({both:true,giveaways:call=>call.method==="GET"?ledger([entry("private",5000)],1):{status:401}});assert.equal(app.nodes.get("partner-list").children.length,1);assert.equal(app.nodes.get("giveaway-total").textContent,"$50.00");await app.record("20");assert.equal(app.nodes.get("session-error").hidden,false);assert.equal(app.nodes.get("partner-list").children.length,0);assert.equal(app.nodes.get("summary-total").textContent,"—");assert.equal(app.nodes.get("giveaway-history").children.length,0);assert.equal(app.nodes.get("giveaway-total").textContent,"—");assert.equal(app.nodes.get("giveaway-amount").value,"");assert.equal(app.nodes.get("giveaway-submit").disabled,true);assert.equal(app.window.__thorshallAdminExpired,true);assert.equal(app.calls.some(call=>call.url.includes("partner-payments")),false);
 });
 
 test("partner expiry reciprocally clears giveaway data, including late script startup",async()=>{
@@ -94,7 +93,7 @@ test("pagehide clears private state and a late write cannot replace the fresh bf
   let release;const gate=new Promise(resolve=>release=resolve);let reads=0,postedId;
   const app=await start({both:true,giveaways:async call=>{if(call.method==="GET")return ++reads===1?ledger():ledger([entry(postedId,2000),entry("another-session",1000)],2);postedId=call.body.requestId;await gate;return ledger([entry(postedId,2000)],1);}});
   await app.record("20");await app.dispatch("pagehide");assert.equal(app.nodes.get("giveaway-total").textContent,"—");assert.equal(app.nodes.get("giveaway-history").children.length,0);assert.equal(app.nodes.get("giveaway-amount").value,"");assert.equal(app.nodes.get("partner-list").children.length,0);assert.equal(app.writes()[0].signal.aborted,true);
-  await app.dispatch("pageshow",{persisted:true});assert.equal(app.reads().length,2);assert.equal(app.writes().length,1);assert.equal(app.nodes.get("giveaway-total").textContent,"$30.00");release();await app.settle();assert.equal(app.nodes.get("giveaway-total").textContent,"$30.00");assert.equal(app.nodes.get("giveaway-history").children.length,2);assert.equal(app.nodes.get("partner-list").children.length,1);
+  await app.dispatch("pageshow",{persisted:true});assert.equal(app.reads().length,2);assert.equal(app.writes().length,1);assert.equal(app.nodes.get("giveaway-total").textContent,"$30.00");release();await app.settle();assert.equal(app.nodes.get("giveaway-total").textContent,"$30.00");assert.equal(app.nodes.get("giveaway-history").children.length,2);assert.equal(app.nodes.get("partner-list").children.length,1);assert.equal(app.calls.some(call=>call.url.includes("partner-payments")),false);
 });
 
 test("bfcache restore reauthorizes and a 401 cannot restore either private panel",async()=>{
