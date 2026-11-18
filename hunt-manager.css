@@ -5,3 +5,135 @@
 @media(max-width:760px){.hunt-toolbar{flex-wrap:wrap;gap:16px}.hunt-name-field{max-width:none;flex-basis:100%}.hunt-top-actions{width:100%;justify-content:flex-start;padding-bottom:0}}
 @media(max-width:1050px){.bonus-entry-form{grid-template-columns:minmax(0,1fr) 100px}.bonus-entry-form .button{grid-column:1/-1}.phase-action{align-items:start;flex-direction:column}.phase-action .button{width:100%}.payout-form{grid-template-columns:1fr}.payout-form .button{margin:0}}
 @media(max-width:600px){.bonus-entry-form{padding:13px;gap:10px;grid-template-columns:minmax(0,1fr) 90px}.collected-bonus{padding:12px 9px;gap:8px}.collected-name{font-size:12px}.collected-bet{font-size:12px}.collected-actions{margin-left:0;gap:3px}.collected-actions .button{font-size:10px;padding:4px 6px}.collected-number{min-width:16px}.payout-form input{font-size:25px!important}.finish-action{align-items:stretch;flex-direction:column;gap:8px}.completed-phase h2{font-size:29px}.complete-result{font-size:34px}.results-disclosure summary span{display:block;margin:4px 0 0}}
+
+/* Owner manager only: matches the calm admin and public hunt styling. */
+body.hunt-manager-page{
+  --bg:#0e1219;--panel:#151b25;--panel2:#1b2330;--text:#e9edf3;
+  --muted:#a2adbd;--line:#293341;--gold:#cfb47d;--gold-soft:#b59b6a;
+  --green:#afd0b6;--red:#f1b6ab;--radius:13px;
+  min-height:100vh;font-size:14px;
+  background:linear-gradient(180deg,#0c1724bb 0%,#0d1724d9 45%,#0e1520f5 100%),url('/img/bonus-hunt-fjord-v1.jpg') center top/cover fixed no-repeat,var(--bg);
+}
+.hunt-manager-page .app-shell{max-width:1440px;padding:24px 32px 48px}
+.hunt-manager-page .app-header{padding:17px 20px;margin-bottom:26px;border:1px solid #2d3847;border-radius:11px;background:#111923ed;box-shadow:0 4px 16px #070f1c26;gap:22px}
+.hunt-manager-page .brand-lockup{font-size:16px;letter-spacing:.05em;gap:11px;flex-shrink:0}
+.hunt-manager-page .brand-lockup img{width:38px;height:38px}
+.hunt-manager-page .brand-lockup small{color:#91a0b3;font-size:8px;letter-spacing:.18em}
+.hunt-manager-page .header-actions{gap:8px}
+.hunt-manager-page .app-header>.header-actions{justify-content:flex-end}
+.hunt-manager-page .save-status{font-size:11px;margin-right:5px}
+.hunt-manager-page .button{min-height:40px;border:1px solid #435067;border-radius:7px;background:#202c3c;color:#c5d1e2;font-size:12px;font-weight:550;padding:9px 13px;transition:background .15s,border-color .15s}
+.hunt-manager-page .button:hover{background:#293548;border-color:#65758c}
+.hunt-manager-page .button.primary{border-color:#cdb481;background:#cdb481;color:#1a1e25;font-weight:650}
+.hunt-manager-page .button.primary:hover{border-color:#e3cca0;background:#e3cca0}
+.hunt-manager-page .button.subtle{background:transparent;border-color:#3d4b60;color:#bcc9dc}
+.hunt-manager-page .button.subtle:hover{background:#293548;border-color:#65758c}
+.hunt-manager-page .button.danger{background:#3b272d55;border-color:#6a4b50;color:#e6b6b1}
+.hunt-manager-page .button.danger:hover{background:#492f35;border-color:#97676b}
+.hunt-manager-page .button.small{min-height:32px;font-size:11px;padding:6px 10px}
+.hunt-manager-page .button:disabled{cursor:default;opacity:.45}
+.hunt-manager-page .phase-button{min-height:45px;font-size:13px;padding:11px 17px}
+.hunt-manager-page .hunt-toolbar{gap:22px;margin-bottom:22px}
+.hunt-manager-page .field label{color:#bdc9d9;font-size:11px;font-weight:550}
+.hunt-manager-page .field input,.hunt-manager-page .field select,.hunt-manager-page .admin-sidebar select,.hunt-manager-page .admin-sidebar input[readonly]{background:#111925;color:#dce5f1;border:1px solid #354254;border-radius:8px;padding:11px 12px;font-size:14px;outline:none;min-height:44px}
+.hunt-manager-page .field input::placeholder{color:#7d8fa9;opacity:1}
+.hunt-manager-page .field input:focus,.hunt-manager-page .field select:focus,.hunt-manager-page .admin-sidebar select:focus,.hunt-manager-page .admin-sidebar input[readonly]:focus{border-color:#ba9e69;box-shadow:0 0 0 3px #c3a77118}
+.hunt-manager-page .hunt-name-field{max-width:530px}
+.hunt-manager-page .hunt-name-field input{font-size:22px;font-weight:550;letter-spacing:-.025em;padding:11px 14px;min-height:50px;background:#151f2ded}
+.hunt-manager-page .hunt-name-field label{color:#a3b3ca;font-size:10px}
+.hunt-manager-page .panel{border-color:#2d3847;background:linear-gradient(130deg,#19222e,#151c27);border-radius:13px;box-shadow:0 8px 22px #060b141a}
+.hunt-manager-page .panel-head h2{font-size:19px;font-weight:600;letter-spacing:-.025em;color:#e9edf5}
+.hunt-manager-page .admin-sidebar .panel-head h2{font-size:17px}
+.hunt-manager-page .panel-head .eyebrow{font-size:8px;letter-spacing:.13em;color:#9aabc2}
+.hunt-manager-page .help{color:#9aacc5;font-size:11px;line-height:1.6}
+.hunt-manager-page .admin-sidebar p.muted{font-size:12px;color:#a5b4c9}
+.hunt-manager-page .hunt-options{color:#a2b2c8;font-size:11px}
+.hunt-manager-page summary{cursor:pointer}
+.hunt-manager-page .metrics{border-color:#344354;border-radius:10px;background:#344354;box-shadow:0 4px 16px #070f1c1a}
+.hunt-manager-page .metric{background:#151f2c}
+.hunt-manager-page .metric-label{color:#9caec6;font-size:9px;font-weight:550;letter-spacing:.08em}
+.hunt-manager-page .metrics.compact .metric-value{color:#dbe4f1;font-size:23px;font-weight:550;letter-spacing:-.035em}
+.hunt-manager-page .metric-note{color:#9aacc5;font-size:10px}
+.hunt-manager-page .bonus-entry-form{padding:18px;border-color:#3b485b;border-radius:10px;background:#111c2b}
+.hunt-manager-page .bonus-entry-form .button{min-height:44px}
+.hunt-manager-page .collection-count{color:#d8c39b;background:#3a322333;border-color:#655837;border-radius:6px;font-size:10px;font-weight:550}
+.hunt-manager-page .collected-bonuses{gap:8px}
+.hunt-manager-page .collected-bonus{background:#111b28;border-color:#2f3d50;border-radius:8px;padding:13px 14px}
+.hunt-manager-page .collected-number{color:#8fa3bf;font-weight:500}
+.hunt-manager-page .collected-name{color:#dfe7f2;font-size:13px;font-weight:550}
+.hunt-manager-page .collected-name small{color:#a5c6ae;font-size:10px;font-weight:500}
+.hunt-manager-page .collected-bet{color:#dcc89e;font-size:13px;font-weight:550;font-variant-numeric:tabular-nums}
+.hunt-manager-page .collected-actions .button{min-height:29px;padding:4px 8px;font-size:10px}
+.hunt-manager-page .empty-state{color:#9bacc3;font-size:12px}
+.hunt-manager-page .entry-error{color:#f1b6ab;font-size:12px}
+.hunt-manager-page .opening-progress-head{color:#a3b4ca;font-size:11px}
+.hunt-manager-page .opening-progress-track{background:#354153;height:5px}
+.hunt-manager-page .opening-progress-track>div{background:#cfb47d}
+.hunt-manager-page .payout-slot-card{border-color:#5d5647;border-radius:11px;background:linear-gradient(135deg,#262b31,#162131);padding:26px 20px}
+.hunt-manager-page .payout-position{color:#c7b38e;font-size:9px;font-weight:550;letter-spacing:.12em}
+.hunt-manager-page .payout-slot-card h3{font-size:clamp(23px,3vw,30px);font-weight:600;color:#e3d0a8;letter-spacing:-.03em}
+.hunt-manager-page .payout-slot-card p{color:#a4b3c8;font-size:12px}
+.hunt-manager-page .payout-form input{color:#e9edf5;font-weight:550;letter-spacing:-.025em}
+.hunt-manager-page .payout-form .button{min-height:59px}
+.hunt-manager-page .finish-action{border-color:#344153}
+.hunt-manager-page .results-disclosure{color:#b6c5db;font-size:12px}
+.hunt-manager-page .results-disclosure summary{font-weight:550}
+.hunt-manager-page .results-disclosure summary span{color:#99abc4;font-size:10px}
+.hunt-manager-page .result-row{border-color:#2f3d50;background:#111b28;color:#c8d4e5;border-radius:8px}
+.hunt-manager-page .result-row:hover{border-color:#65758c;background:#202c3c}
+.hunt-manager-page .result-row.current{border-color:#8a7750;background:#292d30}
+.hunt-manager-page .result-row .result-number{color:#91a5c0}
+.hunt-manager-page .result-row .result-name{color:#dfe7f2;font-weight:550}
+.hunt-manager-page .result-row .result-payout{color:#afd0b6;font-weight:550}
+.hunt-manager-page .result-row .result-payout.unopened{color:#97abc7}
+.hunt-manager-page .done-symbol{border-color:#4a6556;background:#263d32;color:#b3d1bb}
+.hunt-manager-page .opening-done h3,.hunt-manager-page .completed-phase h2{color:#e9edf5;font-weight:600;letter-spacing:-.03em}
+.hunt-manager-page .opening-done p,.hunt-manager-page .completed-phase p{color:#a2b2c8}
+.hunt-manager-page .complete-result{font-size:38px;font-weight:550}
+.hunt-manager-page .badge{border-color:#655837;background:#3a322333;color:#ddc18b;font-size:9px;font-weight:550;border-radius:5px}
+.hunt-manager-page .badge.live{border-color:#3a554b;background:#314b3940;color:#b3d1bb}
+.hunt-manager-page .admin-sidebar details{color:#a3b3c9;font-size:11px}
+.hunt-manager-page .stream-preview{border:1px solid #2f3d50;border-radius:9px;background:#101925;margin-top:15px}
+.hunt-manager-page .notice{background:#302c24;border-color:#63583f;color:#e0c99b;border-radius:9px;font-size:12px}
+.hunt-manager-page .notice.error{background:#3a272a;border-color:#714e43;color:#f0c2b6}
+.hunt-manager-page .toast{background:#1c2736;border-color:#435067;color:#dce5f1;border-radius:8px}
+.hunt-manager-page button:focus-visible,.hunt-manager-page a:focus-visible,.hunt-manager-page summary:focus-visible{outline:2px solid #d7bd89;outline-offset:4px}
+@media(max-width:1100px){
+  .hunt-manager-page .app-header{align-items:flex-start;flex-wrap:wrap;gap:16px}
+  .hunt-manager-page .app-header>.header-actions{justify-content:flex-start}
+}
+@media(max-width:760px){
+  .hunt-manager-page .app-shell{padding:20px 18px 36px}
+  .hunt-manager-page .hunt-name-field{max-width:none;min-width:0}
+  .hunt-manager-page .hunt-toolbar{gap:15px}
+}
+@media(max-width:600px){
+  .hunt-manager-page{background-attachment:scroll}
+  .hunt-manager-page .app-shell{padding:16px 14px 30px}
+  .hunt-manager-page .app-header{padding:14px;border-radius:9px;margin-bottom:21px;gap:15px}
+  .hunt-manager-page .brand-lockup{font-size:14px}
+  .hunt-manager-page .brand-lockup img{width:32px;height:34px}
+  .hunt-manager-page .brand-lockup small{font-size:7px}
+  .hunt-manager-page .app-header>.header-actions{gap:7px;width:100%}
+  .hunt-manager-page .save-status{flex-basis:100%;margin:0 0 3px}
+  .hunt-manager-page .app-header .button{font-size:10px;padding:8px 10px;min-height:35px}
+  .hunt-manager-page .hunt-name-field input{font-size:21px}
+  .hunt-manager-page .field input,.hunt-manager-page .field select{font-size:16px}
+  .hunt-manager-page .panel{padding:19px 14px;border-radius:11px}
+  .hunt-manager-page .panel-head h2{font-size:18px}
+  .hunt-manager-page .bonus-entry-form{padding:13px;gap:10px;grid-template-columns:minmax(0,1fr) 82px}
+  .hunt-manager-page .collected-bonus{padding:12px 9px;gap:8px;flex-wrap:wrap}
+  .hunt-manager-page .collected-name{font-size:12px}
+  .hunt-manager-page .collected-bet{font-size:12px}
+  .hunt-manager-page .collected-actions{flex-basis:100%;justify-content:flex-end}
+  .hunt-manager-page .collected-actions .button{font-size:10px;padding:4px 8px;min-height:30px}
+  .hunt-manager-page .payout-slot-card{padding:23px 15px}
+  .hunt-manager-page .payout-slot-card h3{font-size:25px}
+  .hunt-manager-page .payout-form{gap:13px;margin-top:20px}
+  .hunt-manager-page .payout-form input{font-size:25px!important}
+  .hunt-manager-page .payout-navigation{gap:8px}
+  .hunt-manager-page .payout-navigation .button{font-size:10px;padding:7px 9px}
+  .hunt-manager-page .complete-result{font-size:33px}
+  .hunt-manager-page .hunt-select-row select{font-size:14px}
+}
+@media(prefers-reduced-motion:reduce){.hunt-manager-page .button{transition:none}}
