@@ -241,7 +241,7 @@ test("the real OAuth session helper supplies prediction identity and storage fai
   assert.equal(started.statusCode, 303);
   const state = new URL(started.headers.Location).searchParams.get("state"), stateCookie = started.cookies[0].split(";")[0];
   const callback = authEvent({ action: "callback", state, code: "test-auth-code" }); callback.headers.cookie = stateCookie;
-  const completed = await auth(callback); assert.equal(completed.headers.Location, "/bonus-hunt#hunt=hunt-a");
+  const completed = await auth(callback); assert.equal(completed.headers.Location, "/bonus-hunt?twitch=connected#hunt=hunt-a");
   const sessionCookie = completed.cookies.find(cookie => cookie.startsWith(Auth.SESSION_COOKIE + "=")).split(";")[0];
   const f = fixture(), handle = P.createHandler({ ...f.options, authInfoFor: request => Auth.predictionAuthInfo(request, options) });
   const guest = payload(await handle(event())); assert.equal(guest.viewer, null); assert.equal(guest.authConfigured, true);

@@ -14,7 +14,31 @@
       expired: 'That Twitch sign-in link expired. Please try again.',
       unavailable: 'Twitch sign-in is temporarily unavailable. Please try again later.'
     };
-    try { var flag = new URLSearchParams(location.search || '').get('twitch'); return Object.prototype.hasOwnProperty.call(messages, flag) ? messages[flag] : ''; } catch (_) { return ''; }
+    var message = '';
+    try {
+      var flag = new URLSearchParams(location.search || '').get('twitch');
+      message = Object.prototype.hasOwnProperty.call(messages, flag) ? messages[flag] : '';
+    } catch (_) {}
+    try {
+      // Netlify can pass callback parameters through a redirect. Remove them
+      // before the hunt viewer builds links, without discarding source labels.
+      var url = new URL(location.href), changed = false;
+      if (url.origin !== location.origin || !/^https?:$/.test(url.protocol)) return message;
+      ['action', 'code', 'state', 'scope', 'error', 'error_description'].forEach(function (key) {
+        if (url.searchParams.has(key)) { url.searchParams.delete(key); changed = true; }
+      });
+      var flags = url.searchParams.getAll('twitch');
+      var retained = flags.filter(function (value) { return value !== 'connected' && !Object.prototype.hasOwnProperty.call(messages, value); });
+      if (retained.length !== flags.length) {
+        url.searchParams.delete('twitch');
+        retained.forEach(function (value) { url.searchParams.append('twitch', value); });
+        changed = true;
+      }
+      if (changed && window.history && typeof window.history.replaceState === 'function') {
+        window.history.replaceState(window.history.state, '', url.pathname + url.search + url.hash);
+      }
+    } catch (_) { /* A restricted history API must not block predictions. */ }
+    return message;
   })();
 
   function element(tag, className, text) {

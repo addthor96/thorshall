@@ -175,6 +175,12 @@ async function getPredictionUser(event, options = {}) { return (await prediction
 function result(statusCode, payload, headers = {}) { return { statusCode, headers: { ...HEADERS, ...headers }, body: JSON.stringify(payload) }; }
 function redirect(location, cookies = []) { return { statusCode: 303, headers: { ...HEADERS, Location: location }, cookies, body: "" }; }
 function returnError(path, value) { const [pathname, hash] = safeReturn(path).split("#"); return pathname + "?twitch=" + value + (hash ? "#" + hash : ""); }
+function returnSuccess(path) {
+  // An explicit destination query prevents Netlify from carrying OAuth callback
+  // parameters into the public hunt URL. The page removes this safe marker.
+  const [pathname, hash] = safeReturn(path).split("#");
+  return pathname + "?twitch=connected" + (hash ? "#" + hash : "");
+}
 function sameOrigin(event, config) { return header(event, "origin") === config.origin && (!header(event, "sec-fetch-site") || header(event, "sec-fetch-site") === "same-origin") && header(event, "x-thorshall-request") === "twitch-session"; }
 function createHandler(options = {}) {
   const settings = deps(options);
@@ -263,7 +269,7 @@ function createHandler(options = {}) {
       const session = { schema: 1, origin: config.origin, clientId: config.clientId, createdAt, expiresAt, checkedAt: createdAt, tokenExpiresAt, user: identity.user, token: encrypt(config, sessionKey, token) };
       const saved = await store.setJSON(sessionKey, session, { onlyIfNew: true });
       if (!saved?.modified || typeof saved.etag !== "string") throw new AuthUnavailable();
-      return redirect(returnPath, [clearState, cookie(config, SESSION_COOKIE, sessionId, Math.floor((expiresAt - createdAt) / 1000))]);
+      return redirect(returnSuccess(returnPath), [clearState, cookie(config, SESSION_COOKIE, sessionId, Math.floor((expiresAt - createdAt) / 1000))]);
     } catch (error) {
       if (error instanceof LoginLimited) return result(429, { ok: false, error: error.message }, { "Retry-After": String(error.retryAfter) });
       return redirect(returnError(returnPath, "failed"), [clearState]);

@@ -25,9 +25,18 @@ async function start(handler, options = {}) {
   const all = node => [node, ...node.children.flatMap(all)];
   const document = { activeElement: null, hidden: false, createElement: tag => new Node(tag), getElementById: id => all(mount).find(node => node.id === id) || null, addEventListener: (name, fn) => events.set(name, fn) };
   const observers = [], motion = { matches: !!options.reducedMotion, addEventListener: (name, fn) => { motion.change = fn; } };
+  const initialUrl = new URL(options.href || 'https://thorshall.test/bonus-hunt' + (options.search || '') + (options.hash || ''));
+  const pageLocation = { href: initialUrl.href, origin: options.locationOrigin || initialUrl.origin, pathname: initialUrl.pathname, search: initialUrl.search, hash: initialUrl.hash };
+  const historyCalls = [], historyState = { view: 'test' };
   const browser = { crypto: { randomUUID: () => '00000000-0000-4000-8000-' + String(++uuid).padStart(12, '0') }, matchMedia: () => motion };
+  if (!options.noHistory) browser.history = { state: historyState, replaceState(state, title, url) {
+    if (options.historyThrows) throw new Error('History is restricted');
+    historyCalls.push({ state, title, url });
+    const next = new URL(url, pageLocation.href);
+    Object.assign(pageLocation, { href: next.href, pathname: next.pathname, search: next.search, hash: next.hash });
+  } };
   if (options.observers) browser.IntersectionObserver = class { constructor(fn) { this.fn = fn; this.disconnected = false; observers.push(this); } observe() {} disconnect() { this.disconnected = true; } fire(visible) { this.fn([{ isIntersecting: visible }]); } };
-  const context = { document, window: browser, Intl, Map, Set, AbortController, Uint8Array, URL, URLSearchParams, Date: TestDate, location: { origin: 'https://thorshall.test', search: options.search || '' }, sessionStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
+  const context = { document, window: browser, Intl, Map, Set, AbortController, Uint8Array, URL, URLSearchParams, Date: TestDate, location: pageLocation, sessionStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
     setTimeout: (fn, ms) => { timers.set(++timerId, { fn, ms }); return timerId; }, clearTimeout: id => timers.delete(id),
     fetch: async (url, options) => {
       const call = { url, method: options.method, credentials: options.credentials, headers: clone(options.headers), body: options.body ? JSON.parse(options.body) : undefined, signal: options.signal }; calls.push(call);
@@ -42,7 +51,7 @@ async function start(handler, options = {}) {
   const input = (id, value) => { node(id).value = value; node(id).fire('input'); };
   const submit = async () => { byClass('prediction-form')[0].fire('submit'); await settle(); };
   const tick = async ms => { const selected = [...timers].find(([, timer]) => timer.ms === ms); assert.ok(selected, 'Expected a ' + ms + 'ms timer'); timers.delete(selected[0]); clock += ms; selected[1].fn(); await settle(); };
-  return { mount, node, byClass, events, calls, settle, view, input, submit, document, timers, observers, motion, tick, advance: ms => { clock += ms; }, storage, text: () => all(mount).map(node => node.textContent).join(' ') };
+  return { mount, node, byClass, events, calls, settle, view, input, submit, document, timers, observers, motion, tick, advance: ms => { clock += ms; }, storage, location: pageLocation, historyCalls, historyState, text: () => all(mount).map(node => node.textContent).join(' ') };
 }
 
 test('collecting hunt revisions preserve drafts and keep a single moderate refresh timer', async () => {
@@ -216,11 +225,55 @@ test('OAuth return messages use only known safe statuses and disappear with priv
   const messages = { cancelled: /sign-in was cancelled/, failed: /could not be completed/, expired: /sign-in link expired/, unavailable: /temporarily unavailable/ };
   for (const [status, expected] of Object.entries(messages)) {
     const app = await start(() => response(summary('hunt-a', { viewer: null })), { search: '?twitch=' + status + '&error_description=private_raw_error&code=secret' });
+    assert.equal(app.location.search, '');
     await app.view(); assert.match(app.text(), expected); assert.doesNotMatch(app.text(), /private_raw_error|secret/);
     app.events.get('hunt:unavailable')(); await app.view(); assert.doesNotMatch(app.text(), expected);
   }
   const unknown = await start(() => response(summary('hunt-a', { viewer: null })), { search: '?twitch=%3Cimg%20src%3Dx%3E&error_description=raw_error' });
   await unknown.view(); assert.doesNotMatch(unknown.text(), /<img|raw_error/);
+  assert.equal(new URL(unknown.location.href).searchParams.get('twitch'), '<img src=x>');
+});
+
+test('OAuth callback details are removed before rendering while the source and selected hunt survive', async () => {
+  const app = await start(null, { search: '?src=telegram&action=callback&code=temporary_code&state=temporary_state&scope=&error=provider_error&error_description=private_error&twitch=connected', hash: '#hunt=hunt-b' });
+  assert.equal(app.location.href, 'https://thorshall.test/bonus-hunt?src=telegram#hunt=hunt-b');
+  assert.equal(app.calls.length, 0);
+  assert.deepEqual(app.historyCalls, [{ state: app.historyState, title: '', url: '/bonus-hunt?src=telegram#hunt=hunt-b' }]);
+  await app.view('hunt-b');
+  assert.doesNotMatch(app.text(), /temporary_code|temporary_state|private_error|provider_error|connected/);
+  assert.equal(new URL(app.calls[0].url, app.location.origin).searchParams.get('hunt'), 'hunt-b');
+});
+
+test('URL cleanup removes known markers only and leaves unrelated query values intact', async () => {
+  const app = await start(null, { search: '?src=youtube&src=telegram&twitch=connected&twitch=unknown&custom=keep%20this', hash: '#hunt=hunt-a' });
+  const cleaned = new URL(app.location.href);
+  assert.deepEqual(cleaned.searchParams.getAll('src'), ['youtube', 'telegram']);
+  assert.deepEqual(cleaned.searchParams.getAll('twitch'), ['unknown']);
+  assert.equal(cleaned.searchParams.get('custom'), 'keep this');
+  assert.equal(cleaned.hash, '#hunt=hunt-a');
+  const unchanged = await start(null, { search: '?src=youtube&twitch=unknown', hash: '#hunt=hunt-a' });
+  assert.equal(unchanged.historyCalls.length, 0);
+});
+
+test('restricted or unavailable history does not interrupt prediction loading or safe return messages', async () => {
+  for (const limitation of [{ noHistory: true }, { historyThrows: true }]) {
+    const app = await start(() => response(summary('hunt-a', { viewer: null })), { ...limitation, search: '?twitch=expired&code=private_callback', hash: '#hunt=hunt-a' });
+    await app.view();
+    assert.equal(app.calls.length, 1);
+    assert.match(app.text(), /sign-in link expired/);
+    assert.doesNotMatch(app.text(), /private_callback/);
+    assert.equal(app.historyCalls.length, 0);
+  }
+});
+
+test('URL cleanup never replaces history for a foreign origin or a non-HTTP page', async () => {
+  for (const options of [{ href: 'https://foreign.test/bonus-hunt?code=private', locationOrigin: 'https://thorshall.test' }, { href: 'file:///bonus-hunt?code=private' }]) {
+    const app = await start(null, options);
+    await app.view();
+    assert.equal(app.historyCalls.length, 0);
+    assert.equal(app.calls.length, 1);
+    assert.doesNotMatch(app.text(), /private/);
+  }
 });
 
 const publicEntries = (length = 18) => Array.from({ length }, (_, index) => ({ username: index === 2 ? viewer.login : 'viewer_' + index, amountMinor: 50000 + index * 1250, createdAt: new Date(Date.UTC(2026, 10, 19, 1, 0, index)).toISOString(), verified: index !== 1, isMine: index === 2 }));

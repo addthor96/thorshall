@@ -66,12 +66,32 @@ test("OAuth requests only basic identity and returns to the selected hunt", asyn
   assert.equal(authorize.searchParams.get("scope"), "");
   assert.equal(authorize.searchParams.get("redirect_uri"), auth.DEFAULT_REDIRECT);
   assert.match(login.start.cookies[0], /HttpOnly; SameSite=Lax; Max-Age=600; Secure/);
-  assert.equal(login.response.statusCode, 303); assert.equal(login.response.headers.Location, "/bonus-hunt#hunt=hunt-a");
+  assert.equal(login.response.statusCode, 303); assert.equal(login.response.headers.Location, "/bonus-hunt?twitch=connected#hunt=hunt-a");
   assert.equal(app.calls.length, 3);
   assert.equal(app.calls[1].options.headers.Authorization, "OAuth " + ACCESS_TOKEN);
   assert.equal(app.calls[2].options.headers["Client-Id"], ENV.TWITCH_CLIENT_ID);
   assert.equal(new URLSearchParams(app.calls[0].options.body).get("client_secret"), ENV.TWITCH_CLIENT_SECRET);
   assert.ok(app.calls.every(call => call.options.signal instanceof AbortSignal && call.options.redirect === "error"));
+});
+
+test("successful callbacks replace provider query parameters with a safe marker and keep session cookies", async () => {
+  const app = setup(), selected = "/bonus-hunt#hunt=selected-hunt_2";
+  const start = await app.handler(event("login", { query: { return: selected } }));
+  const state = new URL(start.headers.Location).searchParams.get("state");
+  const callback = await app.handler(event("callback", { cookie: cookiePair(start, auth.STATE_COOKIE),
+    query: { state, code: "discard-oauth-code-sentinel", scope: "" } }));
+  const destination = new URL(callback.headers.Location, "https://thorshall.gg");
+  assert.equal(callback.statusCode, 303);
+  assert.equal(destination.pathname, "/bonus-hunt");
+  assert.equal(destination.search, "?twitch=connected");
+  assert.equal(destination.hash, "#hunt=selected-hunt_2");
+  assert.deepEqual([...destination.searchParams.keys()], ["twitch"]);
+  assert.doesNotMatch(callback.headers.Location, /action=|code=|scope=|state=|discard-oauth-code-sentinel/);
+  assert.equal(callback.cookies.length, 2);
+  assert.match(callback.cookies[0], new RegExp("^" + auth.STATE_COOKIE + "=;.*Max-Age=0; Secure$"));
+  assert.match(callback.cookies[1], new RegExp("^" + auth.SESSION_COOKIE + "=.*HttpOnly; SameSite=Lax; Max-Age=28800; Secure$"));
+  const session = payload(await app.handler(event("session", { cookie: cookiePair(callback, auth.SESSION_COOKIE) })));
+  assert.equal(session.user.login, "testviewer");
 });
 
 test("sessions store encrypted access tokens and expose only verified Twitch identity", async () => {
@@ -161,7 +181,7 @@ test("only allowlisted hunt paths and registered callback origins are used", asy
   for (const value of ["https://evil.test", "//evil.test", "/bonus-hunt?next=https://evil.test", "/bonus-hunt#token=secret", "/bonus-hunt\\evil", "/bonus-hunt%0d%0a", "/admin"]) assert.equal(auth.safeReturn(value), "/bonus-hunt");
   assert.equal(auth.safeReturn("/bonus-hunt#hunt=valid-id_1"), "/bonus-hunt#hunt=valid-id_1");
   for (const redirect of ["https://evil.test" + auth.ENDPOINT + "?action=callback", "http://thorshall.gg" + auth.ENDPOINT + "?action=callback", "https://thorshall.gg/other?action=callback", auth.DEFAULT_REDIRECT + "&next=bad"]) assert.equal(auth.configFor(event(), { ...ENV, TWITCH_REDIRECT_URI: redirect }), null);
-  const app = setup(), login = await app.login("//evil.test"); assert.equal(login.response.headers.Location, "/bonus-hunt");
+  const app = setup(), login = await app.login("//evil.test"); assert.equal(login.response.headers.Location, "/bonus-hunt?twitch=connected");
   assert.equal(auth.storeName(event()), "thorshall-hunt-twitch-v1");
   assert.notEqual(auth.storeName({ ...event(), published: false }), auth.storeName(event()));
   assert.notEqual(auth.storeName(event("session", { origin: "https://preview.test" })), auth.storeName(event()));
