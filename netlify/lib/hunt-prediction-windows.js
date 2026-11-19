@@ -14,10 +14,13 @@ function collecting(hunt) {
   return Boolean(hunt && hunt.status === "collecting" && Array.isArray(hunt.rows)
     && hunt.rows.every(row => row.payout === null || row.payout === undefined));
 }
+function running(hunt) {
+  return Boolean(hunt && ["collecting", "opening"].includes(hunt.status));
+}
 
 // These cutoffs are server metadata, never part of the editable hunt state.
 // Once a hunt ID closes, edits/imports cannot reopen its prediction window.
-function closePredictionWindows(record, nextState, now = new Date()) {
+function closePredictionWindows(record, nextState, now = new Date(), closeHuntId = null) {
   const closed = Object.create(null), existing = record?.predictionClosedAt;
   if (existing !== undefined && (!existing || typeof existing !== "object" || Array.isArray(existing))) throw new Error("Invalid prediction windows");
   for (const [id, value] of Object.entries(existing || {})) {
@@ -32,7 +35,7 @@ function closePredictionWindows(record, nextState, now = new Date()) {
   for (const id of ids) {
     const prior = before.get(id), next = after.get(id);
     const wasDeactivated = record?.state?.activeId === id && nextState?.activeId !== id;
-    if (!next || (prior && !collecting(prior)) || !collecting(next) || wasDeactivated) {
+    if (!next || prior?.status === "complete" || next.status === "complete" || wasDeactivated || id === closeHuntId) {
       if (!Object.prototype.hasOwnProperty.call(closed, id)) closed[id] = at;
     }
   }
@@ -40,4 +43,4 @@ function closePredictionWindows(record, nextState, now = new Date()) {
   return Object.fromEntries(Object.entries(closed));
 }
 
-module.exports = { closePredictionWindows, cutoffFor, collecting, timestamp, MAX_WINDOWS };
+module.exports = { closePredictionWindows, cutoffFor, collecting, running, timestamp, MAX_WINDOWS };

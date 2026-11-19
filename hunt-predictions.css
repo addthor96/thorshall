@@ -25,6 +25,13 @@
 .prediction-signout:hover{background:#51416066;border-color:#ab8dc8}
 .prediction-signout:disabled{opacity:.45;cursor:default}
 .prediction-form{display:grid;grid-template-columns:1fr;gap:14px}
+.prediction-mine:not([hidden])+.prediction-form:not([hidden]){margin-top:18px}
+.prediction-form-actions{display:flex;gap:10px;align-items:stretch}
+.prediction-form-actions .prediction-submit{flex:1;min-width:0}
+.prediction-cancel,.prediction-edit{border:1px solid #7a715d;border-radius:8px;background:#27313b;color:#e1d7c0;padding:10px 14px;font:600 14px/1.4 var(--font,Arial,Helvetica,sans-serif);cursor:pointer}
+.prediction-cancel:hover,.prediction-edit:hover{background:#3b4247;border-color:#b39b70}
+.prediction-cancel:disabled,.prediction-edit:disabled{opacity:.45;cursor:default}
+.prediction-edit{width:100%;margin-top:16px;min-height:43px;background:#30372f88}
 .prediction-field{min-width:0}
 .prediction-field label{display:block;color:#c7d3e3;font-size:14px;font-weight:550;margin-bottom:9px}
 .prediction-field input{width:100%;min-width:0;min-height:52px;border:1px solid #53647c;border-radius:9px;background:#101a29;color:#f0f4fa;padding:12px 14px;outline:none;font:500 20px/1.4 var(--font,Arial,Helvetica,sans-serif);font-variant-numeric:tabular-nums;transition:border-color .15s,box-shadow .15s}

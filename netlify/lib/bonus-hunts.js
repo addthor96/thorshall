@@ -2,7 +2,7 @@
 
 const crypto = require("node:crypto");
 const { sessionAccess, safeEqual } = require("./stats-auth");
-const { closePredictionWindows } = require("./hunt-prediction-windows");
+const { closePredictionWindows, cutoffFor, running } = require("./hunt-prediction-windows");
 const KEY = "hunt-manager";
 const MAX_BODY_BYTES = 1500000;
 const CURRENCIES = new Set(["USD", "EUR", "GBP", "CAD", "AUD"]);
@@ -131,6 +131,13 @@ function displayState(state, mode) {
   };
 }
 
+function predictionWindows(record, state = record.state) {
+  return Object.fromEntries(state.hunts.map(hunt => {
+    const closedAt = cutoffFor(record, hunt.id);
+    return [hunt.id, { closedAt, accepting: state.settings.public === true && state.activeId === hunt.id && running(hunt) && !closedAt }];
+  }));
+}
+
 function storeName(event) {
   let context = event?.deployContext || process.env.CONTEXT || "production";
   if (context === "production" && event?.published === false) context = "production-preview";
@@ -165,7 +172,8 @@ function createHandler(storeFactory = openStore, { now = () => new Date() } = {}
       if (!entry && method === "GET" && mode === "viewer") {
         // A newly published page has a useful empty display before its first
         // owner visit. Anonymous viewers never create or modify stored hunts.
-        return json(200, { ok: true, state: initialState(), revision: "empty" });
+        const state = initialState();
+        return json(200, { ok: true, state, revision: "empty", predictionWindows: predictionWindows({ state }) });
       }
       if (!entry) return json(404, { ok: false, error: "No hunt has been saved yet." });
       const record = entry.data;
@@ -173,22 +181,28 @@ function createHandler(storeFactory = openStore, { now = () => new Date() } = {}
       if (!mutation) {
         if (mode === "overlay" && !validStreamToken(event, record)) return json(401, { ok: false, error: "Stream link is missing or has been replaced." });
         if (mode === "viewer" && !owner && record.state.settings.public !== true) return json(403, { ok: false, error: "This hunt page is private." });
-        return json(200, { ok: true, state: mode === "admin" ? record.state : displayState(record.state, mode), revision: entry.etag, ...(mode === "admin" ? { streamToken: record.streamToken } : {}) });
+        const state = mode === "admin" ? record.state : displayState(record.state, mode);
+        return json(200, { ok: true, state, revision: entry.etag, ...(mode !== "overlay" ? { predictionWindows: predictionWindows(record, state) } : {}), ...(mode === "admin" ? { streamToken: record.streamToken } : {}) });
       }
       const body = parseBody(event);
-      object(body, method === "PUT" ? ["state", "revision"] : ["action", "revision"], "Request");
+      object(body, method === "PUT" ? ["state", "revision"] : ["action", "revision", "huntId"], "Request");
       if (typeof body.revision !== "string" || body.revision !== entry.etag) return json(409, { ok: false, error: "The saved hunt changed. Reload before saving again.", revision: entry.etag });
       let next;
       if (method === "PUT") next = { state: validateState(body.state), streamToken: record.streamToken };
       else {
-        if (body.action !== "rotate-token") throw new InputError("Unknown action.");
-        next = { state: record.state, streamToken: crypto.randomBytes(32).toString("base64url") };
+        if (body.action === "close-predictions") {
+          const huntId = id(body.huntId, "Hunt ID");
+          if (!record.state.hunts.some(hunt => hunt.id === huntId)) throw new InputError("Choose a saved hunt before closing predictions.");
+          next = { state: record.state, streamToken: record.streamToken };
+        } else if (body.action === "rotate-token" && body.huntId === undefined) {
+          next = { state: record.state, streamToken: crypto.randomBytes(32).toString("base64url") };
+        } else throw new InputError("Unknown action.");
       }
-      next.predictionClosedAt = closePredictionWindows(record, next.state, now());
+      next.predictionClosedAt = closePredictionWindows(record, next.state, now(), body.action === "close-predictions" ? body.huntId : null);
       const result = await store.setJSON(KEY, next, { onlyIfMatch: entry.etag });
       if (!result.modified) return json(409, { ok: false, error: "Another save finished first. Reload the saved hunt before trying again." });
       if (!result.etag) throw new Error("Storage did not confirm the save");
-      return json(200, { ok: true, state: next.state, revision: result.etag, ...(method === "POST" ? { streamToken: next.streamToken } : {}) });
+      return json(200, { ok: true, state: next.state, revision: result.etag, predictionWindows: predictionWindows(next), ...(method === "POST" && body.action === "rotate-token" ? { streamToken: next.streamToken } : {}) });
     } catch (error) {
       if (error instanceof InputError) return json(400, { ok: false, error: error.message });
       console.error("Bonus hunt storage request failed:", error.name || "Error");

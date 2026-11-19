@@ -3,12 +3,17 @@ const test = require('node:test'), assert = require('node:assert/strict'), fs = 
 const source = fs.readFileSync(require.resolve('../hunt-predictions.js'), 'utf8');
 const clone = value => structuredClone(value);
 const viewer = { id: '123456', login: 'thor_viewer', displayName: 'Thor_Viewer' };
-const summary = (huntId = 'hunt-a', extra = {}) => ({ ok: true, huntId, currency: 'USD', status: 'collecting', accepting: true, count: 0, mine: null, podium: [], entries: [], viewer: clone(viewer), authConfigured: true, loginUrl: '/.netlify/functions/hunt-twitch?action=login&return=%2Fbonus-hunt%23hunt%3D' + huntId, logoutUrl: '/.netlify/functions/hunt-twitch?action=logout', authExpiresAt: null, authRevalidateAt: null, ...extra });
+const MINE_REVISION = '11111111-1111-4111-8111-111111111111';
+const summary = (huntId = 'hunt-a', extra = {}) => {
+  const value = { ok: true, huntId, currency: 'USD', status: 'collecting', accepting: true, count: 0, mine: null, podium: [], entries: [], viewer: clone(viewer), authConfigured: true, loginUrl: '/.netlify/functions/hunt-twitch?action=login&return=%2Fbonus-hunt%23hunt%3D' + huntId, logoutUrl: '/.netlify/functions/hunt-twitch?action=logout', authExpiresAt: null, authRevalidateAt: null, ...extra };
+  if (value.mine) value.mine = { username: viewer.login, createdAt: '2026-11-19T01:00:00.000Z', updatedAt: '2026-11-19T01:00:00.000Z', revision: MINE_REVISION, ...value.mine };
+  return value;
+};
 const response = (data, status = 200) => ({ ok: status >= 200 && status < 300, status, json: async () => clone(data) });
 const deferred = () => { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; };
 
 async function start(handler, options = {}) {
-  const events = new Map(), calls = [], timers = new Map(), storage = new Map(); let timerId = 0, uuid = 0, clock = Date.now();
+  const events = new Map(), calls = [], timers = new Map(), storage = options.storage || new Map(); let timerId = 0, uuid = 0, clock = Date.now();
   class TestDate extends Date { static now() { return clock; } }
   class Node {
     constructor(tag) { this.tagName = tag.toUpperCase(); this.children = []; this.attributes = {}; this.listeners = new Map(); this.className = ''; this.textContent = ''; this.value = ''; this.disabled = false; this.hidden = false; this.dataset = {}; this.id = ''; this.name = ''; this.scrollTop = 0; this.scrollHeight = 256; this.clientHeight = 256; this.classList = { add: name => { this.className += (this.className ? ' ' : '') + name; } }; }
@@ -45,7 +50,7 @@ async function start(handler, options = {}) {
   };
   vm.runInNewContext(source, context);
   const settle = async () => { for (let i = 0; i < 10; i++) await new Promise(resolve => setImmediate(resolve)); };
-  const view = async (id = 'hunt-a', status = 'collecting', revision = 'v1', activeId = 'hunt-a') => { events.get('hunt:view')({ detail: { hunt: { id, title: id, status, currency: 'USD' }, activeId, revision } }); await settle(); };
+  const view = async (id = 'hunt-a', status = 'collecting', revision = 'v1', activeId = 'hunt-a', predictionWindow) => { events.get('hunt:view')({ detail: { hunt: { id, title: id, status, currency: 'USD' }, activeId, revision, predictionWindow } }); await settle(); };
   const byClass = name => all(mount).filter(node => node.className.split(' ').includes(name));
   const node = id => document.getElementById(id);
   const input = (id, value) => { node(id).value = value; node(id).fire('input'); };
@@ -60,7 +65,7 @@ test('collecting hunt revisions preserve drafts and keep a single moderate refre
   const amount = app.node('prediction-amount'); app.input(amount.id, '1234.50'); amount.focus(); await app.view('hunt-a', 'collecting', 'v2');
   assert.equal(app.calls.length, 1); assert.equal(app.node(amount.id), amount); assert.equal(app.document.activeElement, amount); assert.equal(amount.value, '1234.50'); assert.equal(app.node('prediction-username'), null);
   assert.equal(app.byClass('prediction-place').length, 3); assert.match(app.text(), /1st place.*2nd place.*3rd place/); assert.doesNotMatch(app.text(), /\$[0-9]/);
-  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), []);
 });
 
 test('valid entry posts the free prediction and shows the confirmed saved entry', async () => {
@@ -68,6 +73,7 @@ test('valid entry posts the free prediction and shows the confirmed saved entry'
   await app.view(); app.input('prediction-amount', '1234.50'); await app.submit();
   const call = app.calls[1]; assert.equal(call.method, 'POST'); assert.equal(call.headers['X-Thorshall-Request'], 'hunt-prediction');
   assert.equal(call.body.username, undefined); assert.equal(call.body.viewerId, viewer.id); assert.equal(call.body.amount, '1234.50'); assert.equal(call.body.website, ''); assert.match(call.body.requestId, /^[0-9a-f-]{36}$/);
+  assert.equal(call.body.expectedRevision, null);
   assert.equal(app.byClass('prediction-form')[0].hidden, true); assert.match(app.text(), /\$1,234\.50.*@thor_viewer · Saved for this hunt/); assert.match(app.text(), /Your prediction is saved/);
 });
 
@@ -81,7 +87,7 @@ test('an unconfirmed save retries the identical payload and request ID', async (
   const app = await start(call => {
     if (call.method === 'GET') return response(summary());
     if (++posts === 1) throw new Error('Offline');
-    return response(summary('hunt-a', { count: 1, mine: { username: call.body.username, amountMinor: 2500 } }));
+    return response(summary('hunt-a', { count: 1, mine: { username: viewer.login, amountMinor: 2500, revision: call.body.requestId } }));
   });
   await app.view(); app.input('prediction-amount', '25'); await app.submit();
   assert.equal(app.node('prediction-amount').disabled, true); assert.equal(app.byClass('prediction-submit')[0].textContent, 'Retry prediction');
@@ -94,17 +100,17 @@ test('a duplicate response refreshes the existing entry instead of claiming a se
   let reads = 0;
   const app = await start(call => call.method === 'GET' ? response(summary('hunt-a', ++reads === 1 ? {} : { count: 1, mine: { username: 'original_user', amountMinor: 9900 } })) : response({ ok: false, error: 'One entry per browser.' }, 409));
   await app.view(); app.input('prediction-amount', '25'); await app.submit();
-  assert.equal(app.calls.length, 3); assert.match(app.text(), /@original_user · Saved for this hunt/); assert.match(app.text(), /already saved/); assert.doesNotMatch(app.text(), /@new_user · Saved/);
+  assert.equal(app.calls.length, 3); assert.match(app.text(), /@original_user · Saved for this hunt/); assert.match(app.text(), /another session.*Review your amount/); assert.doesNotMatch(app.text(), /@new_user · Saved/);
 });
 
-test('opening locks the form immediately and a busy save is followed by one status refresh', async () => {
+test('owner closure locks the form immediately and a busy save is followed by one status refresh', async () => {
   const post = deferred(); let opened = false;
   const app = await start(call => call.method === 'POST' ? post.promise : response(summary('hunt-a', opened ? { status: 'opening', accepting: false, count: 1, mine: { username: 'thor_viewer', amountMinor: 2500 } } : {})));
   await app.view(); app.input('prediction-amount', '25');
-  app.byClass('prediction-form')[0].fire('submit'); await app.settle(); opened = true; await app.view('hunt-a', 'opening', 'v2');
+  app.byClass('prediction-form')[0].fire('submit'); await app.settle(); opened = true; await app.view('hunt-a', 'opening', 'v2', 'hunt-a', { accepting: false, closedAt: '2026-11-19T02:00:00.000Z' });
   assert.equal(app.byClass('prediction-form')[0].hidden, true);
   post.resolve(response(summary('hunt-a', { mine: { username: 'thor_viewer', amountMinor: 2500 }, count: 1 })));
-  await app.settle(); assert.equal(app.calls.filter(call => call.method === 'GET').length, 2); assert.equal(app.byClass('prediction-badge')[0].textContent, 'Locked');
+  await app.settle(); assert.equal(app.calls.filter(call => call.method === 'GET').length, 2); assert.equal(app.byClass('prediction-badge')[0].textContent, 'Closed');
 });
 
 test('switching hunts ignores stale display results and restores each hunt draft', async () => {
@@ -278,14 +284,15 @@ test('URL cleanup never replaces history for a foreign origin or a non-HTTP page
 
 const publicEntries = (length = 18) => Array.from({ length }, (_, index) => ({ username: index === 2 ? viewer.login : 'viewer_' + index, amountMinor: 50000 + index * 1250, createdAt: new Date(Date.UTC(2026, 10, 19, 1, 0, index)).toISOString(), verified: index !== 1, isMine: index === 2 }));
 
-test('all public predictions render while the owner amount remains separately locked', async () => {
+test('all public predictions render while the owner amount remains separately saved and editable', async () => {
   const entries = publicEntries();
   const app = await start(() => response(summary('hunt-a', { entries, count: entries.length, mine: { username: viewer.login, amountMinor: entries[2].amountMinor } })));
   await app.view();
   assert.equal(app.byClass('prediction-feed-row').length, 18);
   assert.equal(app.byClass('prediction-feed-mine').length, 1);
   assert.equal(app.byClass('prediction-mine')[0].hidden, false);
-  assert.match(app.text(), /Your locked prediction.*\$525\.00.*@thor_viewer.*Saved · cannot be changed/);
+  assert.match(app.text(), /Your prediction.*\$525\.00.*@thor_viewer.*Saved · editable until predictions close/);
+  assert.equal(app.byClass('prediction-edit')[0].hidden, false);
   assert.match(app.byClass('prediction-feed-row')[1].children[1].children[1].textContent, /Earlier unverified entry/);
   assert.equal(app.byClass('prediction-form')[0].hidden, true);
   assert.equal(app.byClass('prediction-feed-viewport')[0].attributes['aria-live'], undefined);
@@ -375,4 +382,122 @@ test('malformed public entry data cannot be displayed as a valid roster', async 
   await app.view(); assert.equal(app.byClass('prediction-feed-row').length, 0);
   assert.match(app.text(), /Predictions could not be confirmed/);
   assert.doesNotMatch(app.text(), /<img/);
+});
+
+test('a saved prediction can be changed during opening and uses its own current revision', async () => {
+  let saved = { username: viewer.login, amountMinor: 10000, revision: MINE_REVISION };
+  const app = await start(call => {
+    if (call.method === 'POST') saved = { ...saved, amountMinor: Math.round(Number(call.body.amount) * 100), revision: call.body.requestId };
+    return response(summary('hunt-a', { status: 'opening', mine: saved, count: 1, entries: [{ username: viewer.login, amountMinor: saved.amountMinor, createdAt: '2026-11-19T01:00:00.000Z', isMine: true, verified: true }] }));
+  });
+  await app.view('hunt-a', 'opening', 'v1', 'hunt-a', { accepting: true, closedAt: null });
+  assert.equal(app.byClass('prediction-edit')[0].hidden, false);
+  app.byClass('prediction-edit')[0].fire('click');
+  assert.equal(app.node('prediction-amount').value, '100.00');
+  assert.equal(app.byClass('prediction-mine')[0].hidden, false);
+  assert.equal(app.byClass('prediction-form')[0].hidden, false);
+  assert.equal(app.byClass('prediction-submit')[0].textContent, 'Save changes');
+  assert.equal(app.timers.size, 0);
+  app.input('prediction-amount', '222.22'); await app.submit();
+  const post = app.calls.find(call => call.method === 'POST');
+  assert.equal(post.body.expectedRevision, MINE_REVISION); assert.equal(post.body.huntId, 'hunt-a');
+  assert.equal(post.body.viewerId, viewer.id); assert.equal(post.body.amount, '222.22');
+  assert.equal(app.byClass('prediction-form')[0].hidden, true);
+  assert.equal(app.byClass('prediction-feed-row').length, 1);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$222.22');
+  assert.equal(app.byClass('prediction-edit')[0].hidden, false);
+  assert.match(app.text(), /Your prediction is updated/);
+  assert.match(app.text(), /Ties go to the guess saved first; editing resets that time/);
+});
+
+test('canceling an edit preserves the accepted amount and resumes moderate refresh', async () => {
+  const app = await start(() => response(summary('hunt-a', { mine: { amountMinor: 15000 }, count: 1 })));
+  await app.view(); app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '987.65');
+  app.byClass('prediction-cancel')[0].fire('click'); await app.settle();
+  assert.equal(app.calls.length, 1); assert.equal(app.byClass('prediction-form')[0].hidden, true);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$150.00');
+  assert.equal(app.storage.size, 0); assert.equal(app.document.activeElement, app.byClass('prediction-edit')[0]);
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
+});
+
+test('a stale edit refreshes the saved amount but keeps the draft for explicit review and resubmission', async () => {
+  const newerRevision = '22222222-2222-4222-8222-222222222222'; let reads = 0, posts = 0;
+  const app = await start(call => {
+    if (call.method === 'GET') return response(summary('hunt-a', { count: 1, mine: { amountMinor: ++reads === 1 ? 10000 : 50000, revision: reads === 1 ? MINE_REVISION : newerRevision } }));
+    if (++posts === 1) return response({ ok: false, error: 'Your prediction changed in another session.' }, 409);
+    return response(summary('hunt-a', { count: 1, mine: { amountMinor: 77700, revision: call.body.requestId } }));
+  });
+  await app.view(); app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '777'); await app.submit();
+  assert.equal(posts, 1); assert.equal(app.node('prediction-amount').value, '777');
+  assert.equal(app.byClass('prediction-form')[0].hidden, false);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$500.00');
+  assert.match(app.text(), /another session.*Review your amount/); assert.equal(app.timers.size, 0);
+  await app.submit();
+  assert.equal(posts, 2); assert.equal(app.calls.filter(call => call.method === 'POST')[1].body.expectedRevision, newerRevision);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$777.00');
+});
+
+test('an unconfirmed edit retries the exact amount and revision without permitting a cancel', async () => {
+  let posts = 0;
+  const app = await start(call => {
+    if (call.method === 'GET') return response(summary('hunt-a', { count: 1, mine: { amountMinor: 10000 } }));
+    if (++posts === 1) throw new Error('Offline');
+    return response(summary('hunt-a', { count: 1, mine: { amountMinor: 44400, revision: call.body.requestId } }));
+  });
+  await app.view(); app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '444'); await app.submit();
+  assert.equal(app.byClass('prediction-cancel')[0].disabled, true); assert.equal(app.node('prediction-amount').disabled, true);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$100.00');
+  app.byClass('prediction-cancel')[0].fire('click'); assert.equal(app.byClass('prediction-form')[0].hidden, false);
+  await app.submit(); const payloads = app.calls.filter(call => call.method === 'POST').map(call => call.body);
+  assert.deepEqual(payloads[0], payloads[1]); assert.equal(payloads[0].expectedRevision, MINE_REVISION);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$444.00');
+});
+
+test('a manual per-hunt closure hides edit controls even if a delayed summary still says open', async () => {
+  const wait = deferred(); let reads = 0;
+  const app = await start(() => ++reads === 1 ? response(summary('hunt-a', { count: 1, mine: { amountMinor: 25000 } })) : wait.promise);
+  await app.view(); app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '999');
+  await app.view('hunt-a', 'opening', 'v2', 'hunt-a', { accepting: false, closedAt: '2026-11-19T02:00:00.000Z' });
+  assert.equal(app.byClass('prediction-form')[0].hidden, true); assert.equal(app.byClass('prediction-edit')[0].hidden, true);
+  assert.equal(app.byClass('prediction-badge')[0].textContent, 'Closed');
+  wait.resolve(response(summary('hunt-a', { status: 'opening', count: 1, mine: { amountMinor: 25000 } }))); await app.settle();
+  assert.equal(app.byClass('prediction-form')[0].hidden, true); assert.equal(app.byClass('prediction-edit')[0].hidden, true);
+  assert.match(app.text(), /Your locked prediction.*\$250\.00.*final guess locked/);
+  await app.submit(); assert.equal(app.calls.filter(call => call.method === 'POST').length, 0);
+});
+
+test('editing drafts and operation revisions stay attached to the selected hunt', async () => {
+  const app = await start(call => response(summary(new URL(call.url, 'https://test').searchParams.get('hunt') || call.body.huntId,
+    call.method === 'GET' ? { mine: { amountMinor: call.url.includes('hunt-b') ? 20000 : 10000 }, count: 1 } : { mine: { amountMinor: 33300, revision: call.body.requestId }, count: 1 })));
+  await app.view(); app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '333');
+  await app.view('hunt-b', 'opening', 'v1', 'hunt-b'); assert.match(app.byClass('prediction-hunt-name')[0].textContent, /hunt-b/);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$200.00');
+  assert.equal(app.byClass('prediction-form')[0].hidden, true);
+  await app.view('hunt-a'); assert.equal(app.node('prediction-amount').value, '333');
+  assert.equal(app.byClass('prediction-form')[0].hidden, false); await app.submit();
+  assert.equal(app.calls.find(call => call.method === 'POST').body.huntId, 'hunt-a');
+});
+
+test('ordinary hunt updates and manual refresh never replace a draft being edited', async () => {
+  let saved = 10000;
+  const app = await start(() => response(summary('hunt-a', { mine: { amountMinor: saved }, count: 1 })));
+  await app.view(); app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '123.45');
+  await app.view('hunt-a', 'collecting', 'v2'); saved = 20000;
+  app.byClass('prediction-refresh')[0].fire('click'); await app.settle();
+  assert.equal(app.node('prediction-amount').value, '123.45');
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$200.00');
+  assert.equal(app.timers.size, 0);
+});
+
+test('an edited draft survives an expired sign-in and is restored after returning through Twitch', async () => {
+  const saved = { mine: { amountMinor: 10000 }, count: 1 };
+  const app = await start(call => call.method === 'GET' ? response(summary('hunt-a', saved)) : response({ ok: false, error: 'Sign in again.' }, 401));
+  await app.view(); app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '678.90'); await app.submit();
+  assert.equal(app.byClass('prediction-form')[0].hidden, true); assert.equal(app.byClass('prediction-twitch-login')[0].hidden, false);
+  assert.equal(app.storage.size, 1);
+  const returned = await start(() => response(summary('hunt-a', saved)), { storage: app.storage }); await returned.view();
+  assert.equal(returned.node('prediction-amount').value, '678.90');
+  assert.equal(returned.byClass('prediction-form')[0].hidden, false);
+  assert.equal(returned.byClass('prediction-submit')[0].textContent, 'Save changes');
+  assert.equal(returned.byClass('prediction-mine')[0].children[1].textContent, '$100.00');
 });

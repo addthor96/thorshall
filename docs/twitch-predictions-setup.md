@@ -25,8 +25,8 @@ Keep the existing `STATS_SESSION_SECRET` unchanged. No new signing password is n
 
 1. Open `/bonus-hunt` signed out. Predictions should be near the top, with a Twitch sign-in button and no editable username.
 2. Sign in through Twitch. Check that the returned handle matches your Twitch account and the selected hunt is preserved.
-3. Submit a guess during collection. The server supplies the account identity and prevents a second entry from another browser using the same account.
-4. Start opening bonuses in the manager and confirm entries lock. Finish the hunt and confirm the closest three guesses are ranked.
+3. Submit a guess during collection, then use Change prediction to save a new amount. The same account keeps one current guess across browsers; an outdated edit must refresh before it can replace a newer save.
+4. Start opening bonuses and confirm predictions remain editable. Click Close predictions for that hunt in the manager and confirm both new entries and edits lock. Finishing the hunt also closes predictions automatically; confirm the closest three final saved guesses are ranked.
 5. Sign out and confirm the entry form is replaced by the sign-in prompt.
 
 Without the Twitch app variables, the feature fails closed: the page and podium remain available, but new predictions cannot be submitted. Local tests use a clearly isolated fake Twitch provider and throwaway session storage; these do not enable a production bypass.

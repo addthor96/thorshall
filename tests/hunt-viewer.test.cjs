@@ -9,12 +9,12 @@ function state(hunts,activeId=hunts[0].id){return{schema:2,activeId,hunts,settin
 
 // Run the actual viewer script against a small DOM and a controllable read API.
 // Timers are captured so tests drive refreshes without background polling.
-async function start({data,hash='',overlay=false}={}){
-  const nodes=new Map(),windowEvents=new Map(),documentEvents=new Map(),timers=new Map(),calls=[],focuses=[],scrolls=[];
-  let response={state:clone(data),revision:'v1'},timerId=0;
+async function start({data,hash='',overlay=false,predictionWindows={}}={}){
+  const nodes=new Map(),windowEvents=new Map(),documentEvents=new Map(),timers=new Map(),calls=[],focuses=[],scrolls=[],dispatched=[];
+  let response={state:clone(data),revision:'v1',predictionWindows:clone(predictionWindows)},timerId=0;
   const attributes=text=>{const attrs=Object.fromEntries(Array.from(text.matchAll(/([\w-]+)="([^"]*)"/g),match=>[match[1],match[2]]));for(const name of ['hidden','disabled'])if(new RegExp('(?:^|\\s)'+name+'(?=\\s|>|$)').test(text))attrs[name]='';return attrs;};
   const plainText=text=>text.replace(/<[^>]*>/g,'').replace(/&(amp|lt|gt|quot|#39);/g,(_,entity)=>({amp:'&',lt:'<',gt:'>',quot:'"','#39':"'"})[entity]);
-  const document={activeElement:null,hidden:false,getElementById:id=>nodes.get(id)||null,addEventListener:(name,fn)=>documentEvents.set(name,fn),querySelectorAll:()=>[]};
+  const document={activeElement:null,hidden:false,getElementById:id=>nodes.get(id)||null,addEventListener:(name,fn)=>documentEvents.set(name,fn),dispatchEvent:event=>dispatched.push(event),querySelectorAll:()=>[]};
   class Element{
     constructor(attrs={}){this.attributes=attrs;this.id=attrs.id||'';this._html='';this.textContent='';this.hidden='hidden'in attrs;this.disabled=false;this.scrollLeft=0;this.scrollTop=0;this.clientWidth=600;this.scrollWidth=1200;this.offsetHeight=960;this.listeners=new Map();this.dataset={};this.style={setProperty(name,value){this[name]=value;}};const classes=new Set((attrs.class||'').split(' '));this.classList={contains:name=>classes.has(name),add:name=>classes.add(name),remove:name=>classes.delete(name),toggle:(name,on)=>{if(on===undefined)on=!classes.has(name);if(on)classes.add(name);else classes.delete(name);return on;}};}
     get innerHTML(){return this._html;}
@@ -32,10 +32,10 @@ async function start({data,hash='',overlay=false}={}){
   document.body=new Element({class:overlay?'overlay-body':''});
   const location={hash,search:'',origin:'https://thorshall.test'};
   const window={HuntCore:Core,innerWidth:640,innerHeight:1080,addEventListener:(name,fn)=>windowEvents.set(name,fn),matchMedia:()=>({matches:true}),HuntOverlayMotion:{create:()=>({destroy(){},update:()=>({mode:'following',focusId:null})})}};
-  const context={document,window,location,URLSearchParams,AbortController,Date,Intl,setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),fetch:async(url,options={})=>{calls.push({url,method:options.method||'GET',credentials:options.credentials,headers:clone(options.headers)});if(response.error)throw response.error;const current=clone(response);return{ok:!current.status||current.status===200,status:current.status||200,json:async()=>({ok:true,state:current.state,revision:current.revision})};}};
+  const context={document,window,location,URLSearchParams,AbortController,Date,Intl,CustomEvent:class{constructor(type,options){this.type=type;this.detail=options?.detail;}},setTimeout:(fn,ms)=>{timers.set(++timerId,{fn,ms});return timerId;},clearTimeout:id=>timers.delete(id),fetch:async(url,options={})=>{calls.push({url,method:options.method||'GET',credentials:options.credentials,headers:clone(options.headers)});if(response.error)throw response.error;const current=clone(response);return{ok:!current.status||current.status===200,status:current.status||200,json:async()=>({ok:true,state:current.state,revision:current.revision,predictionWindows:current.predictionWindows})};}};
   vm.runInNewContext(source,context);
   const settle=async()=>{for(let i=0;i<8;i++)await new Promise(resolve=>setImmediate(resolve));};await settle();
-  return{nodes,calls,focuses,scrolls,container,windowEvents,documentEvents,location,html:()=>container.innerHTML,setResponse:next=>{response=next.error?next:clone(next);},poll:async()=>{await windowEvents.get('online')();await settle();},select:async id=>{location.hash='#hunt='+encodeURIComponent(id);windowEvents.get('hashchange')?.();await settle();},clearSelection:async()=>{location.hash='';windowEvents.get('hashchange')?.();await settle();}};
+  return{nodes,calls,focuses,scrolls,container,windowEvents,documentEvents,dispatched,location,html:()=>container.innerHTML,setResponse:next=>{response=next.error?next:clone(next);},poll:async()=>{await windowEvents.get('online')();await settle();},select:async id=>{location.hash='#hunt='+encodeURIComponent(id);windowEvents.get('hashchange')?.();await settle();},clearSelection:async()=>{location.hash='';windowEvents.get('hashchange')?.();await settle();}};
 }
 function detail(html){return html.slice(html.indexOf('<section class="hunt-detail"'));}
 function cardIds(html){return Array.from(html.matchAll(/data-view-hunt="([^"]+)"/g),match=>match[1]);}
@@ -56,7 +56,7 @@ test('deep links show the selected full ledger with its own currency, zero payou
 
 test('hash navigation is local, supports fallback and never changes the active hunt',async()=>{
   const data=state([hunt('live','Live hunt','opening'),hunt('past','Past hunt'),hunt('draft','Secret draft','collecting')]),before=clone(data),app=await start({data});
-  await app.select('past');assert.match(detail(app.html()),/>Past hunt<\/h2>/);assert.equal(app.focuses.at(-1),'hunt-detail-title');assert.equal(app.scrolls.at(-1).id,'hunt-detail');assert.equal(app.calls.length,1);
+  await app.select('past');assert.match(detail(app.html()),/>Past hunt<\/h2>/);assert.equal(app.focuses.length,0);assert.equal(app.scrolls.length,0);assert.equal(app.calls.length,1);
   await app.select('does-not-exist');assert.match(detail(app.html()),/>Live hunt<\/h2>/);await app.select('draft');assert.match(detail(app.html()),/>Live hunt<\/h2>/);await app.clearSelection();assert.match(detail(app.html()),/>Live hunt<\/h2>/);
   assert.deepEqual(data,before);assert.equal(app.calls.length,1);assert.ok(app.calls.every(call=>call.method==='GET'));
 });
@@ -90,4 +90,31 @@ test('stream overlay keeps token authentication and active hunt independent of a
   const app=await start({overlay:true,hash:'#token=stream-secret&hunt=past',data:state([hunt('live','Live hunt','opening',undefined,[bonus('a','Live stream slot',30)]),hunt('past','Past hunt','complete',undefined,[bonus('b','Archive-only slot',900)])])});
   assert.deepEqual(app.calls.map(call=>[call.method,call.url,call.credentials,call.headers.Authorization]),[['GET','/.netlify/functions/bonus-hunts-api?mode=overlay','omit','Bearer stream-secret']]);
   assert.match(app.nodes.get('overlay-slot-rows').innerHTML,/Live stream slot/);assert.doesNotMatch(app.nodes.get('overlay-slot-rows').innerHTML,/Archive-only slot/);assert.equal(app.windowEvents.has('hashchange'),false);assert.equal(app.nodes.get('overlay-balance').textContent,'$30.00');
+});
+
+test('top hunt cards control both the selected predictions and ledger without skipping predictions',async()=>{
+  const data=state([hunt('live','Live hunt','opening'),hunt('past','Past hunt')]);
+  const windows={live:{accepting:true,closedAt:null},past:{accepting:false,closedAt:'2026-11-18T12:00:00.000Z'}};
+  const app=await start({data,predictionWindows:windows});
+  assert.ok(app.html().indexOf('id="hunt-cards"')<app.html().indexOf('id="hunt-predictions"'));
+  assert.ok(app.html().indexOf('id="hunt-predictions"')<app.html().indexOf('id="hunt-detail"'));
+  assert.match(app.html(),/aria-controls="hunt-predictions hunt-detail"/);
+  assert.equal(app.dispatched.at(-1).detail.hunt.id,'live');
+  assert.deepEqual(clone(app.dispatched.at(-1).detail.predictionWindow),windows.live);
+  await app.select('past');
+  assert.equal(app.dispatched.at(-1).detail.hunt.id,'past');
+  assert.deepEqual(clone(app.dispatched.at(-1).detail.predictionWindow),windows.past);
+  assert.match(detail(app.html()),/>Past hunt<\/h2>/);assert.equal(app.scrolls.length,0);
+  assert.match(app.html(),/Predictions open/);assert.match(app.html(),/Predictions closed/);
+});
+
+test('manual close metadata reaches the selected prediction view on hunt refresh',async()=>{
+  const data=state([hunt('live','Live hunt','opening'),hunt('past','Past hunt')]);
+  const app=await start({data,predictionWindows:{live:{accepting:true,closedAt:null}}});
+  app.setResponse({state:data,revision:'closed-v2',predictionWindows:{live:{accepting:false,closedAt:'2026-11-19T12:00:00.000Z'}}});
+  await app.poll();
+  assert.equal(app.dispatched.at(-1).detail.hunt.id,'live');
+  assert.equal(app.dispatched.at(-1).detail.predictionWindow.accepting,false);
+  assert.equal(app.dispatched.at(-1).detail.predictionWindow.closedAt,'2026-11-19T12:00:00.000Z');
+  assert.doesNotMatch(app.html(),/Predictions open/);
 });

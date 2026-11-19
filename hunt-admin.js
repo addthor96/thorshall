@@ -2,7 +2,7 @@
   'use strict';
   const Core=window.HuntCore,API='/.netlify/functions/bonus-hunts-api',DRAFT_KEY='thorshall_hunt_admin_draft_v2';
   const $=id=>document.getElementById(id),copy=value=>JSON.parse(JSON.stringify(value)),esc=value=>Core.escapeHtml(String(value==null?'':value));
-  let state,revision,streamToken='',dirty=false,saving=false,blocked=false,timer,editVersion=0,toastTimer,recoveredDraft=null;
+  let state,revision,streamToken='',predictionWindows={},dirty=false,saving=false,blocked=false,timer,editVersion=0,toastTimer,recoveredDraft=null,closingPredictions=false;
   let activeSave=null,lastSaveFailed=false,pendingAction=null,actionBusy=false,rotationBusy=false,rotating=false,editingId=null,payoutRowId=null;
   const current=()=>state.hunts.find(h=>h.id===state.activeId)||state.hunts[0];
   const opened=row=>row.payout!==null&&row.payout!==undefined;
@@ -31,6 +31,7 @@
     $('finishHunt').disabled=locked||!all;
     $('newHunt').disabled=locked||state.hunts.length>=50;$('newHuntAfterFinish').disabled=locked||state.hunts.length>=50;
     $('saveNow').disabled=!dirty||blocked||saving;
+    renderPredictionControl();
     const index=h.rows.findIndex(r=>r.id===payoutRowId);
     $('previousBonus').disabled=locked||index<=0;$('nextBonus').disabled=locked||index<0||index>=h.rows.length-1;
   }
@@ -45,7 +46,7 @@
     clearTimeout(timer);if(!state||!dirty||blocked)return !dirty&&!blocked;
     const version=editVersion,submitted=copy(state);saving=true;lastSaveFailed=false;status('Saving…','saving');controls();
     try{
-      const data=await request('PUT',{state:submitted,revision});revision=data.revision;
+      const data=await request('PUT',{state:submitted,revision});revision=data.revision;predictionWindows=data.predictionWindows||{};
       if(version===editVersion){state=data.state||submitted;dirty=false;clearDraft();status('All changes saved','saved');}
       else{preserveDraft();status('Unsaved changes','dirty');}
       hideError();
@@ -104,6 +105,13 @@
     controls();
   }
   function renderVisibility(){const visible=state.settings.public;$('visibilityBadge').textContent=visible?'Public':'Private';$('visibilityText').textContent=visible?'Anyone can view /bonus-hunt.':'Only you can preview the hunt page.';$('togglePublic').textContent=visible?'Make hunt page private':'Make hunt page public';}
+  function renderPredictionControl(){
+    if(!state)return;const h=current(),window=predictionWindows[h.id],closed=!!(window&&window.closedAt)||h.status==='complete';
+    $('predictionStatus').textContent=closed?'Predictions closed':state.settings.public?'Predictions open':'Predictions unavailable while private';
+    $('predictionStatus').dataset.state=closed?'closed':'open';
+    $('closePredictions').textContent=closingPredictions?'Closing…':closed?'Predictions closed':'Close predictions';
+    $('closePredictions').disabled=blocked||actionBusy||rotationBusy||!!pendingAction||closed;
+  }
   function renderOverlay(){const url=location.origin+'/bonus-hunt-overlay#token='+encodeURIComponent(streamToken);$('overlayUrl').value=url;$('overlayPreview').src=url;}
   function renderAll(){fillDetails();renderLibrary();renderMetrics();renderPhase();renderVisibility();controls();}
   function completePending(){
@@ -136,7 +144,7 @@
   }
   async function load(){
     try{
-      const data=await request('GET');state=data.state;revision=data.revision;streamToken=data.streamToken||'';blocked=false;dirty=false;pendingAction=null;payoutRowId=null;editingId=null;
+      const data=await request('GET');state=data.state;revision=data.revision;streamToken=data.streamToken||'';predictionWindows=data.predictionWindows||{};blocked=false;dirty=false;pendingAction=null;payoutRowId=null;editingId=null;
       $('manager').hidden=false;$('loadingState').hidden=true;status('All changes saved','saved');renderAll();renderOverlay();
       try{const draft=JSON.parse(sessionStorage.getItem(DRAFT_KEY)||'null');if(draft&&draft.state&&JSON.stringify(draft.state)!==JSON.stringify(state)){recoveredDraft=draft;$('recoveryNotice').classList.remove('hidden');}}catch(_){}
       try{if(localStorage.getItem('thorshall_bonus_hunts_v1'))$('importLegacy').classList.remove('hidden');}catch(_){}
@@ -188,6 +196,20 @@
   $('discardDraft').addEventListener('click',()=>{clearDraft();$('recoveryNotice').classList.add('hidden');recoveredDraft=null;});
   $('copyOverlay').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('overlayUrl').value);toast('Overlay URL copied. Paste it into your Browser Source.');}catch(_){$('overlayUrl').type='text';$('overlayUrl').select();toast('Copy the selected overlay URL.');}});
   $('showOverlayUrl').addEventListener('click',()=>{const show=$('overlayUrl').type==='password';$('overlayUrl').type=show?'text':'password';$('showOverlayUrl').textContent=show?'Hide':'Show';$('showOverlayUrl').setAttribute('aria-pressed',String(show));});
+  $('closePredictions').addEventListener('click',async()=>{
+    if(!state||pendingAction||actionBusy||rotationBusy||blocked||current().status==='complete'||predictionWindows[current().id]?.closedAt)return;
+    rotationBusy=true;closingPredictions=true;controls();
+    try{
+      if(!(await flushSave()))return;
+      rotating=true;saving=true;clearTimeout(timer);status('Closing predictions…','saving');controls();
+      const data=await request('POST',{action:'close-predictions',huntId:current().id,revision});
+      revision=data.revision;state=data.state||state;predictionWindows=data.predictionWindows||{};hideError();toast('Predictions closed for this hunt.');
+    }catch(err){
+      blocked=true;
+      if(err.status===401||err.status===403)error('Your owner session expired. Sign in again before closing predictions.','session');
+      else error(err.status===409||err.status===412?'Another tab changed this hunt. Load the latest saved version before closing predictions.':'Could not confirm whether predictions closed. Load the latest saved version before trying again.','conflict');
+    }finally{rotating=false;saving=false;rotationBusy=false;closingPredictions=false;if(!blocked)status(dirty?'Unsaved changes':'All changes saved',dirty?'dirty':'saved');controls();}
+  });
   $('rotateToken').addEventListener('click',async()=>{
     if(pendingAction||actionBusy||rotationBusy||blocked)return;
     if(!confirm('Replace the overlay link? Your current OBS source will stop updating until you paste the new URL.'))return;
@@ -195,7 +217,7 @@
     try{
       if(!(await flushSave()))return;
       rotating=true;saving=true;clearTimeout(timer);status('Replacing overlay link…','saving');controls();
-      const data=await request('POST',{action:'rotate-token',revision});streamToken=data.streamToken;if(data.revision!==undefined)revision=data.revision;renderOverlay();toast('New overlay link created. Update your OBS Browser Source.');
+      const data=await request('POST',{action:'rotate-token',revision});streamToken=data.streamToken;predictionWindows=data.predictionWindows||{};if(data.revision!==undefined)revision=data.revision;renderOverlay();toast('New overlay link created. Update your OBS Browser Source.');
     }catch(err){
       if(err.status===409||err.status===412){blocked=true;error('Another tab changed this hunt. Load the latest saved version before replacing the overlay link.','conflict');}
       else if(err.status===401||err.status===403){blocked=true;error(err.message,'session');}

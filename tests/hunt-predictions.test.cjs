@@ -79,7 +79,7 @@ test("guesses use exact cents and the same final balance rounding as the public 
 test("verified Twitch identity is server-derived, survives browsers and username changes, and leaves editor ETag alone", async () => {
   const f = fixture(), cookie = f.user("realviewer"), body = guess(), before = await f.huntStore.getWithMetadata("hunt-manager");
   const response = await submit(f, cookie, body), result = payload(response); assert.equal(response.statusCode, 201);
-  assert.deepEqual(result.mine, { username: "realviewer", amountMinor: 12345, createdAt: BASE.toISOString() }); assert.equal(result.viewer.login, "realviewer");
+  assert.deepEqual(result.mine, { username: "realviewer", amountMinor: 12345, createdAt: BASE.toISOString(), updatedAt: BASE.toISOString(), revision: body.requestId }); assert.equal(result.viewer.login, "realviewer");
   const secondBrowser = f.sameUser(cookie), renamed = f.sameUser(cookie, "newlogin");
   assert.equal(payload(await f.handle(event("GET", { cookie: secondBrowser }))).mine.username, "realviewer");
   assert.equal(payload(await f.handle(event("GET", { cookie: renamed }))).mine.username, "realviewer");
@@ -151,6 +151,113 @@ test("concurrent saves serialize and enforce one entry for each immutable Twitch
   assert.equal(payload(await f.handle(event())).count, 3);
 });
 
+test("the same Twitch account can change its one prediction during collection and opening", async () => {
+  const f = fixture(), cookie = f.user("firstlogin"), first = guess();
+  assert.equal((await submit(f, cookie, first)).statusCode, 201);
+  f.setClock(new Date(+BASE + 1000)); const second = { ...guess("500"), expectedRevision: first.requestId };
+  const changed = await submit(f, f.sameUser(cookie), second); assert.equal(changed.statusCode, 200);
+  assert.equal(payload(changed).count, 1); assert.equal(payload(changed).mine.revision, second.requestId);
+  f.update(record => { record.state.hunts[0].status = "opening"; record.state.hunts[0].rows[0].payout = 100; });
+  const editorBefore = await f.huntStore.getWithMetadata("hunt-manager");
+  f.setClock(new Date(+BASE + 2000)); const third = { ...guess("999.99"), expectedRevision: second.requestId };
+  const final = payload(await submit(f, f.sameUser(cookie, "newlogin"), third));
+  assert.equal(final.accepting, true); assert.equal(final.count, 1);
+  assert.deepEqual(final.mine, { username: "newlogin", amountMinor: 99999, createdAt: BASE.toISOString(), updatedAt: new Date(+BASE + 2000).toISOString(), revision: third.requestId });
+  assert.deepEqual(final.entries, [{ username: "newlogin", amountMinor: 99999, createdAt: BASE.toISOString(), updatedAt: new Date(+BASE + 2000).toISOString(), verified: true, isMine: true }]);
+  assert.deepEqual(await f.huntStore.getWithMetadata("hunt-manager"), editorBefore);
+  const stored = f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0];
+  assert.equal(stored.amountMinor, 12345); assert.equal(stored.revisions.length, 2);
+  const publicData = await f.handle(event()); assert.doesNotMatch(publicData.body, /requestId|parentRevision|sequence|revisions|userId|identityHash|ipHash/);
+});
+
+test("stale browser edits cannot overwrite a newer saved amount, while old exact retries never roll it back", async () => {
+  const f = fixture(), cookie = f.user(), first = guess(); await submit(f, cookie, first);
+  f.setClock(new Date(+BASE + 1000)); const second = { ...guess("500"), expectedRevision: first.requestId };
+  await submit(f, cookie, second);
+  const stale = await submit(f, f.sameUser(cookie), { ...guess("600"), expectedRevision: first.requestId });
+  assert.equal(stale.statusCode, 409); assert.match(payload(stale).error, /another tab/);
+  f.setClock(new Date(+BASE + 2000)); const third = { ...guess("700"), expectedRevision: second.requestId };
+  await submit(f, cookie, third);
+  for (const body of [first, second, third]) {
+    const retry = payload(await submit(f, f.sameUser(cookie), body));
+    assert.equal(retry.duplicate, true); assert.equal(retry.mine.amountMinor, 70000); assert.equal(retry.mine.revision, third.requestId);
+  }
+  assert.equal((await submit(f, cookie, { ...second, amount: "999" })).statusCode, 409);
+  assert.equal((await submit(f, cookie, { ...second, expectedRevision: third.requestId })).statusCode, 409);
+  assert.equal((await submit(f, f.user("otheruser"), second)).statusCode, 409);
+  assert.equal(f.predictions.writes, 3);
+});
+
+test("concurrent changes from two browsers compare the saved revision and accept one", async () => {
+  const f = fixture(), cookie = f.user(), first = guess(); await submit(f, cookie, first);
+  f.setClock(new Date(+BASE + 1000));
+  const a = { ...guess("500"), expectedRevision: first.requestId }, b = { ...guess("600"), expectedRevision: first.requestId };
+  const responses = await Promise.all([submit(f, cookie, a), submit(f, f.sameUser(cookie), b)]);
+  assert.deepEqual(responses.map(response => response.statusCode).sort(), [200, 409]);
+  const result = payload(await f.handle(event("GET", { cookie })));
+  assert.equal(result.count, 1); assert.equal(result.mine.revision, responses[0].statusCode === 200 ? a.requestId : b.requestId);
+  assert.equal(f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0].revisions.length, 1);
+});
+
+test("manual closure racing an edit keeps the previously accepted amount and rejects retries of the late edit", async () => {
+  const f = fixture(), cookie = f.user(), first = guess("100"); await submit(f, cookie, first);
+  f.setClock(new Date(+BASE + 1000)); const change = { ...guess("999"), expectedRevision: first.requestId };
+  f.predictions.afterWrite = () => f.update(record => { record.predictionClosedAt = { "hunt-a": new Date(+BASE + 1000).toISOString() }; });
+  assert.equal((await submit(f, cookie, change)).statusCode, 409);
+  const data = payload(await f.handle(event("GET", { cookie })));
+  assert.equal(data.accepting, false); assert.equal(data.count, 1); assert.equal(data.mine.amountMinor, 10000); assert.equal(data.mine.revision, first.requestId);
+  assert.deepEqual(data.entries, [{ username: "viewerone", amountMinor: 10000, createdAt: BASE.toISOString(), verified: true, isMine: true }]);
+  assert.equal((await submit(f, cookie, change)).statusCode, 409);
+  assert.equal((await submit(f, cookie, { ...guess("500"), expectedRevision: first.requestId })).statusCode, 409);
+  assert.equal((await submit(f, f.user("newviewer"))).statusCode, 409);
+  assert.equal(payload(await submit(f, cookie, first)).mine.amountMinor, 10000);
+});
+
+test("an accepted change completing before a later close remains the final amount", async () => {
+  const f = fixture(), cookie = f.user(), first = guess("100"); await submit(f, cookie, first);
+  f.setClock(new Date(+BASE + 1000)); const change = { ...guess("500"), expectedRevision: first.requestId };
+  f.predictions.afterWrite = () => f.update(record => { record.predictionClosedAt = { "hunt-a": new Date(+BASE + 1001).toISOString() }; record.state.hunts[0].status = "opening"; });
+  const saved = await submit(f, cookie, change); assert.equal(saved.statusCode, 200); assert.equal(payload(saved).accepting, false);
+  assert.equal(payload(saved).mine.amountMinor, 50000); assert.equal(payload(await submit(f, cookie, change)).duplicate, true);
+});
+
+test("same-millisecond edits use their latest acceptance order for ties without changing roster order", async () => {
+  const f = fixture(), a = f.user("changedfirst"), b = f.user("keptsecond"), first = guess("0");
+  await submit(f, a, first); await submit(f, b, guess());
+  await submit(f, a, { ...guess(), expectedRevision: first.requestId });
+  f.update(record => { record.state.hunts[0].status = "complete"; record.state.hunts[0].rows[0].payout = 123.45; });
+  const data = payload(await f.handle(event()));
+  assert.deepEqual(data.podium.map(entry => entry.username), ["keptsecond", "changedfirst"]);
+  assert.deepEqual(data.entries.map(entry => entry.username), ["changedfirst", "keptsecond"]);
+  assert.equal(data.entries[0].updatedAt, BASE.toISOString()); assert.equal(data.accepting, false);
+  assert.equal((await submit(f, a, { ...guess("50"), expectedRevision: data.mine?.revision })).statusCode, 409);
+});
+
+test("older Twitch records remain editable and bounded revision history does not consume the new-entry connection limit", async () => {
+  const f = fixture(), cookie = f.user(), first = guess(); await submit(f, cookie, first);
+  const older = f.predictions.records.get(P.ledgerKey("hunt-a")); delete older.entries[0].sequence;
+  let revision = first.requestId;
+  for (let i = 0; i < P.MAX_REVISIONS; i++) {
+    f.setClock(new Date(+BASE + i + 1)); const change = { ...guess(String(i)), expectedRevision: revision };
+    const result = await submit(f, cookie, change); assert.equal(result.statusCode, 200); revision = change.requestId;
+  }
+  assert.equal((await submit(f, cookie, { ...guess("777"), expectedRevision: revision })).statusCode, 429);
+  assert.equal(payload(await f.handle(event("GET", { cookie }))).mine.amountMinor, (P.MAX_REVISIONS - 1) * 100);
+  for (let i = 1; i < P.MAX_IP_ENTRIES; i++) assert.equal((await submit(f, f.user("viewer_" + i))).statusCode, 201);
+  assert.equal((await submit(f, f.user("one_too_many"))).statusCode, 429);
+  assert.equal(f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0].revisions.length, P.MAX_REVISIONS);
+});
+
+test("the same account has separate current and completed predictions for each hunt", async () => {
+  const f = fixture(), cookie = f.user(), first = guess("100"); await submit(f, cookie, first);
+  f.update(record => { record.state.hunts[0].status = "complete"; record.predictionClosedAt = { "hunt-a": new Date(+BASE + 1).toISOString() }; record.state.hunts.push({ ...clone(record.state.hunts[0]), id: "hunt-b", status: "opening" }); record.state.activeId = "hunt-b"; });
+  f.setClock(new Date(+BASE + 1000)); const second = guess("500", "hunt-b");
+  assert.equal((await submit(f, cookie, second)).statusCode, 201);
+  const old = payload(await f.handle(event("GET", { cookie }))), current = payload(await f.handle(event("GET", { cookie, hunt: "hunt-b" })));
+  assert.equal(old.mine.amountMinor, 10000); assert.equal(old.accepting, false); assert.equal(old.mine.revision, first.requestId);
+  assert.equal(current.mine.amountMinor, 50000); assert.equal(current.accepting, true); assert.equal(current.mine.revision, second.requestId);
+});
+
 test("final podium ranks the closest three while the public roster retains every eligible entry", async () => {
   const f = fixture(), cookies = [];
   for (const [index, name, amount] of [[0, "earlytie", "122.45"], [1, "latetie", "124.45"], [2, "exactguess", "123.45"], [3, "farguess", "1"]]) {
@@ -220,7 +327,7 @@ test("connection limits and duplicate-safe uncertain-write recovery still protec
 });
 
 test("server cutoffs preserve prototype-like IDs and immutable historical deadlines", () => {
-  const before = { state: { activeId: "__proto__", hunts: [{ id: "__proto__", status: "collecting", currency: "USD", rows: [] }] } }, next = clone(before.state); next.hunts[0].status = "opening";
+  const before = { state: { activeId: "__proto__", hunts: [{ id: "__proto__", status: "collecting", currency: "USD", rows: [] }] } }, next = clone(before.state); next.hunts[0].status = "complete";
   const windows = W.closePredictionWindows(before, next, BASE); assert.equal(Object.prototype.hasOwnProperty.call(windows, "__proto__"), true); assert.equal(windows.__proto__, BASE.toISOString());
   assert.equal(W.closePredictionWindows({ state: next, predictionClosedAt: windows }, clone(before.state), new Date(+BASE + 1000)).__proto__, BASE.toISOString());
   assert.equal(W.cutoffFor({ predictionClosedAt: {} }, "constructor"), null); assert.notEqual(P.ledgerKey("__proto__"), "__proto__");

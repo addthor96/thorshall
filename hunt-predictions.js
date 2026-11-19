@@ -68,7 +68,10 @@
   }
 
   function stateFor(id) {
-    if (!entries.has(id)) entries.set(id, { epoch: privacyEpoch, draft: { amount: readDraft(id), website: '' }, summary: null, loading: false, saving: false, signingOut: false, needsRefresh: false, error: '', notice: '', authMessage: '', pending: null, request: 0 });
+    if (!entries.has(id)) {
+      var amount = readDraft(id);
+      entries.set(id, { epoch: privacyEpoch, draft: { amount: amount, website: '' }, summary: null, loading: false, saving: false, signingOut: false, needsRefresh: false, editing: false, dirty: !!amount, editRevision: null, error: '', notice: '', authMessage: '', pending: null, request: 0 });
+    }
     return entries.get(id);
   }
 
@@ -120,6 +123,14 @@
 
   function active(context) { return current === context && document.getElementById('hunt-predictions') === context.mount; }
 
+  function revision(value) { return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value); }
+
+  function accepting(context, data) {
+    var window = context.predictionWindow;
+    return !!data && data.accepting === true && data.status !== 'complete' && ['collecting', 'opening'].includes(context.hunt.status) && context.hunt.id === context.activeId
+      && (!window || window.accepting === true && !window.closedAt);
+  }
+
   function stopScroll(context) {
     if (!context || !context.scroller) return;
     clearTimeout(context.scroller.timer); context.scroller.timer = null; context.scroller.lastTick = null;
@@ -168,7 +179,7 @@
 
   function scheduleRefresh(context) {
     stopRefresh(context);
-    if (!active(context) || document.hidden || context.inViewport === false || context.hunt.status === 'complete' || !context.state.summary) return;
+    if (!active(context) || document.hidden || context.inViewport === false || context.hunt.status === 'complete' || !context.state.summary || context.state.editing || context.state.dirty || context.state.pending) return;
     context.refreshTimer = setTimeout(function () {
       context.refreshTimer = null;
       if (!active(context) || document.hidden || context.inViewport === false) return;
@@ -179,7 +190,7 @@
 
   function updateEntries(context, data) {
     var nodes = context.nodes, items = data && Array.isArray(data.entries) ? data.entries : [];
-    var signature = JSON.stringify(items);
+    var signature = JSON.stringify([accepting(context, data), items]);
     if (context.entrySignature === signature) return;
     context.entrySignature = signature;
     var previousTop = nodes.feedViewport.scrollTop || 0;
@@ -189,7 +200,7 @@
       var number = element('span', 'prediction-feed-number', String(index + 1).padStart(2, '0'));
       var identity = element('div', 'prediction-feed-person');
       var name = element('strong', 'prediction-feed-name', '@' + item.username);
-      var detail = element('span', 'prediction-feed-detail', item.isMine ? 'Your locked prediction' : item.verified ? 'Twitch prediction' : 'Earlier unverified entry');
+      var detail = element('span', 'prediction-feed-detail', item.isMine ? accepting(context, data) ? 'Your prediction' : 'Your locked prediction' : item.verified ? 'Twitch prediction' : 'Earlier unverified entry');
       var amount = element('strong', 'prediction-feed-amount', money(item.amountMinor, context.hunt.currency));
       append(identity, name, detail); append(row, number, identity, amount); nodes.feedList.appendChild(row);
     });
@@ -233,7 +244,7 @@
 
     var content = element('div', 'prediction-content');
     var entry = element('div', 'prediction-entry');
-    nodes.intro = element('p', 'prediction-intro', 'Predict the final end balance while bonuses are being collected.');
+    nodes.intro = element('p', 'prediction-intro', 'Predict the final end balance. You can change your guess until predictions close.');
     nodes.auth = element('div', 'prediction-auth');
     nodes.loginPrompt = element('div', 'prediction-login-prompt');
     nodes.login = element('a', 'prediction-twitch-login', 'Log in with Twitch');
@@ -253,17 +264,20 @@
     nodes.website = element('input'); nodes.website.id = 'prediction-website'; nodes.website.name = 'website'; nodes.website.type = 'text'; nodes.website.tabIndex = -1; nodes.website.autocomplete = 'off'; nodes.website.value = state.draft.website;
     append(hidden, hiddenLabel, nodes.website);
     nodes.submit = element('button', 'prediction-submit', 'Submit prediction'); nodes.submit.type = 'submit';
-    var rules = element('p', 'prediction-rules', 'One entry per Twitch account. Your username and locked guess appear in the prediction list. Free to enter.');
+    nodes.cancel = element('button', 'prediction-cancel', 'Cancel'); nodes.cancel.type = 'button'; nodes.cancel.hidden = true;
+    var formActions = element('div', 'prediction-form-actions'); append(formActions, nodes.submit, nodes.cancel);
+    var rules = element('p', 'prediction-rules', 'One prediction per Twitch account for this hunt. Your latest saved guess appears in the public list. Free to enter.');
     rules.id = 'prediction-rules'; nodes.form.setAttribute('aria-describedby', rules.id);
-    append(nodes.form, amount.wrapper, hidden, nodes.submit, rules);
+    append(nodes.form, amount.wrapper, hidden, formActions, rules);
     nodes.mine = element('div', 'prediction-mine'); nodes.mine.hidden = true;
     nodes.mineTitle = element('span', 'prediction-mine-label', 'Your locked prediction');
     nodes.mineAmount = element('strong'); nodes.mineName = element('span', 'prediction-mine-name');
     nodes.mineNote = element('span', 'prediction-mine-note', 'Saved · cannot be changed');
-    append(nodes.mine, nodes.mineTitle, nodes.mineAmount, nodes.mineName, nodes.mineNote);
+    nodes.edit = element('button', 'prediction-edit', 'Change prediction'); nodes.edit.type = 'button';
+    append(nodes.mine, nodes.mineTitle, nodes.mineAmount, nodes.mineName, nodes.mineNote, nodes.edit);
     nodes.closed = element('p', 'prediction-closed'); nodes.closed.hidden = true;
     nodes.message = element('p', 'prediction-message'); nodes.message.id = 'prediction-message'; nodes.message.setAttribute('role', 'status'); nodes.message.setAttribute('aria-live', 'polite');
-    append(entry, nodes.intro, nodes.auth, nodes.form, nodes.mine, nodes.closed, nodes.message);
+    append(entry, nodes.intro, nodes.auth, nodes.mine, nodes.form, nodes.closed, nodes.message);
 
     var standings = element('div', 'prediction-standings');
     var standingsHeader = element('div', 'prediction-standings-heading');
@@ -279,7 +293,7 @@
     nodes.feedViewport.setAttribute('role', 'region'); nodes.feedViewport.setAttribute('aria-label', 'All predictions, in entry order. Scroll to browse.');
     nodes.feedList = element('ol', 'prediction-feed-list');
     nodes.feedEmpty = element('div', 'prediction-feed-empty');
-    append(nodes.feedEmpty, element('strong', '', 'The first guess starts it.'), element('span', '', 'Locked predictions will appear here as viewers enter.'));
+    append(nodes.feedEmpty, element('strong', '', 'The first guess starts it.'), element('span', '', 'Saved predictions will appear here as viewers enter.'));
     append(nodes.feedViewport, nodes.feedList, nodes.feedEmpty); append(feed, feedHeading, nodes.feedViewport);
     var podium = element('ol', 'prediction-podium'); podium.setAttribute('aria-label', 'Prediction podium');
     nodes.places = places.map(function (place, index) {
@@ -291,7 +305,7 @@
       append(card, rank, name, guess, difference); podium.appendChild(card);
       return { name: name, guess: guess, difference: difference };
     });
-    nodes.podiumNote = element('p', 'prediction-podium-note', 'The closest guesses appear here once the hunt is finished. Ties go to the earlier entry.');
+    nodes.podiumNote = element('p', 'prediction-podium-note', 'The closest guesses appear here once the hunt is finished. Ties go to the guess saved first; editing resets that time.');
     append(standings, standingsHeader, feed, podium, nodes.podiumNote);
     append(content, entry, standings); append(mount, heading, content);
     context.nodes = nodes;
@@ -324,7 +338,7 @@
     [nodes.amount, nodes.website].forEach(function (input) {
       input.addEventListener('input', function () {
         state.draft[input.name] = input.value;
-        if (input === nodes.amount) saveDraft(context);
+        if (input === nodes.amount) { state.dirty = true; saveDraft(context); stopRefresh(context); }
         input.removeAttribute('aria-invalid');
         if (!state.saving && !state.pending) { state.error = ''; update(context); }
       });
@@ -332,25 +346,37 @@
     nodes.form.addEventListener('submit', function (event) { event.preventDefault(); submit(context); });
     nodes.refresh.addEventListener('click', function () { if (!state.saving) load(context); });
     nodes.logout.addEventListener('click', function () { signOut(context); });
+    nodes.edit.addEventListener('click', function () {
+      var mine = state.summary && state.summary.mine;
+      if (!mine || !revision(mine.revision) || !accepting(context, state.summary) || state.loading || state.saving || state.signingOut || state.pending) return;
+      state.editing = true; state.dirty = false; state.editRevision = mine.revision; state.error = ''; state.notice = '';
+      state.draft.amount = (mine.amountMinor / 100).toFixed(2); nodes.amount.value = state.draft.amount;
+      saveDraft(context); stopRefresh(context); update(context); nodes.amount.focus();
+    });
+    nodes.cancel.addEventListener('click', function () {
+      if (!state.editing || state.saving || state.pending) return;
+      state.editing = false; state.dirty = false; state.editRevision = null; state.draft.amount = ''; nodes.amount.value = '';
+      state.error = ''; state.notice = ''; clearDraft(context.hunt.id); update(context); scheduleRefresh(context); nodes.edit.focus();
+    });
     update(context);
   }
 
   function update(context) {
     if (!active(context)) return;
     var nodes = context.nodes, state = context.state, data = state.summary;
-    var complete = (data ? data.status : context.hunt.status) === 'complete';
-    var accepting = !!data && data.accepting === true && context.hunt.status === 'collecting' && context.hunt.id === context.activeId;
+    var complete = context.hunt.status === 'complete' || !!data && data.status === 'complete';
+    var isOpen = accepting(context, data);
     var mine = data && data.mine, viewer = data && data.viewer;
     var locked = state.loading || state.saving || state.signingOut;
-    nodes.badge.textContent = !data ? state.error ? 'Unavailable' : 'Loading' : complete ? 'Finished' : accepting ? 'Open' : 'Locked';
-    nodes.badge.dataset.state = !data ? 'loading' : complete ? 'complete' : accepting ? 'open' : 'locked';
+    nodes.badge.textContent = !data ? state.error ? 'Unavailable' : 'Loading' : complete ? 'Finished' : isOpen ? 'Open' : 'Closed';
+    nodes.badge.dataset.state = !data ? 'loading' : complete ? 'complete' : isOpen ? 'open' : 'locked';
     nodes.amountLabel.textContent = 'Final end balance (' + context.hunt.currency + ')';
     nodes.huntName.textContent = 'For ' + context.hunt.title;
-    nodes.form.hidden = !accepting || !viewer || !data.authConfigured || !!mine;
-    nodes.intro.textContent = complete ? 'The closest predictions to the final end balance take the top three places.' : accepting ? 'Predict the final end balance while bonuses are being collected.' : 'Entries close when bonus opening begins.';
+    nodes.form.hidden = !isOpen || !viewer || !data.authConfigured || !!mine && !state.editing;
+    nodes.intro.textContent = complete ? 'The closest predictions to the final end balance take the top three places.' : isOpen ? 'Predict the final end balance. You can change your guess until predictions close.' : 'Predictions are closed for this hunt.';
     nodes.amount.disabled = nodes.website.disabled = locked || !!state.pending;
     var href = data && data.authConfigured && loginHref(data.loginUrl);
-    nodes.auth.hidden = !data || (!viewer && !accepting);
+    nodes.auth.hidden = !data || (!viewer && !isOpen);
     nodes.account.hidden = !viewer;
     nodes.loginPrompt.hidden = !!viewer;
     nodes.login.hidden = !href;
@@ -361,15 +387,20 @@
     nodes.logout.disabled = locked;
     nodes.logout.textContent = state.signingOut ? 'Signing out…' : 'Sign out';
     nodes.submit.disabled = locked;
-    nodes.submit.textContent = state.saving ? 'Saving prediction…' : state.pending ? 'Retry prediction' : 'Submit prediction';
+    nodes.submit.textContent = state.saving ? 'Saving prediction…' : state.pending ? 'Retry prediction' : state.editing ? 'Save changes' : 'Submit prediction';
+    nodes.cancel.hidden = !state.editing; nodes.cancel.disabled = locked || !!state.pending;
     nodes.refresh.disabled = locked;
     nodes.count.textContent = data ? data.count + (data.count === 1 ? ' prediction' : ' predictions') : state.loading ? 'Loading predictions…' : 'Predictions unavailable';
     nodes.mine.hidden = !mine;
     if (mine) {
+      nodes.mineTitle.textContent = isOpen ? 'Your prediction' : 'Your locked prediction';
       nodes.mineAmount.textContent = money(mine.amountMinor, context.hunt.currency);
       nodes.mineName.textContent = '@' + mine.username + ' · Saved for this hunt';
+      nodes.mineNote.textContent = isOpen ? 'Saved · editable until predictions close' : 'Predictions closed · final guess locked';
     }
-    nodes.closed.hidden = !data || accepting || !!mine;
+    nodes.edit.hidden = !mine || !isOpen || state.editing || !revision(mine.revision);
+    nodes.edit.disabled = locked || !!state.pending;
+    nodes.closed.hidden = !data || isOpen || !!mine;
     nodes.closed.textContent = complete ? 'Predictions are closed. The final podium is shown here.' : data && data.message ? data.message : 'Predictions are closed for this hunt. Check back for the final podium.';
     nodes.message.textContent = state.error || state.notice || state.authMessage || (!data && state.loading ? 'Loading predictions…' : '');
     nodes.message.dataset.state = state.error ? 'error' : state.notice ? 'success' : state.authMessage ? 'info' : 'loading';
@@ -380,7 +411,7 @@
       place.guess.textContent = winner ? money(winner.amountMinor, context.hunt.currency) : '';
       place.difference.textContent = winner ? winner.differenceMinor === 0 ? 'Exact prediction' : money(winner.differenceMinor, context.hunt.currency) + ' away' : '';
     });
-    nodes.podiumNote.textContent = complete ? 'Ranked by distance from the final end balance. Ties go to the earlier entry.' : 'The closest guesses appear here once the hunt is finished. Ties go to the earlier entry.';
+    nodes.podiumNote.textContent = complete ? 'Ranked by distance from the final end balance. Ties go to the guess saved first; editing resets that time.' : 'The closest guesses appear here once the hunt is finished. Ties go to the guess saved first; editing resets that time.';
     updateEntries(context, data);
   }
 
@@ -405,6 +436,8 @@
       }
       if (data.huntId !== (method === 'GET' ? payload : payload.huntId) || typeof data.accepting !== 'boolean' || !Number.isSafeInteger(data.count) || data.count < 0
           || typeof data.authConfigured !== 'boolean' || !validViewer(data.viewer)
+          || data.mine !== null && (!data.mine || !revision(data.mine.revision) || typeof data.mine.username !== 'string' || !/^[a-z0-9_]{1,25}$/.test(data.mine.username)
+            || !Number.isSafeInteger(data.mine.amountMinor) || data.mine.amountMinor < 0 || data.mine.amountMinor > 100000000000)
           || !Array.isArray(data.entries) || data.entries.length > 2000 || data.entries.some(function (item) {
             return !item || typeof item.username !== 'string' || !/^[A-Za-z0-9_]{1,25}$/.test(item.username) || !Number.isSafeInteger(item.amountMinor)
               || item.amountMinor < 0 || item.amountMinor > 100000000000 || typeof item.createdAt !== 'string' || !Number.isFinite(Date.parse(item.createdAt))
@@ -416,10 +449,20 @@
 
   function apply(state, data) {
     if (state.epoch !== privacyEpoch) return false;
+    var previousViewer = state.summary && state.summary.viewer;
     state.summary = data;
     if (data.viewer) state.authMessage = '';
-    if (data.mine || !data.accepting || !data.viewer || state.pending && state.pending.viewerId !== data.viewer.id) state.pending = null;
-    if (data.mine) clearDraft(data.huntId);
+    var open = current && current.state === state ? accepting(current, data) : data.accepting;
+    if (!open || !data.viewer || previousViewer && previousViewer.id !== data.viewer.id || state.pending && state.pending.viewerId !== data.viewer.id) {
+      state.pending = null; state.editing = false; state.editRevision = null; state.dirty = false;
+    }
+    if (state.pending && data.mine && data.mine.revision === state.pending.requestId) {
+      state.pending = null; state.editing = false; state.editRevision = null; state.dirty = false;
+    }
+    if (open && data.viewer && data.mine && state.dirty && state.draft.amount && !state.editing && !state.pending) {
+      state.editing = true; state.editRevision = data.mine.revision;
+    }
+    if (data.mine && !state.editing && !state.pending) clearDraft(data.huntId);
     if (current && current.state === state) scheduleAuth(data);
     return true;
   }
@@ -501,7 +544,7 @@
 
   async function submit(context) {
     var state = context.state, nodes = context.nodes;
-    if (!active(context) || state.loading || state.saving || state.signingOut || !state.summary || !state.summary.viewer || !state.summary.authConfigured || !state.summary.accepting || state.summary.mine || context.hunt.id !== context.activeId || context.hunt.status !== 'collecting') return;
+    if (!active(context) || state.loading || state.saving || state.signingOut || !state.summary || !state.summary.viewer || !state.summary.authConfigured || !accepting(context, state.summary) || state.summary.mine && !state.editing && !state.pending) return;
     state.error = ''; state.notice = ''; state.authMessage = '';
     if (!state.pending) {
       var amount = nodes.amount.value.trim();
@@ -509,7 +552,7 @@
         state.error = 'Enter an end balance from 0 to 1,000,000,000 using at most two decimal places.';
         nodes.amount.setAttribute('aria-invalid', 'true'); update(context); nodes.amount.focus(); return;
       }
-      try { state.pending = { huntId: context.hunt.id, requestId: requestId(), viewerId: state.summary.viewer.id, amount: amount, website: nodes.website.value }; }
+      try { state.pending = { huntId: context.hunt.id, requestId: requestId(), viewerId: state.summary.viewer.id, expectedRevision: state.editing ? state.editRevision : null, amount: amount, website: nodes.website.value }; }
       catch (error) { state.error = error.message; update(context); return; }
     }
     var payload = state.pending;
@@ -517,38 +560,44 @@
     try {
       var data = await api('POST', payload);
       if (!apply(state, data)) return;
-      state.pending = null; state.notice = 'Your prediction is saved. Good luck!';
+      state.pending = null; state.editing = false; state.editRevision = null; state.dirty = false; state.draft.amount = ''; nodes.amount.value = ''; clearDraft(context.hunt.id);
+      state.notice = data.duplicate && data.mine && data.mine.revision !== payload.requestId ? 'Your latest saved prediction is shown.' : payload.expectedRevision ? 'Your prediction is updated.' : 'Your prediction is saved. Good luck!';
     } catch (error) {
       if (error.discard || state.epoch !== privacyEpoch) return;
       if (error.status === 401) { signedOut(context, 'Your Twitch sign-in expired. Log in again to submit your prediction.'); return; }
       if (error.status === 403) { deny(context, error.message); return; }
-      if ([400, 403, 404, 409, 422].includes(error.status)) state.pending = null;
+      if ([400, 403, 404, 409, 422, 429].includes(error.status)) state.pending = null;
       state.error = error.status ? error.message : 'The save could not be confirmed. Retry to safely submit the same prediction.';
       if (error.status === 409 || error.status === 404) {
         try {
           var latest = await api('GET', context.hunt.id); apply(state, latest);
-          if (latest.mine) { state.error = ''; state.notice = 'Your prediction is already saved for this hunt.'; }
+          if (latest.mine && accepting(context, latest)) {
+            state.error = ''; state.editing = true; state.editRevision = latest.mine.revision; state.dirty = true;
+            state.notice = 'This hunt has a saved prediction from another session. Review your amount, then save changes.';
+          } else if (latest.mine) { state.error = ''; state.notice = 'Predictions closed. Your last accepted guess is shown.'; }
         } catch (refreshError) { if (refreshError.status === 403) deny(context, refreshError.message); }
       }
     } finally {
       state.saving = false;
       settled(state);
+      if (active(context) && context.state === state) scheduleRefresh(context);
     }
   }
 
   document.addEventListener('hunt:view', function (event) {
     var detail = event.detail, hunt = detail && detail.hunt, mount = document.getElementById('hunt-predictions');
     if (!mount || !hunt || typeof hunt.id !== 'string' || !['USD', 'EUR', 'GBP', 'CAD', 'AUD'].includes(hunt.currency)) return;
-    var signature = [hunt.id, hunt.status, hunt.currency, detail.activeId, hunt.status === 'complete' ? detail.revision : ''].join('|');
+    var predictionWindow = detail.predictionWindow && typeof detail.predictionWindow.accepting === 'boolean' ? detail.predictionWindow : null;
+    var signature = [hunt.id, hunt.status, hunt.currency, detail.activeId, predictionWindow ? predictionWindow.closedAt || '' : '', predictionWindow ? predictionWindow.accepting : '', hunt.status === 'complete' ? detail.revision : ''].join('|');
     if (current && current.mount === mount && current.hunt.id === hunt.id) {
       var changed = current.signature !== signature;
-      current.hunt = hunt; current.activeId = detail.activeId; current.signature = signature;
+      current.hunt = hunt; current.activeId = detail.activeId; current.predictionWindow = predictionWindow; current.signature = signature;
       update(current);
       if (changed) load(current);
       return;
     }
     dispose(current);
-    current = { mount: mount, hunt: hunt, activeId: detail.activeId, signature: signature, generation: ++generation, state: stateFor(hunt.id) };
+    current = { mount: mount, hunt: hunt, activeId: detail.activeId, predictionWindow: predictionWindow, signature: signature, generation: ++generation, state: stateFor(hunt.id) };
     if (callbackMessage) { current.state.authMessage = callbackMessage; callbackMessage = ''; }
     build(current); load(current);
   });

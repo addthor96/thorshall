@@ -3,13 +3,14 @@
 const crypto = require("node:crypto");
 const hunts = require("./bonus-hunts");
 const Core = require("../../hunt-shared");
-const { cutoffFor, collecting, timestamp } = require("./hunt-prediction-windows");
+const { cutoffFor, running, timestamp } = require("./hunt-prediction-windows");
 const TWITCH_ID = /^[1-9]\d{0,19}$/;
 const TWITCH_LOGIN = /^[a-z0-9_]{1,25}$/;
 const MAX_BODY_BYTES = 4096;
 const MAX_ENTRIES = 2000;
 const MAX_LEDGER_BYTES = 1024 * 1024;
 const MAX_IP_ENTRIES = 10;
+const MAX_REVISIONS = 100;
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const ID = /^[A-Za-z0-9_-]{1,80}$/;
 const HASH = /^[a-f0-9]{64}$/;
@@ -74,19 +75,21 @@ function parseBody(event) {
   const raw = event.isBase64Encoded ? Buffer.from(event.body, "base64").toString("utf8") : event.body;
   if (Buffer.byteLength(raw) > MAX_BODY_BYTES) throw new PredictionError(413, "This prediction is too large.");
   let body; try { body = JSON.parse(raw); } catch { throw new PredictionError(400, "Send a valid prediction."); }
-  const allowed = ["huntId", "requestId", "amount", "website", "viewerId"];
+  const allowed = ["huntId", "requestId", "amount", "website", "viewerId", "expectedRevision"];
   if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).some(key => !allowed.includes(key))) throw new PredictionError(400, "Unsupported prediction fields.");
   if (body.website !== "") throw new PredictionError(400, "This prediction could not be accepted.");
   if (typeof body.huntId !== "string" || !ID.test(body.huntId) || typeof body.requestId !== "string" || !UUID.test(body.requestId)) throw new PredictionError(400, "Refresh this hunt page before predicting.");
   if (body.viewerId !== undefined && (typeof body.viewerId !== "string" || !TWITCH_ID.test(body.viewerId))) throw new PredictionError(400, "Refresh your Twitch sign-in before predicting.");
-  return { huntId: body.huntId, requestId: body.requestId.toLowerCase(), amountMinor: parseAmount(body.amount), ...(body.viewerId !== undefined ? { viewerId: body.viewerId } : {}) };
+  if (body.expectedRevision !== undefined && body.expectedRevision !== null && (typeof body.expectedRevision !== "string" || !UUID.test(body.expectedRevision))) throw new PredictionError(400, "Refresh your saved prediction before changing it.");
+  return { huntId: body.huntId, requestId: body.requestId.toLowerCase(), amountMinor: parseAmount(body.amount), expectedRevision: body.expectedRevision?.toLowerCase() || null,
+    ...(body.viewerId !== undefined ? { viewerId: body.viewerId } : {}) };
 }
 function emptyLedger(hunt) { return { schema: 1, huntId: hunt.id, currency: hunt.currency, entries: [] }; }
 function validateLedger(value, huntId) {
   if (!value || typeof value !== "object" || value.schema !== 1 || value.huntId !== huntId || !["USD", "EUR", "GBP", "CAD", "AUD"].includes(value.currency)
       || !Array.isArray(value.entries) || value.entries.length > MAX_ENTRIES || Buffer.byteLength(JSON.stringify(value)) > MAX_LEDGER_BYTES) throw new Error("Invalid prediction ledger");
-  const requestIds = new Set(), legacyBrowsers = new Set(), legacyNames = new Set(), users = new Set();
-  for (const entry of value.entries) {
+  const requestIds = new Set(), legacyBrowsers = new Set(), legacyNames = new Set(), users = new Set(), sequences = new Set();
+  for (const [index, entry] of value.entries.entries()) {
     const twitch = entry?.authKind === "twitch";
     if (!entry || typeof entry !== "object" || !UUID.test(entry.requestId) || !HASH.test(entry.identityHash) || !HASH.test(entry.ipHash)
         || typeof entry.username !== "string" || !(twitch ? TWITCH_LOGIN : /^[A-Za-z0-9_]{3,25}$/).test(entry.username) || entry.nameKey !== entry.username.toLowerCase()
@@ -100,6 +103,21 @@ function validateLedger(value, huntId) {
       legacyBrowsers.add(entry.identityHash); legacyNames.add(entry.nameKey);
     }
     requestIds.add(entry.requestId);
+    const sequence = entry.sequence === undefined ? index + 1 : entry.sequence;
+    if (!Number.isSafeInteger(sequence) || sequence < 1 || sequences.has(sequence)) throw new Error("Invalid prediction acceptance order");
+    sequences.add(sequence);
+    if (entry.revisions !== undefined) {
+      if (!twitch || !Array.isArray(entry.revisions) || entry.revisions.length > MAX_REVISIONS) throw new Error("Invalid prediction revisions");
+      let previous = entry;
+      for (const revision of entry.revisions) {
+        if (!revision || typeof revision !== "object" || !UUID.test(revision.requestId) || requestIds.has(revision.requestId)
+            || revision.parentRevision !== previous.requestId || typeof revision.username !== "string" || !TWITCH_LOGIN.test(revision.username) || revision.nameKey !== revision.username
+            || !Number.isSafeInteger(revision.amountMinor) || revision.amountMinor < 0 || revision.amountMinor > 100000000000
+            || !HASH.test(revision.ipHash) || !timestamp(revision.createdAt) || revision.createdAt < previous.createdAt
+            || !Number.isSafeInteger(revision.sequence) || revision.sequence <= (previous.sequence || index + 1) || sequences.has(revision.sequence)) throw new Error("Invalid prediction revision");
+        requestIds.add(revision.requestId); sequences.add(revision.sequence); previous = revision;
+      }
+    }
   }
   return value;
 }
@@ -121,7 +139,13 @@ async function readHunt(store, huntId, event) {
 function eligibleEntries(ledger, record, hunt) {
   if (ledger.currency !== hunt.currency) return [];
   const cutoff = cutoffFor(record, hunt.id);
-  return ledger.entries.filter(entry => !cutoff || entry.createdAt < cutoff);
+  return ledger.entries.flatMap((entry, order) => {
+    const versions = [entry, ...(entry.revisions || [])].filter(version => !cutoff || version.createdAt < cutoff);
+    if (!versions.length) return [];
+    const latest = versions[versions.length - 1];
+    return [{ ...entry, username: latest.username, amountMinor: latest.amountMinor, requestId: latest.requestId,
+      updatedAt: latest.createdAt, acceptedOrder: latest.sequence || order + 1, edited: latest !== entry }];
+  });
 }
 function finalBalanceMinor(hunt) {
   // Rank against the balance viewers actually see. The tracker already has an
@@ -135,7 +159,7 @@ function finalBalanceMinor(hunt) {
   return minor;
 }
 function accepting(record, hunt, ledger) {
-  return record.state.settings?.public === true && record.state.activeId === hunt.id && collecting(hunt)
+  return record.state.settings?.public === true && record.state.activeId === hunt.id && running(hunt)
     && !cutoffFor(record, hunt.id) && ledger.currency === hunt.currency;
 }
 function summary(ledger, record, hunt, viewer) {
@@ -144,22 +168,38 @@ function summary(ledger, record, hunt, viewer) {
   // request, and abuse-prevention identifiers remain in the server ledger.
   const publicEntries = entries.map((entry, order) => ({ entry, order }))
     .sort((a, b) => a.entry.createdAt.localeCompare(b.entry.createdAt) || a.order - b.order)
-    .map(({ entry }) => ({ username: entry.username, amountMinor: entry.amountMinor, createdAt: entry.createdAt,
+    .map(({ entry }) => ({ username: entry.username, amountMinor: entry.amountMinor, createdAt: entry.createdAt, ...(entry.edited ? { updatedAt: entry.updatedAt } : {}),
       verified: entry.authKind === "twitch", isMine: !!viewer && entry.authKind === "twitch" && entry.userId === viewer.id }));
   let podium = [];
   if (hunt.status === "complete") {
     const end = finalBalanceMinor(hunt);
     podium = entries.map((entry, order) => ({ ...entry, order, differenceMinor: Math.abs(entry.amountMinor - end) }))
-      .sort((a, b) => a.differenceMinor - b.differenceMinor || a.createdAt.localeCompare(b.createdAt) || a.order - b.order)
+      .sort((a, b) => a.differenceMinor - b.differenceMinor || a.updatedAt.localeCompare(b.updatedAt) || a.acceptedOrder - b.acceptedOrder || a.order - b.order)
       .slice(0, 3).map((entry, index) => ({ place: index + 1, username: entry.username, amountMinor: entry.amountMinor, differenceMinor: entry.differenceMinor }));
   }
   return { ok: true, huntId: hunt.id, currency: hunt.currency, status: hunt.status,
     accepting: accepting(record, hunt, ledger), count: entries.length, entries: publicEntries,
-    mine: own ? { username: own.username, amountMinor: own.amountMinor, createdAt: own.createdAt } : null, podium,
+    mine: own ? { username: own.username, amountMinor: own.amountMinor, createdAt: own.createdAt, updatedAt: own.updatedAt, revision: own.requestId } : null, podium,
     ...(ledger.currency !== hunt.currency ? { message: "The hunt currency changed. Earlier predictions cannot be ranked for this currency." } : {}) };
 }
-function matchingRetry(entry, operation, viewer) {
-  return entry.requestId === operation.requestId && entry.authKind === "twitch" && entry.userId === viewer.id && entry.amountMinor === operation.amountMinor;
+function operationFor(ledger, requestId) {
+  for (const entry of ledger.entries) {
+    if (entry.requestId === requestId) return { entry, version: entry };
+    const version = entry.revisions?.find(revision => revision.requestId === requestId);
+    if (version) return { entry, version };
+  }
+  return null;
+}
+function matchingRetry(saved, operation, viewer) {
+  return saved.version.requestId === operation.requestId && saved.entry.authKind === "twitch" && saved.entry.userId === viewer.id
+    && saved.version.amountMinor === operation.amountMinor && (saved.version.parentRevision || null) === operation.expectedRevision;
+}
+function acceptedOperation(saved, ledger, record, hunt) {
+  const cutoff = cutoffFor(record, hunt.id);
+  return ledger.currency === hunt.currency && (!cutoff || saved.version.createdAt < cutoff);
+}
+function nextSequence(ledger) {
+  return ledger.entries.reduce((largest, entry, index) => Math.max(largest, entry.sequence || index + 1, ...(entry.revisions || []).map(revision => revision.sequence)), 0) + 1;
 }
 function createHandler({ connectHunts, connectPredictions, now = () => new Date(), secretFor = signingSecret, authInfoFor = defaultAuthInfo,
   logDiagnostic = value => console.error(JSON.stringify(value)) } = {}) {
@@ -191,34 +231,42 @@ function createHandler({ connectHunts, connectPredictions, now = () => new Date(
       if (typeof connectHunts !== "function" || typeof connectPredictions !== "function") throw new Error("Prediction storage is unavailable");
       const huntStore = await connectHunts(event), predictionStore = await connectPredictions(event);
       stage = "read";
-      const current = await readHunt(huntStore, huntId, event);
+      let current = await readHunt(huntStore, huntId, event);
       let { ledger, etag } = await readLedger(predictionStore, current.hunt);
       if (method === "GET") return json(200, { ...summary(ledger, current.record, current.hunt, auth.viewer), ...auth }, extra);
-      const priorRequest = ledger.entries.find(entry => entry.requestId === operation.requestId);
+      const priorRequest = operationFor(ledger, operation.requestId);
       if (priorRequest) {
         if (!matchingRetry(priorRequest, operation, auth.viewer)) throw new PredictionError(409, "This request was already used. Refresh the hunt page.");
-        if (!eligibleEntries(ledger, current.record, current.hunt).includes(priorRequest)) throw new PredictionError(409, "Predictions closed before this entry was accepted.");
+        if (!acceptedOperation(priorRequest, ledger, current.record, current.hunt)) throw new PredictionError(409, "Predictions closed before this change was accepted.");
         return json(200, { ...summary(ledger, current.record, current.hunt, auth.viewer), ...auth, duplicate: true }, extra);
       }
       if (!accepting(current.record, current.hunt, ledger)) throw new PredictionError(409, "Predictions are closed for this hunt.");
       const ip = typeof event.clientIp === "string" && event.clientIp.length < 100 ? event.clientIp : "unavailable";
       const ipHash = hmac(secret, "prediction-ip-v1:" + at.toISOString().slice(0, 10) + ":" + ip);
-      const candidate = { ...operation, authKind: "twitch", userId: auth.viewer.id, username: auth.viewer.login, nameKey: auth.viewer.login,
-        identityHash: hmac(secret, "prediction-twitch-v1:" + auth.viewer.id), ipHash, createdAt: at.toISOString() };
-      delete candidate.huntId; delete candidate.viewerId;
-      let duplicate = false;
+      let duplicate = false, editing = false;
       stage = "write";
       for (let attempt = 0; attempt < 8; attempt++) {
-        const prior = ledger.entries.find(entry => entry.requestId === operation.requestId);
+        const prior = operationFor(ledger, operation.requestId);
         if (prior) {
           if (!matchingRetry(prior, operation, auth.viewer)) throw new PredictionError(409, "This request was already used. Refresh the hunt page.");
           duplicate = true; break;
         }
-        if (ledger.currency !== current.hunt.currency) throw new PredictionError(409, "The hunt currency changed. Refresh the hunt page.");
-        if (ledger.entries.some(entry => entry.authKind === "twitch" && entry.userId === auth.viewer.id)) throw new PredictionError(409, "Your Twitch account already has a prediction for this hunt.");
-        if (ledger.entries.filter(entry => entry.ipHash === ipHash).length >= MAX_IP_ENTRIES) throw new PredictionError(429, "Too many predictions from this connection. Try the next hunt.");
-        if (ledger.entries.length >= MAX_ENTRIES) throw new PredictionError(429, "This hunt has reached its prediction limit.");
-        const next = { ...ledger, entries: [...ledger.entries, candidate] };
+        if (attempt) current = await readHunt(huntStore, huntId, event);
+        if (!accepting(current.record, current.hunt, ledger)) throw new PredictionError(409, "Predictions are closed for this hunt.");
+        const ownIndex = ledger.entries.findIndex(entry => entry.authKind === "twitch" && entry.userId === auth.viewer.id), own = ledger.entries[ownIndex];
+        const previous = own && (own.revisions?.[own.revisions.length - 1] || own);
+        if ((previous?.requestId || null) !== operation.expectedRevision) throw new PredictionError(409, "Your prediction changed in another tab. Refresh predictions before saving again.");
+        editing = !!own;
+        if (editing && (own.revisions?.length || 0) >= MAX_REVISIONS) throw new PredictionError(429, "This prediction has reached its change limit for this hunt.");
+        if (!editing && ledger.entries.filter(entry => entry.ipHash === ipHash).length >= MAX_IP_ENTRIES) throw new PredictionError(429, "Too many predictions from this connection. Try the next hunt.");
+        if (!editing && ledger.entries.length >= MAX_ENTRIES) throw new PredictionError(429, "This hunt has reached its prediction limit.");
+        const savedAt = now().toISOString();
+        if (!timestamp(savedAt) || previous && savedAt < previous.createdAt) throw new Error("Invalid prediction clock");
+        const version = { requestId: operation.requestId, username: auth.viewer.login, nameKey: auth.viewer.login, amountMinor: operation.amountMinor,
+          ipHash, createdAt: savedAt, sequence: nextSequence(ledger) };
+        const next = { ...ledger, entries: [...ledger.entries] };
+        if (editing) next.entries[ownIndex] = { ...own, revisions: [...(own.revisions || []), { ...version, parentRevision: previous.requestId }] };
+        else next.entries.push({ ...version, authKind: "twitch", userId: auth.viewer.id, identityHash: hmac(secret, "prediction-twitch-v1:" + auth.viewer.id) });
         if (Buffer.byteLength(JSON.stringify(next)) > MAX_LEDGER_BYTES) throw new PredictionError(429, "This hunt has reached its prediction limit.");
         const result = await predictionStore.setJSON(ledgerKey(huntId), next, etag ? { onlyIfMatch: etag } : { onlyIfNew: true });
         if (result?.modified === true && typeof result.etag === "string" && result.etag) { ledger = next; break; }
@@ -229,10 +277,10 @@ function createHandler({ connectHunts, connectPredictions, now = () => new Date(
       stage = "confirm";
       const confirmed = await readLedger(predictionStore, current.hunt);
       const after = await readHunt(huntStore, huntId, event);
-      const saved = confirmed.ledger.entries.find(entry => entry.requestId === operation.requestId);
+      const saved = operationFor(confirmed.ledger, operation.requestId);
       if (!saved || !matchingRetry(saved, operation, auth.viewer)) throw new Error("Prediction save could not be confirmed");
-      if (!eligibleEntries(confirmed.ledger, after.record, after.hunt).some(entry => entry.requestId === saved.requestId)) throw new PredictionError(409, "Predictions closed before this entry was accepted.");
-      return json(duplicate ? 200 : 201, { ...summary(confirmed.ledger, after.record, after.hunt, auth.viewer), ...auth, duplicate }, extra);
+      if (!acceptedOperation(saved, confirmed.ledger, after.record, after.hunt)) throw new PredictionError(409, "Predictions closed before this change was accepted.");
+      return json(duplicate || editing ? 200 : 201, { ...summary(confirmed.ledger, after.record, after.hunt, auth.viewer), ...auth, duplicate }, extra);
     } catch (error) {
       if (error instanceof PredictionError) return json(error.status, { ok: false, error: error.message }, extra);
       try { logDiagnostic({ event: "hunt_prediction_failure", stage }); } catch { /* Logs never change a response. */ }
@@ -241,5 +289,5 @@ function createHandler({ connectHunts, connectPredictions, now = () => new Date(
   };
 }
 
-module.exports = { createHandler, storeName, ledgerKey, HEADERS, MAX_BODY_BYTES, MAX_ENTRIES, MAX_IP_ENTRIES,
+module.exports = { createHandler, storeName, ledgerKey, HEADERS, MAX_BODY_BYTES, MAX_ENTRIES, MAX_IP_ENTRIES, MAX_REVISIONS,
   PredictionError, parseAmount, validateLedger, eligibleEntries, finalBalanceMinor, summary, verifiedUser };
