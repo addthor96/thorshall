@@ -152,7 +152,35 @@ async function openStore(event) {
   return getStore({ name: storeName(event), consistency: "strong" });
 }
 
-function createHandler(storeFactory = openStore, { now = () => new Date() } = {}) {
+async function openPredictionStore(event) {
+  const { getStore } = require("@netlify/blobs");
+  return getStore({ name: predictionStoreName(event), consistency: "strong" });
+}
+
+function predictionStoreName(event) {
+  const predictions = require("./hunt-predictions");
+  // Production hunts share one ledger even when the owner uses Netlify's
+  // alternate production hostname. Preview ledgers remain isolated.
+  return predictions.storeName(event?.deployContext === "production" && event.published === true
+    ? { ...event, rawUrl: "https://thorshall.gg/bonus-hunt", headers: { host: "thorshall.gg" } } : event);
+}
+
+async function currencyConflict(previous, next, event, connectPredictions) {
+  const before = new Map(previous.hunts.map(hunt => [hunt.id, hunt]));
+  const changed = next.hunts.filter(hunt => !before.has(hunt.id) || before.get(hunt.id).currency !== hunt.currency);
+  if (!changed.length) return null;
+  const predictions = require("./hunt-predictions"), store = await connectPredictions(event);
+  for (const hunt of changed) {
+    const entry = await store.getWithMetadata(predictions.ledgerKey(hunt.id), { type: "json", consistency: "strong" });
+    if (entry === null) continue;
+    if (!entry || typeof entry.etag !== "string") throw new Error("Prediction currency could not be checked");
+    const ledger = predictions.validateLedger(entry.data, hunt.id);
+    if (ledger.currency !== hunt.currency) return `This hunt already has prediction records in ${ledger.currency}. Keep that currency, or create a new hunt for ${hunt.currency}.`;
+  }
+  return null;
+}
+
+function createHandler(storeFactory = openStore, { now = () => new Date(), connectPredictions = openPredictionStore } = {}) {
   return async function handler(event) {
     const method = String(event.httpMethod || "GET").toUpperCase();
     const mode = event.queryStringParameters?.mode || "viewer";
@@ -190,7 +218,11 @@ function createHandler(storeFactory = openStore, { now = () => new Date() } = {}
       object(body, method === "PUT" ? ["state", "revision"] : ["action", "revision", "huntId"], "Request");
       if (typeof body.revision !== "string" || body.revision !== entry.etag) return json(409, { ok: false, error: "The saved hunt changed. Reload before saving again.", revision: entry.etag });
       let next;
-      if (method === "PUT") next = { state: validateState(body.state), streamToken: record.streamToken };
+      if (method === "PUT") {
+        next = { state: validateState(body.state), streamToken: record.streamToken };
+        const conflict = await currencyConflict(record.state, next.state, event, connectPredictions);
+        if (conflict) return json(409, { ok: false, errorCode: "currency_locked", error: conflict });
+      }
       else {
         if (body.action === "close-predictions") {
           const huntId = id(body.huntId, "Hunt ID");
@@ -230,5 +262,5 @@ function createHandler(storeFactory = openStore, { now = () => new Date() } = {}
   };
 }
 
-module.exports = { createHandler, isOwner, initialState, validateState, InputError, KEY, storeName };
+module.exports = { createHandler, isOwner, initialState, validateState, InputError, KEY, storeName, predictionStoreName };
 

@@ -7,8 +7,8 @@ const source=fs.readFileSync(require.resolve('../hunt-admin.js'),'utf8');
 const clone=value=>structuredClone(value);
 function initial(rows=[],status='collecting'){return{schema:2,activeId:'hunt-a',hunts:[{id:'hunt-a',title:'Test hunt',date:'2026-11-16',currency:'USD',start:1000,balance:0,status,rows}],settings:{public:true}};}
 function bonus(id,slot,payout=null){return{id,slot,provider:'',bet:10,payout};}
-async function start({data=initial(),mutate}={}){
-  const nodes=new Map(),events=new Map(),timers=new Map(),storage=new Map(),retired=new Set(data.hunts.filter(h=>h.status==='complete').map(h=>h.id));let timerId=0,version=1,server=clone(data),writes=0,closed={};
+async function start({data=initial(),mutate,seedStorage=[],confirm=()=>true}={}){
+  const nodes=new Map(),events=new Map(),timers=new Map(),storage=new Map(seedStorage),retired=new Set(data.hunts.filter(h=>h.status==='complete').map(h=>h.id));let timerId=0,version=1,server=clone(data),writes=0,closed={};
   const windows=()=>Object.fromEntries(server.hunts.map(h=>[h.id,{closedAt:closed[h.id]||null,reopenable:server.activeId===h.id&&h.status==='opening'&&!retired.has(h.id),accepting:server.settings.public&&server.activeId===h.id&&Windows.running(h)&&!closed[h.id]}]));
   const document={activeElement:null,getElementById:id=>{if(!nodes.has(id))throw new Error('Missing DOM element '+id);return nodes.get(id);},createElement:()=>({click(){}})};
   class Element{
@@ -22,13 +22,13 @@ async function start({data=initial(),mutate}={}){
     fire(type,target=this){return this.listeners[type]?.({target,preventDefault(){}});}
   }
   for(const [,attrs,id]of html.matchAll(/<[a-z]+([^>]*\bid="([^"]+)"[^>]*)>/g))nodes.set(id,new Element(id,attrs));
-  const calls=[];
-  const context={document,window:{HuntCore:Core,addEventListener:(name,fn)=>events.set(name,fn)},location:{origin:'https://thorshall.test'},sessionStorage:{setItem:(k,v)=>storage.set(k,v),getItem:k=>storage.get(k)||null,removeItem:k=>storage.delete(k)},localStorage:{getItem:()=>null},navigator:{clipboard:{writeText:async()=>{}}},AbortSignal,URL,Blob,Date,Intl,confirm:()=>true,setTimeout:fn=>{timers.set(++timerId,fn);return timerId;},clearTimeout:id=>timers.delete(id),
+  const calls=[],confirmations=[];
+  const context={document,window:{HuntCore:Core,addEventListener:(name,fn)=>events.set(name,fn)},location:{origin:'https://thorshall.test'},sessionStorage:{setItem:(k,v)=>storage.set(k,v),getItem:k=>storage.get(k)||null,removeItem:k=>storage.delete(k)},localStorage:{getItem:()=>null},navigator:{clipboard:{writeText:async()=>{}}},AbortSignal,URL,Blob,Date,Intl,confirm:message=>{confirmations.push(message);return confirm(message);},setTimeout:fn=>{timers.set(++timerId,fn);return timerId;},clearTimeout:id=>timers.delete(id),
     fetch:async(url,options={})=>{
       const body=options.body?JSON.parse(options.body):undefined;calls.push({url,method:options.method,body:clone(body)});
       if(options.method==='GET')return{ok:true,status:200,json:async()=>({ok:true,state:clone(server),revision:'v'+version,streamToken:'x'.repeat(43),predictionWindows:windows()})};
       writes++;let result=mutate?await mutate(body,writes,options):null;if(result instanceof Error)throw result;
-      if(result?.status)return{ok:false,status:result.status,json:async()=>({ok:false,error:result.error||'Save failed'})};
+      if(result?.status)return{ok:false,status:result.status,json:async()=>({ok:false,error:result.error||'Save failed',...(result.errorCode?{errorCode:result.errorCode}:{})})};
       assert.equal(body.revision,'v'+version,'writes must use the latest saved revision');version++;
       const next=options.method==='PUT'?clone(body.state):clone(server);
       if(body.action==='start-opening')next.hunts.find(h=>h.id===body.huntId).status='opening';
@@ -41,7 +41,7 @@ async function start({data=initial(),mutate}={}){
   vm.runInNewContext(source,context);
   const settle=async()=>{for(let i=0;i<12;i++)await new Promise(resolve=>setImmediate(resolve));};await settle();
   const target=(key,value)=>({closest:selector=>selector==='[data-'+key+']'?{dataset:{[key.replace(/-([a-z])/g,(_,c)=>c.toUpperCase())]:value}}:null});
-  return{nodes,events,calls,storage,settle,activeElement:()=>document.activeElement,saved:()=>clone(server),windows:()=>clone(windows()),field:(id,value)=>{nodes.get(id).value=String(value);return nodes.get(id).fire('input');},fire:(id,type='click',t)=>nodes.get(id).fire(type,t),target};
+  return{nodes,events,calls,confirmations,storage,settle,activeElement:()=>document.activeElement,saved:()=>clone(server),windows:()=>clone(windows()),field:(id,value)=>{nodes.get(id).value=String(value);return nodes.get(id).fire('input');},fire:(id,type='click',t)=>nodes.get(id).fire(type,t),target};
 }
 
 test('quick collection adds a valid named bonus, keeps the bet and focuses the next slot',async()=>{
@@ -158,11 +158,52 @@ test('failed return to hunting leaves closed predictions and payouts until the s
   await app.fire('reloadRemote');await app.settle();assert.equal(app.nodes.get('backToHunting').disabled,false);assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');
 });
 
-test('reviewing completed payouts alone never reopens predictions',async()=>{
+test('reviewing and correcting completed payouts preserves completion and only correction writes state',async()=>{
   const app=await start({data:initial([bonus('a','Only',100)],'opening')});await app.fire('finishHunt');await app.settle();assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');assert.equal(app.nodes.get('backToHunting').hidden,true);
   await app.fire('backToHunting');await app.settle();assert.equal(app.calls.filter(c=>c.method==='POST').length,0);
-  await app.fire('reviewHunt');await app.settle();assert.equal(app.saved().hunts[0].status,'opening');assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');assert.equal(app.calls.filter(c=>c.method==='POST').length,0);assert.equal(app.saved().hunts[0].rows[0].payout,100);
+  const beforeReview=clone(app.saved()),writesBeforeReview=app.calls.filter(c=>c.method!=='GET').length;
+  await app.fire('reviewHunt');await app.settle();assert.deepEqual(app.saved(),beforeReview);assert.equal(app.saved().hunts[0].status,'complete');assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');assert.equal(app.calls.filter(c=>c.method!=='GET').length,writesBeforeReview);assert.equal(app.nodes.get('openingPhase').hidden,false);assert.equal(app.nodes.get('completedPhase').hidden,true);assert.equal(app.nodes.get('finishHunt').textContent,'Done reviewing');assert.equal(app.nodes.get('payoutAmount').value,100);
   assert.equal(app.nodes.get('backToHunting').hidden,true);assert.equal(app.nodes.get('backToHunting').disabled,true);await app.fire('backToHunting');await app.settle();assert.equal(app.calls.filter(c=>c.method==='POST').length,0);
+  app.field('payoutAmount','125');await app.fire('payoutForm','submit');await app.settle();assert.equal(app.saved().hunts[0].status,'complete');assert.equal(app.saved().hunts[0].rows[0].payout,125);assert.equal(app.calls.filter(c=>c.method!=='GET').length,writesBeforeReview+1);assert.equal(app.calls.at(-1).body.state.hunts[0].status,'complete');assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');
+  await app.fire('finishHunt');await app.settle();assert.equal(app.nodes.get('completedPhase').hidden,false);assert.equal(app.nodes.get('openingPhase').hidden,true);assert.match(app.nodes.get('completedSummary').textContent,/125\.00 end balance/);assert.equal(app.calls.filter(c=>c.method!=='GET').length,writesBeforeReview+1);assert.equal(app.activeElement(),app.nodes.get('reviewHunt'));
+});
+
+test('failed completed payout correction keeps review and its draft without unfinishing the saved hunt',async()=>{
+  const app=await start({data:initial([bonus('a','Only',100)],'complete'),mutate:async(body,count)=>count===1?new Error('Offline'):null});
+  await app.fire('reviewHunt');app.field('payoutAmount','140');await app.fire('payoutForm','submit');await app.settle();assert.equal(app.saved().hunts[0].status,'complete');assert.equal(app.saved().hunts[0].rows[0].payout,100);assert.equal(app.nodes.get('openingPhase').hidden,false);assert.equal(app.nodes.get('payoutAmount').value,'140');assert.equal(app.nodes.get('finishHunt').disabled,true);
+  await app.fire('retrySave');await app.settle();assert.equal(app.saved().hunts[0].status,'complete');assert.equal(app.saved().hunts[0].rows[0].payout,140);assert.equal(app.nodes.get('finishHunt').textContent,'Done reviewing');assert.equal(app.nodes.get('finishHunt').disabled,false);assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');
+});
+
+test('recovering an autosaved draft preserves its original public or private visibility',async()=>{
+  for(const visible of [true,false]){
+    const data=initial([bonus('a','Only')]),draft=clone(data);draft.settings.public=visible;draft.hunts[0].title='Recovered title';
+    const app=await start({data,seedStorage:[['thorshall_hunt_admin_draft_v2',JSON.stringify({state:draft,revision:'v0'})]]});await app.fire('restoreDraft');await app.fire('saveNow');await app.settle();
+    assert.equal(app.saved().settings.public,visible);assert.equal(app.saved().hunts[0].title,'Recovered title');assert.equal(app.nodes.get('visibilityBadge').textContent,visible?'Public':'Private');assert.equal(app.calls.filter(c=>c.method==='PUT')[0].body.revision,'v1');
+  }
+});
+
+test('importing a backup still starts private even when its exported visibility was public',async()=>{
+  const app=await start(),backup=initial([bonus('a','Imported')]);backup.hunts[0].title='Imported hunt';app.nodes.get('importFile').files=[{size:1000,text:async()=>JSON.stringify({schema:2,state:backup})}];
+  await app.fire('importFile','change');await app.fire('saveNow');await app.settle();assert.equal(app.saved().settings.public,false);assert.equal(app.saved().hunts[0].title,'Imported hunt');assert.equal(app.nodes.get('visibilityBadge').textContent,'Private');
+});
+
+test('cancelling a switch away from an unfinished hunt keeps selection, edits, rows and revision untouched',async()=>{
+  const data=initial([bonus('a','Live')]);data.hunts.push({...clone(data.hunts[0]),id:'finished-b',title:'Past hunt',status:'complete'});const app=await start({data,confirm:()=>false});
+  app.field('newSlotName','Unsubmitted bonus');app.nodes.get('huntSelect').value='finished-b';await app.fire('huntSelect','change');await app.settle();assert.equal(app.nodes.get('huntSelect').value,'hunt-a');assert.equal(app.nodes.get('newSlotName').value,'Unsubmitted bonus');assert.deepEqual(app.saved(),data);assert.equal(app.calls.filter(c=>c.method!=='GET').length,0);assert.equal(app.nodes.get('collectionPhase').hidden,false);assert.equal(app.nodes.get('saveNow').disabled,true);assert.match(app.confirmations[0],/predictions will close permanently/);
+  await app.fire('startOpening');await app.settle();assert.deepEqual(app.calls.filter(c=>c.method!=='GET').map(c=>c.body),[{action:'start-opening',huntId:'hunt-a',revision:'v1'}]);
+});
+
+test('confirmed library switch saves the chosen active hunt and needs no warning when leaving a completed hunt',async()=>{
+  const data=initial([bonus('a','Live')]);data.hunts.push({...clone(data.hunts[0]),id:'finished-b',title:'Past hunt',status:'complete'});const app=await start({data});
+  app.nodes.get('huntSelect').value='finished-b';await app.fire('huntSelect','change');await app.fire('saveNow');await app.settle();assert.equal(app.confirmations.length,1);assert.equal(app.saved().activeId,'finished-b');assert.equal(app.nodes.get('completedPhase').hidden,false);
+  app.nodes.get('huntSelect').value='hunt-a';await app.fire('huntSelect','change');await app.fire('saveNow');await app.settle();assert.equal(app.confirmations.length,1);assert.equal(app.saved().activeId,'hunt-a');
+});
+
+test('a server currency lock explains the existing prediction currency and recovers without claiming another tab saved',async()=>{
+  const message='This hunt already has prediction records in USD. Keep that currency, or create a new hunt for EUR.';
+  const app=await start({data:initial([bonus('a','Live')]),mutate:async body=>body.state?.hunts[0].currency==='EUR'?{status:409,errorCode:'currency_locked',error:message}:null});
+  app.field('huntCurrency','EUR');await app.fire('saveNow');await app.settle();assert.equal(app.saved().hunts[0].currency,'USD');assert.equal(app.nodes.get('errorText').textContent,message+' Load the latest saved version to discard this unsaved currency change.');assert.doesNotMatch(app.nodes.get('errorText').textContent,/Another tab/);assert.equal(app.nodes.get('saveStatus').textContent,'Currency change not saved');assert.equal(app.nodes.get('reloadRemote').classList.contains('hidden'),false);assert.equal(app.nodes.get('huntCurrency').disabled,true);assert.equal(app.storage.has('thorshall_hunt_admin_draft_v2'),true);
+  await app.fire('reloadRemote');await app.settle();assert.equal(app.nodes.get('huntCurrency').value,'USD');assert.equal(app.nodes.get('huntCurrency').disabled,false);assert.equal(app.nodes.get('errorNotice').classList.contains('hidden'),true);assert.equal(app.calls.filter(c=>c.method==='PUT').length,1);
 });
 
 test('reloading after a lost committed phase response adopts the saved phase and prediction status',async()=>{

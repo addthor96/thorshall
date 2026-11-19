@@ -76,6 +76,86 @@ test('collecting hunt revisions preserve drafts and keep a single moderate refre
   assert.deepEqual([...app.timers.values()].map(timer => timer.ms), []);
 });
 
+test('a transient first request recovers automatically for current and completed hunts', async () => {
+  for (const status of ['collecting', 'complete']) {
+    let reads = 0;
+    const app = await start(() => ++reads === 1 ? response({ ok: false, error: 'Please try again.' }, 503)
+      : response(summary('hunt-a', { status, accepting: status === 'collecting' })));
+    await app.view('hunt-a', status);
+    assert.equal(app.byClass('prediction-badge')[0].textContent, 'Unavailable');
+    assert.equal(app.byClass('prediction-intro')[0].textContent, 'Predictions are temporarily unavailable.');
+    assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [5000]);
+    await app.tick(5000);
+    assert.equal(reads, 2);
+    assert.equal(app.byClass('prediction-badge')[0].textContent, status === 'complete' ? 'Finished' : 'Open');
+    assert.deepEqual([...app.timers.values()].map(timer => timer.ms), status === 'complete' ? [] : [60000]);
+  }
+});
+
+test('initial network recovery uses four slower retries and manual refresh can restart it', async () => {
+  const app = await start(() => { throw new Error('Offline'); });
+  await app.view();
+  for (const delay of [5000, 15000, 30000, 60000]) {
+    assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [delay]);
+    await app.tick(delay);
+  }
+  assert.equal(app.calls.length, 5); assert.equal(app.timers.size, 0);
+  app.byClass('prediction-refresh')[0].fire('click'); await app.settle();
+  assert.equal(app.calls.length, 6);
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [5000]);
+});
+
+test('permanent initial request errors do not schedule automatic retries', async () => {
+  for (const status of [400, 404, 409, 422, 429]) {
+    const app = await start(() => response({ ok: false, error: 'Predictions are unavailable.' }, status));
+    await app.view();
+    assert.equal(app.calls.length, 1); assert.equal(app.timers.size, 0);
+    app.byClass('prediction-refresh')[0].fire('click'); await app.settle();
+    assert.equal(app.calls.length, 2); assert.equal(app.timers.size, 0);
+  }
+});
+
+test('initial recovery pauses hidden or offscreen and is disposed when selecting another hunt', async () => {
+  const app = await start(call => call.url.includes('hunt=hunt-a') ? response({ ok: false, error: 'Try again.' }, 502)
+    : response(summary('hunt-b', { status: 'complete', accepting: false })), { observers: true });
+  await app.view(); assert.equal(app.timers.size, 0);
+  app.observers[0].fire(true);
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [5000]);
+  app.document.hidden = true; app.events.get('visibilitychange')(); assert.equal(app.timers.size, 0);
+  app.document.hidden = false; app.events.get('visibilitychange')();
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [5000]);
+  app.observers[0].fire(false); assert.equal(app.timers.size, 0);
+  app.observers[0].fire(true);
+  await app.view('hunt-b', 'complete');
+  assert.equal(app.calls.filter(call => call.url.includes('hunt=hunt-a')).length, 1);
+  assert.equal(app.timers.size, 0); assert.equal(app.observers[0].disconnected, true);
+  app.events.get('hunt:unavailable')(); assert.equal(app.timers.size, 0);
+});
+
+test('a saved amount draft pauses initial recovery and remains available after manual refresh', async () => {
+  const storage = new Map([['thorshall-prediction-draft-v2:hunt-a', JSON.stringify({ amount: '123.45', savedAt: Date.now() })]]);
+  let reads = 0;
+  const app = await start(() => { if (++reads === 1) throw new Error('Offline'); return response(summary()); }, { storage });
+  await app.view(); assert.equal(app.timers.size, 0);
+  assert.equal(app.node('prediction-amount').value, '123.45');
+  app.byClass('prediction-refresh')[0].fire('click'); await app.settle();
+  assert.equal(reads, 2); assert.equal(app.node('prediction-amount').value, '123.45');
+  assert.equal(app.byClass('prediction-form')[0].hidden, false); assert.equal(app.timers.size, 0);
+});
+
+test('clearing an unsaved new guess resumes roster refresh while an empty edit remains paused', async () => {
+  const app = await start(); await app.view();
+  app.input('prediction-amount', '42'); assert.equal(app.timers.size, 0);
+  app.input('prediction-amount', '');
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
+  assert.equal(app.storage.size, 0);
+  await app.tick(60000); assert.equal(app.calls.length, 2);
+  const edit = await start(() => response(summary('hunt-a', { mine: { amountMinor: 10000 }, count: 1 })));
+  await edit.view(); edit.byClass('prediction-edit')[0].fire('click'); edit.input('prediction-amount', '');
+  assert.equal(edit.timers.size, 0); assert.equal(edit.byClass('prediction-form')[0].hidden, false);
+  assert.equal(edit.byClass('prediction-submit')[0].textContent, 'Save changes');
+});
+
 test('valid entry posts the free prediction and shows the confirmed saved entry', async () => {
   const app = await start(call => call.method === 'GET' ? response(summary()) : response(summary('hunt-a', { count: 1, mine: { username: viewer.login, amountMinor: 123450, createdAt: '2026-11-19T01:00:00.000Z' } }), 201));
   await app.view(); app.input('prediction-amount', '1234.50'); await app.submit();

@@ -295,6 +295,67 @@ test("equal guesses in the same millisecond follow acceptance order rather than 
   assert.deepEqual(payload(await f.handle(event())).podium.map(e => e.username), ["firstviewer", "secondviewer"]);
 });
 
+test("same-millisecond ties follow confirmed admissions when an earlier pending save is delayed", async () => {
+  const f = fixture(), delayed = f.user("requestfirst"), earlier = f.user("savedfirst"), delayedBody = guess("100");
+  let release, reached, blockedOnce = false;
+  const gate = new Promise(resolve => { release = resolve; }), blocked = new Promise(resolve => { reached = resolve; });
+  f.predictions.afterWrite = async (key, data) => {
+    if (!blockedOnce && data.entries.length === 1 && data.entries[0].admittedAt === null) { blockedOnce = true; reached(); await gate; }
+  };
+  const pending = submit(f, delayed, delayedBody); await blocked;
+  const earlierBody = guess("100"); assert.equal((await submit(f, earlier, earlierBody)).statusCode, 201);
+  assert.deepEqual(payload(await f.handle(event())).entries.map(entry => entry.username), ["savedfirst"]);
+  release(); assert.equal((await pending).statusCode, 201);
+  const beforeRetry = clone(f.predictions.records.get(P.ledgerKey("hunt-a")));
+  assert.equal(payload(await submit(f, delayed, delayedBody)).duplicate, true);
+  assert.deepEqual(f.predictions.records.get(P.ledgerKey("hunt-a")), beforeRetry);
+  const [delayedEntry, earlierEntry] = beforeRetry.entries;
+  assert.equal(delayedEntry.admittedAt, earlierEntry.admittedAt);
+  assert.equal(delayedEntry.sequence < earlierEntry.sequence, true);
+  assert.equal(earlierEntry.admissionOrder < delayedEntry.admissionOrder, true);
+  f.update(record => { record.state.hunts[0].status = "complete"; record.state.hunts[0].rows[0].payout = 100; });
+  const final = payload(await f.handle(event()));
+  assert.deepEqual(final.podium.map(entry => entry.username), ["savedfirst", "requestfirst"]);
+  assert.doesNotMatch(JSON.stringify(final), /admissionOrder|sequence|admittedAt/);
+});
+
+test("older ledgers retain their tie order and newer edits receive a later admission order", async () => {
+  const f = fixture(), a = f.user("olderfirst"), b = f.user("oldersecond"), first = guess("100");
+  await submit(f, a, first); await submit(f, b, guess("100"));
+  const stored = f.predictions.records.get(P.ledgerKey("hunt-a"));
+  for (const entry of stored.entries) delete entry.admissionOrder;
+  const before = clone(stored);
+  const hunt = clone(f.huntStore.records.get("hunt-manager").state.hunts[0]); hunt.status = "complete"; hunt.rows[0].payout = 100;
+  assert.deepEqual(P.summary(P.validateLedger(clone(before), "hunt-a"), f.huntStore.records.get("hunt-manager"), hunt).podium.map(entry => entry.username), ["olderfirst", "oldersecond"]);
+  assert.deepEqual(stored, before);
+  const change = { ...guess("100"), expectedRevision: first.requestId };
+  assert.equal((await submit(f, a, change)).statusCode, 200);
+  const revised = f.predictions.records.get(P.ledgerKey("hunt-a"));
+  const admission = revised.entries[0].revisions[0].admissionOrder;
+  assert.equal(admission > Math.max(...before.entries.map(entry => entry.sequence)), true);
+  assert.equal(payload(await submit(f, a, change)).duplicate, true);
+  assert.equal(f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0].revisions[0].admissionOrder, admission);
+  assert.deepEqual(P.summary(P.validateLedger(clone(revised), "hunt-a"), f.huntStore.records.get("hunt-manager"), hunt).podium.map(entry => entry.username), ["oldersecond", "olderfirst"]);
+  const collision = clone(revised); collision.entries[0].revisions[0].admissionOrder = collision.entries[1].sequence;
+  assert.throws(() => P.validateLedger(collision, "hunt-a"), /admission order/);
+  const malformed = clone(revised); malformed.entries[0].revisions[0].admissionOrder = -1;
+  assert.throws(() => P.validateLedger(malformed, "hunt-a"), /revision/);
+});
+
+test("near-limit ledgers reserve admission timestamp and order bytes before writing pending predictions", async () => {
+  const template = fixture(), templateCookie = template.user(); await submit(template, templateCookie);
+  const pending = clone(template.predictions.records.get(P.ledgerKey("hunt-a")).entries[0]);
+  pending.admittedAt = null; delete pending.admissionOrder;
+  const f = fixture(), cookie = f.user(), ledger = { schema: 1, huntId: "hunt-a", currency: "USD", entries: [], padding: "" };
+  const pendingBytes = Buffer.byteLength(JSON.stringify({ ...ledger, entries: [pending] }));
+  ledger.padding = " ".repeat(1024 * 1024 - pendingBytes - 35);
+  f.predictions.records.set(P.ledgerKey("hunt-a"), ledger);
+  assert.equal((await submit(f, cookie)).statusCode, 429);
+  assert.equal(f.predictions.writes, 0);
+  assert.equal((await f.handle(event())).statusCode, 200);
+  assert.equal(payload(await f.handle(event())).count, 0);
+});
+
 test("a concurrent opening cutoff excludes late writes and cannot be reversed by a retry", async () => {
   const f = fixture(), cookie = f.user(), body = guess();
   f.predictions.afterWrite = () => f.update(record => { record.predictionClosedAt = { "hunt-a": BASE.toISOString() }; record.state.hunts[0].status = "opening"; });
@@ -374,9 +435,9 @@ test("reopened cycles preserve accepted guesses and permanently exclude legacy c
   const ledger = f.predictions.records.get(P.ledgerKey("hunt-a")), original = ledger.entries[0];
   const lateId = crypto.randomUUID();
   original.revisions = [{ requestId: lateId, parentRevision: original.requestId, username: original.username, nameKey: original.nameKey,
-    amountMinor: 99900, ipHash: original.ipHash, createdAt: new Date(+BASE + 1500).toISOString(), sequence: 2 }];
-  const lateViewer = { ...clone(original), requestId: crypto.randomUUID(), userId: "999999", username: "closedgap", nameKey: "closedgap", createdAt: new Date(+BASE + 1500).toISOString(), sequence: 3 };
-  delete lateViewer.revisions; delete lateViewer.windowId; delete lateViewer.admittedAt; delete lateViewer.expectedRevision;
+    amountMinor: 99900, ipHash: original.ipHash, createdAt: new Date(+BASE + 1500).toISOString(), sequence: 3 }];
+  const lateViewer = { ...clone(original), requestId: crypto.randomUUID(), userId: "999999", username: "closedgap", nameKey: "closedgap", createdAt: new Date(+BASE + 1500).toISOString(), sequence: 4 };
+  delete lateViewer.revisions; delete lateViewer.windowId; delete lateViewer.admittedAt; delete lateViewer.expectedRevision; delete lateViewer.admissionOrder;
   ledger.entries.push(lateViewer);
   const windowId = phase(f, "back-to-hunting", +BASE + 2000);
   const reopened = payload(await f.handle(event("GET", { cookie })));
@@ -430,7 +491,7 @@ test("pending new accounts cannot appear after reopening, but a fresh current-cy
 test("legacy accepted Twitch records stay editable after a new cycle and malformed cycle metadata fails closed", async () => {
   const f = fixture(), cookie = f.user(), first = guess("100"); await submit(f, cookie, first);
   const stored = f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0];
-  delete stored.windowId; delete stored.admittedAt; delete stored.expectedRevision;
+  delete stored.windowId; delete stored.admittedAt; delete stored.expectedRevision; delete stored.admissionOrder;
   phase(f, "start-opening", +BASE + 1000); const windowId = phase(f, "back-to-hunting", +BASE + 2000);
   assert.equal((await submit(f, cookie, { ...guess("200"), expectedRevision: first.requestId, windowId })).statusCode, 200);
   f.update(record => { record.predictionWindowHistory["hunt-a"][0].closedAt = null; });

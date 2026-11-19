@@ -6,6 +6,7 @@
   var AUTH = '/.netlify/functions/hunt-twitch', DRAFT_PREFIX = 'thorshall-prediction-draft-v2:';
   var entries = new Map(), current = null, generation = 0, privacyEpoch = 0, controllers = new Set(), authTimer = null, authDue = null;
   var places = ['1st place', '2nd place', '3rd place'];
+  var recoveryDelays = [5000, 15000, 30000, 60000];
   var motionQuery = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   var callbackMessage = (function () {
     var messages = {
@@ -70,7 +71,7 @@
   function stateFor(id) {
     if (!entries.has(id)) {
       var amount = readDraft(id);
-      entries.set(id, { epoch: privacyEpoch, windowEpoch: 0, draft: { amount: amount, website: '' }, summary: null, loading: false, saving: false, signingOut: false, needsRefresh: false, editing: false, dirty: !!amount, editRevision: null, error: '', notice: '', authMessage: '', pending: null, request: 0 });
+      entries.set(id, { epoch: privacyEpoch, windowEpoch: 0, draft: { amount: amount, website: '' }, summary: null, loading: false, saving: false, signingOut: false, needsRefresh: false, editing: false, dirty: !!amount, editRevision: null, error: '', notice: '', authMessage: '', pending: null, request: 0, recoveryAttempts: 0, retryInitialLoad: false });
     }
     return entries.get(id);
   }
@@ -186,13 +187,15 @@
 
   function scheduleRefresh(context) {
     stopRefresh(context);
-    if (!active(context) || document.hidden || context.inViewport === false || context.hunt.status === 'complete' || !context.state.summary || context.state.editing || context.state.dirty || context.state.pending) return;
+    if (!active(context) || document.hidden || context.inViewport === false || (context.hunt.status === 'complete' && context.state.summary) || context.state.editing || context.state.dirty || context.state.pending) return;
+    var delay = context.state.summary ? 60000 : context.state.retryInitialLoad ? recoveryDelays[context.state.recoveryAttempts - 1] : undefined;
+    if (delay === undefined) return;
     context.refreshTimer = setTimeout(function () {
       context.refreshTimer = null;
       if (!active(context) || document.hidden || context.inViewport === false) return;
       if (context.state.loading || context.state.saving || context.state.signingOut) { scheduleRefresh(context); return; }
       load(context);
-    }, 60000);
+    }, delay);
   }
 
   function updateEntries(context, data) {
@@ -354,13 +357,16 @@
     [nodes.amount, nodes.website].forEach(function (input) {
       input.addEventListener('input', function () {
         state.draft[input.name] = input.value;
-        if (input === nodes.amount) { state.dirty = true; saveDraft(context); stopRefresh(context); }
+        if (input === nodes.amount) {
+          state.dirty = input.value !== ''; saveDraft(context);
+          if (state.dirty || state.editing || state.pending) stopRefresh(context); else scheduleRefresh(context);
+        }
         input.removeAttribute('aria-invalid');
         if (!state.saving && !state.pending) { state.error = ''; update(context); }
       });
     });
     nodes.form.addEventListener('submit', function (event) { event.preventDefault(); submit(context); });
-    nodes.refresh.addEventListener('click', function () { if (!state.saving) load(context); });
+    nodes.refresh.addEventListener('click', function () { if (!state.saving) load(context, true); });
     nodes.logout.addEventListener('click', function () { signOut(context); });
     nodes.edit.addEventListener('click', function () {
       var mine = state.summary && state.summary.mine;
@@ -389,7 +395,7 @@
     nodes.amountLabel.textContent = 'Final end balance (' + context.hunt.currency + ')';
     nodes.results.setAttribute('aria-label', 'Prediction podium for ' + context.hunt.title);
     nodes.form.hidden = !isOpen || !viewer || !data.authConfigured || !!mine && !state.editing;
-    nodes.intro.textContent = complete ? 'The closest predictions to the final end balance take the top three places.' : isOpen ? 'Predict the final end balance. You can change your guess until predictions close.' : 'Predictions are closed for this hunt.';
+    nodes.intro.textContent = !data ? state.loading ? 'Loading predictions…' : 'Predictions are temporarily unavailable.' : complete ? 'The closest predictions to the final end balance take the top three places.' : isOpen ? 'Predict the final end balance. You can change your guess until predictions close.' : 'Predictions are closed for this hunt.';
     nodes.amount.disabled = nodes.website.disabled = locked || !!state.pending;
     var href = data && data.authConfigured && loginHref(data.loginUrl);
     nodes.auth.hidden = !data || (!viewer && !isOpen);
@@ -545,24 +551,31 @@
     build(context);
   }
 
-  async function load(context) {
+  async function load(context, restartRecovery) {
     if (!active(context)) return;
     stopRefresh(context);
     if (context.state.loading || context.state.saving || context.state.signingOut) { context.state.needsRefresh = true; return; }
     var state = context.state, request = ++state.request, windowEpoch = state.windowEpoch;
+    if (restartRecovery) { state.recoveryAttempts = 0; state.retryInitialLoad = false; }
     state.loading = true; state.error = ''; update(context);
     try {
       var data = await api('GET', context.hunt.id);
       if (request !== state.request || windowEpoch !== state.windowEpoch) return;
-      apply(state, data);
+      if (apply(state, data)) { state.recoveryAttempts = 0; state.retryInitialLoad = false; }
     } catch (error) {
       if (error.status === 401) { signedOut(context, 'Your Twitch sign-in expired. Log in again to submit your prediction.'); return; }
       if (error.status === 403) { deny(context, error.message); return; }
-      if (!error.discard && state.epoch === privacyEpoch && request === state.request && windowEpoch === state.windowEpoch) state.error = error.message || 'Predictions are temporarily unavailable. Please try again.';
+      if (!error.discard && state.epoch === privacyEpoch && request === state.request && windowEpoch === state.windowEpoch) {
+        state.error = error.message || 'Predictions are temporarily unavailable. Please try again.';
+        if (!state.summary) {
+          state.retryInitialLoad = !error.status || error.status === 408 || error.status >= 500;
+          if (state.retryInitialLoad) state.recoveryAttempts++;
+        }
+      }
     } finally {
       if (request === state.request) state.loading = false;
       settled(state);
-      if (active(context) && context.state === state && state.epoch === privacyEpoch && state.summary) scheduleRefresh(context);
+      if (active(context) && context.state === state && state.epoch === privacyEpoch) scheduleRefresh(context);
     }
   }
 

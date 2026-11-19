@@ -3,8 +3,9 @@
   const Core=window.HuntCore,API='/.netlify/functions/bonus-hunts-api',DRAFT_KEY='thorshall_hunt_admin_draft_v2';
   const $=id=>document.getElementById(id),copy=value=>JSON.parse(JSON.stringify(value)),esc=value=>Core.escapeHtml(String(value==null?'':value));
   let state,revision,streamToken='',predictionWindows={},dirty=false,saving=false,blocked=false,timer,editVersion=0,toastTimer,recoveredDraft=null,phaseAction='';
-  let activeSave=null,lastSaveFailed=false,pendingAction=null,actionBusy=false,rotationBusy=false,rotating=false,editingId=null,payoutRowId=null;
+  let activeSave=null,lastSaveFailed=false,pendingAction=null,actionBusy=false,rotationBusy=false,rotating=false,editingId=null,payoutRowId=null,reviewingHuntId=null;
   const current=()=>state.hunts.find(h=>h.id===state.activeId)||state.hunts[0];
+  const reviewing=()=>current().status==='complete'&&reviewingHuntId===current().id;
   const opened=row=>row.payout!==null&&row.payout!==undefined;
   const value=input=>Math.max(0,Math.min(100000000,Number(input.value)||0));
   function status(text,type){$('saveStatus').textContent=text;$('saveStatus').dataset.state=type;}
@@ -21,7 +22,7 @@
   async function request(method,body){
     const response=await fetch(API+(method==='GET'?'?mode=admin':''),{method,credentials:'same-origin',cache:'no-store',signal:AbortSignal.timeout(20000),headers:method==='GET'?{}:{'Content-Type':'application/json','X-Thorshall-Request':'bonus-hunts'},body:body?JSON.stringify(body):undefined});
     let data;try{data=await response.json();}catch(_){data={};}
-    if(!response.ok||!data.ok){const err=new Error(data.error||'Could not connect. Your draft is kept in this browser tab.');err.status=response.status;throw err;}return data;
+    if(!response.ok||!data.ok){const err=new Error(data.error||'Could not connect. Your draft is kept in this browser tab.');err.status=response.status;err.errorCode=data.errorCode;throw err;}return data;
   }
   function controls(){
     if(!state)return;
@@ -29,7 +30,8 @@
     ['newSlotName','newSlotBet','addBonus','cancelBonusEdit','payoutAmount','savePayout','previousBonus','nextBonus','startOpening','backToHunting','reviewHunt','huntSelect','renameHunt','duplicateHunt','deleteHunt','huntStart','huntCurrency','huntTitle','huntDate','huntBalance','importData','importFile','importLegacy','restoreDraft','togglePublic','rotateToken'].forEach(id=>$(id).disabled=locked);
     $('startOpening').disabled=locked||h.rows.length===0;
     $('backToHunting').disabled=locked||predictionWindows[h.id]?.reopenable===false;
-    $('finishHunt').disabled=locked||!all;
+    $('finishHunt').disabled=locked||!reviewing()&&!all;
+    $('finishHunt').textContent=reviewing()?'Done reviewing':'Finish hunt ✓';
     $('newHunt').disabled=locked||state.hunts.length>=50;$('newHuntAfterFinish').disabled=locked||state.hunts.length>=50;
     $('saveNow').disabled=locked||!dirty||saving;
     renderPredictionControl();
@@ -54,6 +56,7 @@
     }catch(err){
       lastSaveFailed=true;preserveDraft();
       if(err.status===401||err.status===403){blocked=true;error('Your owner session has expired. Sign in again; your draft is kept in this tab.','session');}
+      else if(err.errorCode==='currency_locked'){blocked=true;error(err.message+' Load the latest saved version to discard this unsaved currency change.','conflict');status('Currency change not saved','error');}
       else if(err.status===409||err.status===412){blocked=true;error('Another tab saved this hunt first. Download your draft before loading the latest saved version.','conflict');}
       else error(err.message,'network');
     }finally{saving=false;controls();}
@@ -94,12 +97,13 @@
     $('openingProgressText').textContent=m.opened+' of '+m.total+' opened';$('openingProgressPercent').textContent=Math.round(percent)+'%';$('openingProgressFill').style.width=percent+'%';
     $('payoutEditor').hidden=!row;$('allOpened').hidden=!!row||m.remaining>0;
     $('finishHint').textContent=m.remaining?m.remaining+' '+(m.remaining===1?'bonus left':'bonuses left')+' to open.':'All bonuses opened. Ready to finish.';
+    $('finishHint').hidden=reviewing();
     if(row){$('payoutPosition').textContent='Bonus '+(index+1)+' of '+h.rows.length;$('payoutSlotName').textContent=row.slot||'Unnamed slot';$('payoutSlotBet').textContent='Bet '+Core.money(row.bet,h.currency);$('payoutAmount').value=opened(row)?row.payout:'';$('savePayout').textContent=opened(row)?'Save correction & next →':'Save payout & next →';}
     $('payoutError').hidden=true;renderResults();controls();
   }
   function renderPhase(){
-    const h=current(),phase=h.status;
-    $('collectionPhase').hidden=phase!=='collecting';$('openingPhase').hidden=phase!=='opening';$('completedPhase').hidden=phase!=='complete';$('huntSetup').hidden=phase!=='collecting';$('startOpening').hidden=phase!=='collecting';$('backToHunting').hidden=phase!=='opening'||predictionWindows[h.id]?.reopenable===false;
+    const h=current(),phase=reviewing()?'opening':h.status;
+    $('collectionPhase').hidden=phase!=='collecting';$('openingPhase').hidden=phase!=='opening';$('completedPhase').hidden=phase!=='complete';$('huntSetup').hidden=phase!=='collecting';$('startOpening').hidden=phase!=='collecting';$('backToHunting').hidden=h.status!=='opening'||predictionWindows[h.id]?.reopenable===false;
     if(phase==='collecting')renderCollected();
     if(phase==='opening')renderOpening();
     if(phase==='complete'){const m=Core.calculate(h);$('completedSummary').textContent=h.rows.length+' bonuses · '+Core.money(m.endBalance,h.currency)+' end balance';$('completedProfit').textContent=(m.profit>0?'+':'')+Core.money(m.profit,h.currency)+' P/L';$('completedProfit').classList.toggle('positive',m.profit>=0);$('completedProfit').classList.toggle('negative',m.profit<0);}
@@ -112,7 +116,7 @@
     $('predictionStatus').dataset.state=closed?'closed':'open';
   }
   function renderOverlay(){const url=location.origin+'/bonus-hunt-overlay#token='+encodeURIComponent(streamToken);$('overlayUrl').value=url;$('overlayPreview').src=url;}
-  function renderAll(){fillDetails();renderLibrary();renderMetrics();renderPhase();renderVisibility();controls();}
+  function renderAll(){if(reviewingHuntId!==current().id)reviewingHuntId=null;fillDetails();renderLibrary();renderMetrics();renderPhase();renderVisibility();controls();}
   function completePending(){
     const action=pendingAction;if(!action)return;pendingAction=null;if(current().id!==action.huntId)return;
     if(action.kind==='payout'){const rows=current().rows,index=rows.findIndex(r=>r.id===action.rowId);const next=rows.slice(index+1).find(r=>!opened(r))||rows.find(r=>!opened(r));payoutRowId=next?next.id:null;renderMetrics();renderOpening();if(next)$('payoutAmount').focus();}
@@ -121,7 +125,7 @@
   }
   async function runPending(){
     if(actionBusy||blocked||!pendingAction)return false;actionBusy=true;controls();let completed=false;
-    try{if(await flushSave()){completePending();completed=true;return true;}return false;}finally{actionBusy=false;controls();if(completed){if(current().status==='opening'&&payoutRowId)$('payoutAmount').focus();else if(current().status==='collecting')$('newSlotName').focus();else if(current().status==='complete')$('newHuntAfterFinish').focus();}}
+    try{if(await flushSave()){completePending();completed=true;return true;}return false;}finally{actionBusy=false;controls();if(completed){if((current().status==='opening'||reviewing())&&payoutRowId)$('payoutAmount').focus();else if(current().status==='collecting')$('newSlotName').focus();else if(current().status==='complete')$(reviewing()?'finishHunt':'newHuntAfterFinish').focus();}}
   }
   function beginAction(action){if(actionBusy||pendingAction||blocked)return;pendingAction=action;change();runPending();}
   function newHunt(){
@@ -129,9 +133,10 @@
   }
   function download(data,filename) { const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a'); a.href=url; a.download=filename; a.click(); setTimeout(()=>URL.revokeObjectURL(url),1000); }
   function exportDraft() { download({schema:2,state,exportedAt:new Date().toISOString()},'thorshall-hunts-'+new Date().toISOString().slice(0,10)+'.json'); }
-  function validateImport(data) {
+  function validateImport(data,preserveVisibility=false) {
     const s=data.state || data;
     if(s.schema!==2 || !Array.isArray(s.hunts) || !s.hunts.length || s.hunts.length>50)throw new Error('Choose a Thor’s Hall hunt backup.');
+    if(preserveVisibility&&(!s.settings||typeof s.settings.public!=='boolean'))throw new Error('This draft has invalid visibility settings.');
     for(const h of s.hunts) {
       if(!h || typeof h.id!=='string' || !/^[A-Za-z0-9_-]{1,80}$/.test(h.id) || typeof h.title!=='string' || !h.title.trim() || h.title.length>80 || !/^\d{4}-\d{2}-\d{2}$/.test(h.date) || !['USD','EUR','GBP','CAD','AUD'].includes(h.currency) || !['collecting','opening','complete'].includes(h.status) || !Array.isArray(h.rows) || h.rows.length>150)throw new Error('This backup has invalid hunt details.');
       for(const n of [h.start,h.balance])if(!Number.isFinite(n)||n<0||n>100000000)throw new Error('This backup has an invalid balance.');
@@ -139,11 +144,11 @@
       if(new Set(h.rows.map(r=>r.id)).size!==h.rows.length)throw new Error('This backup contains duplicate bonus IDs.');
     }
     const ids=s.hunts.map(h=>h.id); if(new Set(ids).size!==ids.length)throw new Error('This backup contains duplicate hunts.');
-    return {schema:2,activeId:ids.includes(s.activeId)?s.activeId:ids[0],hunts:copy(s.hunts),settings:{public:false}};
+    return {schema:2,activeId:ids.includes(s.activeId)?s.activeId:ids[0],hunts:copy(s.hunts),settings:{public:preserveVisibility?s.settings.public:false}};
   }
   async function load(){
     try{
-      const data=await request('GET');state=data.state;revision=data.revision;streamToken=data.streamToken||'';predictionWindows=data.predictionWindows||{};blocked=false;dirty=false;pendingAction=null;payoutRowId=null;editingId=null;
+      const data=await request('GET');state=data.state;revision=data.revision;streamToken=data.streamToken||'';predictionWindows=data.predictionWindows||{};blocked=false;dirty=false;pendingAction=null;payoutRowId=null;editingId=null;reviewingHuntId=null;
       $('manager').hidden=false;$('loadingState').hidden=true;status('All changes saved','saved');renderAll();renderOverlay();
       try{const draft=JSON.parse(sessionStorage.getItem(DRAFT_KEY)||'null');if(draft&&draft.state&&JSON.stringify(draft.state)!==JSON.stringify(state)){recoveredDraft=draft;$('recoveryNotice').classList.remove('hidden');}}catch(_){}
       try{if(localStorage.getItem('thorshall_bonus_hunts_v1'))$('importLegacy').classList.remove('hidden');}catch(_){}
@@ -171,7 +176,7 @@
     return changePhase('start-opening');
   });
   $('payoutForm').addEventListener('submit',event=>{
-    event.preventDefault();if(pendingAction||rotationBusy||blocked||current().status!=='opening')return;
+    event.preventDefault();if(pendingAction||rotationBusy||blocked||current().status!=='opening'&&!reviewing())return;
     const raw=$('payoutAmount').value.trim(),amount=Number(raw),row=current().rows.find(r=>r.id===payoutRowId);
     if(!row||raw===''||!Number.isFinite(amount)||amount<0||amount>100000000){$('payoutError').textContent='Enter the payout. Use 0 for a bonus that paid nothing.';$('payoutError').hidden=false;return;}
     row.payout=Math.round(amount*100)/100;$('payoutError').hidden=true;beginAction({kind:'payout',huntId:current().id,rowId:row.id});
@@ -179,9 +184,14 @@
   $('openingResults').addEventListener('click',event=>{const button=event.target.closest('[data-open-row]');if(!button||pendingAction||rotationBusy||blocked)return;payoutRowId=button.dataset.openRow;renderOpening();$('payoutAmount').focus();});
   [['previousBonus',-1],['nextBonus',1]].forEach(([id,direction])=>$(id).addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const rows=current().rows,index=rows.findIndex(r=>r.id===payoutRowId),next=rows[index+direction];if(next){payoutRowId=next.id;renderOpening();$('payoutAmount').focus();}}));
   $('backToHunting').addEventListener('click',()=>changePhase('back-to-hunting'));
-  $('finishHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const h=current();if(!h.rows.length||h.rows.some(r=>!opened(r)))return;h.status='complete';beginAction({kind:'finish',huntId:h.id});});
-  $('reviewHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const h=current();h.status='opening';beginAction({kind:'review',huntId:h.id});});
-  $('huntSelect').addEventListener('change',()=>{if(pendingAction||rotationBusy||blocked)return;state.activeId=$('huntSelect').value;payoutRowId=null;resetEntry();renderAll();change();});
+  $('finishHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;if(reviewing()){reviewingHuntId=null;payoutRowId=null;renderPhase();$('reviewHunt').focus();return;}const h=current();if(!h.rows.length||h.rows.some(r=>!opened(r)))return;h.status='complete';beginAction({kind:'finish',huntId:h.id});});
+  $('reviewHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked||current().status!=='complete')return;reviewingHuntId=current().id;payoutRowId=current().rows[0]?.id||null;renderPhase();if(payoutRowId)$('payoutAmount').focus();});
+  $('huntSelect').addEventListener('change',()=>{
+    if(!state)return;const selected=$('huntSelect').value,previous=state.activeId;
+    if(pendingAction||rotationBusy||blocked||selected===previous||!state.hunts.some(h=>h.id===selected)){$('huntSelect').value=previous;return;}
+    if(current().status!=='complete'&&!confirm('Switch away from this unfinished hunt? Its predictions will close permanently. Your page and stream will switch to the selected hunt.')){$('huntSelect').value=previous;return;}
+    state.activeId=selected;reviewingHuntId=null;payoutRowId=null;resetEntry();renderAll();change();
+  });
   $('renameHunt').addEventListener('click',()=>{if(!state||pendingAction||actionBusy||rotationBusy||blocked)return;const input=$('huntTitle');input.scrollIntoView({block:'center'});input.focus({preventScroll:true});input.select();});
   $('newHunt').addEventListener('click',newHunt);$('newHuntAfterFinish').addEventListener('click',newHunt);
   $('duplicateHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked||state.hunts.length>=50)return;const h=copy(current());h.id=Core.id();h.title=(h.title+' copy').slice(0,80);h.rows.forEach(r=>r.id=Core.id());state.hunts.unshift(h);state.activeId=h.id;payoutRowId=null;resetEntry();renderAll();change();});
@@ -191,7 +201,7 @@
   $('saveNow').addEventListener('click',retryOrSave);
   $('retrySave').addEventListener('click',()=>{if(!state){load();return;}blocked=false;retryOrSave();});
   $('reloadRemote').addEventListener('click',async()=>{if(!confirm('Replace your unsaved draft with the saved version? Download your draft first if you need to keep it.'))return;clearDraft();hideError();pendingAction=null;await load();});
-  $('restoreDraft').addEventListener('click',()=>{if(pendingAction||actionBusy||rotationBusy)return;try{state=validateImport(recoveredDraft.state);pendingAction=null;payoutRowId=null;renderAll();$('recoveryNotice').classList.add('hidden');change();toast('Draft restored. Saving your changes…');}catch(err){error(err.message,'network');}});
+  $('restoreDraft').addEventListener('click',()=>{if(pendingAction||actionBusy||rotationBusy)return;try{state=validateImport(recoveredDraft.state,true);pendingAction=null;payoutRowId=null;reviewingHuntId=null;renderAll();$('recoveryNotice').classList.add('hidden');change();toast('Draft restored. Saving your changes…');}catch(err){error(err.message,'network');}});
   $('discardDraft').addEventListener('click',()=>{clearDraft();$('recoveryNotice').classList.add('hidden');recoveredDraft=null;});
   $('copyOverlay').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('overlayUrl').value);toast('Overlay URL copied. Paste it into your Browser Source.');}catch(_){$('overlayUrl').type='text';$('overlayUrl').select();toast('Copy the selected overlay URL.');}});
   $('showOverlayUrl').addEventListener('click',()=>{const show=$('overlayUrl').type==='password';$('overlayUrl').type=show?'text':'password';$('showOverlayUrl').textContent=show?'Hide':'Show';$('showOverlayUrl').setAttribute('aria-pressed',String(show));});

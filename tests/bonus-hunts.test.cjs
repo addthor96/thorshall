@@ -7,7 +7,8 @@ const site = path.resolve(__dirname, "..");
 process.env.STATS_SESSION_SECRET = "test-only-signing-secret-at-least-32-characters";
 process.env.DASHBOARD_PASSWORD = "test-only-master-password";
 const { createSession, COOKIE_NAME } = require(path.join(site, "netlify/lib/stats-auth"));
-const { createHandler, validateState, initialState, storeName } = require(path.join(site, "netlify/lib/bonus-hunts"));
+const { createHandler: handlerFactory, validateState, initialState, storeName, predictionStoreName } = require(path.join(site, "netlify/lib/bonus-hunts"));
+const createHandler = (factory, options = {}) => handlerFactory(factory, { connectPredictions: () => ({ async getWithMetadata() { return null; } }), ...options });
 const login = require(path.join(site, "netlify/functions/stats-session")).handler;
 const adminPage = require(path.join(site, "netlify/functions/bonus-hunts-admin")).handler;
 
@@ -315,5 +316,53 @@ test("fresh public display does not require owner initialization or persist anon
   const handle=createHandler(()=>({async getWithMetadata(){return null;},async setJSON(){writes++;throw new Error("not permitted");}}));
   const result=await handle(event("GET","viewer",null));
   assert.equal(result.statusCode,200);assert.equal(payload(result).state.settings.public,true);assert.equal(payload(result).revision,"empty");assert.equal(writes,0);
+});
+
+test("currency remains configurable before entries and is protected after a saved prediction", async () => {
+  const store = storage(), P = require("../netlify/lib/hunt-predictions");
+  let ledger = null, reads = 0;
+  const handle = createHandler(() => store, { connectPredictions: () => ({ async getWithMetadata(key, options) {
+    reads++; assert.equal(options.consistency, "strong");
+    return ledger ? { data: structuredClone(ledger), etag: "prediction-v1" } : null;
+  } }) });
+  let saved = payload(await handle(event())), huntId = saved.state.activeId;
+  assert.equal(reads, 0);
+  saved.state.hunts[0].currency = "EUR";
+  saved = payload(await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision })));
+  assert.equal(saved.state.hunts[0].currency, "EUR");
+  ledger = { schema: 1, huntId, currency: "EUR", entries: [{ authKind: "twitch", userId: "123", requestId: require("node:crypto").randomUUID(),
+    username: "viewer", nameKey: "viewer", amountMinor: 12345, identityHash: "a".repeat(64), ipHash: "b".repeat(64), createdAt: "2026-11-19T12:00:00.000Z" }] };
+  const changed = structuredClone(saved.state); changed.hunts[0].currency = "USD";
+  const rejected = await handle(event("PUT", "admin", "admin", { state: changed, revision: saved.revision }));
+  assert.equal(rejected.statusCode, 409); assert.equal(payload(rejected).errorCode, "currency_locked"); assert.match(payload(rejected).error, /EUR.*USD/);
+  const current = await store.getWithMetadata(); assert.equal(current.etag, saved.revision); assert.equal(current.data.state.hunts[0].currency, "EUR");
+  assert.equal(P.summary(ledger, current.data, current.data.state.hunts[0], null).count, 1);
+  const beforeReads = reads; saved.state.hunts[0].title = "Still editable";
+  assert.equal((await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision }))).statusCode, 200);
+  assert.equal(reads, beforeReads);
+});
+
+test("pending prediction currency and imported hunt IDs are protected without overwriting their records", async () => {
+  const store = storage(), huntId = "restored-hunt", ledger = { schema: 1, huntId, currency: "USD", entries: [{ authKind: "twitch", userId: "123",
+    requestId: require("node:crypto").randomUUID(), username: "viewer", nameKey: "viewer", amountMinor: 12345, identityHash: "a".repeat(64), ipHash: "b".repeat(64),
+    createdAt: "2026-11-19T12:00:00.000Z", sequence: 1, windowId: "0", admittedAt: null, expectedRevision: null }] };
+  const handle = createHandler(() => store, { connectPredictions: () => ({ async getWithMetadata(key) { return key === "hunt-" + huntId ? { data: ledger, etag: "pending-v1" } : null; } }) });
+  let saved = payload(await handle(event()));
+  saved.state.hunts.push({ ...structuredClone(saved.state.hunts[0]), id: huntId, currency: "EUR" });
+  const rejected = await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision }));
+  assert.equal(rejected.statusCode, 409); assert.equal(payload(rejected).errorCode, "currency_locked");
+  assert.equal((await store.getWithMetadata()).etag, saved.revision); assert.equal(ledger.currency, "USD");
+  saved.state.hunts[1].currency = "USD";
+  assert.equal((await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision }))).statusCode, 200);
+});
+
+test("currency checking fails safely on unavailable storage and uses the canonical production ledger", async () => {
+  const store = storage(), handle = createHandler(() => store, { connectPredictions: () => { throw new Error("unavailable"); } });
+  const saved = payload(await handle(event())); saved.state.hunts[0].currency = "EUR";
+  assert.equal((await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision }))).statusCode, 503);
+  assert.equal((await store.getWithMetadata()).data.state.hunts[0].currency, "USD");
+  const alternate = { rawUrl: "https://example.netlify.app/admin", headers: { host: "example.netlify.app" }, deployContext: "production", published: true };
+  assert.equal(predictionStoreName(alternate), "thorshall-hunt-predictions-v1");
+  assert.notEqual(predictionStoreName({ ...alternate, published: false }), predictionStoreName(alternate));
 });
 

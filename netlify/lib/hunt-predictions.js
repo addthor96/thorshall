@@ -90,12 +90,18 @@ function emptyLedger(hunt) { return { schema: 1, huntId: hunt.id, currency: hunt
 function validAdmission(version) {
   return (version.windowId === undefined || validWindowId(version.windowId))
     && (version.expectedRevision === undefined || version.expectedRevision === null || typeof version.expectedRevision === "string" && UUID.test(version.expectedRevision))
+    && (version.admissionOrder === undefined || Number.isSafeInteger(version.admissionOrder) && version.admissionOrder > 0 && timestamp(version.admittedAt))
     && (version.admittedAt === undefined ? version.windowId === undefined : version.admittedAt === null || timestamp(version.admittedAt) && version.admittedAt >= version.createdAt);
 }
 function validateLedger(value, huntId) {
   if (!value || typeof value !== "object" || value.schema !== 1 || value.huntId !== huntId || !["USD", "EUR", "GBP", "CAD", "AUD"].includes(value.currency)
       || !Array.isArray(value.entries) || value.entries.length > MAX_ENTRIES || Buffer.byteLength(JSON.stringify(value)) > MAX_LEDGER_BYTES) throw new Error("Invalid prediction ledger");
-  const requestIds = new Set(), legacyBrowsers = new Set(), legacyNames = new Set(), users = new Set(), sequences = new Set();
+  const requestIds = new Set(), legacyBrowsers = new Set(), legacyNames = new Set(), users = new Set(), sequences = new Set(), admissions = new Set();
+  function admission(version) {
+    if (version.admissionOrder === undefined) return;
+    if (admissions.has(version.admissionOrder)) throw new Error("Invalid prediction admission order");
+    admissions.add(version.admissionOrder);
+  }
   for (const [index, entry] of value.entries.entries()) {
     const twitch = entry?.authKind === "twitch";
     if (!entry || typeof entry !== "object" || !UUID.test(entry.requestId) || !HASH.test(entry.identityHash) || !HASH.test(entry.ipHash)
@@ -113,6 +119,7 @@ function validateLedger(value, huntId) {
     const sequence = entry.sequence === undefined ? index + 1 : entry.sequence;
     if (!Number.isSafeInteger(sequence) || sequence < 1 || sequences.has(sequence)) throw new Error("Invalid prediction acceptance order");
     sequences.add(sequence);
+    admission(entry);
     if (entry.revisions !== undefined) {
       if (!twitch || !Array.isArray(entry.revisions) || entry.revisions.length > MAX_REVISIONS) throw new Error("Invalid prediction revisions");
       let previous = entry;
@@ -122,10 +129,11 @@ function validateLedger(value, huntId) {
             || !Number.isSafeInteger(revision.amountMinor) || revision.amountMinor < 0 || revision.amountMinor > 100000000000
             || !HASH.test(revision.ipHash) || !timestamp(revision.createdAt) || revision.createdAt < previous.createdAt || !validAdmission(revision)
             || !Number.isSafeInteger(revision.sequence) || revision.sequence <= (previous.sequence || index + 1) || sequences.has(revision.sequence)) throw new Error("Invalid prediction revision");
-        requestIds.add(revision.requestId); sequences.add(revision.sequence); previous = revision;
+        requestIds.add(revision.requestId); sequences.add(revision.sequence); admission(revision); previous = revision;
       }
     }
   }
+  if ([...admissions].some(order => sequences.has(order))) throw new Error("Invalid prediction admission order");
   return value;
 }
 async function readLedger(store, hunt) {
@@ -150,7 +158,7 @@ function eligibleEntries(ledger, record, hunt) {
     if (!versions.length) return [];
     const latest = versions[versions.length - 1];
     return [{ ...entry, username: latest.username, amountMinor: latest.amountMinor, requestId: latest.requestId,
-      updatedAt: latest.admittedAt || latest.createdAt, acceptedOrder: latest.sequence || order + 1, edited: latest !== entry }];
+      updatedAt: latest.admittedAt || latest.createdAt, acceptedOrder: latest.admissionOrder || latest.sequence || order + 1, edited: latest !== entry }];
   });
 }
 function finalBalanceMinor(hunt) {
@@ -205,13 +213,14 @@ function acceptedOperation(saved, ledger, record, hunt) {
   return ledger.currency === hunt.currency && versionEligible(record, hunt.id, saved.version);
 }
 function nextSequence(ledger) {
-  return ledger.entries.reduce((largest, entry, index) => Math.max(largest, entry.sequence || index + 1, ...(entry.revisions || []).map(revision => revision.sequence)), 0) + 1;
+  return ledger.entries.reduce((largest, entry, index) => Math.max(largest, entry.sequence || index + 1, entry.admissionOrder || 0,
+    ...(entry.revisions || []).flatMap(revision => [revision.sequence, revision.admissionOrder || 0])), 0) + 1;
 }
 function reservedLedgerBytes(ledger) {
-  // Reserve the full ISO timestamp for every pending admission so confirming a
-  // near-limit ledger never makes the stored document unreadable.
+  // Reserve the ISO timestamp and the largest safe admission-order field for
+  // every pending save, including admissions delayed behind other requests.
   const pending = ledger.entries.reduce((count, entry) => count + [entry, ...(entry.revisions || [])].filter(version => version.admittedAt === null).length, 0);
-  return Buffer.byteLength(JSON.stringify(ledger)) + pending * 22;
+  return Buffer.byteLength(JSON.stringify(ledger)) + pending * (22 + Buffer.byteLength(',"admissionOrder":9007199254740991'));
 }
 function createHandler({ connectHunts, connectPredictions, now = () => new Date(), secretFor = signingSecret, authInfoFor = defaultAuthInfo,
   logDiagnostic = value => console.error(JSON.stringify(value)) } = {}) {
@@ -302,12 +311,12 @@ function createHandler({ connectHunts, connectPredictions, now = () => new Date(
             || !running(current.hunt) || pending.ledger.currency !== current.hunt.currency) throw new PredictionError(409, "Predictions changed or closed before this change was accepted.");
         const previous = eligibleEntries(pending.ledger, current.record, current.hunt).find(entry => entry.authKind === "twitch" && entry.userId === auth.viewer.id);
         if ((previous?.requestId || null) !== operation.expectedRevision) throw new PredictionError(409, "Your prediction changed in another tab. Refresh predictions before saving again.");
-        const admittedAt = now().toISOString(), admitted = { ...saved.version, admittedAt };
+        const admittedAt = now().toISOString(), admissionOrder = nextSequence(pending.ledger), admitted = { ...saved.version, admittedAt, admissionOrder };
         if (!timestamp(admittedAt) || admittedAt < admitted.createdAt) throw new Error("Invalid prediction admission clock");
         if (!versionEligible(current.record, huntId, admitted)) throw new PredictionError(409, "Predictions closed before this change was accepted.");
         const next = { ...pending.ledger, entries: pending.ledger.entries.map(entry => entry.requestId === saved.entry.requestId
-          ? entry.requestId === operation.requestId ? { ...entry, admittedAt }
-            : { ...entry, revisions: entry.revisions.map(revision => revision.requestId === operation.requestId ? { ...revision, admittedAt } : revision) } : entry) };
+          ? entry.requestId === operation.requestId ? { ...entry, admittedAt, admissionOrder }
+            : { ...entry, revisions: entry.revisions.map(revision => revision.requestId === operation.requestId ? { ...revision, admittedAt, admissionOrder } : revision) } : entry) };
         if (Buffer.byteLength(JSON.stringify(next)) > MAX_LEDGER_BYTES) throw new PredictionError(429, "This hunt has reached its prediction limit.");
         const result = await predictionStore.setJSON(ledgerKey(huntId), next, { onlyIfMatch: pending.etag });
         if (result?.modified === true && typeof result.etag === "string" && result.etag) break;
