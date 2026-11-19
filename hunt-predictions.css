@@ -1,5 +1,6 @@
 /* Public hunt predictions. Kept separate from the owner editor and OBS overlay. */
-.hunt-predictions{margin:0 0 24px;padding:26px;border:1px solid #3a495c;border-radius:16px;background:linear-gradient(135deg,#1b2634,#141e2b);box-shadow:0 12px 38px #050b1726;min-width:0}
+.hunt-predictions{margin:0 0 24px;min-width:0}
+.prediction-panel{padding:26px;border:1px solid #3a495c;border-radius:16px;background:linear-gradient(135deg,#1b2634,#141e2b);box-shadow:0 12px 38px #050b1726;min-width:0}
 .hunt-predictions [hidden]{display:none!important}
 .prediction-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:24px}
 .prediction-heading .eyebrow{display:block;color:#b7c5d7;font-size:12px;font-weight:600;letter-spacing:.11em;margin-bottom:9px}
@@ -77,17 +78,26 @@
 .prediction-feed-empty{display:flex;flex-direction:column;justify-content:center;gap:9px;height:100%;padding:26px;text-align:center;color:#b7c6d9}
 .prediction-feed-empty strong{font-size:16px;font-weight:550;color:#dce4ef}
 .prediction-feed-empty span{font-size:14px;line-height:1.6;max-width:300px;align-self:center}
-.prediction-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;padding:0;margin:0}
-.prediction-place{display:flex;flex-direction:column;min-width:0;min-height:108px;padding:14px;border:1px solid #41526a;border-radius:10px;background:linear-gradient(140deg,#243346,#1a283a)}
-.prediction-place-1{border-color:#8a7853;background:linear-gradient(140deg,#3b3b33,#263344)}
-.prediction-rank{color:#dfc796;font-size:14px;line-height:1.3;font-weight:600;margin-bottom:14px}
-.prediction-place-2 .prediction-rank{color:#cfdaeb}.prediction-place-3 .prediction-rank{color:#dfbca1}
+.prediction-results{margin:0 0 22px;padding:0 12px;min-width:0}
+.prediction-results-heading{display:flex;align-items:baseline;justify-content:space-between;gap:15px;max-width:720px;margin:0 auto 12px}
+.prediction-results-heading h2{font-size:14px;line-height:1.5;font-weight:600;letter-spacing:.02em;color:#c4cfde;margin:0}
+.prediction-podium-hunt{font-size:13px;line-height:1.5;color:#a8b8cc;text-align:right;overflow-wrap:anywhere;margin:0}
+.prediction-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:end;gap:12px;max-width:720px;list-style:none;padding:0;margin:0 auto}
+.prediction-place{--podium-light:#b6c4d5;--podium-dark:#55677e;--podium-edge:#a6b5c9;--podium-text:#e1eaf5;--podium-height:54px;display:flex;flex-direction:column;min-width:0;padding:0;border:0;background:transparent}
+.prediction-place-1{--podium-light:#d7b66c;--podium-dark:#796032;--podium-edge:#d7bb7a;--podium-text:#f9e4af;--podium-height:78px}
+.prediction-place-3{--podium-light:#bd9070;--podium-dark:#6b4937;--podium-edge:#ba8f70;--podium-text:#eed0b8;--podium-height:34px}
+.prediction-place-content{display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:0;min-height:70px;text-align:center;padding:0 7px 11px}
+.prediction-rank{color:var(--podium-text);font-size:14px;line-height:1.3;font-weight:600;margin-bottom:7px}
+.prediction-pedestal{position:relative;display:flex;align-items:center;justify-content:center;flex:none;height:var(--podium-height);border:1px solid var(--podium-edge);border-radius:8px 8px 3px 3px;background:linear-gradient(115deg,var(--podium-light),var(--podium-dark));box-shadow:inset 0 3px 0 #ffffff35,inset -8px 0 0 #00000012,0 7px 18px #050b1730;overflow:hidden}
+.prediction-pedestal::before{content:"";position:absolute;inset:0;background:linear-gradient(120deg,#ffffff14,transparent 46%);pointer-events:none}
+.prediction-place-number{font-size:32px;font-weight:750;line-height:1;color:#101b29b8;text-shadow:0 1px 0 #ffffff28;font-variant-numeric:tabular-nums}
+.prediction-place-1 .prediction-place-number{font-size:40px}.prediction-place-3 .prediction-place-number{font-size:25px}
 .prediction-winner-name{color:#e2ebf7;font-size:14px;font-weight:550;line-height:1.45;overflow-wrap:anywhere}
 .prediction-winner-guess{display:block;color:#edd8ae;font-size:19px;line-height:1.3;letter-spacing:-.025em;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;margin-top:8px}
 .prediction-winner-difference{display:block;color:#b4c5db;font-size:12px;line-height:1.5;margin-top:6px;overflow-wrap:anywhere}
-.prediction-podium-note{font-size:13px;line-height:1.65;color:#a8bbd3;margin:13px 0 0}
+.prediction-podium-note{max-width:720px;font-size:13px;line-height:1.65;color:#a8bbd3;text-align:center;margin:12px auto 0}
 .hunt-predictions button:focus-visible,.hunt-predictions .prediction-twitch-login:focus-visible{outline:2px solid #d7bd89;outline-offset:3px}
-@media(max-width:1100px){.prediction-content{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:22px}.prediction-entry{padding:17px}.prediction-feed-row{gap:9px;padding:11px}.prediction-feed-amount{font-size:16px}.prediction-feed-number{min-width:16px}.prediction-place{padding:12px}.prediction-winner-name{font-size:13px}}
-@media(max-width:760px){.hunt-predictions{padding:22px}.prediction-content{grid-template-columns:1fr;gap:23px}.prediction-entry{padding:19px}.prediction-heading{margin-bottom:20px}.prediction-heading h2{font-size:24px}.prediction-feed-viewport{height:256px}.prediction-mine strong{font-size:34px}}
-@media(max-width:520px){.hunt-predictions{padding:19px 14px;margin-bottom:19px;border-radius:12px}.prediction-heading{gap:12px}.prediction-heading h2{font-size:22px}.prediction-heading .eyebrow{font-size:10px;letter-spacing:.09em}.prediction-hunt-name{font-size:13px}.prediction-badge{font-size:12px;padding:7px 9px}.prediction-entry{padding:16px}.prediction-intro{font-size:15px;margin-bottom:17px}.prediction-auth-note,.prediction-rules{font-size:13px}.prediction-account{padding:12px}.prediction-account-name{font-size:15px}.prediction-feed-heading{padding:12px}.prediction-feed-row{gap:9px;padding:11px 10px}.prediction-feed-name{font-size:13px}.prediction-feed-detail{font-size:11px}.prediction-feed-number{font-size:11px;min-width:15px}.prediction-feed-amount{font-size:15px}.prediction-refresh{font-size:12px;padding:7px 8px}.prediction-podium{gap:7px}.prediction-place{padding:12px 9px;min-height:106px;border-radius:8px}.prediction-rank{font-size:13px;margin-bottom:13px}.prediction-winner-name{font-size:12px}.prediction-winner-guess{font-size:16px}.prediction-winner-difference{font-size:11px}.prediction-podium-note{font-size:12px}.prediction-mine{padding:17px}.prediction-mine strong{font-size:32px}}
+@media(max-width:1100px){.prediction-content{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr);gap:22px}.prediction-entry{padding:17px}.prediction-feed-row{gap:9px;padding:11px}.prediction-feed-amount{font-size:16px}.prediction-feed-number{min-width:16px}}
+@media(max-width:760px){.prediction-panel{padding:22px}.prediction-content{grid-template-columns:1fr;gap:23px}.prediction-entry{padding:19px}.prediction-heading{margin-bottom:20px}.prediction-heading h2{font-size:24px}.prediction-feed-viewport{height:256px}.prediction-mine strong{font-size:34px}}
+@media(max-width:520px){.hunt-predictions{margin-bottom:19px}.prediction-panel{padding:19px 14px;border-radius:12px}.prediction-heading{gap:12px}.prediction-heading h2{font-size:22px}.prediction-heading .eyebrow{font-size:10px;letter-spacing:.09em}.prediction-hunt-name{font-size:13px}.prediction-badge{font-size:12px;padding:7px 9px}.prediction-entry{padding:16px}.prediction-intro{font-size:15px;margin-bottom:17px}.prediction-auth-note,.prediction-rules{font-size:13px}.prediction-account{padding:12px}.prediction-account-name{font-size:15px}.prediction-feed-heading{padding:12px}.prediction-feed-row{gap:9px;padding:11px 10px}.prediction-feed-name{font-size:13px}.prediction-feed-detail{font-size:11px}.prediction-feed-number{font-size:11px;min-width:15px}.prediction-feed-amount{font-size:15px}.prediction-refresh{font-size:12px;padding:7px 8px}.prediction-results{padding:0 2px;margin-bottom:18px}.prediction-results-heading{gap:10px;margin-bottom:9px}.prediction-results-heading h2{font-size:13px}.prediction-podium-hunt{font-size:12px}.prediction-podium{gap:8px}.prediction-place-content{padding:0 2px 9px;min-height:65px}.prediction-rank{font-size:13px;margin-bottom:6px}.prediction-winner-name{font-size:13px}.prediction-winner-guess{font-size:16px}.prediction-winner-difference{font-size:12px}.prediction-podium-note{font-size:12px;margin-top:10px}.prediction-mine{padding:17px}.prediction-mine strong{font-size:32px}}
 @media(prefers-reduced-motion:reduce){.prediction-field input,.prediction-submit,.prediction-twitch-login{transition:none}}

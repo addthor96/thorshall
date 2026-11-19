@@ -1,6 +1,6 @@
 # Hunt predictions
 
-The public `/bonus-hunt` page accepts free end-balance guesses while its active hunt is collecting bonuses and predictions are open. Compact selectable hunt cards appear at the top; the prediction section and full bonus breakdown below both follow the selected card. It shows 1st, 2nd and 3rd place without prize amounts; completed hunts rank guesses by absolute distance from the displayed final end balance, with earlier final saved guesses winning ties.
+The public `/bonus-hunt` page accepts free end-balance guesses while its active hunt is collecting bonuses and predictions are open. Compact selectable hunt cards appear at the top; the prediction section and full bonus breakdown below both follow the selected card. A separate stepped podium sits above the prediction entry/feed panel: silver second on the left, taller gold first in the center, and shorter bronze third on the right. Places remain labelled while results are pending, without prize amounts; completed hunts rank guesses by absolute distance from the displayed final end balance, with earlier final saved guesses winning ties.
 
 ## Current identity and entry rules
 

@@ -302,19 +302,33 @@
     nodes.feedEmpty = element('div', 'prediction-feed-empty');
     append(nodes.feedEmpty, element('strong', '', 'The first guess starts it.'), element('span', '', 'Saved predictions will appear here as viewers enter.'));
     append(nodes.feedViewport, nodes.feedList, nodes.feedEmpty); append(feed, feedHeading, nodes.feedViewport);
+    var results = element('section', 'prediction-results');
+    results.setAttribute('aria-labelledby', 'prediction-podium-title'); results.setAttribute('data-hunt-id', context.hunt.id);
+    var resultsHeading = element('div', 'prediction-results-heading');
+    var podiumTitle = element('h2', '', 'Prediction podium'); podiumTitle.id = 'prediction-podium-title';
+    nodes.podiumHunt = element('p', 'prediction-podium-hunt', 'For ' + context.hunt.title);
+    append(resultsHeading, podiumTitle, nodes.podiumHunt);
     var podium = element('ol', 'prediction-podium'); podium.setAttribute('aria-label', 'Prediction podium');
     nodes.places = places.map(function (place, index) {
       var card = element('li', 'prediction-place prediction-place-' + (index + 1));
+      card.setAttribute('value', index + 1);
       var rank = element('span', 'prediction-rank', place);
       var name = element('strong', 'prediction-winner-name', 'To be decided');
       var guess = element('span', 'prediction-winner-guess'); guess.hidden = true;
       var difference = element('span', 'prediction-winner-difference'); difference.hidden = true;
-      append(card, rank, name, guess, difference); podium.appendChild(card);
-      return { name: name, guess: guess, difference: difference };
+      var details = element('div', 'prediction-place-content'); append(details, rank, name, guess, difference);
+      var pedestal = element('div', 'prediction-pedestal');
+      var placeNumber = element('span', 'prediction-place-number', String(index + 1)); placeNumber.setAttribute('aria-hidden', 'true');
+      pedestal.appendChild(placeNumber); append(card, details, pedestal);
+      return { card: card, name: name, guess: guess, difference: difference };
     });
+    // Keep result lookup in rank order while the podium places the winner in the center.
+    [1, 0, 2].forEach(function (index) { podium.appendChild(nodes.places[index].card); });
     nodes.podiumNote = element('p', 'prediction-podium-note', 'The closest guesses appear here once the hunt is finished. Ties go to the guess saved first; editing resets that time.');
-    append(standings, standingsHeader, feed, podium, nodes.podiumNote);
-    append(content, entry, standings); append(mount, heading, content);
+    append(results, resultsHeading, podium, nodes.podiumNote);
+    append(standings, standingsHeader, feed);
+    var panel = element('section', 'prediction-panel'); panel.setAttribute('aria-labelledby', 'predictions-title');
+    append(content, entry, standings); append(panel, heading, content); append(mount, results, panel);
     context.nodes = nodes;
     context.scroller = { timer: null, lastTick: null, position: 0, paused: false, hovered: false, focused: false };
     context.inViewport = typeof window.IntersectionObserver !== 'function';
@@ -379,6 +393,7 @@
     nodes.badge.dataset.state = !data ? 'loading' : complete ? 'complete' : isOpen ? 'open' : 'locked';
     nodes.amountLabel.textContent = 'Final end balance (' + context.hunt.currency + ')';
     nodes.huntName.textContent = 'For ' + context.hunt.title;
+    nodes.podiumHunt.textContent = 'For ' + context.hunt.title;
     nodes.form.hidden = !isOpen || !viewer || !data.authConfigured || !!mine && !state.editing;
     nodes.intro.textContent = complete ? 'The closest predictions to the final end balance take the top three places.' : isOpen ? 'Predict the final end balance. You can change your guess until predictions close.' : 'Predictions are closed for this hunt.';
     nodes.amount.disabled = nodes.website.disabled = locked || !!state.pending;

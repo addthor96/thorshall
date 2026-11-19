@@ -65,7 +65,10 @@ test('collecting hunt revisions preserve drafts and keep a single moderate refre
   assert.equal(app.calls.length, 1); assert.equal(app.calls[0].credentials, 'same-origin');
   const amount = app.node('prediction-amount'); app.input(amount.id, '1234.50'); amount.focus(); await app.view('hunt-a', 'collecting', 'v2');
   assert.equal(app.calls.length, 1); assert.equal(app.node(amount.id), amount); assert.equal(app.document.activeElement, amount); assert.equal(amount.value, '1234.50'); assert.equal(app.node('prediction-username'), null);
-  assert.equal(app.byClass('prediction-place').length, 3); assert.match(app.text(), /1st place.*2nd place.*3rd place/); assert.doesNotMatch(app.text(), /\$[0-9]/);
+  assert.equal(app.byClass('prediction-place').length, 3); assert.match(app.text(), /2nd place.*1st place.*3rd place/); assert.doesNotMatch(app.text(), /\$[0-9]/);
+  assert.deepEqual(app.mount.children.map(node => node.className), ['prediction-results', 'prediction-panel']);
+  assert.deepEqual(app.byClass('prediction-place').map(node => node.attributes.value), ['2', '1', '3']);
+  assert.equal(app.byClass('prediction-podium-hunt')[0].textContent, 'For hunt-a');
   assert.deepEqual([...app.timers.values()].map(timer => timer.ms), []);
 });
 
@@ -125,10 +128,19 @@ test('switching hunts ignores stale display results and restores each hunt draft
 });
 
 test('completed results render safe text and refresh only when the final revision changes', async () => {
-  const app = await start(() => response(summary('hunt-a', { status: 'complete', accepting: false, count: 2, podium: [{ place: 1, username: '<img src=x>', amountMinor: 15000, differenceMinor: 0 }, { place: 2, username: 'second_user', amountMinor: 15500, differenceMinor: 500 }] })));
-  await app.view('hunt-a', 'complete'); assert.equal(app.byClass('prediction-form')[0].hidden, true); assert.equal(app.byClass('prediction-winner-name')[0].textContent, '@<img src=x>');
-  assert.equal(app.byClass('prediction-place')[0].children.some(node => node.tagName === 'IMG'), false); assert.match(app.text(), /Exact prediction/);
+  let empty = false;
+  const app = await start(() => response(summary('hunt-a', { status: 'complete', accepting: false, count: empty ? 0 : 2, podium: empty ? [] : [{ place: 1, username: '<img src=x>', amountMinor: 15000, differenceMinor: 0 }, { place: 2, username: 'second_user', amountMinor: 15500, differenceMinor: 500 }] })));
+  await app.view('hunt-a', 'complete'); assert.equal(app.byClass('prediction-form')[0].hidden, true);
+  assert.deepEqual(app.byClass('prediction-winner-name').map(node => node.textContent), ['@second_user', '@<img src=x>', 'No entry']);
+  const winner = app.byClass('prediction-place-1')[0];
+  const winnerDetails = winner.children[0];
+  assert.equal(winnerDetails.children.some(node => node.tagName === 'IMG'), false); assert.match(app.text(), /Exact prediction/);
+  assert.equal(winnerDetails.children[2].textContent, '$150.00'); assert.equal(winnerDetails.children[3].textContent, 'Exact prediction');
+  assert.equal(app.byClass('prediction-place-3')[0].children[0].children[2].hidden, true);
   await app.view('hunt-a', 'complete'); assert.equal(app.calls.length, 1); await app.view('hunt-a', 'complete', 'v2'); assert.equal(app.calls.length, 2);
+  empty = true; await app.view('hunt-a', 'complete', 'v3');
+  assert.deepEqual(app.byClass('prediction-winner-name').map(node => node.textContent), ['No entry', 'No entry', 'No entry']);
+  assert.ok(app.byClass('prediction-winner-guess').every(node => node.hidden)); assert.ok(app.byClass('prediction-winner-difference').every(node => node.hidden));
 });
 
 test('privacy loss discards cached names, drafts and delayed responses', async () => {
