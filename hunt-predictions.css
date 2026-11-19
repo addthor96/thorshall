@@ -1,0 +1,53 @@
+/* Public hunt predictions. Isolated from the owner editor and OBS overlay. */
+.hunt-predictions{margin:0 0 24px;padding:24px;border:1px solid #344354;border-radius:12px;background:linear-gradient(130deg,#19222e,#151c27);box-shadow:0 8px 22px #060b141a;min-width:0}
+.prediction-heading{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:23px}
+.prediction-heading .eyebrow{display:block;color:#9aabc2;font-size:8px;font-weight:550;letter-spacing:.13em;margin-bottom:8px}
+.prediction-heading h3{font-size:21px;line-height:1.25;font-weight:600;letter-spacing:-.025em;color:#e9edf5}
+.prediction-badge{border:1px solid #46546a;border-radius:999px;padding:6px 10px;font-size:9px;color:#b7c5d8;flex-shrink:0;line-height:1.2}
+.prediction-badge[data-state=open]{color:#b3d1bb;border-color:#3a554b;background:#314b3940}
+.prediction-badge[data-state=complete]{color:#ddc79a;border-color:#655837;background:#3a322333}
+.prediction-content{display:grid;grid-template-columns:minmax(0,.85fr) minmax(0,1.25fr);gap:34px;align-items:start}
+.prediction-entry{min-width:0}
+.prediction-intro{font-size:12px;line-height:1.6;color:#a9b8cd;margin:0 0 17px}
+.prediction-form{display:grid;grid-template-columns:1fr;gap:13px}
+.prediction-field{min-width:0}
+.prediction-field label{display:block;color:#bdc9d9;font-size:11px;font-weight:550;margin-bottom:7px}
+.prediction-field input{width:100%;min-width:0;min-height:44px;border:1px solid #3a485d;border-radius:8px;background:#111925;color:#e4ebf6;padding:11px 12px;outline:none;font:400 14px/1.4 var(--font,Arial,Helvetica,sans-serif);font-variant-numeric:tabular-nums;transition:border-color .15s,box-shadow .15s}
+.prediction-field input::placeholder{color:#7d8fa9;opacity:1}
+.prediction-field input:focus{border-color:#ba9e69;box-shadow:0 0 0 3px #c3a77118}
+.prediction-field input[aria-invalid=true]{border-color:#bb8379}
+.prediction-field input:disabled{opacity:.6}
+.prediction-submit{width:100%;min-height:43px;border:1px solid #cdb481;border-radius:7px;background:#cdb481;color:#1a1e25;padding:10px 15px;font:650 12px/1.4 var(--font,Arial,Helvetica,sans-serif);transition:background .15s,border-color .15s}
+.prediction-submit:hover{background:#e3cca0;border-color:#e3cca0}
+.prediction-submit:disabled,.prediction-refresh:disabled{opacity:.45;cursor:default}
+.prediction-rules{font-size:10px;line-height:1.65;color:#97a9c3;margin:0}
+.prediction-honeypot{position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden}
+.prediction-mine{padding:16px 17px;border:1px solid #4c5c4c;border-radius:9px;background:#23392c26}
+.prediction-mine-label{display:block;color:#a9c1b1;font-size:10px}
+.prediction-mine strong{display:block;font-size:28px;font-weight:550;line-height:1.2;letter-spacing:-.035em;color:#dfd0ac;margin:8px 0;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.prediction-mine-name{display:block;color:#a4b8ca;font-size:10px;line-height:1.5;overflow-wrap:anywhere}
+.prediction-closed{padding:15px;border:1px solid #354356;border-radius:8px;background:#111b2826;color:#a6b7ce;font-size:11px;line-height:1.6;margin:0}
+.prediction-message{font-size:11px;line-height:1.6;color:#a6b7ce;margin:11px 0 0;min-height:18px}
+.prediction-message:empty{margin-top:0;min-height:0}
+.prediction-message[data-state=error]{color:#f1b6ab}
+.prediction-message[data-state=success]{color:#afd0b6}
+.prediction-standings{min-width:0}
+.prediction-standings-heading{display:flex;justify-content:space-between;align-items:center;gap:13px;margin:0 0 12px;min-height:29px}
+.prediction-count{color:#a6b7ce;font-size:10px}
+.prediction-refresh{font:500 10px/1.4 var(--font,Arial,Helvetica,sans-serif);color:#bac8dc;background:transparent;border:1px solid #435067;border-radius:6px;padding:6px 8px;white-space:nowrap}
+.prediction-refresh:hover{background:#293548;border-color:#65758c}
+.prediction-podium{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;list-style:none;padding:0;margin:0}
+.prediction-place{display:flex;flex-direction:column;min-width:0;min-height:173px;padding:17px 14px;border:1px solid #354356;border-radius:10px;background:linear-gradient(140deg,#1d2938,#141f2d)}
+.prediction-place-1{border-color:#776b51;background:linear-gradient(140deg,#2b2e2f,#1b2633)}
+.prediction-rank{color:#cbb383;font-size:11px;line-height:1.3;font-weight:550;margin-bottom:25px}
+.prediction-place-2 .prediction-rank{color:#bbc9dc}.prediction-place-3 .prediction-rank{color:#c7aa93}
+.prediction-winner-name{color:#d9e3f1;font-size:12px;font-weight:550;line-height:1.45;overflow-wrap:anywhere}
+.prediction-winner-guess{display:block;color:#e0cfaa;font-size:20px;line-height:1.25;letter-spacing:-.025em;overflow-wrap:anywhere;font-variant-numeric:tabular-nums;margin-top:9px}
+.prediction-winner-difference{display:block;color:#9fb2ca;font-size:9px;line-height:1.5;margin-top:6px;overflow-wrap:anywhere}
+.prediction-podium-note{font-size:10px;line-height:1.65;color:#97a9c3;margin:12px 0 0}
+.hunt-predictions [hidden]{display:none!important}
+.hunt-predictions button:focus-visible{outline:2px solid #d7bd89;outline-offset:4px}
+@media(max-width:1000px){.prediction-content{gap:23px;grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}.prediction-place{padding:15px 11px}.prediction-winner-guess{font-size:18px}}
+@media(max-width:760px){.hunt-predictions{padding:22px}.prediction-content{grid-template-columns:1fr;gap:24px}.prediction-form{grid-template-columns:1fr 1fr;gap:13px}.prediction-submit,.prediction-rules{grid-column:1/-1}.prediction-place{min-height:151px;padding:17px}.prediction-rank{margin-bottom:22px}.prediction-winner-guess{font-size:22px}}
+@media(max-width:520px){.hunt-predictions{padding:19px 14px;margin-bottom:19px;border-radius:10px}.prediction-heading{margin-bottom:18px;gap:12px;align-items:flex-start}.prediction-heading h3{font-size:19px}.prediction-heading .eyebrow{font-size:7px}.prediction-badge{font-size:8px;padding:6px 8px;margin-top:2px}.prediction-intro{font-size:11px}.prediction-form{grid-template-columns:1fr;gap:12px}.prediction-field input{font-size:16px;min-height:45px}.prediction-submit{min-height:44px;font-size:12px}.prediction-rules{font-size:9px}.prediction-content{gap:22px}.prediction-standings-heading{gap:10px}.prediction-count{font-size:9px}.prediction-refresh{font-size:9px}.prediction-podium{gap:7px}.prediction-place{padding:13px 9px;min-height:145px;border-radius:8px}.prediction-rank{font-size:10px;margin-bottom:21px}.prediction-winner-name{font-size:10px}.prediction-winner-guess{font-size:17px}.prediction-winner-difference{font-size:8px}.prediction-podium-note{font-size:9px}.prediction-mine strong{font-size:26px}}
+@media(prefers-reduced-motion:reduce){.prediction-field input,.prediction-submit{transition:none}}

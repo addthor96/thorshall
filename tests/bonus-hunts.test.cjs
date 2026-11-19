@@ -77,6 +77,27 @@ test("conditional writes prevent two editors from replacing the same saved revis
   assert.deepEqual(results.map(r => r.statusCode).sort(), [200, 409]);
 });
 
+test("starting payouts closes predictions once, preserves the cutoff on later saves and never exposes it", async () => {
+  const store = storage();
+  let clock = new Date("2026-11-19T12:00:00.000Z");
+  const handle = createHandler(() => store, { now: () => clock });
+  const initial = payload(await handle(event()));
+  const huntId = initial.state.activeId;
+  initial.state.hunts[0].status = "opening";
+  let saved = payload(await handle(event("PUT", "admin", "admin", { state: initial.state, revision: initial.revision })));
+  const cutoff = (await store.getWithMetadata()).data.predictionClosedAt[huntId];
+  assert.equal(cutoff, clock.toISOString());
+  assert.equal(saved.predictionClosedAt, undefined);
+  clock = new Date("2026-11-19T12:30:00.000Z");
+  saved.state.hunts[0].status = "collecting";
+  saved = payload(await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision })));
+  assert.equal((await store.getWithMetadata()).data.predictionClosedAt[huntId], cutoff);
+  const rotated = await handle(event("POST", "admin", "admin", { action: "rotate-token", revision: saved.revision }));
+  assert.equal(rotated.statusCode, 200);
+  assert.equal((await store.getWithMetadata()).data.predictionClosedAt[huntId], cutoff);
+  assert.equal(payload(await handle(event("GET", "viewer", null))).predictionClosedAt, undefined);
+});
+
 test("OBS token is read-only and replacement revokes the previous token", async () => {
   const store = storage(), handle = createHandler(() => store);
   const initial = payload(await handle(event()));

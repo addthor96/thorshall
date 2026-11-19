@@ -2,6 +2,7 @@
 
 const crypto = require("node:crypto");
 const { sessionAccess, safeEqual } = require("./stats-auth");
+const { closePredictionWindows } = require("./hunt-prediction-windows");
 const KEY = "hunt-manager";
 const MAX_BODY_BYTES = 1500000;
 const CURRENCIES = new Set(["USD", "EUR", "GBP", "CAD", "AUD"]);
@@ -142,7 +143,7 @@ async function openStore(event) {
   return getStore({ name: storeName(event), consistency: "strong" });
 }
 
-function createHandler(storeFactory = openStore) {
+function createHandler(storeFactory = openStore, { now = () => new Date() } = {}) {
   return async function handler(event) {
     const method = String(event.httpMethod || "GET").toUpperCase();
     const mode = event.queryStringParameters?.mode || "viewer";
@@ -183,6 +184,7 @@ function createHandler(storeFactory = openStore) {
         if (body.action !== "rotate-token") throw new InputError("Unknown action.");
         next = { state: record.state, streamToken: crypto.randomBytes(32).toString("base64url") };
       }
+      next.predictionClosedAt = closePredictionWindows(record, next.state, now());
       const result = await store.setJSON(KEY, next, { onlyIfMatch: entry.etag });
       if (!result.modified) return json(409, { ok: false, error: "Another save finished first. Reload the saved hunt before trying again." });
       if (!result.etag) throw new Error("Storage did not confirm the save");
