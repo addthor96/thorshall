@@ -67,9 +67,12 @@ test('collecting hunt revisions preserve drafts and keep a single moderate refre
   assert.equal(app.calls.length, 1); assert.equal(app.node(amount.id), amount); assert.equal(app.document.activeElement, amount); assert.equal(amount.value, '1234.50'); assert.equal(app.node('prediction-username'), null);
   assert.equal(app.byClass('prediction-place').length, 3); assert.match(app.text(), /2nd place.*1st place.*3rd place/); assert.doesNotMatch(app.text(), /\$[0-9]/);
   assert.deepEqual(app.mount.children.map(node => node.className), ['prediction-panel']);
-  assert.deepEqual(app.byClass('prediction-panel')[0].children.map(node => node.className), ['prediction-heading', 'prediction-results', 'prediction-content']);
+  assert.deepEqual(app.byClass('prediction-panel')[0].children.map(node => node.className), ['prediction-heading', 'prediction-content']);
+  assert.deepEqual(app.byClass('prediction-standings')[0].children.map(node => node.className), ['prediction-standings-heading', 'prediction-results', 'prediction-feed']);
   assert.deepEqual(app.byClass('prediction-place').map(node => node.attributes.value), ['2', '1', '3']);
-  assert.equal(app.byClass('prediction-podium-hunt')[0].textContent, 'For hunt-a');
+  assert.equal(app.byClass('prediction-results')[0].attributes['aria-label'], 'Prediction podium for hunt-a');
+  assert.equal(app.node('predictions-title').textContent, 'End balance predictions');
+  assert.doesNotMatch(app.text(), /What will the hunt finish at|For hunt-a|Prediction podium|Ties go/);
   assert.deepEqual([...app.timers.values()].map(timer => timer.ms), []);
 });
 
@@ -422,7 +425,6 @@ test('a saved prediction can be changed during collection and uses its own curre
   assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$222.22');
   assert.equal(app.byClass('prediction-edit')[0].hidden, false);
   assert.match(app.text(), /Your prediction is updated/);
-  assert.match(app.text(), /Ties go to the guess saved first; editing resets that time/);
 });
 
 test('canceling an edit preserves the accepted amount and resumes moderate refresh', async () => {
@@ -597,7 +599,7 @@ test('editing drafts and operation revisions stay attached to the selected hunt'
   const app = await start(call => response(summary(new URL(call.url, 'https://test').searchParams.get('hunt') || call.body.huntId,
     call.method === 'GET' ? { mine: { amountMinor: call.url.includes('hunt-b') ? 20000 : 10000 }, count: 1 } : { mine: { amountMinor: 33300, revision: call.body.requestId }, count: 1 })));
   await app.view(); app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '333');
-  await app.view('hunt-b', 'opening', 'v1', 'hunt-b'); assert.match(app.byClass('prediction-hunt-name')[0].textContent, /hunt-b/);
+  await app.view('hunt-b', 'opening', 'v1', 'hunt-b'); assert.equal(app.byClass('prediction-results')[0].attributes['aria-label'], 'Prediction podium for hunt-b');
   assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$200.00');
   assert.equal(app.byClass('prediction-form')[0].hidden, true);
   await app.view('hunt-a'); assert.equal(app.node('prediction-amount').value, '333');
