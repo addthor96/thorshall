@@ -6,6 +6,7 @@
   var AUTH = '/.netlify/functions/hunt-twitch', DRAFT_PREFIX = 'thorshall-prediction-draft-v2:';
   var entries = new Map(), current = null, generation = 0, privacyEpoch = 0, controllers = new Set(), authTimer = null, authDue = null;
   var places = ['1st place', '2nd place', '3rd place'];
+  var motionQuery = typeof window.matchMedia === 'function' ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
   var callbackMessage = (function () {
     var messages = {
       cancelled: 'Twitch sign-in was cancelled. You can try again.',
@@ -95,6 +96,86 @@
 
   function active(context) { return current === context && document.getElementById('hunt-predictions') === context.mount; }
 
+  function stopScroll(context) {
+    if (!context || !context.scroller) return;
+    clearTimeout(context.scroller.timer); context.scroller.timer = null; context.scroller.lastTick = null;
+  }
+
+  function stopRefresh(context) {
+    if (context) { clearTimeout(context.refreshTimer); context.refreshTimer = null; }
+  }
+
+  function dispose(context) {
+    if (!context) return;
+    stopScroll(context); stopRefresh(context);
+    if (context.resizeObserver) context.resizeObserver.disconnect();
+    if (context.intersectionObserver) context.intersectionObserver.disconnect();
+    context.resizeObserver = context.intersectionObserver = null;
+  }
+
+  function scrollAllowed(context) {
+    var state = context.scroller, viewport = context.nodes.feedViewport;
+    return active(context) && !document.hidden && context.inViewport !== false && state && !state.paused && !state.hovered && !state.focused
+      && !(motionQuery && motionQuery.matches) && viewport.scrollHeight > viewport.clientHeight + 1;
+  }
+
+  function syncScroll(context, delay) {
+    stopScroll(context);
+    if (!active(context) || !context.nodes || !context.scroller) return;
+    var scroll = context.scroller, viewport = context.nodes.feedViewport;
+    context.nodes.scrollToggle.hidden = viewport.scrollHeight <= viewport.clientHeight + 1 || !!(motionQuery && motionQuery.matches);
+    context.nodes.scrollToggle.textContent = scroll.paused ? 'Resume scrolling' : 'Pause scrolling';
+    context.nodes.scrollToggle.setAttribute('aria-pressed', scroll.paused ? 'true' : 'false');
+    if (!scrollAllowed(context)) return;
+    scroll.timer = setTimeout(function tick() {
+      scroll.timer = null;
+      if (!scrollAllowed(context)) return;
+      var now = Date.now(), elapsed = scroll.lastTick === null ? 0 : Math.min(100, now - scroll.lastTick);
+      scroll.lastTick = now;
+      scroll.position = Math.min(viewport.scrollHeight - viewport.clientHeight, scroll.position + elapsed * .022);
+      viewport.scrollTop = scroll.position;
+      if (scroll.position >= viewport.scrollHeight - viewport.clientHeight - 1) {
+        // Continue in one direction only. Reset immediately, then rest at the top.
+        viewport.scrollTop = scroll.position = 0; scroll.lastTick = null;
+        scroll.timer = setTimeout(tick, 2000);
+      } else scroll.timer = setTimeout(tick, 50);
+    }, delay === undefined ? 2000 : delay);
+  }
+
+  function scheduleRefresh(context) {
+    stopRefresh(context);
+    if (!active(context) || document.hidden || context.inViewport === false || context.hunt.status === 'complete' || !context.state.summary) return;
+    context.refreshTimer = setTimeout(function () {
+      context.refreshTimer = null;
+      if (!active(context) || document.hidden || context.inViewport === false) return;
+      if (context.state.loading || context.state.saving || context.state.signingOut) { scheduleRefresh(context); return; }
+      load(context);
+    }, 60000);
+  }
+
+  function updateEntries(context, data) {
+    var nodes = context.nodes, items = data && Array.isArray(data.entries) ? data.entries : [];
+    var signature = JSON.stringify(items);
+    if (context.entrySignature === signature) return;
+    context.entrySignature = signature;
+    var previousTop = nodes.feedViewport.scrollTop || 0;
+    nodes.feedList.replaceChildren();
+    items.forEach(function (item, index) {
+      var row = element('li', 'prediction-feed-row' + (item.isMine ? ' prediction-feed-mine' : ''));
+      var number = element('span', 'prediction-feed-number', String(index + 1).padStart(2, '0'));
+      var identity = element('div', 'prediction-feed-person');
+      var name = element('strong', 'prediction-feed-name', '@' + item.username);
+      var detail = element('span', 'prediction-feed-detail', item.isMine ? 'Your locked prediction' : item.verified ? 'Twitch prediction' : 'Earlier unverified entry');
+      var amount = element('strong', 'prediction-feed-amount', money(item.amountMinor, context.hunt.currency));
+      append(identity, name, detail); append(row, number, identity, amount); nodes.feedList.appendChild(row);
+    });
+    nodes.feedEmpty.hidden = items.length > 0;
+    nodes.feedList.hidden = items.length === 0;
+    nodes.feedViewport.scrollTop = previousTop;
+    context.scroller.position = nodes.feedViewport.scrollTop;
+    syncScroll(context);
+  }
+
   function settled(state) {
     if (!current || current.state !== state || !active(current)) return;
     update(current);
@@ -113,6 +194,7 @@
 
   function build(context) {
     var mount = context.mount, state = context.state, nodes = {};
+    dispose(context); context.entrySignature = null;
     mount.classList.add('hunt-predictions'); mount.setAttribute('aria-labelledby', 'predictions-title');
     mount.replaceChildren();
 
@@ -147,13 +229,14 @@
     nodes.website = element('input'); nodes.website.id = 'prediction-website'; nodes.website.name = 'website'; nodes.website.type = 'text'; nodes.website.tabIndex = -1; nodes.website.autocomplete = 'off'; nodes.website.value = state.draft.website;
     append(hidden, hiddenLabel, nodes.website);
     nodes.submit = element('button', 'prediction-submit', 'Submit prediction'); nodes.submit.type = 'submit';
-    var rules = element('p', 'prediction-rules', 'One entry per Twitch account for each hunt. Your username and guess can appear in the final top three. Free to enter.');
+    var rules = element('p', 'prediction-rules', 'One entry per Twitch account. Your username and locked guess appear in the prediction list. Free to enter.');
     rules.id = 'prediction-rules'; nodes.form.setAttribute('aria-describedby', rules.id);
     append(nodes.form, amount.wrapper, hidden, nodes.submit, rules);
     nodes.mine = element('div', 'prediction-mine'); nodes.mine.hidden = true;
-    nodes.mineTitle = element('span', 'prediction-mine-label', 'Your prediction');
+    nodes.mineTitle = element('span', 'prediction-mine-label', 'Your locked prediction');
     nodes.mineAmount = element('strong'); nodes.mineName = element('span', 'prediction-mine-name');
-    append(nodes.mine, nodes.mineTitle, nodes.mineAmount, nodes.mineName);
+    nodes.mineNote = element('span', 'prediction-mine-note', 'Saved · cannot be changed');
+    append(nodes.mine, nodes.mineTitle, nodes.mineAmount, nodes.mineName, nodes.mineNote);
     nodes.closed = element('p', 'prediction-closed'); nodes.closed.hidden = true;
     nodes.message = element('p', 'prediction-message'); nodes.message.id = 'prediction-message'; nodes.message.setAttribute('role', 'status'); nodes.message.setAttribute('aria-live', 'polite');
     append(entry, nodes.intro, nodes.auth, nodes.form, nodes.mine, nodes.closed, nodes.message);
@@ -163,6 +246,17 @@
     nodes.count = element('span', 'prediction-count', 'Loading predictions…');
     nodes.refresh = element('button', 'prediction-refresh', 'Refresh predictions'); nodes.refresh.type = 'button';
     append(standingsHeader, nodes.count, nodes.refresh);
+    var feed = element('section', 'prediction-feed'); feed.setAttribute('aria-labelledby', 'prediction-feed-title');
+    var feedHeading = element('div', 'prediction-feed-heading');
+    var feedTitle = element('h3', '', 'Every prediction'); feedTitle.id = 'prediction-feed-title';
+    nodes.scrollToggle = element('button', 'prediction-scroll-toggle', 'Pause scrolling'); nodes.scrollToggle.type = 'button'; nodes.scrollToggle.hidden = true;
+    append(feedHeading, feedTitle, nodes.scrollToggle);
+    nodes.feedViewport = element('div', 'prediction-feed-viewport'); nodes.feedViewport.tabIndex = 0;
+    nodes.feedViewport.setAttribute('role', 'region'); nodes.feedViewport.setAttribute('aria-label', 'All predictions, in entry order. Scroll to browse.');
+    nodes.feedList = element('ol', 'prediction-feed-list');
+    nodes.feedEmpty = element('div', 'prediction-feed-empty');
+    append(nodes.feedEmpty, element('strong', '', 'The first guess starts it.'), element('span', '', 'Locked predictions will appear here as viewers enter.'));
+    append(nodes.feedViewport, nodes.feedList, nodes.feedEmpty); append(feed, feedHeading, nodes.feedViewport);
     var podium = element('ol', 'prediction-podium'); podium.setAttribute('aria-label', 'Prediction podium');
     nodes.places = places.map(function (place, index) {
       var card = element('li', 'prediction-place prediction-place-' + (index + 1));
@@ -174,9 +268,34 @@
       return { name: name, guess: guess, difference: difference };
     });
     nodes.podiumNote = element('p', 'prediction-podium-note', 'The closest guesses appear here once the hunt is finished. Ties go to the earlier entry.');
-    append(standings, standingsHeader, podium, nodes.podiumNote);
+    append(standings, standingsHeader, feed, podium, nodes.podiumNote);
     append(content, entry, standings); append(mount, heading, content);
     context.nodes = nodes;
+    context.scroller = { timer: null, lastTick: null, position: 0, paused: false, hovered: false, focused: false };
+    context.inViewport = typeof window.IntersectionObserver !== 'function';
+    if (typeof window.ResizeObserver === 'function') {
+      context.resizeObserver = new window.ResizeObserver(function () { syncScroll(context); });
+      context.resizeObserver.observe(nodes.feedViewport); context.resizeObserver.observe(nodes.feedList);
+    }
+    if (typeof window.IntersectionObserver === 'function') {
+      context.intersectionObserver = new window.IntersectionObserver(function (observations) {
+        if (!active(context)) return;
+        var visible = observations.some(function (observation) { return observation.isIntersecting; });
+        if (visible === context.inViewport) return;
+        context.inViewport = visible;
+        if (visible) { syncScroll(context); scheduleRefresh(context); }
+        else { stopScroll(context); stopRefresh(context); }
+      });
+      context.intersectionObserver.observe(mount);
+    }
+    nodes.scrollToggle.addEventListener('click', function () { context.scroller.paused = !context.scroller.paused; context.scroller.position = nodes.feedViewport.scrollTop; syncScroll(context); });
+    nodes.feedViewport.addEventListener('mouseenter', function () { context.scroller.hovered = true; stopScroll(context); });
+    nodes.feedViewport.addEventListener('mouseleave', function () { context.scroller.hovered = false; context.scroller.position = nodes.feedViewport.scrollTop; syncScroll(context); });
+    nodes.feedViewport.addEventListener('focusin', function () { context.scroller.focused = true; stopScroll(context); });
+    nodes.feedViewport.addEventListener('focusout', function (event) { context.scroller.focused = !!event.relatedTarget && nodes.feedViewport.contains(event.relatedTarget); syncScroll(context); });
+    ['wheel', 'touchstart', 'pointerdown', 'keydown'].forEach(function (eventName) {
+      nodes.feedViewport.addEventListener(eventName, function () { context.scroller.paused = true; context.scroller.position = nodes.feedViewport.scrollTop; syncScroll(context); });
+    });
 
     [nodes.amount, nodes.website].forEach(function (input) {
       input.addEventListener('input', function () {
@@ -238,6 +357,7 @@
       place.difference.textContent = winner ? winner.differenceMinor === 0 ? 'Exact prediction' : money(winner.differenceMinor, context.hunt.currency) + ' away' : '';
     });
     nodes.podiumNote.textContent = complete ? 'Ranked by distance from the final end balance. Ties go to the earlier entry.' : 'The closest guesses appear here once the hunt is finished. Ties go to the earlier entry.';
+    updateEntries(context, data);
   }
 
   async function api(method, payload) {
@@ -260,7 +380,12 @@
         error.status = response.status; throw error;
       }
       if (data.huntId !== (method === 'GET' ? payload : payload.huntId) || typeof data.accepting !== 'boolean' || !Number.isSafeInteger(data.count) || data.count < 0
-          || typeof data.authConfigured !== 'boolean' || !validViewer(data.viewer)) throw new Error('Predictions could not be confirmed. Please refresh predictions.');
+          || typeof data.authConfigured !== 'boolean' || !validViewer(data.viewer)
+          || !Array.isArray(data.entries) || data.entries.length > 2000 || data.entries.some(function (item) {
+            return !item || typeof item.username !== 'string' || !/^[A-Za-z0-9_]{1,25}$/.test(item.username) || !Number.isSafeInteger(item.amountMinor)
+              || item.amountMinor < 0 || item.amountMinor > 100000000000 || typeof item.createdAt !== 'string' || !Number.isFinite(Date.parse(item.createdAt))
+              || typeof item.isMine !== 'boolean' || typeof item.verified !== 'boolean';
+          })) throw new Error('Predictions could not be confirmed. Please refresh predictions.');
       return data;
     } finally { clearTimeout(timeout); controllers.delete(controller); }
   }
@@ -277,6 +402,7 @@
 
   function reset(preserveDrafts) {
     privacyEpoch++;
+    dispose(current);
     clearTimeout(authTimer); authTimer = null; authDue = null;
     controllers.forEach(function (controller) { controller.abort(); }); controllers.clear();
     if (!preserveDrafts) entries.forEach(function (_, id) { clearDraft(id); });
@@ -290,7 +416,7 @@
     if (!visible) { current = null; return; }
     var previous = visible.state.summary;
     visible.state = stateFor(visible.hunt.id);
-    if (previous) visible.state.summary = Object.assign({}, previous, { viewer: null, mine: null });
+    if (previous) visible.state.summary = Object.assign({}, previous, { viewer: null, mine: null, entries: (previous.entries || []).map(function (item) { return Object.assign({}, item, { isMine: false }); }) });
     visible.state.error = message || '';
     build(visible);
   }
@@ -330,6 +456,7 @@
 
   async function load(context) {
     if (!active(context)) return;
+    stopRefresh(context);
     if (context.state.loading || context.state.saving || context.state.signingOut) { context.state.needsRefresh = true; return; }
     var state = context.state, request = ++state.request;
     state.loading = true; state.error = ''; update(context);
@@ -344,6 +471,7 @@
     } finally {
       if (request === state.request) state.loading = false;
       settled(state);
+      if (active(context) && context.state === state && state.epoch === privacyEpoch && state.summary) scheduleRefresh(context);
     }
   }
 
@@ -395,6 +523,7 @@
       if (changed) load(current);
       return;
     }
+    dispose(current);
     current = { mount: mount, hunt: hunt, activeId: detail.activeId, signature: signature, generation: ++generation, state: stateFor(hunt.id) };
     if (callbackMessage) { current.state.authMessage = callbackMessage; callbackMessage = ''; }
     build(current); load(current);
@@ -407,10 +536,12 @@
   });
 
   document.addEventListener('visibilitychange', function () {
-    if (document.hidden) { clearTimeout(authTimer); authTimer = null; return; }
+    if (document.hidden) { clearTimeout(authTimer); authTimer = null; stopScroll(current); stopRefresh(current); return; }
+    if (current && active(current)) { syncScroll(current); scheduleRefresh(current); }
     if (authDue !== null && current && active(current)) {
       if (Date.now() >= authDue) refreshAuth();
       else scheduleAuth(current.state.summary);
     }
   });
+  if (motionQuery && typeof motionQuery.addEventListener === 'function') motionQuery.addEventListener('change', function () { if (current && active(current)) syncScroll(current); });
 })();

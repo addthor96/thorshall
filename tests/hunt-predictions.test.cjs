@@ -83,9 +83,11 @@ test("verified Twitch identity is server-derived, survives browsers and username
   const secondBrowser = f.sameUser(cookie), renamed = f.sameUser(cookie, "newlogin");
   assert.equal(payload(await f.handle(event("GET", { cookie: secondBrowser }))).mine.username, "realviewer");
   assert.equal(payload(await f.handle(event("GET", { cookie: renamed }))).mine.username, "realviewer");
-  assert.equal((await submit(f, secondBrowser, guess("500"))).statusCode, 409); assert.equal((await submit(f, renamed, guess())).statusCode, 409);
+  assert.equal((await submit(f, secondBrowser, guess("500"))).statusCode, 409); assert.equal((await submit(f, renamed, guess("999.99"))).statusCode, 409);
   assert.equal((await submit(f, cookie, { ...guess(), username: "someoneelse" })).statusCode, 400);
-  const stranger = await f.handle(event()); assert.equal(payload(stranger).mine, null); assert.doesNotMatch(stranger.body, /realviewer|12345|identityHash|ipHash|stream-token/);
+  const stranger = await f.handle(event()); assert.equal(payload(stranger).mine, null); assert.doesNotMatch(stranger.body, /identityHash|ipHash|stream-token|userId|requestId/);
+  assert.deepEqual(payload(stranger).entries, [{ username: "realviewer", amountMinor: 12345, createdAt: BASE.toISOString(), verified: true, isMine: false }]);
+  assert.deepEqual(payload(await f.handle(event("GET", { cookie: renamed }))).entries, [{ username: "realviewer", amountMinor: 12345, createdAt: BASE.toISOString(), verified: true, isMine: true }]);
   assert.deepEqual(await f.huntStore.getWithMetadata("hunt-manager"), before); assert.equal(f.huntStore.writes, 0);
   const stored = f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0]; assert.equal(stored.userId, f.identity(cookie).id); assert.equal(stored.authKind, "twitch"); assert.equal(stored.username, "realviewer");
   assert.doesNotMatch(JSON.stringify(stored), /192\.0\.2\.1|test-session|test-only-prediction-secret/);
@@ -98,11 +100,36 @@ test("a client account assertion prevents accidental submissions after an accoun
   const saved = f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0]; assert.equal(saved.viewerId, undefined);
 });
 
+test("the public roster includes every eligible locked prediction in chronological acceptance order without private identifiers", async () => {
+  const f = fixture(), cookies = [];
+  for (let i = 0; i < 12; i++) {
+    // Insertion order differs from timestamps so chronological ordering is
+    // explicit; the first two share a timestamp and retain acceptance order.
+    f.setClock(new Date(+BASE + (i < 2 ? 2 : 12 - i) * 1000));
+    const cookie = f.user("viewer_" + i); cookies.push(cookie);
+    assert.equal((await submit(f, cookie, guess(String(i)), { clientIp: "192.0.2." + (i + 1) })).statusCode, 201);
+  }
+  const publicData = payload(await f.handle(event()));
+  assert.equal(publicData.count, 12); assert.equal(publicData.entries.length, 12);
+  const stored = f.predictions.records.get(P.ledgerKey("hunt-a")).entries;
+  const expected = stored.map((entry, order) => ({ entry, order })).sort((a, b) => a.entry.createdAt.localeCompare(b.entry.createdAt) || a.order - b.order).map(value => value.entry.username);
+  assert.deepEqual(publicData.entries.map(entry => entry.username), expected);
+  for (const entry of publicData.entries) {
+    assert.deepEqual(Object.keys(entry).sort(), ["amountMinor", "createdAt", "isMine", "username", "verified"]);
+    assert.equal(entry.verified, true); assert.equal(entry.isMine, false);
+  }
+  const ownData = payload(await f.handle(event("GET", { cookie: cookies[4] })));
+  assert.deepEqual(ownData.entries.filter(entry => entry.isMine).map(entry => entry.username), ["viewer_4"]);
+  assert.equal(ownData.entries.find(entry => entry.isMine).amountMinor, 400);
+  assert.doesNotMatch(JSON.stringify(publicData.entries), /userId|identityHash|ipHash|requestId|test-session|192\.0\.2\./);
+});
+
 test("legacy anonymous records stay readable without being assigned to a real account or blocking its name", async () => {
   const f = fixture();
   const old = { requestId: crypto.randomUUID(), username: "realviewer", nameKey: "realviewer", amountMinor: 10000, identityHash: "a".repeat(64), ipHash: "b".repeat(64), createdAt: new Date(+BASE - 1000).toISOString() };
   f.predictions.records.set(P.ledgerKey("hunt-a"), { schema: 1, huntId: "hunt-a", currency: "USD", entries: [old] });
   const cookie = f.user("realviewer"); const before = payload(await f.handle(event("GET", { cookie }))); assert.equal(before.mine, null); assert.equal(before.count, 1);
+  assert.deepEqual(before.entries, [{ username: "realviewer", amountMinor: 10000, createdAt: old.createdAt, verified: false, isMine: false }]);
   assert.equal((await submit(f, cookie)).statusCode, 201); assert.equal(payload(await f.handle(event("GET", { cookie }))).mine.amountMinor, 12345);
   assert.deepEqual(f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0], old);
   assert.throws(() => P.validateLedger({ schema: 1, huntId: "hunt-a", currency: "USD", entries: [{ ...old, userId: f.identity(cookie).id }] }, "hunt-a"));
@@ -124,7 +151,7 @@ test("concurrent saves serialize and enforce one entry for each immutable Twitch
   assert.equal(payload(await f.handle(event())).count, 3);
 });
 
-test("final podium reveals only the closest three, with earlier acceptance breaking ties", async () => {
+test("final podium ranks the closest three while the public roster retains every eligible entry", async () => {
   const f = fixture(), cookies = [];
   for (const [index, name, amount] of [[0, "earlytie", "122.45"], [1, "latetie", "124.45"], [2, "exactguess", "123.45"], [3, "farguess", "1"]]) {
     f.setClock(new Date(+BASE + index * 1000)); const cookie = f.user(name); cookies.push(cookie); assert.equal((await submit(f, cookie, guess(amount))).statusCode, 201);
@@ -133,7 +160,8 @@ test("final podium reveals only the closest three, with earlier acceptance break
   assert.deepEqual(payload(await f.handle(event())).podium, []);
   f.update(record => { record.state.hunts[0].status = "complete"; }); const response = await f.handle(event()), data = payload(response);
   assert.deepEqual(data.podium.map(e => [e.place, e.username, e.amountMinor, e.differenceMinor]), [[1, "exactguess", 12345, 0], [2, "earlytie", 12245, 100], [3, "latetie", 12445, 100]]);
-  assert.doesNotMatch(response.body, /farguess|identityHash|ipHash|requestId|createdAt|streamToken|userId/);
+  assert.deepEqual(data.entries.map(entry => entry.username), ["earlytie", "latetie", "exactguess", "farguess"]);
+  assert.doesNotMatch(response.body, /identityHash|ipHash|requestId|streamToken|userId/);
   assert.equal(payload(await f.handle(event("GET", { cookie: cookies[3] }))).mine.username, "farguess");
 });
 
@@ -149,7 +177,7 @@ test("a concurrent opening cutoff excludes late writes and cannot be reversed by
   const f = fixture(), cookie = f.user(), body = guess();
   f.predictions.afterWrite = () => f.update(record => { record.predictionClosedAt = { "hunt-a": BASE.toISOString() }; record.state.hunts[0].status = "opening"; });
   assert.equal((await submit(f, cookie, body)).statusCode, 409); assert.equal(f.predictions.writes, 1);
-  const summary = payload(await f.handle(event("GET", { cookie }))); assert.equal(summary.count, 0); assert.equal(summary.mine, null); assert.deepEqual(summary.podium, []);
+  const summary = payload(await f.handle(event("GET", { cookie }))); assert.equal(summary.count, 0); assert.equal(summary.mine, null); assert.deepEqual(summary.podium, []); assert.deepEqual(summary.entries, []);
   assert.equal((await submit(f, cookie, body)).statusCode, 409);
 });
 
@@ -171,7 +199,7 @@ test("a new currency can be set before predictions, while old guesses are exclud
   assert.equal(payload(await fresh.handle(event())).accepting, true);
   const f = fixture(), cookie = f.user(); assert.equal((await submit(f, cookie)).statusCode, 201);
   f.update(record => { record.state.hunts[0].currency = "EUR"; }); const data = payload(await f.handle(event("GET", { cookie })));
-  assert.equal(data.count, 0); assert.equal(data.mine, null); assert.equal(data.accepting, false); assert.match(data.message, /currency changed/); assert.equal((await submit(f, f.user("otheruser"))).statusCode, 409);
+  assert.equal(data.count, 0); assert.equal(data.mine, null); assert.deepEqual(data.entries, []); assert.equal(data.accepting, false); assert.match(data.message, /currency changed/); assert.equal((await submit(f, f.user("otheruser"))).statusCode, 409);
 });
 
 test("cross-site writes, forged identity fields, honeypots, excessive bodies and methods fail before storage", async () => {

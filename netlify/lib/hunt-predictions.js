@@ -140,6 +140,12 @@ function accepting(record, hunt, ledger) {
 }
 function summary(ledger, record, hunt, viewer) {
   const entries = eligibleEntries(ledger, record, hunt), own = viewer ? entries.find(entry => entry.authKind === "twitch" && entry.userId === viewer.id) : null;
+  // The public roster deliberately projects only display fields. Authentication,
+  // request, and abuse-prevention identifiers remain in the server ledger.
+  const publicEntries = entries.map((entry, order) => ({ entry, order }))
+    .sort((a, b) => a.entry.createdAt.localeCompare(b.entry.createdAt) || a.order - b.order)
+    .map(({ entry }) => ({ username: entry.username, amountMinor: entry.amountMinor, createdAt: entry.createdAt,
+      verified: entry.authKind === "twitch", isMine: !!viewer && entry.authKind === "twitch" && entry.userId === viewer.id }));
   let podium = [];
   if (hunt.status === "complete") {
     const end = finalBalanceMinor(hunt);
@@ -148,7 +154,7 @@ function summary(ledger, record, hunt, viewer) {
       .slice(0, 3).map((entry, index) => ({ place: index + 1, username: entry.username, amountMinor: entry.amountMinor, differenceMinor: entry.differenceMinor }));
   }
   return { ok: true, huntId: hunt.id, currency: hunt.currency, status: hunt.status,
-    accepting: accepting(record, hunt, ledger), count: entries.length,
+    accepting: accepting(record, hunt, ledger), count: entries.length, entries: publicEntries,
     mine: own ? { username: own.username, amountMinor: own.amountMinor, createdAt: own.createdAt } : null, podium,
     ...(ledger.currency !== hunt.currency ? { message: "The hunt currency changed. Earlier predictions cannot be ranked for this currency." } : {}) };
 }

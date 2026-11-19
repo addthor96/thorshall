@@ -3,7 +3,7 @@ const test = require('node:test'), assert = require('node:assert/strict'), fs = 
 const source = fs.readFileSync(require.resolve('../hunt-predictions.js'), 'utf8');
 const clone = value => structuredClone(value);
 const viewer = { id: '123456', login: 'thor_viewer', displayName: 'Thor_Viewer' };
-const summary = (huntId = 'hunt-a', extra = {}) => ({ ok: true, huntId, currency: 'USD', status: 'collecting', accepting: true, count: 0, mine: null, podium: [], viewer: clone(viewer), authConfigured: true, loginUrl: '/.netlify/functions/hunt-twitch?action=login&return=%2Fbonus-hunt%23hunt%3D' + huntId, logoutUrl: '/.netlify/functions/hunt-twitch?action=logout', authExpiresAt: null, authRevalidateAt: null, ...extra });
+const summary = (huntId = 'hunt-a', extra = {}) => ({ ok: true, huntId, currency: 'USD', status: 'collecting', accepting: true, count: 0, mine: null, podium: [], entries: [], viewer: clone(viewer), authConfigured: true, loginUrl: '/.netlify/functions/hunt-twitch?action=login&return=%2Fbonus-hunt%23hunt%3D' + huntId, logoutUrl: '/.netlify/functions/hunt-twitch?action=logout', authExpiresAt: null, authRevalidateAt: null, ...extra });
 const response = (data, status = 200) => ({ ok: status >= 200 && status < 300, status, json: async () => clone(data) });
 const deferred = () => { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; };
 
@@ -11,19 +11,23 @@ async function start(handler, options = {}) {
   const events = new Map(), calls = [], timers = new Map(), storage = new Map(); let timerId = 0, uuid = 0, clock = Date.now();
   class TestDate extends Date { static now() { return clock; } }
   class Node {
-    constructor(tag) { this.tagName = tag.toUpperCase(); this.children = []; this.attributes = {}; this.listeners = new Map(); this.className = ''; this.textContent = ''; this.value = ''; this.disabled = false; this.hidden = false; this.dataset = {}; this.id = ''; this.name = ''; this.classList = { add: name => { this.className += (this.className ? ' ' : '') + name; } }; }
+    constructor(tag) { this.tagName = tag.toUpperCase(); this.children = []; this.attributes = {}; this.listeners = new Map(); this.className = ''; this.textContent = ''; this.value = ''; this.disabled = false; this.hidden = false; this.dataset = {}; this.id = ''; this.name = ''; this.scrollTop = 0; this.scrollHeight = 256; this.clientHeight = 256; this.classList = { add: name => { this.className += (this.className ? ' ' : '') + name; } }; }
     appendChild(child) { this.children.push(child); child.parent = this; return child; }
     replaceChildren(...children) { this.children = []; children.forEach(child => this.appendChild(child)); }
     setAttribute(name, value) { this.attributes[name] = String(value); if (name === 'id') this.id = String(value); }
     removeAttribute(name) { delete this.attributes[name]; }
     addEventListener(name, fn) { this.listeners.set(name, fn); }
     focus() { document.activeElement = this; }
-    fire(name) { return this.listeners.get(name)?.({ preventDefault() {} }); }
+    fire(name, extra = {}) { return this.listeners.get(name)?.({ preventDefault() {}, ...extra }); }
+    contains(node) { return this === node || this.children.some(child => child.contains(node)); }
   }
   const mount = new Node('section'); mount.id = 'hunt-predictions';
   const all = node => [node, ...node.children.flatMap(all)];
   const document = { activeElement: null, hidden: false, createElement: tag => new Node(tag), getElementById: id => all(mount).find(node => node.id === id) || null, addEventListener: (name, fn) => events.set(name, fn) };
-  const context = { document, window: { crypto: { randomUUID: () => '00000000-0000-4000-8000-' + String(++uuid).padStart(12, '0') } }, Intl, Map, Set, AbortController, Uint8Array, URL, URLSearchParams, Date: TestDate, location: { origin: 'https://thorshall.test', search: options.search || '' }, sessionStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
+  const observers = [], motion = { matches: !!options.reducedMotion, addEventListener: (name, fn) => { motion.change = fn; } };
+  const browser = { crypto: { randomUUID: () => '00000000-0000-4000-8000-' + String(++uuid).padStart(12, '0') }, matchMedia: () => motion };
+  if (options.observers) browser.IntersectionObserver = class { constructor(fn) { this.fn = fn; this.disconnected = false; observers.push(this); } observe() {} disconnect() { this.disconnected = true; } fire(visible) { this.fn([{ isIntersecting: visible }]); } };
+  const context = { document, window: browser, Intl, Map, Set, AbortController, Uint8Array, URL, URLSearchParams, Date: TestDate, location: { origin: 'https://thorshall.test', search: options.search || '' }, sessionStorage: { getItem: key => storage.get(key) || null, setItem: (key, value) => storage.set(key, value), removeItem: key => storage.delete(key) },
     setTimeout: (fn, ms) => { timers.set(++timerId, { fn, ms }); return timerId; }, clearTimeout: id => timers.delete(id),
     fetch: async (url, options) => {
       const call = { url, method: options.method, credentials: options.credentials, headers: clone(options.headers), body: options.body ? JSON.parse(options.body) : undefined, signal: options.signal }; calls.push(call);
@@ -37,15 +41,17 @@ async function start(handler, options = {}) {
   const node = id => document.getElementById(id);
   const input = (id, value) => { node(id).value = value; node(id).fire('input'); };
   const submit = async () => { byClass('prediction-form')[0].fire('submit'); await settle(); };
-  return { mount, node, byClass, events, calls, settle, view, input, submit, document, timers, advance: ms => { clock += ms; }, storage, text: () => all(mount).map(node => node.textContent).join(' ') };
+  const tick = async ms => { const selected = [...timers].find(([, timer]) => timer.ms === ms); assert.ok(selected, 'Expected a ' + ms + 'ms timer'); timers.delete(selected[0]); clock += ms; selected[1].fn(); await settle(); };
+  return { mount, node, byClass, events, calls, settle, view, input, submit, document, timers, observers, motion, tick, advance: ms => { clock += ms; }, storage, text: () => all(mount).map(node => node.textContent).join(' ') };
 }
 
-test('collecting hunt revisions preserve drafts and do not add a prediction polling loop', async () => {
+test('collecting hunt revisions preserve drafts and keep a single moderate refresh timer', async () => {
   const app = await start(); await app.view();
   assert.equal(app.calls.length, 1); assert.equal(app.calls[0].credentials, 'same-origin');
   const amount = app.node('prediction-amount'); app.input(amount.id, '1234.50'); amount.focus(); await app.view('hunt-a', 'collecting', 'v2');
   assert.equal(app.calls.length, 1); assert.equal(app.node(amount.id), amount); assert.equal(app.document.activeElement, amount); assert.equal(amount.value, '1234.50'); assert.equal(app.node('prediction-username'), null);
   assert.equal(app.byClass('prediction-place').length, 3); assert.match(app.text(), /1st place.*2nd place.*3rd place/); assert.doesNotMatch(app.text(), /\$[0-9]/);
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
 });
 
 test('valid entry posts the free prediction and shows the confirmed saved entry', async () => {
@@ -142,7 +148,7 @@ test('anonymous visitors see Twitch login and cannot post a manually named predi
   assert.match(app.byClass('prediction-twitch-login')[0].attributes.href, /^\/\.netlify\/functions\/hunt-twitch\?action=login/);
   assert.equal(app.node('prediction-username'), null);
   await app.submit(); assert.equal(app.calls.length, 1);
-  assert.equal(app.timers.size, 0);
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
 });
 
 test('unconfigured Twitch login fails closed with a clear disabled prompt', async () => {
@@ -197,12 +203,12 @@ test('Twitch revalidation uses one server deadline, pauses hidden, and refreshes
   const base = Date.now(); let reads = 0;
   const app = await start(() => response(summary('hunt-a', { authRevalidateAt: new Date(base + (++reads) * 55 * 60000).toISOString() })));
   await app.view();
-  assert.equal(app.timers.size, 1);
-  assert.equal(Array.from(app.timers.values())[0].ms > 54 * 60000, true);
+  assert.equal(app.timers.size, 2);
+  assert.equal(Array.from(app.timers.values()).some(timer => timer.ms > 54 * 60000), true);
   await app.view('hunt-a', 'collecting', 'v2'); assert.equal(app.calls.length, 1);
   app.document.hidden = true; app.events.get('visibilitychange')(); assert.equal(app.timers.size, 0);
   app.advance(56 * 60000); app.document.hidden = false; app.events.get('visibilitychange')(); await app.settle();
-  assert.equal(app.calls.length, 2); assert.equal(app.timers.size, 1);
+  assert.equal(app.calls.length, 2); assert.equal(app.timers.size, 2);
   app.events.get('hunt:unavailable')(); assert.equal(app.timers.size, 0);
 });
 
@@ -215,4 +221,105 @@ test('OAuth return messages use only known safe statuses and disappear with priv
   }
   const unknown = await start(() => response(summary('hunt-a', { viewer: null })), { search: '?twitch=%3Cimg%20src%3Dx%3E&error_description=raw_error' });
   await unknown.view(); assert.doesNotMatch(unknown.text(), /<img|raw_error/);
+});
+
+const publicEntries = (length = 18) => Array.from({ length }, (_, index) => ({ username: index === 2 ? viewer.login : 'viewer_' + index, amountMinor: 50000 + index * 1250, createdAt: new Date(Date.UTC(2026, 10, 19, 1, 0, index)).toISOString(), verified: index !== 1, isMine: index === 2 }));
+
+test('all public predictions render while the owner amount remains separately locked', async () => {
+  const entries = publicEntries();
+  const app = await start(() => response(summary('hunt-a', { entries, count: entries.length, mine: { username: viewer.login, amountMinor: entries[2].amountMinor } })));
+  await app.view();
+  assert.equal(app.byClass('prediction-feed-row').length, 18);
+  assert.equal(app.byClass('prediction-feed-mine').length, 1);
+  assert.equal(app.byClass('prediction-mine')[0].hidden, false);
+  assert.match(app.text(), /Your locked prediction.*\$525\.00.*@thor_viewer.*Saved · cannot be changed/);
+  assert.match(app.byClass('prediction-feed-row')[1].children[1].children[1].textContent, /Earlier unverified entry/);
+  assert.equal(app.byClass('prediction-form')[0].hidden, true);
+  assert.equal(app.byClass('prediction-feed-viewport')[0].attributes['aria-live'], undefined);
+});
+
+test('prediction scroll only travels down, resets at the bottom and rests for two seconds', async () => {
+  const entries = publicEntries(); const app = await start(() => response(summary('hunt-a', { entries, count: entries.length })));
+  await app.view();
+  const viewport = app.byClass('prediction-feed-viewport')[0], toggle = app.byClass('prediction-scroll-toggle')[0];
+  viewport.scrollHeight = 512; toggle.fire('click'); toggle.fire('click');
+  await app.tick(2000); await app.tick(50); const first = viewport.scrollTop;
+  await app.tick(50); assert.equal(viewport.scrollTop > first, true); assert.equal(app.calls.length, 1);
+  viewport.scrollHeight = 300; viewport.scrollTop = 42;
+  toggle.fire('click'); toggle.fire('click'); await app.tick(2000); await app.tick(50);
+  assert.equal(viewport.scrollTop, 0);
+  assert.equal([...app.timers.values()].some(timer => timer.ms === 2000), true);
+  assert.equal(app.calls.length, 1);
+});
+
+test('hover, focus and manual interaction pause motion without hiding predictions', async () => {
+  const entries = publicEntries(); const app = await start(() => response(summary('hunt-a', { entries, count: entries.length })));
+  await app.view();
+  const viewport = app.byClass('prediction-feed-viewport')[0], toggle = app.byClass('prediction-scroll-toggle')[0];
+  viewport.scrollHeight = 512; toggle.fire('click'); toggle.fire('click');
+  viewport.fire('mouseenter'); assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
+  viewport.fire('mouseleave'); assert.equal([...app.timers.values()].some(timer => timer.ms === 2000), true);
+  viewport.fire('focusin'); assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
+  viewport.fire('focusout', { relatedTarget: null }); viewport.fire('wheel');
+  assert.equal(toggle.textContent, 'Resume scrolling'); assert.equal(toggle.attributes['aria-pressed'], 'true');
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
+  assert.equal(app.byClass('prediction-feed-row').length, 18);
+});
+
+test('reduced motion leaves a manually scrollable list without automatic movement', async () => {
+  const entries = publicEntries(); const app = await start(() => response(summary('hunt-a', { entries, count: entries.length })), { reducedMotion: true });
+  await app.view();
+  const viewport = app.byClass('prediction-feed-viewport')[0], toggle = app.byClass('prediction-scroll-toggle')[0];
+  viewport.scrollHeight = 512; toggle.fire('click'); toggle.fire('click');
+  assert.equal(toggle.hidden, true); assert.equal(viewport.tabIndex, 0);
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
+  assert.equal(app.byClass('prediction-feed-row').length, 18);
+});
+
+test('automatic refresh is limited to one minute, pauses offscreen and hidden, and stops for completed hunts', async () => {
+  const app = await start(null, { observers: true }); await app.view();
+  assert.equal(app.timers.size, 0); app.observers[0].fire(true);
+  assert.deepEqual([...app.timers.values()].map(timer => timer.ms), [60000]);
+  await app.tick(60000); assert.equal(app.calls.length, 2);
+  app.observers[0].fire(false); assert.equal(app.timers.size, 0);
+  app.observers[0].fire(true); app.document.hidden = true; app.events.get('visibilitychange')(); assert.equal(app.timers.size, 0);
+  app.document.hidden = false; app.events.get('visibilitychange')(); assert.equal(app.timers.size, 1);
+  await app.view('hunt-b', 'complete'); assert.equal(app.observers[0].disconnected, true); app.observers[1].fire(true);
+  assert.equal(app.timers.size, 0);
+});
+
+test('switching hunts and loss of public access discard scrolling and refresh timers', async () => {
+  let forbidden = false; const entries = publicEntries();
+  const app = await start(call => forbidden ? response({ ok: false, error: 'This hunt is private.' }, 403) : response(summary(new URL(call.url, 'https://test').searchParams.get('hunt'), { entries, count: entries.length })), { observers: true });
+  await app.view(); app.observers[0].fire(true);
+  let viewport = app.byClass('prediction-feed-viewport')[0], toggle = app.byClass('prediction-scroll-toggle')[0];
+  viewport.scrollHeight = 512; toggle.fire('click'); toggle.fire('click'); assert.equal(app.timers.size, 2);
+  await app.view('hunt-b'); assert.equal(app.observers[0].disconnected, true); assert.equal(app.timers.size, 0);
+  app.observers[1].fire(true); assert.equal(app.timers.size, 1);
+  forbidden = true; app.byClass('prediction-refresh')[0].fire('click'); await app.settle();
+  app.observers.at(-1).fire(true);
+  assert.equal(app.timers.size, 0); assert.equal(app.byClass('prediction-feed-row').length, 0);
+  app.events.get('hunt:unavailable')(); assert.equal(app.mount.children.length, 0); assert.equal(app.timers.size, 0);
+});
+
+test('signout immediately clears own-row attribution even when the public refresh then fails', async () => {
+  let signedOut = false; const entries = publicEntries();
+  const app = await start(call => {
+    if (call.url.includes('action=logout')) { signedOut = true; return response({ ok: true }); }
+    if (signedOut) throw new Error('Offline');
+    return response(summary('hunt-a', { entries, count: entries.length, mine: { username: viewer.login, amountMinor: entries[2].amountMinor } }));
+  });
+  await app.view(); assert.equal(app.byClass('prediction-feed-mine').length, 1);
+  app.byClass('prediction-signout')[0].fire('click'); await app.settle();
+  assert.equal(app.byClass('prediction-feed-mine').length, 0);
+  assert.equal(app.byClass('prediction-mine')[0].hidden, true);
+  assert.equal(app.byClass('prediction-feed-row').length, 18);
+});
+
+test('malformed public entry data cannot be displayed as a valid roster', async () => {
+  const entries = publicEntries(1); entries[0].username = '<img src=x>';
+  const app = await start(() => response(summary('hunt-a', { entries, count: 1 })));
+  await app.view(); assert.equal(app.byClass('prediction-feed-row').length, 0);
+  assert.match(app.text(), /Predictions could not be confirmed/);
+  assert.doesNotMatch(app.text(), /<img/);
 });
