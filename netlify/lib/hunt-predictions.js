@@ -4,7 +4,8 @@ const crypto = require("node:crypto");
 const hunts = require("./bonus-hunts");
 const Core = require("../../hunt-shared");
 const { cutoffFor, collecting, timestamp } = require("./hunt-prediction-windows");
-const COOKIE_NAME = "thorshall_prediction_id";
+const TWITCH_ID = /^[1-9]\d{0,19}$/;
+const TWITCH_LOGIN = /^[a-z0-9_]{1,25}$/;
 const MAX_BODY_BYTES = 4096;
 const MAX_ENTRIES = 2000;
 const MAX_LEDGER_BYTES = 1024 * 1024;
@@ -45,20 +46,20 @@ function sameOrigin(event) {
     throw new PredictionError(403, "Submit your prediction from this hunt page.");
   }
 }
-function identity(event, secret) {
-  const cookie = String(header(event, "cookie")).split(";").map(item => item.trim()).find(item => item.startsWith(COOKIE_NAME + "="));
-  let value = cookie ? cookie.slice(COOKIE_NAME.length + 1) : "";
-  const match = /^([A-Za-z0-9_-]{43})\.([a-f0-9]{64})$/.exec(value);
-  let valid = false;
-  if (match) {
-    const expected = hmac(secret, "prediction-cookie-v1:" + match[1]);
-    valid = crypto.timingSafeEqual(Buffer.from(expected), Buffer.from(match[2]));
-  }
-  const id = valid ? match[1] : crypto.randomBytes(32).toString("base64url");
-  if (!valid) value = id + "." + hmac(secret, "prediction-cookie-v1:" + id);
-  const secure = urlFor(event).protocol === "https:" ? "; Secure" : "";
-  return { hash: hmac(secret, "prediction-browser-v1:" + id), valid,
-    cookie: valid ? null : COOKIE_NAME + "=" + value + "; Path=/; HttpOnly; SameSite=Lax; Max-Age=7776000" + secure };
+function verifiedUser(value) {
+  if (!value || typeof value !== "object" || !TWITCH_ID.test(value.id) || !TWITCH_LOGIN.test(value.login)
+      || typeof value.displayName !== "string" || !value.displayName || value.displayName.length > 50 || /[\u0000-\u001f\u007f]/.test(value.displayName)) return null;
+  return { id: value.id, login: value.login, displayName: value.displayName };
+}
+async function defaultAuthInfo(event) {
+  return require("./hunt-twitch-auth").predictionAuthInfo(event);
+}
+function publicAuth(value) {
+  return { viewer: verifiedUser(value?.viewer), authConfigured: value?.authConfigured === true,
+    loginUrl: typeof value?.loginUrl === "string" ? value.loginUrl : "/.netlify/functions/hunt-twitch?action=login",
+    logoutUrl: typeof value?.logoutUrl === "string" ? value.logoutUrl : "/.netlify/functions/hunt-twitch?action=logout",
+    authExpiresAt: timestamp(value?.authExpiresAt) ? value.authExpiresAt : null,
+    authRevalidateAt: timestamp(value?.authRevalidateAt) ? value.authRevalidateAt : null };
 }
 function parseAmount(value) {
   if (typeof value !== "string" || !/^(0|[1-9]\d{0,9})(?:\.\d{1,2})?$/.test(value)) throw new PredictionError(400, "Enter an end balance using no more than two decimal places.");
@@ -73,25 +74,32 @@ function parseBody(event) {
   const raw = event.isBase64Encoded ? Buffer.from(event.body, "base64").toString("utf8") : event.body;
   if (Buffer.byteLength(raw) > MAX_BODY_BYTES) throw new PredictionError(413, "This prediction is too large.");
   let body; try { body = JSON.parse(raw); } catch { throw new PredictionError(400, "Send a valid prediction."); }
-  const allowed = ["huntId", "requestId", "username", "amount", "website"];
+  const allowed = ["huntId", "requestId", "amount", "website", "viewerId"];
   if (!body || typeof body !== "object" || Array.isArray(body) || Object.keys(body).some(key => !allowed.includes(key))) throw new PredictionError(400, "Unsupported prediction fields.");
   if (body.website !== "") throw new PredictionError(400, "This prediction could not be accepted.");
   if (typeof body.huntId !== "string" || !ID.test(body.huntId) || typeof body.requestId !== "string" || !UUID.test(body.requestId)) throw new PredictionError(400, "Refresh this hunt page before predicting.");
-  if (typeof body.username !== "string" || !/^[A-Za-z0-9_]{3,25}$/.test(body.username)) throw new PredictionError(400, "Use your Twitch username: 3–25 letters, numbers or underscores.");
-  return { huntId: body.huntId, requestId: body.requestId.toLowerCase(), username: body.username,
-    nameKey: body.username.toLowerCase(), amountMinor: parseAmount(body.amount) };
+  if (body.viewerId !== undefined && (typeof body.viewerId !== "string" || !TWITCH_ID.test(body.viewerId))) throw new PredictionError(400, "Refresh your Twitch sign-in before predicting.");
+  return { huntId: body.huntId, requestId: body.requestId.toLowerCase(), amountMinor: parseAmount(body.amount), ...(body.viewerId !== undefined ? { viewerId: body.viewerId } : {}) };
 }
 function emptyLedger(hunt) { return { schema: 1, huntId: hunt.id, currency: hunt.currency, entries: [] }; }
 function validateLedger(value, huntId) {
   if (!value || typeof value !== "object" || value.schema !== 1 || value.huntId !== huntId || !["USD", "EUR", "GBP", "CAD", "AUD"].includes(value.currency)
       || !Array.isArray(value.entries) || value.entries.length > MAX_ENTRIES || Buffer.byteLength(JSON.stringify(value)) > MAX_LEDGER_BYTES) throw new Error("Invalid prediction ledger");
-  const requestIds = new Set(), browsers = new Set(), names = new Set();
+  const requestIds = new Set(), legacyBrowsers = new Set(), legacyNames = new Set(), users = new Set();
   for (const entry of value.entries) {
+    const twitch = entry?.authKind === "twitch";
     if (!entry || typeof entry !== "object" || !UUID.test(entry.requestId) || !HASH.test(entry.identityHash) || !HASH.test(entry.ipHash)
-        || typeof entry.username !== "string" || !/^[A-Za-z0-9_]{3,25}$/.test(entry.username) || entry.nameKey !== entry.username.toLowerCase()
+        || typeof entry.username !== "string" || !(twitch ? TWITCH_LOGIN : /^[A-Za-z0-9_]{3,25}$/).test(entry.username) || entry.nameKey !== entry.username.toLowerCase()
         || !Number.isSafeInteger(entry.amountMinor) || entry.amountMinor < 0 || entry.amountMinor > 100000000000 || !timestamp(entry.createdAt)
-        || requestIds.has(entry.requestId) || browsers.has(entry.identityHash) || names.has(entry.nameKey)) throw new Error("Invalid prediction record");
-    requestIds.add(entry.requestId); browsers.add(entry.identityHash); names.add(entry.nameKey);
+        || requestIds.has(entry.requestId)) throw new Error("Invalid prediction record");
+    if (twitch) {
+      if (!TWITCH_ID.test(entry.userId) || users.has(entry.userId)) throw new Error("Invalid Twitch prediction record");
+      users.add(entry.userId);
+    } else {
+      if (entry.authKind !== undefined || entry.userId !== undefined || legacyBrowsers.has(entry.identityHash) || legacyNames.has(entry.nameKey)) throw new Error("Invalid legacy prediction record");
+      legacyBrowsers.add(entry.identityHash); legacyNames.add(entry.nameKey);
+    }
+    requestIds.add(entry.requestId);
   }
   return value;
 }
@@ -130,8 +138,8 @@ function accepting(record, hunt, ledger) {
   return record.state.settings?.public === true && record.state.activeId === hunt.id && collecting(hunt)
     && !cutoffFor(record, hunt.id) && ledger.currency === hunt.currency;
 }
-function summary(ledger, record, hunt, identityHash) {
-  const entries = eligibleEntries(ledger, record, hunt), own = entries.find(entry => entry.identityHash === identityHash);
+function summary(ledger, record, hunt, viewer) {
+  const entries = eligibleEntries(ledger, record, hunt), own = viewer ? entries.find(entry => entry.authKind === "twitch" && entry.userId === viewer.id) : null;
   let podium = [];
   if (hunt.status === "complete") {
     const end = finalBalanceMinor(hunt);
@@ -144,59 +152,64 @@ function summary(ledger, record, hunt, identityHash) {
     mine: own ? { username: own.username, amountMinor: own.amountMinor, createdAt: own.createdAt } : null, podium,
     ...(ledger.currency !== hunt.currency ? { message: "The hunt currency changed. Earlier predictions cannot be ranked for this currency." } : {}) };
 }
-function matchingRetry(entry, operation, identityHash) {
-  return entry.requestId === operation.requestId && entry.identityHash === identityHash && entry.username === operation.username && entry.amountMinor === operation.amountMinor;
+function matchingRetry(entry, operation, viewer) {
+  return entry.requestId === operation.requestId && entry.authKind === "twitch" && entry.userId === viewer.id && entry.amountMinor === operation.amountMinor;
 }
-function createHandler({ connectHunts, connectPredictions, now = () => new Date(), secretFor = signingSecret,
+function createHandler({ connectHunts, connectPredictions, now = () => new Date(), secretFor = signingSecret, authInfoFor = defaultAuthInfo,
   logDiagnostic = value => console.error(JSON.stringify(value)) } = {}) {
   return async function handler(event = {}) {
     const method = String(event.httpMethod || "GET").toUpperCase();
     if (!["GET", "POST"].includes(method)) return json(405, { ok: false, error: "Method not allowed." }, { Allow: "GET, POST" });
-    let extra = {}, stage = "validation";
+    let extra = {}, stage = "validation", auth = null;
     try {
       const at = now(); if (!timestamp(at.toISOString())) throw new Error("Invalid prediction clock");
       const secret = secretFor(); if (typeof secret !== "string" || secret.length < 32) throw new Error("Prediction signing is unavailable");
-      const browser = identity(event, secret);
-      if (browser.cookie) extra["Set-Cookie"] = browser.cookie;
+      urlFor(event);
       let operation, huntId;
       const query = event.queryStringParameters || {};
       if (method === "POST") {
         sameOrigin(event); if (Object.keys(query).length) throw new PredictionError(400, "Unsupported prediction parameter.");
         operation = parseBody(event); huntId = operation.huntId;
-        if (!browser.valid) throw new PredictionError(403, "Refresh the hunt page before saving your prediction.");
       } else {
         if (Object.keys(query).length !== 1 || typeof query.hunt !== "string" || !ID.test(query.hunt)) throw new PredictionError(400, "Choose a valid hunt.");
         huntId = query.hunt;
       }
+      stage = "auth";
+      const authEvent = { ...event, queryStringParameters: { ...(event.queryStringParameters || {}), return: "/bonus-hunt#hunt=" + huntId } };
+      auth = publicAuth(await authInfoFor(authEvent));
+      if (method === "POST" && (!auth.authConfigured || !auth.viewer)) {
+        return json(401, { ok: false, error: auth.authConfigured ? "Sign in with Twitch before submitting a prediction." : "Twitch sign-in is being connected. Predictions require a verified Twitch account.", ...auth });
+      }
+      if (operation?.viewerId !== undefined && operation.viewerId !== auth.viewer.id) throw new PredictionError(409, "Your Twitch account changed. Refresh predictions and review your entry.");
       stage = "connect";
       if (typeof connectHunts !== "function" || typeof connectPredictions !== "function") throw new Error("Prediction storage is unavailable");
       const huntStore = await connectHunts(event), predictionStore = await connectPredictions(event);
       stage = "read";
       const current = await readHunt(huntStore, huntId, event);
       let { ledger, etag } = await readLedger(predictionStore, current.hunt);
-      if (method === "GET") return json(200, summary(ledger, current.record, current.hunt, browser.hash), extra);
+      if (method === "GET") return json(200, { ...summary(ledger, current.record, current.hunt, auth.viewer), ...auth }, extra);
       const priorRequest = ledger.entries.find(entry => entry.requestId === operation.requestId);
       if (priorRequest) {
-        if (!matchingRetry(priorRequest, operation, browser.hash)) throw new PredictionError(409, "This request was already used. Refresh the hunt page.");
+        if (!matchingRetry(priorRequest, operation, auth.viewer)) throw new PredictionError(409, "This request was already used. Refresh the hunt page.");
         if (!eligibleEntries(ledger, current.record, current.hunt).includes(priorRequest)) throw new PredictionError(409, "Predictions closed before this entry was accepted.");
-        return json(200, { ...summary(ledger, current.record, current.hunt, browser.hash), duplicate: true }, extra);
+        return json(200, { ...summary(ledger, current.record, current.hunt, auth.viewer), ...auth, duplicate: true }, extra);
       }
       if (!accepting(current.record, current.hunt, ledger)) throw new PredictionError(409, "Predictions are closed for this hunt.");
       const ip = typeof event.clientIp === "string" && event.clientIp.length < 100 ? event.clientIp : "unavailable";
       const ipHash = hmac(secret, "prediction-ip-v1:" + at.toISOString().slice(0, 10) + ":" + ip);
-      const candidate = { ...operation, identityHash: browser.hash, ipHash, createdAt: at.toISOString() };
-      delete candidate.huntId;
+      const candidate = { ...operation, authKind: "twitch", userId: auth.viewer.id, username: auth.viewer.login, nameKey: auth.viewer.login,
+        identityHash: hmac(secret, "prediction-twitch-v1:" + auth.viewer.id), ipHash, createdAt: at.toISOString() };
+      delete candidate.huntId; delete candidate.viewerId;
       let duplicate = false;
       stage = "write";
       for (let attempt = 0; attempt < 8; attempt++) {
         const prior = ledger.entries.find(entry => entry.requestId === operation.requestId);
         if (prior) {
-          if (!matchingRetry(prior, operation, browser.hash)) throw new PredictionError(409, "This request was already used. Refresh the hunt page.");
+          if (!matchingRetry(prior, operation, auth.viewer)) throw new PredictionError(409, "This request was already used. Refresh the hunt page.");
           duplicate = true; break;
         }
         if (ledger.currency !== current.hunt.currency) throw new PredictionError(409, "The hunt currency changed. Refresh the hunt page.");
-        if (ledger.entries.some(entry => entry.identityHash === browser.hash)) throw new PredictionError(409, "This browser already has a prediction for this hunt.");
-        if (ledger.entries.some(entry => entry.nameKey === operation.nameKey)) throw new PredictionError(409, "That Twitch username already has a prediction for this hunt.");
+        if (ledger.entries.some(entry => entry.authKind === "twitch" && entry.userId === auth.viewer.id)) throw new PredictionError(409, "Your Twitch account already has a prediction for this hunt.");
         if (ledger.entries.filter(entry => entry.ipHash === ipHash).length >= MAX_IP_ENTRIES) throw new PredictionError(429, "Too many predictions from this connection. Try the next hunt.");
         if (ledger.entries.length >= MAX_ENTRIES) throw new PredictionError(429, "This hunt has reached its prediction limit.");
         const next = { ...ledger, entries: [...ledger.entries, candidate] };
@@ -211,9 +224,9 @@ function createHandler({ connectHunts, connectPredictions, now = () => new Date(
       const confirmed = await readLedger(predictionStore, current.hunt);
       const after = await readHunt(huntStore, huntId, event);
       const saved = confirmed.ledger.entries.find(entry => entry.requestId === operation.requestId);
-      if (!saved || !matchingRetry(saved, operation, browser.hash)) throw new Error("Prediction save could not be confirmed");
+      if (!saved || !matchingRetry(saved, operation, auth.viewer)) throw new Error("Prediction save could not be confirmed");
       if (!eligibleEntries(confirmed.ledger, after.record, after.hunt).some(entry => entry.requestId === saved.requestId)) throw new PredictionError(409, "Predictions closed before this entry was accepted.");
-      return json(duplicate ? 200 : 201, { ...summary(confirmed.ledger, after.record, after.hunt, browser.hash), duplicate }, extra);
+      return json(duplicate ? 200 : 201, { ...summary(confirmed.ledger, after.record, after.hunt, auth.viewer), ...auth, duplicate }, extra);
     } catch (error) {
       if (error instanceof PredictionError) return json(error.status, { ok: false, error: error.message }, extra);
       try { logDiagnostic({ event: "hunt_prediction_failure", stage }); } catch { /* Logs never change a response. */ }
@@ -223,4 +236,4 @@ function createHandler({ connectHunts, connectPredictions, now = () => new Date(
 }
 
 module.exports = { createHandler, storeName, ledgerKey, HEADERS, MAX_BODY_BYTES, MAX_ENTRIES, MAX_IP_ENTRIES,
-  COOKIE_NAME, PredictionError, parseAmount, validateLedger, eligibleEntries, finalBalanceMinor, summary };
+  PredictionError, parseAmount, validateLedger, eligibleEntries, finalBalanceMinor, summary, verifiedUser };
