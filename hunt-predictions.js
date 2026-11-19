@@ -328,7 +328,7 @@
     append(results, resultsHeading, podium, nodes.podiumNote);
     append(standings, standingsHeader, feed);
     var panel = element('section', 'prediction-panel'); panel.setAttribute('aria-labelledby', 'predictions-title');
-    append(content, entry, standings); append(panel, heading, content); append(mount, results, panel);
+    append(content, entry, standings); append(panel, heading, results, content); append(mount, panel);
     context.nodes = nodes;
     context.scroller = { timer: null, lastTick: null, position: 0, paused: false, hovered: false, focused: false };
     context.inViewport = typeof window.IntersectionObserver !== 'function';

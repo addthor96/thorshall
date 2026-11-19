@@ -66,7 +66,8 @@ test('collecting hunt revisions preserve drafts and keep a single moderate refre
   const amount = app.node('prediction-amount'); app.input(amount.id, '1234.50'); amount.focus(); await app.view('hunt-a', 'collecting', 'v2');
   assert.equal(app.calls.length, 1); assert.equal(app.node(amount.id), amount); assert.equal(app.document.activeElement, amount); assert.equal(amount.value, '1234.50'); assert.equal(app.node('prediction-username'), null);
   assert.equal(app.byClass('prediction-place').length, 3); assert.match(app.text(), /2nd place.*1st place.*3rd place/); assert.doesNotMatch(app.text(), /\$[0-9]/);
-  assert.deepEqual(app.mount.children.map(node => node.className), ['prediction-results', 'prediction-panel']);
+  assert.deepEqual(app.mount.children.map(node => node.className), ['prediction-panel']);
+  assert.deepEqual(app.byClass('prediction-panel')[0].children.map(node => node.className), ['prediction-heading', 'prediction-results', 'prediction-content']);
   assert.deepEqual(app.byClass('prediction-place').map(node => node.attributes.value), ['2', '1', '3']);
   assert.equal(app.byClass('prediction-podium-hunt')[0].textContent, 'For hunt-a');
   assert.deepEqual([...app.timers.values()].map(timer => timer.ms), []);
