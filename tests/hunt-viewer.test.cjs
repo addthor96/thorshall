@@ -96,6 +96,7 @@ test('top hunt cards control both the selected predictions and ledger without sk
   const data=state([hunt('live','Live hunt','opening'),hunt('past','Past hunt')]);
   const windows={live:{accepting:true,closedAt:null},past:{accepting:false,closedAt:'2026-11-18T12:00:00.000Z'}};
   const app=await start({data,predictionWindows:windows});
+  assert.doesNotMatch(app.html(),/Bonus hunts\.|Choose a hunt to explore|Choose your hunt|completed ·|in progress<\/span>|archive-count/);
   assert.ok(app.html().indexOf('id="hunt-cards"')<app.html().indexOf('id="hunt-predictions"'));
   assert.ok(app.html().indexOf('id="hunt-predictions"')<app.html().indexOf('id="hunt-detail"'));
   assert.match(app.html(),/aria-controls="hunt-predictions hunt-detail"/);
@@ -117,4 +118,15 @@ test('manual close metadata reaches the selected prediction view on hunt refresh
   assert.equal(app.dispatched.at(-1).detail.predictionWindow.accepting,false);
   assert.equal(app.dispatched.at(-1).detail.predictionWindow.closedAt,'2026-11-19T12:00:00.000Z');
   assert.doesNotMatch(app.html(),/Predictions open/);
+});
+
+test('reopening refresh passes the new prediction window token without changing the selected hunt',async()=>{
+  const data=state([hunt('live','Live hunt','opening'),hunt('past','Past hunt')]);
+  const app=await start({data,predictionWindows:{live:{accepting:false,closedAt:'2026-11-19T12:00:00.000Z',windowId:'0'}}});
+  const reopened=clone(data);reopened.hunts.find(h=>h.id==='live').status='collecting';
+  app.setResponse({state:reopened,revision:'reopened-v3',predictionWindows:{live:{accepting:true,closedAt:null,windowId:'new-cycle'}}});
+  await app.poll();
+  assert.equal(app.dispatched.at(-1).detail.hunt.id,'live');
+  assert.deepEqual(clone(app.dispatched.at(-1).detail.predictionWindow),{accepting:true,closedAt:null,windowId:'new-cycle'});
+  assert.match(app.html(),/Predictions open/);
 });

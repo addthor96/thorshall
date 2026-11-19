@@ -43,6 +43,17 @@ function fixture() {
 function payload(response) { return JSON.parse(response.body); }
 function guess(amount = "123.45", huntId = "hunt-a") { return { huntId, amount, requestId: crypto.randomUUID(), website: "" }; }
 async function submit(f, cookie, body = guess(), opts = {}) { return f.handle(event("POST", { cookie, body, ...opts })); }
+function phase(f, action, at) {
+  const clock = new Date(at); f.setClock(clock); let windowId;
+  f.update(record => {
+    const state = clone(record.state), hunt = state.hunts.find(item => item.id === state.activeId);
+    hunt.status = action === "start-opening" ? "opening" : "collecting";
+    Object.assign(record, W.updatePredictionWindows(record, state, clock, { closeHuntId: action === "start-opening" ? hunt.id : null,
+      reopenHuntId: action === "back-to-hunting" ? hunt.id : null, newWindowId: action === "back-to-hunting" ? crypto.randomUUID() : null }), { state });
+    windowId = W.windowFor(record, hunt.id).id;
+  });
+  return windowId;
+}
 
 test("public summaries remain readable without login, never create browser cookies, and isolate preview storage", async () => {
   const f = fixture(), response = await f.handle(event()), data = payload(response);
@@ -141,7 +152,7 @@ test("exact retries work after closing while changed requests and different iden
   assert.equal((await submit(f, cookie, { ...body, amount: "555" })).statusCode, 409);
   const stranger = f.user("otheruser"); assert.equal((await submit(f, stranger, body)).statusCode, 409);
   f.update(record => { record.predictionClosedAt = { "hunt-a": "2026-11-19T13:01:00.000Z" }; record.state.hunts[0].status = "opening"; });
-  assert.equal((await submit(f, cookie, body)).statusCode, 200); assert.equal((await submit(f, stranger)).statusCode, 409); assert.equal(f.predictions.writes, 1);
+  assert.equal((await submit(f, cookie, body)).statusCode, 200); assert.equal((await submit(f, stranger)).statusCode, 409); assert.equal(f.predictions.writes, 2);
 });
 
 test("concurrent saves serialize and enforce one entry for each immutable Twitch account", async () => {
@@ -151,15 +162,18 @@ test("concurrent saves serialize and enforce one entry for each immutable Twitch
   assert.equal(payload(await f.handle(event())).count, 3);
 });
 
-test("the same Twitch account can change its one prediction during collection and opening", async () => {
+test("the same account can edit during collection, locks on opening, and resumes after explicit return to hunting", async () => {
   const f = fixture(), cookie = f.user("firstlogin"), first = guess();
   assert.equal((await submit(f, cookie, first)).statusCode, 201);
   f.setClock(new Date(+BASE + 1000)); const second = { ...guess("500"), expectedRevision: first.requestId };
   const changed = await submit(f, f.sameUser(cookie), second); assert.equal(changed.statusCode, 200);
   assert.equal(payload(changed).count, 1); assert.equal(payload(changed).mine.revision, second.requestId);
-  f.update(record => { record.state.hunts[0].status = "opening"; record.state.hunts[0].rows[0].payout = 100; });
+  phase(f, "start-opening", +BASE + 1500);
+  f.update(record => { record.state.hunts[0].rows[0].payout = 100; });
+  assert.equal((await submit(f, cookie, { ...guess("999.99"), expectedRevision: second.requestId })).statusCode, 409);
+  const windowId = phase(f, "back-to-hunting", +BASE + 1800);
   const editorBefore = await f.huntStore.getWithMetadata("hunt-manager");
-  f.setClock(new Date(+BASE + 2000)); const third = { ...guess("999.99"), expectedRevision: second.requestId };
+  f.setClock(new Date(+BASE + 2000)); const third = { ...guess("999.99"), expectedRevision: second.requestId, windowId };
   const final = payload(await submit(f, f.sameUser(cookie, "newlogin"), third));
   assert.equal(final.accepting, true); assert.equal(final.count, 1);
   assert.deepEqual(final.mine, { username: "newlogin", amountMinor: 99999, createdAt: BASE.toISOString(), updatedAt: new Date(+BASE + 2000).toISOString(), revision: third.requestId });
@@ -185,7 +199,7 @@ test("stale browser edits cannot overwrite a newer saved amount, while old exact
   assert.equal((await submit(f, cookie, { ...second, amount: "999" })).statusCode, 409);
   assert.equal((await submit(f, cookie, { ...second, expectedRevision: third.requestId })).statusCode, 409);
   assert.equal((await submit(f, f.user("otheruser"), second)).statusCode, 409);
-  assert.equal(f.predictions.writes, 3);
+  assert.equal(f.predictions.writes, 6);
 });
 
 test("concurrent changes from two browsers compare the saved revision and accept one", async () => {
@@ -196,7 +210,8 @@ test("concurrent changes from two browsers compare the saved revision and accept
   assert.deepEqual(responses.map(response => response.statusCode).sort(), [200, 409]);
   const result = payload(await f.handle(event("GET", { cookie })));
   assert.equal(result.count, 1); assert.equal(result.mine.revision, responses[0].statusCode === 200 ? a.requestId : b.requestId);
-  assert.equal(f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0].revisions.length, 1);
+  const revisions = f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0].revisions;
+  assert.equal(revisions.filter(revision => revision.admittedAt !== null).length, 1);
 });
 
 test("manual closure racing an edit keeps the previously accepted amount and rejects retries of the late edit", async () => {
@@ -250,7 +265,7 @@ test("older Twitch records remain editable and bounded revision history does not
 
 test("the same account has separate current and completed predictions for each hunt", async () => {
   const f = fixture(), cookie = f.user(), first = guess("100"); await submit(f, cookie, first);
-  f.update(record => { record.state.hunts[0].status = "complete"; record.predictionClosedAt = { "hunt-a": new Date(+BASE + 1).toISOString() }; record.state.hunts.push({ ...clone(record.state.hunts[0]), id: "hunt-b", status: "opening" }); record.state.activeId = "hunt-b"; });
+  f.update(record => { record.state.hunts[0].status = "complete"; record.predictionClosedAt = { "hunt-a": new Date(+BASE + 1).toISOString() }; record.state.hunts.push({ ...clone(record.state.hunts[0]), id: "hunt-b", status: "collecting" }); record.state.activeId = "hunt-b"; });
   f.setClock(new Date(+BASE + 1000)); const second = guess("500", "hunt-b");
   assert.equal((await submit(f, cookie, second)).statusCode, 201);
   const old = payload(await f.handle(event("GET", { cookie }))), current = payload(await f.handle(event("GET", { cookie, hunt: "hunt-b" })));
@@ -323,7 +338,7 @@ test("connection limits and duplicate-safe uncertain-write recovery still protec
   const retry = fixture(), cookie = retry.user(), body = guess(); let once = true;
   retry.predictions.afterWrite = () => { if (once) { once = false; throw new Error("Lost after commit"); } };
   assert.equal((await submit(retry, cookie, body)).statusCode, 503); const recovered = await submit(retry, cookie, body);
-  assert.equal(recovered.statusCode, 200); assert.equal(payload(recovered).duplicate, true); assert.equal(retry.predictions.writes, 1);
+  assert.equal(recovered.statusCode, 200); assert.equal(payload(recovered).duplicate, true); assert.equal(retry.predictions.writes, 2);
 });
 
 test("server cutoffs preserve prototype-like IDs and immutable historical deadlines", () => {
@@ -331,6 +346,96 @@ test("server cutoffs preserve prototype-like IDs and immutable historical deadli
   const windows = W.closePredictionWindows(before, next, BASE); assert.equal(Object.prototype.hasOwnProperty.call(windows, "__proto__"), true); assert.equal(windows.__proto__, BASE.toISOString());
   assert.equal(W.closePredictionWindows({ state: next, predictionClosedAt: windows }, clone(before.state), new Date(+BASE + 1000)).__proto__, BASE.toISOString());
   assert.equal(W.cutoffFor({ predictionClosedAt: {} }, "constructor"), null); assert.notEqual(P.ledgerKey("__proto__"), "__proto__");
+  const prototypeRecord = { state: { activeId: "constructor", hunts: [{ id: "constructor", status: "collecting", rows: [] }] } };
+  const opening = clone(prototypeRecord.state); opening.hunts[0].status = "opening";
+  const closed = W.updatePredictionWindows(prototypeRecord, opening, BASE);
+  assert.equal(closed.predictionWindowHistory.constructor[0].closedAt, BASE.toISOString());
+  const collecting = clone(opening); collecting.hunts[0].status = "collecting";
+  const reopened = W.updatePredictionWindows({ ...prototypeRecord, ...closed, state: opening }, collecting, new Date(+BASE + 1000), { reopenHuntId: "constructor", newWindowId: crypto.randomUUID() });
+  assert.equal(Object.hasOwn(reopened.predictionWindowHistory, "constructor"), true);
+  assert.equal(W.cutoffFor(reopened, "constructor"), null);
+});
+
+test("legacy closed IDs absent from the prior active state cannot be revived on their first new-format import", () => {
+  for (const removed of [true, false]) {
+    const oldHunt = { id: "retired-hunt", status: "collecting", rows: [] }, active = { id: "current-hunt", status: "collecting", rows: [] };
+    const record = { state: { activeId: active.id, hunts: removed ? [active] : [active, oldHunt] }, predictionClosedAt: { [oldHunt.id]: BASE.toISOString() } };
+    const imported = { activeId: oldHunt.id, hunts: [{ ...oldHunt, status: "opening" }] };
+    const migrated = W.updatePredictionWindows(record, imported, new Date(+BASE + 1000));
+    assert.equal(Object.hasOwn(migrated.predictionPermanentlyClosed, oldHunt.id), true);
+    assert.throws(() => W.updatePredictionWindows({ ...record, ...migrated, state: imported }, { ...imported, hunts: [oldHunt] }, new Date(+BASE + 2000),
+      { reopenHuntId: oldHunt.id, newWindowId: crypto.randomUUID() }), /cannot be reopened/);
+  }
+});
+
+test("reopened cycles preserve accepted guesses and permanently exclude legacy closed-gap versions", async () => {
+  const f = fixture(), cookie = f.user(), first = guess("100"); await submit(f, cookie, first);
+  phase(f, "start-opening", +BASE + 1000);
+  const ledger = f.predictions.records.get(P.ledgerKey("hunt-a")), original = ledger.entries[0];
+  const lateId = crypto.randomUUID();
+  original.revisions = [{ requestId: lateId, parentRevision: original.requestId, username: original.username, nameKey: original.nameKey,
+    amountMinor: 99900, ipHash: original.ipHash, createdAt: new Date(+BASE + 1500).toISOString(), sequence: 2 }];
+  const lateViewer = { ...clone(original), requestId: crypto.randomUUID(), userId: "999999", username: "closedgap", nameKey: "closedgap", createdAt: new Date(+BASE + 1500).toISOString(), sequence: 3 };
+  delete lateViewer.revisions; delete lateViewer.windowId; delete lateViewer.admittedAt; delete lateViewer.expectedRevision;
+  ledger.entries.push(lateViewer);
+  const windowId = phase(f, "back-to-hunting", +BASE + 2000);
+  const reopened = payload(await f.handle(event("GET", { cookie })));
+  assert.equal(reopened.accepting, true); assert.equal(reopened.windowId, windowId); assert.equal(reopened.count, 1);
+  assert.equal(reopened.mine.amountMinor, 10000); assert.equal(reopened.mine.revision, first.requestId);
+  assert.equal((await submit(f, cookie, { ...guess("200"), expectedRevision: first.requestId })).statusCode, 409);
+  f.setClock(new Date(+BASE + 2500)); const change = { ...guess("200"), expectedRevision: first.requestId, windowId };
+  const accepted = await submit(f, cookie, change); assert.equal(accepted.statusCode, 200); assert.equal(payload(accepted).mine.amountMinor, 20000);
+  assert.equal(payload(await submit(f, cookie, first)).mine.amountMinor, 20000);
+  assert.equal((await submit(f, cookie, { ...guess("300"), expectedRevision: lateId, windowId })).statusCode, 409);
+  phase(f, "start-opening", +BASE + 3000); phase(f, "back-to-hunting", +BASE + 4000);
+  assert.equal(payload(await f.handle(event("GET", { cookie }))).mine.amountMinor, 20000);
+  assert.equal(payload(await f.handle(event())).entries.some(entry => entry.username === "closedgap"), false);
+});
+
+test("an old-cycle request timestamped before close but physically written after reopen is never visible", async () => {
+  const f = fixture(), cookie = f.user(), first = guess("100"); await submit(f, cookie, first);
+  f.setClock(new Date(+BASE + 500)); const late = { ...guess("999"), expectedRevision: first.requestId, windowId: "0" };
+  let switched = false, windowId;
+  f.predictions.beforeWrite = () => { if (!switched) { switched = true; phase(f, "start-opening", +BASE + 1000); windowId = phase(f, "back-to-hunting", +BASE + 2000); } };
+  f.predictions.afterWrite = async () => {
+    const visible = payload(await f.handle(event("GET", { cookie })));
+    assert.equal(visible.mine.amountMinor, 10000); assert.equal(visible.windowId, windowId);
+  };
+  assert.equal((await submit(f, cookie, late)).statusCode, 409);
+  assert.equal((await submit(f, cookie, late)).statusCode, 409);
+  const stored = f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0];
+  assert.equal(stored.revisions[0].createdAt, new Date(+BASE + 500).toISOString());
+  assert.equal(stored.revisions[0].admittedAt, null);
+  f.predictions.beforeWrite = null; f.predictions.afterWrite = null;
+  const fresh = { ...guess("250"), expectedRevision: first.requestId, windowId };
+  assert.equal((await submit(f, cookie, fresh)).statusCode, 200);
+  assert.equal(payload(await f.handle(event("GET", { cookie }))).mine.amountMinor, 25000);
+});
+
+test("pending new accounts cannot appear after reopening, but a fresh current-cycle request can join", async () => {
+  const f = fixture(), cookie = f.user(), old = guess("999"); let windowId, moved = false;
+  f.predictions.afterWrite = () => { if (!moved) { moved = true; phase(f, "start-opening", +BASE + 1000); windowId = phase(f, "back-to-hunting", +BASE + 2000); } };
+  assert.equal((await submit(f, cookie, old)).statusCode, 409);
+  let visible = payload(await f.handle(event("GET", { cookie })));
+  assert.equal(visible.count, 0); assert.equal(visible.mine, null); assert.equal(visible.windowId, windowId);
+  f.predictions.afterWrite = null;
+  const fresh = { ...guess("50"), windowId };
+  assert.equal((await submit(f, cookie, fresh)).statusCode, 200);
+  visible = payload(await f.handle(event("GET", { cookie })));
+  assert.equal(visible.count, 1); assert.equal(visible.mine.amountMinor, 5000);
+  assert.equal((await submit(f, cookie, old)).statusCode, 409);
+  assert.equal(payload(await submit(f, cookie, fresh)).duplicate, true);
+});
+
+test("legacy accepted Twitch records stay editable after a new cycle and malformed cycle metadata fails closed", async () => {
+  const f = fixture(), cookie = f.user(), first = guess("100"); await submit(f, cookie, first);
+  const stored = f.predictions.records.get(P.ledgerKey("hunt-a")).entries[0];
+  delete stored.windowId; delete stored.admittedAt; delete stored.expectedRevision;
+  phase(f, "start-opening", +BASE + 1000); const windowId = phase(f, "back-to-hunting", +BASE + 2000);
+  assert.equal((await submit(f, cookie, { ...guess("200"), expectedRevision: first.requestId, windowId })).statusCode, 200);
+  f.update(record => { record.predictionWindowHistory["hunt-a"][0].closedAt = null; });
+  assert.equal((await f.handle(event())).statusCode, 503);
+  assert.equal((await submit(f, cookie, { ...guess("500"), windowId })).statusCode, 503);
 });
 
 test("the real OAuth session helper supplies prediction identity and storage failures never become anonymous access", async () => {
@@ -356,5 +461,5 @@ test("the real OAuth session helper supplies prediction identity and storage fai
   const saved = await handle(event("POST", { cookie: sessionCookie, body: guess() })); assert.equal(saved.statusCode, 201); assert.equal(payload(saved).mine.username, "verifiedviewer");
   const unavailable = P.createHandler({ ...f.options, authInfoFor: request => Auth.predictionAuthInfo(request, { ...options, connectStore: () => { throw new Error("auth store unavailable"); } }) });
   assert.equal((await unavailable(event("POST", { cookie: sessionCookie, body: guess() }))).statusCode, 503);
-  assert.equal(f.predictions.writes, 1);
+  assert.equal(f.predictions.writes, 2);
 });

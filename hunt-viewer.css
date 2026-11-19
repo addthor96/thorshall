@@ -186,22 +186,27 @@
 .hunt-gallery-page .viewer-footer a{color:#b3c2d6}
 .hunt-gallery-page a:focus-visible,.hunt-gallery-page button:focus-visible{outline-color:#d7bd89}
 /* Compact hunt selector: each card controls the predictions and ledger below. */
+.hunt-selector-row{display:flex;align-items:center;gap:10px;min-width:0}
+.hunt-selector-row .hunt-cards{flex:1;min-width:0;padding-bottom:7px}
+.hunt-selector-row .hunt-card-controls{flex:none;flex-direction:column;gap:8px}
+.hunt-gallery-page .viewer-header{margin-bottom:16px}
+.hunt-picker{margin-bottom:16px}
 .hunt-cards{grid-auto-columns:calc((100% - 48px)/5);gap:12px;align-items:stretch}
-.hunt-card{padding:16px;min-width:0}
+.hunt-card{padding:13px;min-width:0}
 .hunt-card-top{gap:8px;align-items:flex-start}
 .hunt-card-top h2{font-size:17px;font-weight:600;line-height:1.35;letter-spacing:-.02em;color:#e4eaf3;margin:0;overflow-wrap:anywhere}
 .hunt-card .current-hunt-tag{font-size:10px;line-height:1.4;padding:3px 6px;margin:0;flex-shrink:0}
-.hunt-card-meta{display:flex;justify-content:space-between;gap:8px;margin:8px 0 14px;align-items:center}
+.hunt-card-meta{display:flex;justify-content:space-between;gap:8px;margin:6px 0 9px;align-items:center}
 .hunt-card-meta time{font-size:11px;color:#98a9c1;line-height:1.4}
 .hunt-card-meta .hunt-card-state{font-size:10px;line-height:1.4}
 .hunt-card-meta .hunt-card-state::before{display:none}
-.hunt-card-summary{display:grid;gap:7px;margin:0}
+.hunt-card-summary{display:grid;gap:4px;margin:0}
 .hunt-card-summary>div{display:flex;align-items:baseline;justify-content:space-between;gap:9px;min-width:0}
 .hunt-card-summary dt{font-size:13px;color:#a4b5cb;line-height:1.4}
 .hunt-card-summary dd{font-size:14px;font-weight:550;color:#dfe7f2;line-height:1.4;margin:0;white-space:nowrap;font-variant-numeric:tabular-nums}
 .hunt-card-summary .hunt-card-profit dd{font-weight:650}
 .hunt-card.profit .hunt-card-profit dd{color:#afd0b6}.hunt-card.loss .hunt-card-profit dd{color:#f1b6ab}
-.hunt-card-link{margin-top:14px;padding-top:11px;border-top:1px solid #344153;font-size:12px;line-height:1.4;gap:8px}
+.hunt-card-link{margin-top:9px;padding-top:8px;border-top:1px solid #344153;font-size:12px;line-height:1.4;gap:8px}
 .hunt-card-link>span:last-child{font-size:inherit}
 .hunt-card.selected .hunt-card-link>span:last-child{color:#e8d09d;font-weight:600}
 @media(max-width:1199px){.hunt-cards{grid-auto-columns:calc((100% - 36px)/4)}}
@@ -243,5 +248,5 @@
   .hunt-gallery-page .viewer-footer{font-size:9px;line-height:1.7}
 }
 @media(max-width:1000px){.hunt-cards{grid-auto-columns:calc((100% - 24px)/3)}.hunt-card{padding:15px}}
-@media(max-width:760px){.hunt-cards{grid-auto-columns:calc((100% - 12px)/2)}.hunt-card-top h2{font-size:17px}.hunt-picker{margin-bottom:22px}}
-@media(max-width:520px){.hunt-cards{grid-auto-columns:78%;gap:12px}.hunt-card{padding:16px}.hunt-card-summary dt{font-size:14px}.hunt-card-summary dd{font-size:15px}.hunt-card-meta time{font-size:12px}.hunt-card-meta .hunt-card-state{font-size:11px}.hunt-card-link{font-size:12px}}
+@media(max-width:760px){.hunt-cards{grid-auto-columns:calc((100% - 12px)/2)}.hunt-card-top h2{font-size:17px}.hunt-picker{margin-bottom:16px}.hunt-gallery-page .viewer-header{margin-bottom:16px}}
+@media(max-width:520px){.hunt-cards{grid-auto-columns:85%;gap:12px}.hunt-card{padding:13px}.hunt-card-summary dt{font-size:14px}.hunt-card-summary dd{font-size:15px}.hunt-card-meta time{font-size:12px}.hunt-card-meta .hunt-card-state{font-size:11px}.hunt-card-link{font-size:12px}.hunt-selector-row{gap:7px}.hunt-card-controls button{width:28px}}

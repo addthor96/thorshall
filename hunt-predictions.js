@@ -70,7 +70,7 @@
   function stateFor(id) {
     if (!entries.has(id)) {
       var amount = readDraft(id);
-      entries.set(id, { epoch: privacyEpoch, draft: { amount: amount, website: '' }, summary: null, loading: false, saving: false, signingOut: false, needsRefresh: false, editing: false, dirty: !!amount, editRevision: null, error: '', notice: '', authMessage: '', pending: null, request: 0 });
+      entries.set(id, { epoch: privacyEpoch, windowEpoch: 0, draft: { amount: amount, website: '' }, summary: null, loading: false, saving: false, signingOut: false, needsRefresh: false, editing: false, dirty: !!amount, editRevision: null, error: '', notice: '', authMessage: '', pending: null, request: 0 });
     }
     return entries.get(id);
   }
@@ -125,10 +125,17 @@
 
   function revision(value) { return typeof value === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value); }
 
+  function validWindowId(value) { return value === '0' || revision(value); }
+
+  function windowId(context) {
+    var metadata = context.predictionWindow;
+    return metadata ? validWindowId(metadata.windowId) ? metadata.windowId.toLowerCase() : '0' : null;
+  }
+
   function accepting(context, data) {
-    var window = context.predictionWindow;
-    return !!data && data.accepting === true && data.status !== 'complete' && ['collecting', 'opening'].includes(context.hunt.status) && context.hunt.id === context.activeId
-      && (!window || window.accepting === true && !window.closedAt);
+    var metadata = context.predictionWindow, token = windowId(context);
+    return !!data && data.accepting === true && data.status === 'collecting' && context.hunt.status === 'collecting' && context.hunt.id === context.activeId
+      && (token === null || token === data.windowId) && (!metadata || metadata.accepting === true && !metadata.closedAt);
   }
 
   function stopScroll(context) {
@@ -434,7 +441,7 @@
         var error = new Error(typeof data.error === 'string' ? data.error : 'Predictions are temporarily unavailable. Please try again.');
         error.status = response.status; throw error;
       }
-      if (data.huntId !== (method === 'GET' ? payload : payload.huntId) || typeof data.accepting !== 'boolean' || !Number.isSafeInteger(data.count) || data.count < 0
+      if (data.huntId !== (method === 'GET' ? payload : payload.huntId) || !validWindowId(data.windowId) || typeof data.accepting !== 'boolean' || !Number.isSafeInteger(data.count) || data.count < 0
           || typeof data.authConfigured !== 'boolean' || !validViewer(data.viewer)
           || data.mine !== null && (!data.mine || !revision(data.mine.revision) || typeof data.mine.username !== 'string' || !/^[a-z0-9_]{1,25}$/.test(data.mine.username)
             || !Number.isSafeInteger(data.mine.amountMinor) || data.mine.amountMinor < 0 || data.mine.amountMinor > 100000000000)
@@ -449,11 +456,20 @@
 
   function apply(state, data) {
     if (state.epoch !== privacyEpoch) return false;
+    var context = current && current.state === state ? current : null;
+    if (context && windowId(context) !== null && windowId(context) !== data.windowId) return false;
     var previousViewer = state.summary && state.summary.viewer;
     state.summary = data;
     if (data.viewer) state.authMessage = '';
+    if (state.pending && state.pending.windowId !== data.windowId) {
+      state.pending = null; state.editing = false; state.editRevision = null;
+      state.dirty = !!state.draft.amount; state.notice = '';
+    }
     var open = current && current.state === state ? accepting(current, data) : data.accepting;
-    if (!open || !data.viewer || previousViewer && previousViewer.id !== data.viewer.id || state.pending && state.pending.viewerId !== data.viewer.id) {
+    if (!open) {
+      state.pending = null; state.editing = false; state.editRevision = null;
+    }
+    if (!data.viewer || previousViewer && previousViewer.id !== data.viewer.id || state.pending && state.pending.viewerId !== data.viewer.id) {
       state.pending = null; state.editing = false; state.editRevision = null; state.dirty = false;
     }
     if (state.pending && data.mine && data.mine.revision === state.pending.requestId) {
@@ -462,7 +478,7 @@
     if (open && data.viewer && data.mine && state.dirty && state.draft.amount && !state.editing && !state.pending) {
       state.editing = true; state.editRevision = data.mine.revision;
     }
-    if (data.mine && !state.editing && !state.pending) clearDraft(data.huntId);
+    if (data.mine && !state.editing && !state.pending && !state.dirty) clearDraft(data.huntId);
     if (current && current.state === state) scheduleAuth(data);
     return true;
   }
@@ -525,16 +541,16 @@
     if (!active(context)) return;
     stopRefresh(context);
     if (context.state.loading || context.state.saving || context.state.signingOut) { context.state.needsRefresh = true; return; }
-    var state = context.state, request = ++state.request;
+    var state = context.state, request = ++state.request, windowEpoch = state.windowEpoch;
     state.loading = true; state.error = ''; update(context);
     try {
       var data = await api('GET', context.hunt.id);
-      if (request !== state.request) return;
+      if (request !== state.request || windowEpoch !== state.windowEpoch) return;
       apply(state, data);
     } catch (error) {
       if (error.status === 401) { signedOut(context, 'Your Twitch sign-in expired. Log in again to submit your prediction.'); return; }
       if (error.status === 403) { deny(context, error.message); return; }
-      if (!error.discard && state.epoch === privacyEpoch && request === state.request) state.error = error.message || 'Predictions are temporarily unavailable. Please try again.';
+      if (!error.discard && state.epoch === privacyEpoch && request === state.request && windowEpoch === state.windowEpoch) state.error = error.message || 'Predictions are temporarily unavailable. Please try again.';
     } finally {
       if (request === state.request) state.loading = false;
       settled(state);
@@ -552,13 +568,14 @@
         state.error = 'Enter an end balance from 0 to 1,000,000,000 using at most two decimal places.';
         nodes.amount.setAttribute('aria-invalid', 'true'); update(context); nodes.amount.focus(); return;
       }
-      try { state.pending = { huntId: context.hunt.id, requestId: requestId(), viewerId: state.summary.viewer.id, expectedRevision: state.editing ? state.editRevision : null, amount: amount, website: nodes.website.value }; }
+      try { state.pending = { huntId: context.hunt.id, windowId: state.summary.windowId, requestId: requestId(), viewerId: state.summary.viewer.id, expectedRevision: state.editing ? state.editRevision : null, amount: amount, website: nodes.website.value }; }
       catch (error) { state.error = error.message; update(context); return; }
     }
-    var payload = state.pending;
+    var payload = state.pending, windowEpoch = state.windowEpoch;
     state.saving = true; update(context);
     try {
       var data = await api('POST', payload);
+      if (windowEpoch !== state.windowEpoch) return;
       if (!apply(state, data)) return;
       state.pending = null; state.editing = false; state.editRevision = null; state.dirty = false; state.draft.amount = ''; nodes.amount.value = ''; clearDraft(context.hunt.id);
       state.notice = data.duplicate && data.mine && data.mine.revision !== payload.requestId ? 'Your latest saved prediction is shown.' : payload.expectedRevision ? 'Your prediction is updated.' : 'Your prediction is saved. Good luck!';
@@ -566,11 +583,13 @@
       if (error.discard || state.epoch !== privacyEpoch) return;
       if (error.status === 401) { signedOut(context, 'Your Twitch sign-in expired. Log in again to submit your prediction.'); return; }
       if (error.status === 403) { deny(context, error.message); return; }
+      if (windowEpoch !== state.windowEpoch) return;
       if ([400, 403, 404, 409, 422, 429].includes(error.status)) state.pending = null;
       state.error = error.status ? error.message : 'The save could not be confirmed. Retry to safely submit the same prediction.';
       if (error.status === 409 || error.status === 404) {
         try {
-          var latest = await api('GET', context.hunt.id); apply(state, latest);
+          var latest = await api('GET', context.hunt.id);
+          if (windowEpoch !== state.windowEpoch || !apply(state, latest)) return;
           if (latest.mine && accepting(context, latest)) {
             state.error = ''; state.editing = true; state.editRevision = latest.mine.revision; state.dirty = true;
             state.notice = 'This hunt has a saved prediction from another session. Review your amount, then save changes.';
@@ -588,9 +607,19 @@
     var detail = event.detail, hunt = detail && detail.hunt, mount = document.getElementById('hunt-predictions');
     if (!mount || !hunt || typeof hunt.id !== 'string' || !['USD', 'EUR', 'GBP', 'CAD', 'AUD'].includes(hunt.currency)) return;
     var predictionWindow = detail.predictionWindow && typeof detail.predictionWindow.accepting === 'boolean' ? detail.predictionWindow : null;
-    var signature = [hunt.id, hunt.status, hunt.currency, detail.activeId, predictionWindow ? predictionWindow.closedAt || '' : '', predictionWindow ? predictionWindow.accepting : '', hunt.status === 'complete' ? detail.revision : ''].join('|');
+    var signature = [hunt.id, hunt.status, hunt.currency, detail.activeId, predictionWindow ? predictionWindow.windowId || '0' : '', predictionWindow ? predictionWindow.closedAt || '' : '', predictionWindow ? predictionWindow.accepting : '', hunt.status === 'complete' ? detail.revision : ''].join('|');
     if (current && current.mount === mount && current.hunt.id === hunt.id) {
       var changed = current.signature !== signature;
+      if (changed) {
+        current.state.windowEpoch++;
+        if (windowId(current) !== (predictionWindow ? validWindowId(predictionWindow.windowId) ? predictionWindow.windowId.toLowerCase() : '0' : null)) {
+          // An unconfirmed retry from the previous collection window must never
+          // be replayed in a reopened window. Keep the amount for explicit review.
+          current.state.pending = null; current.state.editing = false; current.state.editRevision = null;
+          current.state.dirty = !!current.state.draft.amount;
+          current.state.error = ''; current.state.notice = '';
+        }
+      }
       current.hunt = hunt; current.activeId = detail.activeId; current.predictionWindow = predictionWindow; current.signature = signature;
       update(current);
       if (changed) load(current);

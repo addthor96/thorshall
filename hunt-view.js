@@ -23,7 +23,10 @@
   }
   function predictionWindow(hunt){
     var value=Object.prototype.hasOwnProperty.call(lastPredictionWindows,hunt.id)?lastPredictionWindows[hunt.id]:null;
-    return value&&typeof value.accepting==='boolean'?{closedAt:typeof value.closedAt==='string'?value.closedAt:null,accepting:value.accepting}:null;
+    if(!value||typeof value.accepting!=='boolean')return null;
+    var result={closedAt:typeof value.closedAt==='string'?value.closedAt:null,accepting:value.accepting};
+    if(typeof value.windowId==='string')result.windowId=value.windowId;
+    return result;
   }
   function renderViewer(state){
     var hunts=viewerHunts(state),requested=new URLSearchParams(location.hash.slice(1)).get('hunt');
@@ -51,8 +54,8 @@
     var predictionFocus=predictionPanel&&predictionPanel.contains&&predictionPanel.contains(focused)?focused:null;
     var predictionSelection=predictionFocus&&typeof predictionFocus.selectionStart==='number'?[predictionFocus.selectionStart,predictionFocus.selectionEnd]:null;
     if(predictionPanel&&predictionPanel.remove)predictionPanel.remove();
-    container.innerHTML='<div class="hunt-page-heading"><div><span class="eyebrow">THOR’S HALL · BONUS HUNTS</span><h1>Bonus hunts.</h1><p>Choose a hunt to explore its bonuses, payouts and results.</p></div><div class="archive-count"><strong>'+String(hunts.length).padStart(2,'0')+'</strong><span>'+ (hunts.length===1?'hunt in the hall':'hunts in the hall')+'</span></div></div>'+
-      '<section class="hunt-picker" aria-labelledby="hunt-picker-title"><div class="hunt-picker-heading"><div><h2 id="hunt-picker-title">Choose your hunt</h2><span>'+hunts.filter(function(h){return h.status==='complete';}).length+' completed'+(state.hunts.some(function(h){return h.id===state.activeId&&h.status!=='complete';})?' · 1 in progress':'')+'</span></div><div class="hunt-card-controls" id="hunt-card-controls"><button type="button" id="hunts-back" aria-label="Previous hunts">←</button><button type="button" id="hunts-next" aria-label="More hunts">→</button></div></div><nav class="hunt-cards" id="hunt-cards" aria-label="Select a hunt">'+cards+'</nav></section>'+
+    container.innerHTML='<h1 class="sr-only">Hunt archive</h1>'+
+      '<section class="hunt-picker" aria-label="Hunts"><div class="hunt-selector-row"><nav class="hunt-cards" id="hunt-cards" aria-label="Select a hunt">'+cards+'</nav><div class="hunt-card-controls" id="hunt-card-controls"><button type="button" id="hunts-back" aria-label="Previous hunts">‹</button><button type="button" id="hunts-next" aria-label="More hunts">›</button></div></div></section>'+
       '<section id="hunt-predictions" aria-label="End balance predictions"></section>'+
       '<p id="sync-label" class="viewer-sync" role="status"'+(failures>0?'>Reconnecting. Showing the last saved results.':' hidden>')+'</p>'+
       '<section class="hunt-detail" id="hunt-detail" aria-labelledby="hunt-detail-title"><div class="hunt-detail-heading"><div><div class="hunt-detail-kicker"><span class="eyebrow">HUNT BREAKDOWN</span><time datetime="'+esc(hunt.date)+'">'+esc(dateText(hunt.date))+'</time></div><h2 id="hunt-detail-title" tabindex="-1">'+esc(hunt.title)+'</h2></div>'+stateBadge(hunt)+'</div>'+

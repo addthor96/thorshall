@@ -2,7 +2,7 @@
 
 const crypto = require("node:crypto");
 const { sessionAccess, safeEqual } = require("./stats-auth");
-const { closePredictionWindows, cutoffFor, running } = require("./hunt-prediction-windows");
+const { updatePredictionWindows, cutoffFor, windowFor, MAX_CYCLES } = require("./hunt-prediction-windows");
 const KEY = "hunt-manager";
 const MAX_BODY_BYTES = 1500000;
 const CURRENCIES = new Set(["USD", "EUR", "GBP", "CAD", "AUD"]);
@@ -134,7 +134,9 @@ function displayState(state, mode) {
 function predictionWindows(record, state = record.state) {
   return Object.fromEntries(state.hunts.map(hunt => {
     const closedAt = cutoffFor(record, hunt.id);
-    return [hunt.id, { closedAt, accepting: state.settings.public === true && state.activeId === hunt.id && running(hunt) && !closedAt }];
+    const active = state.activeId === hunt.id, retired = Object.prototype.hasOwnProperty.call(record.predictionPermanentlyClosed || {}, hunt.id);
+    return [hunt.id, { closedAt, windowId: windowFor(record, hunt.id).id, accepting: state.settings.public === true && active && hunt.status === "collecting" && !closedAt,
+      reopenable: active && hunt.status === "opening" && !retired && (record.predictionWindowHistory?.[hunt.id]?.length || 1) < MAX_CYCLES }];
   }));
 }
 
@@ -194,11 +196,28 @@ function createHandler(storeFactory = openStore, { now = () => new Date() } = {}
           const huntId = id(body.huntId, "Hunt ID");
           if (!record.state.hunts.some(hunt => hunt.id === huntId)) throw new InputError("Choose a saved hunt before closing predictions.");
           next = { state: record.state, streamToken: record.streamToken };
+        } else if (["start-opening", "back-to-hunting"].includes(body.action)) {
+          const huntId = id(body.huntId, "Hunt ID"), hunt = record.state.hunts.find(item => item.id === huntId);
+          if (!hunt || record.state.activeId !== huntId) throw new InputError("Choose the active saved hunt before changing its phase.");
+          if (body.action === "start-opening" && hunt.status !== "collecting") throw new InputError("This hunt is already opening or finished.");
+          if (body.action === "back-to-hunting" && (hunt.status !== "opening" || Object.prototype.hasOwnProperty.call(record.predictionPermanentlyClosed || {}, huntId)
+              || (record.predictionWindowHistory?.[huntId]?.length || 1) >= MAX_CYCLES)) throw new InputError("Only the current unfinished hunt can return to hunting.");
+          const state = { ...record.state, hunts: record.state.hunts.map(item => item.id === huntId ? { ...item, status: body.action === "start-opening" ? "opening" : "collecting" } : item) };
+          next = { state, streamToken: record.streamToken };
         } else if (body.action === "rotate-token" && body.huntId === undefined) {
           next = { state: record.state, streamToken: crypto.randomBytes(32).toString("base64url") };
         } else throw new InputError("Unknown action.");
       }
-      next.predictionClosedAt = closePredictionWindows(record, next.state, now(), body.action === "close-predictions" ? body.huntId : null);
+      const clock = now();
+      // A legacy opening hunt can return to collection too, but its initial
+      // window must first be recorded as closed before a fresh cycle opens.
+      const windowsRecord = body.action === "back-to-hunting" && !cutoffFor(record, body.huntId)
+        ? { ...record, ...updatePredictionWindows(record, record.state, clock, { closeHuntId: body.huntId }) } : record;
+      Object.assign(next, updatePredictionWindows(windowsRecord, next.state, clock, {
+        closeHuntId: ["close-predictions", "start-opening"].includes(body.action) ? body.huntId : null,
+        reopenHuntId: body.action === "back-to-hunting" ? body.huntId : null,
+        newWindowId: body.action === "back-to-hunting" ? crypto.randomUUID() : null
+      }));
       const result = await store.setJSON(KEY, next, { onlyIfMatch: entry.etag });
       if (!result.modified) return json(409, { ok: false, error: "Another save finished first. Reload the saved hunt before trying again." });
       if (!result.etag) throw new Error("Storage did not confirm the save");

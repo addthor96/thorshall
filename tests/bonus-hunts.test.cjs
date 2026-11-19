@@ -78,7 +78,7 @@ test("conditional writes prevent two editors from replacing the same saved revis
   assert.deepEqual(results.map(r => r.statusCode).sort(), [200, 409]);
 });
 
-test("predictions remain open through payouts until owner closure, and stored closure cannot be reopened", async () => {
+test("saving opening status closes predictions and ordinary imports cannot reopen them", async () => {
   const store = storage();
   let clock = new Date("2026-11-19T12:00:00.000Z");
   const handle = createHandler(() => store, { now: () => clock });
@@ -88,8 +88,8 @@ test("predictions remain open through payouts until owner closure, and stored cl
   initial.state.hunts[0].status = "opening";
   initial.state.hunts[0].rows.push({ id: "paid-bonus", slot: "Test bonus", provider: "", bet: 10, payout: 100 });
   let saved = payload(await handle(event("PUT", "admin", "admin", { state: initial.state, revision: initial.revision })));
-  assert.equal(saved.predictionWindows[huntId].accepting, true);
-  assert.equal(saved.predictionWindows[huntId].closedAt, null);
+  assert.equal(saved.predictionWindows[huntId].accepting, false);
+  assert.equal(saved.predictionWindows[huntId].closedAt, clock.toISOString());
   assert.equal((await handle(event("POST", "admin", "admin", { action: "close-predictions", huntId, revision: initial.revision }))).statusCode, 409);
   saved = payload(await handle(event("POST", "admin", "admin", { action: "close-predictions", huntId, revision: saved.revision })));
   const cutoff = (await store.getWithMetadata()).data.predictionClosedAt[huntId];
@@ -119,7 +119,7 @@ test("finishing a hunt closes predictions and owner closure rejects unsafe, unkn
   assert.equal((await store.getWithMetadata()).etag, initial.revision);
   initial.state.hunts[0].status = "complete";
   const finished = payload(await handle(event("PUT", "admin", "admin", { state: initial.state, revision: initial.revision })));
-  assert.deepEqual(finished.predictionWindows[huntId], { closedAt: at.toISOString(), accepting: false });
+  assert.deepEqual(finished.predictionWindows[huntId], { closedAt: at.toISOString(), accepting: false, windowId: "0", reopenable: false });
   finished.state.hunts[0].status = "opening";
   const reopened = payload(await handle(event("PUT", "admin", "admin", { state: finished.state, revision: finished.revision })));
   assert.deepEqual(reopened.predictionWindows[huntId], finished.predictionWindows[huntId]);
@@ -140,6 +140,70 @@ test("concurrent hunt editing and prediction closure cannot overwrite the winnin
   assert.equal(saved.predictionWindows[huntId].accepting, false);
   assert.equal((await handle(event("PUT", "admin", "admin", { state: initial.state, revision: initial.revision }))).statusCode, 409);
   assert.equal(payload(await handle(event())).predictionWindows[huntId].closedAt, at.toISOString());
+});
+
+test("owner phase commands close and reopen atomically while preserving every bonus and payout", async () => {
+  const store = storage(); let at = new Date("2026-11-19T12:00:00.000Z");
+  const handle = createHandler(() => store, { now: () => at });
+  let saved = payload(await handle(event())), huntId = saved.state.activeId;
+  saved.state.hunts[0].rows.push({ id: "collected", slot: "Preserved slot", provider: "", bet: 5, payout: null });
+  saved.state.hunts[0].balance = 42;
+  saved = payload(await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision })));
+  at = new Date("2026-11-19T12:01:00.000Z");
+  const staleRevision = saved.revision;
+  saved = payload(await handle(event("POST", "admin", "admin", { action: "start-opening", huntId, revision: saved.revision })));
+  assert.equal(saved.state.hunts[0].status, "opening");
+  assert.deepEqual(saved.predictionWindows[huntId], { windowId: "0", accepting: false, closedAt: at.toISOString(), reopenable: true });
+  assert.equal((await handle(event("POST", "admin", "admin", { action: "back-to-hunting", huntId, revision: staleRevision }))).statusCode, 409);
+  saved.state.hunts[0].rows[0].payout = 125;
+  saved = payload(await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision })));
+  const preserved = structuredClone(saved.state.hunts[0]);
+  at = new Date("2026-11-19T12:02:00.000Z");
+  saved = payload(await handle(event("POST", "admin", "admin", { action: "back-to-hunting", huntId, revision: saved.revision })));
+  assert.deepEqual(saved.state.hunts[0], { ...preserved, status: "collecting" });
+  assert.equal(saved.predictionWindows[huntId].accepting, true);
+  assert.equal(saved.predictionWindows[huntId].closedAt, null);
+  const newId = saved.predictionWindows[huntId].windowId;
+  assert.match(newId, /^[0-9a-f-]{36}$/); assert.notEqual(newId, "0");
+  assert.equal((await handle(event("POST", "admin", "admin", { action: "back-to-hunting", huntId, revision: saved.revision }))).statusCode, 400);
+  assert.equal(payload(await handle(event())).predictionWindows[huntId].windowId, newId);
+  at = new Date("2026-11-19T12:03:00.000Z");
+  saved = payload(await handle(event("POST", "admin", "admin", { action: "start-opening", huntId, revision: saved.revision })));
+  const stored = (await store.getWithMetadata()).data;
+  assert.deepEqual(stored.predictionWindowHistory[huntId], [{ id: "0", openedAt: null, closedAt: "2026-11-19T12:01:00.000Z" },
+    { id: newId, openedAt: "2026-11-19T12:02:00.000Z", closedAt: "2026-11-19T12:03:00.000Z" }]);
+  assert.equal(saved.predictionWindows[huntId].accepting, false);
+});
+
+test("finished, deactivated and removed hunt IDs retain permanent prediction tombstones across imports", async () => {
+  for (const retirement of ["complete", "deactivate", "remove"]) {
+    const store = storage(), handle = createHandler(() => store);
+    let saved = payload(await handle(event())), huntId = saved.state.activeId;
+    const original = structuredClone(saved.state.hunts[0]), other = { ...original, id: "another-hunt" };
+    if (retirement === "complete") saved.state.hunts[0].status = "complete";
+    else { saved.state.hunts.push(other); saved.state.activeId = other.id; if (retirement === "remove") saved.state.hunts.shift(); }
+    saved = payload(await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision })));
+    saved.state.hunts = [{ ...original, status: "opening" }]; saved.state.activeId = huntId;
+    saved = payload(await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision })));
+    assert.equal(saved.predictionWindows[huntId].reopenable, false, retirement);
+    assert.equal(saved.predictionWindows[huntId].accepting, false, retirement);
+    assert.equal((await handle(event("POST", "admin", "admin", { action: "back-to-hunting", huntId, revision: saved.revision }))).statusCode, 400, retirement);
+    assert.equal(Object.hasOwn((await store.getWithMetadata()).data.predictionPermanentlyClosed, huntId), true);
+  }
+});
+
+test("phase commands reject inactive hunts, creator sessions and unsafe requests without changing revision", async () => {
+  const store = storage(), handle = createHandler(() => store); let saved = payload(await handle(event()));
+  const huntId = saved.state.activeId;
+  saved.state.hunts.push({ ...structuredClone(saved.state.hunts[0]), id: "inactive-hunt" });
+  saved = payload(await handle(event("PUT", "admin", "admin", { state: saved.state, revision: saved.revision })));
+  for (const action of ["start-opening", "back-to-hunting"]) {
+    assert.equal((await handle(event("POST", "admin", "manuel", { action, huntId, revision: saved.revision }))).statusCode, 401);
+    assert.equal((await handle(event("POST", "admin", "admin", { action, huntId: "inactive-hunt", revision: saved.revision }))).statusCode, 400);
+    const unsafe = event("POST", "admin", "admin", { action, huntId, revision: saved.revision }); unsafe.headers.origin = "https://evil.test";
+    assert.equal((await handle(unsafe)).statusCode, 403);
+  }
+  assert.equal((await store.getWithMetadata()).etag, saved.revision);
 });
 
 test("OBS token is read-only and replacement revokes the previous token", async () => {

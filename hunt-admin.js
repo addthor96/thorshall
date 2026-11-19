@@ -2,7 +2,7 @@
   'use strict';
   const Core=window.HuntCore,API='/.netlify/functions/bonus-hunts-api',DRAFT_KEY='thorshall_hunt_admin_draft_v2';
   const $=id=>document.getElementById(id),copy=value=>JSON.parse(JSON.stringify(value)),esc=value=>Core.escapeHtml(String(value==null?'':value));
-  let state,revision,streamToken='',predictionWindows={},dirty=false,saving=false,blocked=false,timer,editVersion=0,toastTimer,recoveredDraft=null,closingPredictions=false;
+  let state,revision,streamToken='',predictionWindows={},dirty=false,saving=false,blocked=false,timer,editVersion=0,toastTimer,recoveredDraft=null,phaseAction='';
   let activeSave=null,lastSaveFailed=false,pendingAction=null,actionBusy=false,rotationBusy=false,rotating=false,editingId=null,payoutRowId=null;
   const current=()=>state.hunts.find(h=>h.id===state.activeId)||state.hunts[0];
   const opened=row=>row.payout!==null&&row.payout!==undefined;
@@ -26,11 +26,12 @@
   function controls(){
     if(!state)return;
     const locked=blocked||actionBusy||rotationBusy||!!pendingAction,h=current(),all=h.rows.length>0&&h.rows.every(opened);
-    ['newSlotName','newSlotBet','addBonus','cancelBonusEdit','payoutAmount','savePayout','previousBonus','nextBonus','startOpening','editCollection','reviewHunt','huntSelect','renameHunt','duplicateHunt','deleteHunt','huntStart','huntCurrency','huntTitle','huntDate','huntBalance','importData','importFile','importLegacy','restoreDraft','togglePublic','rotateToken'].forEach(id=>$(id).disabled=locked);
+    ['newSlotName','newSlotBet','addBonus','cancelBonusEdit','payoutAmount','savePayout','previousBonus','nextBonus','startOpening','backToHunting','reviewHunt','huntSelect','renameHunt','duplicateHunt','deleteHunt','huntStart','huntCurrency','huntTitle','huntDate','huntBalance','importData','importFile','importLegacy','restoreDraft','togglePublic','rotateToken'].forEach(id=>$(id).disabled=locked);
     $('startOpening').disabled=locked||h.rows.length===0;
+    $('backToHunting').disabled=locked||predictionWindows[h.id]?.reopenable===false;
     $('finishHunt').disabled=locked||!all;
     $('newHunt').disabled=locked||state.hunts.length>=50;$('newHuntAfterFinish').disabled=locked||state.hunts.length>=50;
-    $('saveNow').disabled=!dirty||blocked||saving;
+    $('saveNow').disabled=locked||!dirty||saving;
     renderPredictionControl();
     const index=h.rows.findIndex(r=>r.id===payoutRowId);
     $('previousBonus').disabled=locked||index<=0;$('nextBonus').disabled=locked||index<0||index>=h.rows.length-1;
@@ -80,7 +81,7 @@
   function resetEntry(){editingId=null;$('newSlotName').value='';$('addBonus').textContent='+ Add bonus';$('cancelBonusEdit').hidden=true;$('entryError').hidden=true;}
   function renderCollected(){
     const h=current();$('collectedBonuses').innerHTML=h.rows.map((r,i)=>'<article class="collected-bonus"><span class="collected-number">'+String(i+1).padStart(2,'0')+'</span><div class="collected-name">'+esc(r.slot||'Unnamed slot')+(opened(r)?'<small>Opened · '+esc(Core.money(r.payout,h.currency))+'</small>':'')+'</div><strong class="collected-bet">'+esc(Core.money(r.bet,h.currency))+'</strong><div class="collected-actions"><button type="button" class="button subtle small" data-edit="'+esc(r.id)+'" aria-label="Edit bonus '+(i+1)+'">Edit</button><button type="button" class="button danger small" data-remove="'+esc(r.id)+'" aria-label="Remove bonus '+(i+1)+'">×</button></div></article>').join('');
-    $('emptyRows').hidden=h.rows.length>0;$('startOpening').textContent=h.rows.some(opened)?'Continue opening bonuses →':'Start opening bonuses →';
+    $('emptyRows').hidden=h.rows.length>0;$('startOpening').textContent=h.rows.some(opened)?'Continue opening bonuses':'Start opening bonuses';
   }
   function renderResults(){
     const h=current();$('openingResults').innerHTML=h.rows.map((r,i)=>'<button class="result-row'+(r.id===payoutRowId?' current':'')+'" type="button" data-open-row="'+esc(r.id)+'"><span class="result-number">'+String(i+1).padStart(2,'0')+'</span><span class="result-name">'+esc(r.slot||'Unnamed slot')+'</span><span class="result-payout'+(opened(r)?'':' unopened')+'">'+(opened(r)?esc(Core.money(r.payout,h.currency)):'Unopened')+'</span></button>').join('');
@@ -98,7 +99,7 @@
   }
   function renderPhase(){
     const h=current(),phase=h.status;
-    $('collectionPhase').hidden=phase!=='collecting';$('openingPhase').hidden=phase!=='opening';$('completedPhase').hidden=phase!=='complete';$('huntSetup').hidden=phase!=='collecting';$('startOpening').hidden=phase!=='collecting';
+    $('collectionPhase').hidden=phase!=='collecting';$('openingPhase').hidden=phase!=='opening';$('completedPhase').hidden=phase!=='complete';$('huntSetup').hidden=phase!=='collecting';$('startOpening').hidden=phase!=='collecting';$('backToHunting').hidden=phase!=='opening'||predictionWindows[h.id]?.reopenable===false;
     if(phase==='collecting')renderCollected();
     if(phase==='opening')renderOpening();
     if(phase==='complete'){const m=Core.calculate(h);$('completedSummary').textContent=h.rows.length+' bonuses · '+Core.money(m.endBalance,h.currency)+' end balance';$('completedProfit').textContent=(m.profit>0?'+':'')+Core.money(m.profit,h.currency)+' P/L';$('completedProfit').classList.toggle('positive',m.profit>=0);$('completedProfit').classList.toggle('negative',m.profit<0);}
@@ -106,11 +107,9 @@
   }
   function renderVisibility(){const visible=state.settings.public;$('visibilityBadge').textContent=visible?'Public':'Private';$('visibilityText').textContent=visible?'Anyone can view /bonus-hunt.':'Only you can preview the hunt page.';$('togglePublic').textContent=visible?'Make hunt page private':'Make hunt page public';}
   function renderPredictionControl(){
-    if(!state)return;const h=current(),window=predictionWindows[h.id],closed=!!(window&&window.closedAt)||h.status==='complete';
-    $('predictionStatus').textContent=closed?'Predictions closed':state.settings.public?'Predictions open':'Predictions unavailable while private';
+    if(!state)return;const h=current(),window=predictionWindows[h.id],closed=!!(window&&window.closedAt)||h.status==='opening'||h.status==='complete';
+    $('predictionStatus').textContent=phaseAction?'Updating predictions…':closed?'Predictions closed':state.settings.public?'Predictions open':'Predictions unavailable while private';
     $('predictionStatus').dataset.state=closed?'closed':'open';
-    $('closePredictions').textContent=closingPredictions?'Closing…':closed?'Predictions closed':'Close predictions';
-    $('closePredictions').disabled=blocked||actionBusy||rotationBusy||!!pendingAction||closed;
   }
   function renderOverlay(){const url=location.origin+'/bonus-hunt-overlay#token='+encodeURIComponent(streamToken);$('overlayUrl').value=url;$('overlayPreview').src=url;}
   function renderAll(){fillDetails();renderLibrary();renderMetrics();renderPhase();renderVisibility();controls();}
@@ -169,7 +168,7 @@
   });
   $('startOpening').addEventListener('click',()=>{
     if(pendingAction||rotationBusy||blocked)return;const h=current();if(!h.rows.length||h.rows.some(r=>!r.slot.trim()||r.bet<=0)){ $('entryError').textContent='Add a valid slot name and bet to every bonus before opening.';$('entryError').hidden=false;return;}
-    h.status='opening';beginAction({kind:'opening',huntId:h.id});
+    return changePhase('start-opening');
   });
   $('payoutForm').addEventListener('submit',event=>{
     event.preventDefault();if(pendingAction||rotationBusy||blocked||current().status!=='opening')return;
@@ -179,7 +178,7 @@
   });
   $('openingResults').addEventListener('click',event=>{const button=event.target.closest('[data-open-row]');if(!button||pendingAction||rotationBusy||blocked)return;payoutRowId=button.dataset.openRow;renderOpening();$('payoutAmount').focus();});
   [['previousBonus',-1],['nextBonus',1]].forEach(([id,direction])=>$(id).addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const rows=current().rows,index=rows.findIndex(r=>r.id===payoutRowId),next=rows[index+direction];if(next){payoutRowId=next.id;renderOpening();$('payoutAmount').focus();}}));
-  $('editCollection').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const h=current();h.status='collecting';beginAction({kind:'collection',huntId:h.id});});
+  $('backToHunting').addEventListener('click',()=>changePhase('back-to-hunting'));
   $('finishHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const h=current();if(!h.rows.length||h.rows.some(r=>!opened(r)))return;h.status='complete';beginAction({kind:'finish',huntId:h.id});});
   $('reviewHunt').addEventListener('click',()=>{if(pendingAction||rotationBusy||blocked)return;const h=current();h.status='opening';beginAction({kind:'review',huntId:h.id});});
   $('huntSelect').addEventListener('change',()=>{if(pendingAction||rotationBusy||blocked)return;state.activeId=$('huntSelect').value;payoutRowId=null;resetEntry();renderAll();change();});
@@ -196,20 +195,26 @@
   $('discardDraft').addEventListener('click',()=>{clearDraft();$('recoveryNotice').classList.add('hidden');recoveredDraft=null;});
   $('copyOverlay').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('overlayUrl').value);toast('Overlay URL copied. Paste it into your Browser Source.');}catch(_){$('overlayUrl').type='text';$('overlayUrl').select();toast('Copy the selected overlay URL.');}});
   $('showOverlayUrl').addEventListener('click',()=>{const show=$('overlayUrl').type==='password';$('overlayUrl').type=show?'text':'password';$('showOverlayUrl').textContent=show?'Hide':'Show';$('showOverlayUrl').setAttribute('aria-pressed',String(show));});
-  $('closePredictions').addEventListener('click',async()=>{
-    if(!state||pendingAction||actionBusy||rotationBusy||blocked||current().status==='complete'||predictionWindows[current().id]?.closedAt)return;
-    rotationBusy=true;closingPredictions=true;controls();
+  async function changePhase(action){
+    if(!state||pendingAction||actionBusy||rotationBusy||blocked)return;
+    const huntId=current().id,opening=action==='start-opening';
+    if(current().status!==(opening?'collecting':'opening')||!opening&&predictionWindows[huntId]?.reopenable===false)return;
+    rotationBusy=true;phaseAction=action;controls();
     try{
       if(!(await flushSave()))return;
-      rotating=true;saving=true;clearTimeout(timer);status('Closing predictions…','saving');controls();
-      const data=await request('POST',{action:'close-predictions',huntId:current().id,revision});
-      revision=data.revision;state=data.state||state;predictionWindows=data.predictionWindows||{};hideError();toast('Predictions closed for this hunt.');
+      rotating=true;saving=true;clearTimeout(timer);status(opening?'Starting opening…':'Returning to hunting…','saving');controls();
+      const data=await request('POST',{action,huntId,revision});
+      revision=data.revision;state=data.state||state;predictionWindows=data.predictionWindows||{};payoutRowId=null;resetEntry();hideError();renderAll();
+      toast(opening?'Opening bonuses. Predictions closed.':'Back to hunting. Predictions open.');
     }catch(err){
       blocked=true;
-      if(err.status===401||err.status===403)error('Your owner session expired. Sign in again before closing predictions.','session');
-      else error(err.status===409||err.status===412?'Another tab changed this hunt. Load the latest saved version before closing predictions.':'Could not confirm whether predictions closed. Load the latest saved version before trying again.','conflict');
-    }finally{rotating=false;saving=false;rotationBusy=false;closingPredictions=false;if(!blocked)status(dirty?'Unsaved changes':'All changes saved',dirty?'dirty':'saved');controls();}
-  });
+      if(err.status===401||err.status===403)error('Your owner session expired. Sign in again before changing hunt phase.','session');
+      else error(err.status===409||err.status===412?'Another tab changed this hunt. Load the latest saved version before changing hunt phase.':'Could not confirm the hunt phase or prediction status. Load the latest saved version before trying again.','conflict');
+    }finally{
+      rotating=false;saving=false;rotationBusy=false;phaseAction='';if(!blocked)status(dirty?'Unsaved changes':'All changes saved',dirty?'dirty':'saved');controls();
+      if(!blocked&&!dirty){if(current().status==='collecting')$('newSlotName').focus();else if(current().status==='opening'&&payoutRowId)$('payoutAmount').focus();}
+    }
+  }
   $('rotateToken').addEventListener('click',async()=>{
     if(pendingAction||actionBusy||rotationBusy||blocked)return;
     if(!confirm('Replace the overlay link? Your current OBS source will stop updating until you paste the new URL.'))return;

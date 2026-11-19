@@ -4,8 +4,9 @@ const source = fs.readFileSync(require.resolve('../hunt-predictions.js'), 'utf8'
 const clone = value => structuredClone(value);
 const viewer = { id: '123456', login: 'thor_viewer', displayName: 'Thor_Viewer' };
 const MINE_REVISION = '11111111-1111-4111-8111-111111111111';
+const REOPENED_WINDOW = '99999999-9999-4999-8999-999999999999';
 const summary = (huntId = 'hunt-a', extra = {}) => {
-  const value = { ok: true, huntId, currency: 'USD', status: 'collecting', accepting: true, count: 0, mine: null, podium: [], entries: [], viewer: clone(viewer), authConfigured: true, loginUrl: '/.netlify/functions/hunt-twitch?action=login&return=%2Fbonus-hunt%23hunt%3D' + huntId, logoutUrl: '/.netlify/functions/hunt-twitch?action=logout', authExpiresAt: null, authRevalidateAt: null, ...extra };
+  const value = { ok: true, huntId, windowId: '0', currency: 'USD', status: 'collecting', accepting: true, count: 0, mine: null, podium: [], entries: [], viewer: clone(viewer), authConfigured: true, loginUrl: '/.netlify/functions/hunt-twitch?action=login&return=%2Fbonus-hunt%23hunt%3D' + huntId, logoutUrl: '/.netlify/functions/hunt-twitch?action=logout', authExpiresAt: null, authRevalidateAt: null, ...extra };
   if (value.mine) value.mine = { username: viewer.login, createdAt: '2026-11-19T01:00:00.000Z', updatedAt: '2026-11-19T01:00:00.000Z', revision: MINE_REVISION, ...value.mine };
   return value;
 };
@@ -74,6 +75,7 @@ test('valid entry posts the free prediction and shows the confirmed saved entry'
   const call = app.calls[1]; assert.equal(call.method, 'POST'); assert.equal(call.headers['X-Thorshall-Request'], 'hunt-prediction');
   assert.equal(call.body.username, undefined); assert.equal(call.body.viewerId, viewer.id); assert.equal(call.body.amount, '1234.50'); assert.equal(call.body.website, ''); assert.match(call.body.requestId, /^[0-9a-f-]{36}$/);
   assert.equal(call.body.expectedRevision, null);
+  assert.equal(call.body.windowId, '0');
   assert.equal(app.byClass('prediction-form')[0].hidden, true); assert.match(app.text(), /\$1,234\.50.*@thor_viewer · Saved for this hunt/); assert.match(app.text(), /Your prediction is saved/);
 });
 
@@ -384,13 +386,13 @@ test('malformed public entry data cannot be displayed as a valid roster', async 
   assert.doesNotMatch(app.text(), /<img/);
 });
 
-test('a saved prediction can be changed during opening and uses its own current revision', async () => {
+test('a saved prediction can be changed during collection and uses its own current revision', async () => {
   let saved = { username: viewer.login, amountMinor: 10000, revision: MINE_REVISION };
   const app = await start(call => {
     if (call.method === 'POST') saved = { ...saved, amountMinor: Math.round(Number(call.body.amount) * 100), revision: call.body.requestId };
-    return response(summary('hunt-a', { status: 'opening', mine: saved, count: 1, entries: [{ username: viewer.login, amountMinor: saved.amountMinor, createdAt: '2026-11-19T01:00:00.000Z', isMine: true, verified: true }] }));
+    return response(summary('hunt-a', { mine: saved, count: 1, entries: [{ username: viewer.login, amountMinor: saved.amountMinor, createdAt: '2026-11-19T01:00:00.000Z', isMine: true, verified: true }] }));
   });
-  await app.view('hunt-a', 'opening', 'v1', 'hunt-a', { accepting: true, closedAt: null });
+  await app.view('hunt-a', 'collecting', 'v1', 'hunt-a', { windowId: '0', accepting: true, closedAt: null });
   assert.equal(app.byClass('prediction-edit')[0].hidden, false);
   app.byClass('prediction-edit')[0].fire('click');
   assert.equal(app.node('prediction-amount').value, '100.00');
@@ -464,6 +466,118 @@ test('a manual per-hunt closure hides edit controls even if a delayed summary st
   assert.equal(app.byClass('prediction-form')[0].hidden, true); assert.equal(app.byClass('prediction-edit')[0].hidden, true);
   assert.match(app.text(), /Your locked prediction.*\$250\.00.*final guess locked/);
   await app.submit(); assert.equal(app.calls.filter(call => call.method === 'POST').length, 0);
+});
+
+test('opening always locks predictions even if an earlier summary still claims an open window', async () => {
+  const app = await start(() => response(summary('hunt-a', { mine: { amountMinor: 25000 }, count: 1 })));
+  await app.view('hunt-a', 'opening', 'v2', 'hunt-a', { windowId: '0', accepting: true, closedAt: null });
+  assert.equal(app.byClass('prediction-form')[0].hidden, true);
+  assert.equal(app.byClass('prediction-edit')[0].hidden, true);
+  assert.equal(app.byClass('prediction-badge')[0].textContent, 'Closed');
+  assert.match(app.text(), /Your locked prediction/);
+  await app.submit(); assert.equal(app.calls.filter(call => call.method === 'POST').length, 0);
+});
+
+test('back to hunting unlocks the accepted prediction and ignores the prior closed-window response', async () => {
+  const oldClosed = deferred(); let reads = 0;
+  const app = await start(call => {
+    if (call.method === 'POST') return response(summary('hunt-a', { windowId: REOPENED_WINDOW, mine: { amountMinor: 33300, revision: call.body.requestId }, count: 1 }));
+    reads++;
+    if (reads === 2) return oldClosed.promise;
+    return response(summary('hunt-a', { windowId: reads === 1 ? '0' : REOPENED_WINDOW, mine: { amountMinor: 10000 }, count: 1 }));
+  });
+  await app.view('hunt-a', 'collecting', 'v1', 'hunt-a', { windowId: '0', accepting: true, closedAt: null });
+  app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '333');
+  await app.view('hunt-a', 'opening', 'v2', 'hunt-a', { windowId: '0', accepting: false, closedAt: '2026-11-19T02:00:00.000Z' });
+  assert.equal(app.byClass('prediction-form')[0].hidden, true);
+  await app.view('hunt-a', 'collecting', 'v3', 'hunt-a', { windowId: REOPENED_WINDOW, accepting: true, closedAt: null });
+  oldClosed.resolve(response(summary('hunt-a', { status: 'opening', accepting: false, mine: { amountMinor: 99000 }, count: 1 })));
+  await app.settle();
+  assert.equal(reads, 3);
+  assert.equal(app.byClass('prediction-badge')[0].textContent, 'Open');
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$100.00');
+  assert.equal(app.byClass('prediction-form')[0].hidden, false);
+  assert.equal(app.node('prediction-amount').value, '333');
+  assert.equal(app.byClass('prediction-submit')[0].textContent, 'Save changes');
+  await app.submit();
+  const post = app.calls.find(call => call.method === 'POST');
+  assert.equal(post.body.windowId, REOPENED_WINDOW);
+  assert.equal(post.body.expectedRevision, MINE_REVISION);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$333.00');
+});
+
+test('an old-cycle save cannot overwrite the reopened accepted guess or be retried in the new window', async () => {
+  const oldPost = deferred(); let reads = 0;
+  const newerRevision = '22222222-2222-4222-8222-222222222222';
+  const app = await start(call => {
+    if (call.method === 'POST') return oldPost.promise;
+    return response(summary('hunt-a', ++reads === 1 ? { mine: { amountMinor: 10000 }, count: 1 }
+      : { windowId: REOPENED_WINDOW, mine: { amountMinor: 45000, revision: newerRevision }, count: 1 }));
+  });
+  await app.view('hunt-a', 'collecting', 'v1', 'hunt-a', { windowId: '0', accepting: true, closedAt: null });
+  app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '999');
+  app.byClass('prediction-form')[0].fire('submit'); await app.settle();
+  const oldPayload = app.calls.find(call => call.method === 'POST').body;
+  await app.view('hunt-a', 'opening', 'v2', 'hunt-a', { windowId: '0', accepting: false, closedAt: '2026-11-19T02:00:00.000Z' });
+  await app.view('hunt-a', 'collecting', 'v3', 'hunt-a', { windowId: REOPENED_WINDOW, accepting: true, closedAt: null });
+  oldPost.resolve(response(summary('hunt-a', { mine: { amountMinor: 99900, revision: oldPayload.requestId }, count: 1 })));
+  await app.settle();
+  assert.equal(reads, 2);
+  assert.equal(app.byClass('prediction-mine')[0].children[1].textContent, '$450.00');
+  assert.equal(app.byClass('prediction-badge')[0].textContent, 'Open');
+  assert.equal(app.byClass('prediction-submit')[0].textContent, 'Save changes');
+  assert.equal(app.node('prediction-amount').value, '999');
+  assert.doesNotMatch(app.text(), /Your prediction is updated/);
+  assert.equal(app.calls.filter(call => call.method === 'POST').length, 1);
+});
+
+test('a reopened window refreshes the same collecting hunt and rejects a mismatched summary token', async () => {
+  let reads = 0;
+  const app = await start(() => response(summary('hunt-a', { windowId: ++reads < 3 ? '0' : REOPENED_WINDOW, mine: { amountMinor: 10000 }, count: 1 })));
+  await app.view('hunt-a', 'collecting', 'v1', 'hunt-a', { windowId: '0', accepting: true, closedAt: null });
+  await app.view('hunt-a', 'collecting', 'v2', 'hunt-a', { windowId: REOPENED_WINDOW, accepting: true, closedAt: null });
+  assert.equal(reads, 2); assert.equal(app.byClass('prediction-edit')[0].hidden, true);
+  app.byClass('prediction-refresh')[0].fire('click'); await app.settle();
+  assert.equal(app.byClass('prediction-edit')[0].hidden, false);
+  app.byClass('prediction-edit')[0].fire('click');
+  assert.equal(app.node('prediction-amount').value, '100.00');
+  assert.equal(app.byClass('prediction-form')[0].hidden, false);
+});
+
+test('missing or malformed prediction window tokens fail closed before a prediction can be sent', async () => {
+  for (const windowId of [undefined, '', 'old-window', 1]) {
+    const app = await start(() => response(summary('hunt-a', { windowId })));
+    await app.view();
+    assert.equal(app.byClass('prediction-form')[0].hidden, true);
+    assert.match(app.text(), /Predictions could not be confirmed/);
+    await app.submit();
+    assert.equal(app.calls.filter(call => call.method === 'POST').length, 0);
+  }
+});
+
+test('returning to a reopened hunt discards its earlier unconfirmed retry and keeps the amount for review', async () => {
+  let reopened = false, posts = 0;
+  const app = await start(call => {
+    if (call.method === 'POST') {
+      if (++posts === 1) throw new Error('Offline');
+      return response(summary('hunt-a', { windowId: REOPENED_WINDOW, mine: { amountMinor: 77700, revision: call.body.requestId }, count: 1 }));
+    }
+    const huntId = new URL(call.url, 'https://test').searchParams.get('hunt');
+    return response(summary(huntId, { windowId: huntId === 'hunt-a' && reopened ? REOPENED_WINDOW : '0', mine: { amountMinor: 10000 }, count: 1 }));
+  });
+  await app.view('hunt-a', 'collecting', 'v1', 'hunt-a', { windowId: '0', accepting: true, closedAt: null });
+  app.byClass('prediction-edit')[0].fire('click'); app.input('prediction-amount', '777'); await app.submit();
+  assert.equal(app.byClass('prediction-submit')[0].textContent, 'Retry prediction');
+  await app.view('hunt-b', 'complete'); reopened = true;
+  await app.view('hunt-a', 'collecting', 'v2', 'hunt-a', { windowId: REOPENED_WINDOW, accepting: true, closedAt: null });
+  assert.equal(app.byClass('prediction-submit')[0].textContent, 'Save changes');
+  assert.equal(app.node('prediction-amount').value, '777');
+  assert.equal(app.node('prediction-amount').disabled, false);
+  await app.submit();
+  const payloads = app.calls.filter(call => call.method === 'POST').map(call => call.body);
+  assert.equal(payloads[1].windowId, REOPENED_WINDOW);
+  assert.notEqual(payloads[1].requestId, payloads[0].requestId);
+  assert.equal(payloads[1].expectedRevision, MINE_REVISION);
 });
 
 test('editing drafts and operation revisions stay attached to the selected hunt', async () => {

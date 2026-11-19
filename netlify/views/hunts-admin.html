@@ -9,9 +9,9 @@
   <link rel="icon" href="/favicon.ico">
   <link rel="preload" href="/img/bonus-hunt-fjord-v1.jpg" as="image">
   <link rel="stylesheet" href="/hunt.css">
-  <link rel="stylesheet" href="/hunt-manager.css?v=20261119-predictions">
+  <link rel="stylesheet" href="/hunt-manager.css?v=20261119-phase-actions">
   <script src="/hunt-shared.js" defer></script>
-  <script src="/hunt-admin.js?v=20261119-predictions" defer></script>
+  <script src="/hunt-admin.js?v=20261119-phase-actions" defer></script>
 </head>
 <body class="admin hunt-manager-page">
 <div class="app-shell">
@@ -28,8 +28,8 @@
 
   <main>
     <h1 class="sr-only">Hunt manager</h1>
-    <div class="hunt-toolbar"><div class="field hunt-name-field"><label for="huntTitle">Hunt name</label><input id="huntTitle" maxlength="80" placeholder="Hunt name" autocomplete="off" required disabled></div><div class="header-actions hunt-top-actions"><button class="button primary phase-button" id="startOpening" type="button" disabled hidden>Start opening bonuses →</button><button class="button subtle" id="newHunt" type="button" disabled>+ New hunt</button></div></div>
-    <div class="hunt-prediction-control"><span id="predictionStatus" role="status">Loading predictions…</span><button class="button subtle small" id="closePredictions" type="button" disabled>Close predictions</button></div>
+    <div class="hunt-toolbar"><div class="field hunt-name-field"><label for="huntTitle">Hunt name</label><input id="huntTitle" maxlength="80" placeholder="Hunt name" autocomplete="off" required disabled></div><div class="header-actions hunt-top-actions"><button class="button primary phase-button" id="startOpening" type="button" disabled hidden>Start opening bonuses</button><button class="button primary phase-button" id="backToHunting" type="button" disabled hidden>Back to hunting</button><button class="button subtle" id="newHunt" type="button" disabled>+ New hunt</button></div></div>
+    <div class="hunt-prediction-control"><span id="predictionStatus" role="status">Loading predictions…</span></div>
     <div class="notice hidden" id="errorNotice" role="alert"><span id="errorText"></span><div class="header-actions"><button class="button small subtle hidden" id="retrySave" type="button">Try saving again</button><button class="button small subtle hidden" id="reloadRemote" type="button">Load latest saved version</button><a class="button small primary hidden" id="loginAgain" href="/.netlify/functions/stats-session?return=%2Fadmin%3Fview%3Dhunts">Sign in again</a><button class="button small subtle" id="exportDraft" type="button">Download my draft</button></div></div>
     <div class="notice hidden" id="recoveryNotice"><span>A draft from your previous session is available.</span><div class="header-actions"><button class="button small primary" id="restoreDraft" type="button">Restore draft</button><button class="button small subtle" id="discardDraft" type="button">Keep saved version</button></div></div>
     <div class="admin-grid" id="manager" hidden>
@@ -61,7 +61,7 @@
         </section>
 
         <section class="panel opening-phase" id="openingPhase" aria-labelledby="openingTitle" hidden>
-          <div class="panel-head"><h2 id="openingTitle">Payouts</h2><button class="button subtle small" id="editCollection" type="button">Edit bonus list</button></div>
+          <div class="panel-head"><h2 id="openingTitle">Payouts</h2></div>
           <div class="opening-progress-head"><span id="openingProgressText">0 of 0 opened</span><span id="openingProgressPercent">0%</span></div>
           <div class="opening-progress-track"><div id="openingProgressFill"></div></div>
           <div id="payoutEditor">

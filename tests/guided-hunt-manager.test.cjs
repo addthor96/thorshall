@@ -8,8 +8,8 @@ const clone=value=>structuredClone(value);
 function initial(rows=[],status='collecting'){return{schema:2,activeId:'hunt-a',hunts:[{id:'hunt-a',title:'Test hunt',date:'2026-11-16',currency:'USD',start:1000,balance:0,status,rows}],settings:{public:true}};}
 function bonus(id,slot,payout=null){return{id,slot,provider:'',bet:10,payout};}
 async function start({data=initial(),mutate}={}){
-  const nodes=new Map(),events=new Map(),timers=new Map(),storage=new Map();let timerId=0,version=1,server=clone(data),writes=0,closed={};
-  const windows=()=>Object.fromEntries(server.hunts.map(h=>[h.id,{closedAt:closed[h.id]||null,accepting:server.settings.public&&server.activeId===h.id&&Windows.running(h)&&!closed[h.id]}]));
+  const nodes=new Map(),events=new Map(),timers=new Map(),storage=new Map(),retired=new Set(data.hunts.filter(h=>h.status==='complete').map(h=>h.id));let timerId=0,version=1,server=clone(data),writes=0,closed={};
+  const windows=()=>Object.fromEntries(server.hunts.map(h=>[h.id,{closedAt:closed[h.id]||null,reopenable:server.activeId===h.id&&h.status==='opening'&&!retired.has(h.id),accepting:server.settings.public&&server.activeId===h.id&&Windows.running(h)&&!closed[h.id]}]));
   const document={activeElement:null,getElementById:id=>{if(!nodes.has(id))throw new Error('Missing DOM element '+id);return nodes.get(id);},createElement:()=>({click(){}})};
   class Element{
     constructor(id,attrs){this.id=id;this.value='';this.textContent='';this.innerHTML='';this.hidden=/\bhidden\b/.test(attrs);this.disabled=/\bdisabled\b/.test(attrs);this.dataset={};this.style={};this.attributes={};this.listeners={};this.classes=new Set();this.classList={add:x=>this.classes.add(x),remove:x=>this.classes.delete(x),toggle:(x,on)=>{if(on===undefined)on=!this.classes.has(x);if(on)this.classes.add(x);else this.classes.delete(x);return on;},contains:x=>this.classes.has(x)};}
@@ -30,8 +30,12 @@ async function start({data=initial(),mutate}={}){
       writes++;let result=mutate?await mutate(body,writes,options):null;if(result instanceof Error)throw result;
       if(result?.status)return{ok:false,status:result.status,json:async()=>({ok:false,error:result.error||'Save failed'})};
       assert.equal(body.revision,'v'+version,'writes must use the latest saved revision');version++;
-      const next=options.method==='PUT'?clone(body.state):server;
-      closed=Windows.closePredictionWindows({state:server,predictionClosedAt:closed},next,new Date('2026-11-19T15:00:00.000Z'),body.action==='close-predictions'?body.huntId:null);server=next;
+      const next=options.method==='PUT'?clone(body.state):clone(server);
+      if(body.action==='start-opening')next.hunts.find(h=>h.id===body.huntId).status='opening';
+      if(body.action==='back-to-hunting')next.hunts.find(h=>h.id===body.huntId).status='collecting';
+      closed=Windows.closePredictionWindows({state:server,predictionClosedAt:closed},next,new Date('2026-11-19T15:00:00.000Z'),body.action==='start-opening'?body.huntId:null);
+      if(body.action==='back-to-hunting')delete closed[body.huntId];server=next;for(const h of server.hunts)if(h.status==='complete')retired.add(h.id);
+      if(result?.afterCommitError)throw result.afterCommitError;
       return{ok:true,status:200,json:async()=>({ok:true,state:clone(server),revision:'v'+version,predictionWindows:windows(),...(body.action==='rotate-token'?{streamToken:'y'.repeat(43)}:{})})};
     }};
   vm.runInNewContext(source,context);
@@ -52,7 +56,8 @@ test('opening waits for pending collection autosave and keeps all entered slots'
   let release;const gate=new Promise(resolve=>release=resolve);const app=await start({mutate:async(body,count)=>{if(count===1)await gate;}});
   app.field('newSlotName','First slot');app.field('newSlotBet','10');app.fire('slotEntryForm','submit');app.fire('saveNow');await app.settle();
   app.fire('startOpening');await app.settle();assert.equal(app.nodes.get('collectionPhase').hidden,false);assert.equal(app.nodes.get('startOpening').disabled,true);
-  release();await app.settle();assert.equal(app.nodes.get('openingPhase').hidden,false);assert.equal(app.nodes.get('collectionPhase').hidden,true);assert.equal(app.nodes.get('huntSetup').hidden,true);assert.equal(app.saved().hunts[0].status,'opening');assert.equal(app.saved().hunts[0].rows.length,1);assert.equal(app.calls.filter(c=>c.method==='PUT').length,2);
+  release();await app.settle();assert.equal(app.nodes.get('openingPhase').hidden,false);assert.equal(app.nodes.get('collectionPhase').hidden,true);assert.equal(app.nodes.get('huntSetup').hidden,true);assert.equal(app.saved().hunts[0].status,'opening');assert.equal(app.saved().hunts[0].rows.length,1);
+  const writes=app.calls.filter(c=>c.method!=='GET');assert.deepEqual(writes.map(c=>c.method),['PUT','POST']);assert.equal(writes[0].body.state.hunts[0].status,'collecting');assert.deepEqual(writes[1].body,{action:'start-opening',huntId:'hunt-a',revision:'v2'});assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');
 });
 
 test('blank payout cannot advance, while zero saves and advances to the next bonus',async()=>{
@@ -101,32 +106,71 @@ test('Rename stays blocked during an unsaved payout and session or revision erro
   }
 });
 
-test('owner can close predictions while opening, after pending edits save, without changing hunt or overlay data',async()=>{
-  const data=initial([bonus('a','First',100),bonus('b','Second')],'opening'),app=await start({data});
-  assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions open');assert.equal(app.nodes.get('closePredictions').disabled,false);
-  app.field('huntTitle','Renamed live hunt');await app.fire('closePredictions');await app.settle();
+test('start opening closes predictions after pending edits save without changing bonuses or overlay data',async()=>{
+  const data=initial([bonus('a','First',100),bonus('b','Second')]),app=await start({data});
+  assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions open');assert.equal(app.nodes.has('closePredictions'),false);assert.equal(app.nodes.has('editCollection'),false);
+  app.field('huntTitle','Renamed live hunt');await app.fire('startOpening');await app.settle();
   const writes=app.calls.filter(c=>c.method!=='GET');assert.deepEqual(writes.map(c=>c.method),['PUT','POST']);
-  assert.deepEqual(writes[1].body,{action:'close-predictions',huntId:'hunt-a',revision:'v2'});
+  assert.deepEqual(writes[1].body,{action:'start-opening',huntId:'hunt-a',revision:'v2'});
   assert.equal(app.saved().hunts[0].title,'Renamed live hunt');assert.equal(app.saved().hunts[0].status,'opening');assert.deepEqual(app.saved().hunts[0].rows,data.hunts[0].rows);
-  assert.equal(app.nodes.get('closePredictions').disabled,true);assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');
+  assert.equal(app.nodes.get('startOpening').hidden,true);assert.equal(app.nodes.get('backToHunting').hidden,false);assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');
   assert.equal(app.nodes.get('overlayUrl').value.includes('x'.repeat(43)),true);
-  await app.fire('closePredictions');await app.settle();assert.equal(app.calls.filter(c=>c.method==='POST').length,1);
+  await app.fire('startOpening');await app.settle();assert.equal(app.calls.filter(c=>c.method==='POST').length,1);
 });
 
-test('close predictions locks other actions during its write and closes only the selected saved hunt',async()=>{
-  let release;const gate=new Promise(resolve=>release=resolve),data=initial();data.hunts.push({...clone(data.hunts[0]),id:'hunt-b',title:'Other hunt'});data.activeId='hunt-b';
-  const app=await start({data,mutate:async(body)=>{if(body.action==='close-predictions')await gate;}});
-  app.fire('closePredictions');await app.settle();assert.equal(app.nodes.get('huntSelect').disabled,true);assert.equal(app.nodes.get('rotateToken').disabled,true);assert.equal(app.nodes.get('newHunt').disabled,true);
+test('start opening locks other actions during its write and closes only the selected saved hunt',async()=>{
+  let release;const gate=new Promise(resolve=>release=resolve),data=initial([bonus('a','First')]);data.hunts.push({...clone(data.hunts[0]),id:'hunt-b',title:'Other hunt'});data.activeId='hunt-b';
+  const app=await start({data,mutate:async(body)=>{if(body.action==='start-opening')await gate;}});
+  app.fire('startOpening');await app.settle();assert.equal(app.nodes.get('huntSelect').disabled,true);assert.equal(app.nodes.get('rotateToken').disabled,true);assert.equal(app.nodes.get('newHunt').disabled,true);assert.equal(app.nodes.get('backToHunting').disabled,true);assert.equal(app.saved().hunts[1].status,'collecting');assert.equal(app.nodes.get('collectionPhase').hidden,false);
   app.fire('rotateToken');app.fire('newHunt');await app.settle();assert.equal(app.calls.filter(c=>c.method==='POST').length,1);
   release();await app.settle();assert.equal(app.windows()['hunt-b'].closedAt,'2026-11-19T15:00:00.000Z');assert.equal(app.windows()['hunt-a'].closedAt,null);
   assert.equal(app.nodes.get('newHunt').disabled,false);
 });
 
-test('failed or conflicting close never claims closure and blocks further edits until reload',async()=>{
+test('back to hunting reopens predictions atomically and preserves previously saved payouts',async()=>{
+  const data=initial([bonus('a','First',100),bonus('b','Second')]),app=await start({data});
+  await app.fire('startOpening');await app.settle();assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');
+  app.field('huntTitle','Continuing the hunt');await app.fire('backToHunting');await app.settle();
+  const writes=app.calls.filter(c=>c.method!=='GET');assert.deepEqual(writes.map(c=>c.method),['POST','PUT','POST']);assert.equal(writes[1].body.state.hunts[0].status,'opening');assert.deepEqual(writes[2].body,{action:'back-to-hunting',huntId:'hunt-a',revision:'v3'});
+  assert.equal(app.saved().hunts[0].status,'collecting');assert.equal(app.saved().hunts[0].title,'Continuing the hunt');assert.deepEqual(app.saved().hunts[0].rows,data.hunts[0].rows);assert.equal(app.nodes.get('collectionPhase').hidden,false);assert.equal(app.nodes.get('startOpening').hidden,false);assert.equal(app.nodes.get('backToHunting').hidden,true);assert.equal(app.nodes.get('startOpening').textContent,'Continue opening bonuses');assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions open');assert.equal(app.activeElement(),app.nodes.get('newSlotName'));
+});
+
+test('a legacy opening hunt shows closed predictions before its first metadata save',async()=>{
+  const app=await start({data:initial([bonus('a','First',100),bonus('b','Second')],'opening')});
+  assert.equal(app.windows()['hunt-a'].closedAt,null);assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');assert.equal(app.nodes.get('predictionStatus').dataset.state,'closed');assert.equal(app.nodes.get('backToHunting').hidden,false);assert.equal(app.calls.filter(c=>c.method!=='GET').length,0);
+  await app.fire('backToHunting');await app.settle();assert.equal(app.saved().hunts[0].status,'collecting');assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions open');assert.equal(app.saved().hunts[0].rows[0].payout,100);
+});
+
+test('a lost, failed or conflicting phase response never claims success and requires recovery',async()=>{
   for(const failure of [new Error('Offline'),{status:409},{status:401}]){
-    const app=await start({mutate:async body=>body.action==='close-predictions'?failure:null});
-    await app.fire('closePredictions');await app.settle();assert.equal(app.windows()['hunt-a'].closedAt,null);assert.equal(app.nodes.get('closePredictions').disabled,true);
+    const app=await start({data:initial([bonus('a','First')]),mutate:async body=>body.action==='start-opening'?failure:null});
+    await app.fire('startOpening');await app.settle();assert.equal(app.windows()['hunt-a'].closedAt,null);assert.equal(app.nodes.get('startOpening').disabled,true);assert.equal(app.saved().hunts[0].status,'collecting');assert.equal(app.nodes.get('collectionPhase').hidden,false);assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions open');
     assert.equal(app.nodes.get('errorNotice').classList.contains('hidden'),false);assert.doesNotMatch(app.nodes.get('toast').textContent,/Predictions closed/);
     assert.equal(app.nodes.get(failure.status===401?'loginAgain':'reloadRemote').classList.contains('hidden'),false);
+    await app.fire('startOpening');await app.fire('backToHunting');await app.fire('saveNow');await app.settle();assert.equal(app.calls.filter(c=>c.method!=='GET').length,1);
+  }
+});
+
+test('failed return to hunting leaves closed predictions and payouts until the saved version is reloaded',async()=>{
+  const app=await start({data:initial([bonus('a','First',100),bonus('b','Second')]),mutate:async body=>body.action==='back-to-hunting'?new Error('Lost response'):null});
+  await app.fire('startOpening');await app.settle();await app.fire('backToHunting');await app.settle();
+  assert.equal(app.saved().hunts[0].status,'opening');assert.equal(app.nodes.get('openingPhase').hidden,false);assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');assert.equal(app.nodes.get('backToHunting').disabled,true);assert.equal(app.nodes.get('startOpening').hidden,true);assert.equal(app.saved().hunts[0].rows[0].payout,100);assert.doesNotMatch(app.nodes.get('toast').textContent,/Back to hunting/);
+  await app.fire('reloadRemote');await app.settle();assert.equal(app.nodes.get('backToHunting').disabled,false);assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');
+});
+
+test('reviewing completed payouts alone never reopens predictions',async()=>{
+  const app=await start({data:initial([bonus('a','Only',100)],'opening')});await app.fire('finishHunt');await app.settle();assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');assert.equal(app.nodes.get('backToHunting').hidden,true);
+  await app.fire('backToHunting');await app.settle();assert.equal(app.calls.filter(c=>c.method==='POST').length,0);
+  await app.fire('reviewHunt');await app.settle();assert.equal(app.saved().hunts[0].status,'opening');assert.equal(app.nodes.get('predictionStatus').textContent,'Predictions closed');assert.equal(app.calls.filter(c=>c.method==='POST').length,0);assert.equal(app.saved().hunts[0].rows[0].payout,100);
+  assert.equal(app.nodes.get('backToHunting').hidden,true);assert.equal(app.nodes.get('backToHunting').disabled,true);await app.fire('backToHunting');await app.settle();assert.equal(app.calls.filter(c=>c.method==='POST').length,0);
+});
+
+test('reloading after a lost committed phase response adopts the saved phase and prediction status',async()=>{
+  for(const action of ['start-opening','back-to-hunting']){
+    let lost=false;const app=await start({data:initial([bonus('a','First',100),bonus('b','Second')]),mutate:async body=>{if(body.action===action&&!lost){lost=true;return{afterCommitError:new Error('Response lost')};}}});
+    await app.fire('startOpening');await app.settle();
+    if(action==='back-to-hunting'){await app.fire('backToHunting');await app.settle();}
+    const opening=action==='start-opening';assert.equal(app.saved().hunts[0].status,opening?'opening':'collecting');assert.equal(app.nodes.get(opening?'collectionPhase':'openingPhase').hidden,false);assert.equal(app.nodes.get(opening?'startOpening':'backToHunting').disabled,true);assert.equal(app.nodes.get('reloadRemote').classList.contains('hidden'),false);
+    await app.fire('reloadRemote');await app.settle();assert.equal(app.nodes.get(opening?'openingPhase':'collectionPhase').hidden,false);assert.equal(app.nodes.get('predictionStatus').textContent,opening?'Predictions closed':'Predictions open');assert.equal(app.saved().hunts[0].rows[0].payout,100);assert.equal(app.nodes.get(opening?'backToHunting':'startOpening').disabled,false);
   }
 });
